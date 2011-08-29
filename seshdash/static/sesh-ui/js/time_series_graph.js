@@ -29,24 +29,42 @@ $(document).ready(function(){
                 // var jsondata = JSON.parse(data)
                //  alert(jsondata)
           $('#time_series_graph').highcharts({
-                  chart: {
-                     type : 'column',
-                  },
-                  title: {
-                     text : 'Time Series Graph',
-                  },
-                 xAxis: {
-                    categories : []
-                 },
-                 yAxis : {
-                     title : {
-                         text : measurement_value,
-                             }
+           chart : {
+                zoomtype : 'yx'
+           },
+           title : {
+                text: 'Time Series Graph '
+           },
+           yAxis : [{
+                   labels : {
+                         format : '{value}',
+                         style : {
+                               color : Highcharts.getOptions().colors[1]
+                         },
                      },
-                     series : [{
-                          data:data,
-                     }]
-                
+                   title : {
+                         text : measurement_default_value,
+                   },
+
+           }],
+           legend : {
+                layout : 'vertical',
+                align : 'left',
+                x:40,
+                varticalAlign: 'top',
+                y :-350,
+                floating:true,
+           },
+           series :[{
+                 name : measurement_default_value,
+                 type : 'spline',
+                 data : data,
+                 tooltip : {
+                        valueSuffix : ''
+                 },
+            }],
+
+               
           });
      });
 });
@@ -54,35 +72,46 @@ $(document).ready(function(){
 var measurement_value;
 var time_value;
 $('#graph_change_trigger').click(function(){ 
-     $('#measurements_dropdown').change(function(){
          measurement_value = $('#measurements_dropdown').val();
-     });
-
-     $('#time_dropdown').change(function(){
-          time_value = $('#time_dropdown').val();
-     });
+         time_value = $('#time_dropdown').val();
  $.post('/time_series',{csrfmiddlewaretoken:csrftoken,'measurement':measurement_value,'time':time_value,'active_id':active_site_id},function(data){
                  alert(data)
           $('#time_series_graph').highcharts({
-                  chart: {
-                     type : 'column',
-                  },
-                  title: {
-                     text : 'Time Series Graph',
-                  },
-                 xAxis: {
-                    categories : []
-                 },
-                 yAxis : {
-                     title : {
-                         text : measurement_value,
-                             }
+              chart : {
+                zoomtype : 'xy'
+           },
+           title : {
+                text: 'Time Series Graph '
+           },
+           yAxis : [{
+                   labels : {
+                         format : '{value}',
+                         style : {
+                               color : Highcharts.getOptions().colors[1]
+                         },
                      },
-                     series : [{
-                          data:data,
-                     }]
-                
-          });
+                   title : {
+                         text : measurement_value,
+                   },
+           }],
+           legend : {
+                layout : 'vertical',
+                align : 'left',
+                x:40,
+                varticalAlign: 'top',
+                y :-350,
+                floating:true,
+           },
+           series :[{
+                 name : measurement_value,
+                 type : 'spline',
+                 data : data,
+                 tooltip : {
+                        valueSuffix : 'mxioum'
+                 },
+            }],
+
+         });
      });
 });
        
