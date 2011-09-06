@@ -241,43 +241,43 @@ class Influx:
 
     # Helper classes to the interface
 
-    def get_latest_point_site(site, measurement_name, db=None):
-        """ Returns the latest point for a measurement for a specific siite """
-        i = Influx()
-        if db is not None:
-            i = Influx(database=db)
+def get_latest_point_site(site, measurement_name, db=None):
+    """ Returns the latest point for a measurement for a specific siite """
+    i = Influx()
+    if db is not None:
+        i = Influx(database=db)
 
-        point = i.get_latest_measurement_point_site(site, measurement_name, db)
+    point = i.get_latest_measurement_point_site(site, measurement_name, db)
 
-        if len(point) > 0:
-            point = point[0]
-        else:
-            logging.error('No influx data points for the site')
-            return None
+    if len(point) > 0:
+        point = point[0]
+    else:
+        logging.error('No influx data points for the site')
+        return None
 
-        return point
-
-
-    def get_point(measurement_name, point_id, db=None):
-        """ Queryies for a specific point and returns it """
-        i = Influx()
-        if db is not None:
-            i = Influx(database=db)
-
-        point = i.get_point(measurement_name, point_id, db)
-
-        if point:
-            return point[0]
-
-        return point
+    return point
 
 
-    def insert_point(site, measurement_name, value, db=None):
-        """ Inserts a point into the db provided the name and the site """
-        i = Influx()
-        if db is not None:
-            i = Influx(database=db)
+def get_point(measurement_name, point_id, db=None):
+    """ Queryies for a specific point and returns it """
+    i = Influx()
+    if db is not None:
+        i = Influx(database=db)
 
-        value = i.insert_point(site, measurement_name, float(value))
+    point = i.get_point(measurement_name, point_id, db)
+
+    if point:
+        return point[0]
+
+    return point
+
+
+def insert_point(site, measurement_name, value, db=None):
+    """ Inserts a point into the db provided the name and the site """
+    i = Influx()
+    if db is not None:
+        i = Influx(database=db)
+
+    value = i.insert_point(site, measurement_name, float(value))
 
 

@@ -15,7 +15,8 @@ from geoposition import Geoposition
 from datetime import datetime
 from django.utils import timezone
 
-
+#influx
+from seshdash.data.db.influx import Influx
 
 from django.utils import timezone
 
@@ -46,9 +47,11 @@ class time_series_graph_TestCase(TestCase):
         self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
+         
+        #create an influx db
+        self.create_influx_instance = Influx()
+        self.create_influx_db = self.create_influx_instance.create_database('test_db')
 
-
-    # This test case written to test post request if it returns code 200
     #Testing Time_Series_graph
     def test_time_graph(self):
         c = Client()
