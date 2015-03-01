@@ -1,5 +1,6 @@
 import requests, json, logging
-
+from lxml import html
+from datetime import datetime
 class EnphaseAPI:
     API_BASE_URL = "https://api.enphaseenergy.com/api/v2/systems/{system_id}/{function}?key={key}&user_id={user_id}"
     API_BASE_URL_INDEX = "https://api.enphaseenergy.com/api/v2/systems/?key={key}&user_id={user_id}"
@@ -107,5 +108,60 @@ class EnphaseAPI:
     """
     def get_monthly_production(self,system_id,start_date):
          return self.make_request("monthly_production",system_id,start_date=start_date)
+
+
+
+
+class EnphaseLocalAPI:
+
+	_ENVOY_IP = '0.0.0.0'
+	_IS_INTIALIZED = False
+
+	_ENVOY_URL = 'http://{ip}/{path}?locale=en'
+	_CURRENT_DATA = {}
+
+	_XPATH_DICT = {
+			'current_production':'/html/body/div[1]/table/tr[2]/td[2]/text()',
+			'today_production':'/html/body/div[1]/table/tr[3]/td[2]/text()',
+			'past_week_production':'/html/body/div[1]/table/tr[4]/td[2]/text()',
+			'since_installation_production':'/html/body/div[1]/table/tr[5]/td[2]/text()'
+			}
+
+
+	def __init__(self, ip ):
+		self._ENVOY_IP = ip
+
+		self._initialize()
+
+		if self._IS_INTIALIZED:
+			logging.info('ENHPASE LOCAL API initialised')
+
+	def _initialize(self):
+
+		formated_url = self._ENVOY_URL.format(ip = self._ENVOY_IP,path = 'production')
+		envoy_page  = requests.get(formated_url)
+		page_html = html.fromstring(envoy_page.text)
+
+		if envoy_page.status_code == 200:
+			print "API initialized getting data"
+			self._CURRENT_DATA = self._parse_production_data(page_html)
+			self._IS_INTIALIZED = True
+		else:
+			logging.error("unable to initialize API error: %s"%envoy_page.status_code)
+			self._IS_INTIALIZED = False
+
+	def _parse_production_data(self,page_html):
+
+		parsed_result = {'':datetime.now()}
+
+		for key in self._XPATH_DICT.keys():
+			value = page_html.xpath(self._XPATH_DICT[key])
+			parsed_result[key] = value[0].strip()
+		return parsed_result
+
+	def get_current_prod_data(self):
+		return self._CURRENT_DATA
+
+
 
 
