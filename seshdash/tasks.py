@@ -6,6 +6,7 @@ from .models import Sesh_Site,PV_Production_Point,Site_Weather_Data
 
 from seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
+from seshdash.api.victron import VictronAPI
 from seshdash.utils import time_utils
 from datetime import datetime, date, timedelta
 
@@ -77,3 +78,5 @@ Get data related to system voltage, SoC, battery voltage through Victro VRM port
 def get_BOM_data():
 
     sites = Sesh_Site.objects.all()
+
+    [[[
