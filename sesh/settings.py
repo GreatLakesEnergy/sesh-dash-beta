@@ -9,9 +9,12 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
+from __future__ import absolute_import
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from celery.schedules import crontab
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
@@ -28,9 +31,38 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#API Keys:
+ENPHASE_KEY = '9cf3d0ab84bb0ec5d72eea7f1e8ffa39'
+#TODO This should go in the model not here move this when you can
+ENPHASE_ID = '4e44497a4d5459320a'
+VICTRON_KEY = ''
+FORECAST_KEY = '8eefab4d187a39b993ca9c875fef6159'
+
+
+# CELERY SETTINGS
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Kigali'
+CELERYBEAT_SCHEDULE = {
+    'get_daily_enphase_data': {
+        'task': 'seshdash.tasks.get_enphase_daily_summary',
+        'schedule': crontab(minute=0, hour=0),
+        'args': None,
+    },
+    'get_daily_weather_forecast': {
+        'task': 'seshdash.tasks.get_weather_data',
+        'schedule': crontab(minute=5, hour=0),
+        'args': None,
+    },
+}
+
+#Authentication
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login'
 
 # Application definition
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',

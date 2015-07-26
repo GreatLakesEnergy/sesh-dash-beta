@@ -7,7 +7,7 @@ class VictronAPI:
     PASSWORD = ""
 
     SESSION_ID = ""
-    VERIFICATION_TOKEN = ""
+    VERIFICATION_TOKEN = "seshdev"
 
     API_VERSION = "220"
     SYSTEMS_IDS = []
@@ -37,13 +37,12 @@ class VictronAPI:
     TODO: print out user info gatherd from system
     """
     def _initialize(self):
-        login_payload = {
-                         'version':self.API_VERSION,
-                         'username':self.USERNAME,
-                         'password':self.PASSWORD,
-                         'verification_token':self.API_VERSION
-                        }
-        response  = self.make_request("user","login",response="requests",data=login_payload)
+        response  = self._make_request(
+                "user",
+                "login",
+                response="requests",
+                username=self.USERNAME,
+                password=self.PASSWORD)
         if response.status_code == 403:
             logging.error("Access denied unable to initialize \nresponse: %s:" %response)
             self.IS_INITIALIZED = False
@@ -55,8 +54,13 @@ class VictronAPI:
             else:
                 logging.error("Problem getting session id")
                 self.IS_INITIALIZED = False
+        else:
+                logging.error("other error while initializing %s"% response.status_code)
 
-    def parse_response(self,response_json):
+    """
+    Utility function perhaps deleet this
+    """
+    def _parse_response(self,response_json):
         parsed = json.loads(response_json)
         return parsed
 
@@ -65,14 +69,19 @@ class VictronAPI:
     Will return json or request based on response parameter
     Data needs to be passed with data keyword
     """
-    def make_request(self,call_type,function,response="json",**data):
+    def _make_request(self,call_type,function,response="json",**data):
         #format string with our paramters can do this with requests as well
-
         formated_URL = self.API_BASE_URL.format(call_type=call_type,function=function)
 
+        #these  paramters are mandatory
         headers = {"content-type":" application/x-www-form-urlencoded"}
+        data['version'] = self.API_VERSION
+        data['sessionid'] = self.SESSION_ID
+        data['verification_token'] = self.VERIFICATION_TOKEN
+        ###
+        print data
         if  data:
-            r = requests.post(formated_URL,data=data["data"], headers = headers)
+            r = requests.post(formated_URL,data=data, headers = headers)
         else:
             r = requests.post(formated_URL, headers = headers)
         if response == "json":
@@ -81,23 +90,38 @@ class VictronAPI:
             return r
 
     """
-    Get system summary
+    Get system list
     """
-    def get_summary(self,system_id):
-         return self.make_request("summary",system_id)
+    def get_site_list(self):
+         if self.IS_INITIALIZED:
+            return self._make_request("sites","get")
 
     """
     Get system stats for provided system_id
+    @params: site_id
     """
-    def get_stats(self,system_id):
-         return self.make_request("stats",system_id)
+    def get_site_stats(self,site_id):
+         return self._make_request("sites","get_site",siteid=site_id)
 
     """
     return monthly production from start date
-    @params: start_data
+    @params: site_id
     """
-    def get_monthly_production(self,system_id,start_date):
-         payload = {"start_date":start_date}
-         return self.make_request("monthly_production",system_id, payload)
+    def get_energy_data(self,site_id):
+         return self._make_request("sites","get_energy_data", siteid=site_id, instance = 0)
+
+    """
+    Get all associated attributes with a site
+    @params: site_id
+    """
+    def get_site_attributes_list(self,site_id):
+         return self._make_request("sites","get_site_attributes", siteid=site_id, instance = 0)
+
+    """
+    Get all attribute data from  with a site
+    @params: site_id, attribute_code
+    """
+    def get_site_attribute(self,site_id,attribute_code_arr):
+         return self._make_request("sites","attributes_by_code",codes=attribute_code_arr, siteid=site_id, instance = 0)
 
 

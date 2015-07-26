@@ -6,12 +6,13 @@ from django.db import models
 Model for each PV SESH installed site
 """
 class Sesh_Site(models.Model):
+
     site_name = models.CharField(max_length=100)
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
     latitude = models.FloatField()
-    longtude = models.FloatField()
+    longitude = models.FloatField()
     installed_kw = models.IntegerField()
     number_of_pv_strings = models.IntegerField()
     Number_of_panels = models.IntegerField()
@@ -29,15 +30,34 @@ class PV_Production_Point(models.Model):
     w_production = models.IntegerField()
 
 """
+BoM data Soc,, battery voltage system voltage etc
+"""
+class BoM_Data_Point(models.Model):
+    site = models.ForeignKey(Sesh_Site)
+    time = models.DateTimeField()
+    soc = models.FloatField()
+    battery_voltage = models.FloatField()
+    AC_input = models.FloatField()
+    AC_output = models.FloatField()
+    AC_Load_in = models.FloatField()
+    AC_Load_out = models.FloatField()
+    inverter_state = models.CharField(max_length = 100)
+    genset_state = models.CharField(max_length = 100)
+#TODO relay will likely need to be it's own model
+    relay_state = models.CharField(max_length = 100)
+
+"""
 weather data to overlay with each stite
 
 """
 class Site_Weather_Data(models.Model):
     site = models.ForeignKey(Sesh_Site)
-    date = models.DateTimeField('date')
+    date = models.DateTimeField('date',unique_for_date=True)
     temp = models.IntegerField()
-    uv_index = models.IntegerField()
     condition = models.CharField(max_length=20)
+    cloud_cover = models.FloatField()
+    sunrise = models.TimeField()
+    sunset = models.TimeField()
 
 
 

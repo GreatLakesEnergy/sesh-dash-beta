@@ -9,6 +9,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
+
+    <!-- mapbox-->
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
+
+    <!-- bootstrap -->
     <link href="/static/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
@@ -32,7 +37,7 @@
   <body>
        <div id="wrapper">
 
-            {% block top_navbar%}
+            {% block top_navbar %}
             <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -65,10 +70,10 @@
                         <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
-                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                        <li><a href="/admin"><i class="fa fa-gear fa-fw"></i> Settings</a>
                         </li>
                         <li class="divider"></li>
-                        <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        <li><a href="/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                         </li>
                     </ul>
                     <!-- /.dropdown-user -->
@@ -97,12 +102,11 @@
                         <li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Sites<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
+                                {% for site in sites %}
                                 <li>
-                                    <a href="flot.html">todo</a>
+                                <a href="/dash/{{ site.id }}">{{ site.site_name }}</a>
                                 </li>
-                                <li>
-                                    <a href="morris.html">todo</a>
-                                </li>
+                                {% endfor %}
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
@@ -113,17 +117,31 @@
             <!-- /.navbar-static-side -->
             {% endblock %}
             </nav>
-
+        {% block  main_content %}
             <div id="page-wrapper">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Howdy</h1>
+                        <!--   user info here {{ user }} -->
+                        {% block header %}
+                            <h2 class="page-header">Welcome {{ user }}</h2>
+                        {% endblock %}
                     </div>
                     <!-- /.col-lg-12 -->
+                    {% block dash_1 %}
+
+                    {% endblock %}
                 </div>
                 <!-- /.row -->
             </div>
         </div> 
+        {% endblock %}
+
+    {% block footer %}
+    <script type="text/javascript">
+    {% block javascript %}
+    
+    {% endblock %}
+    </script>
     <!-- jQuery -->
     <script src="/static/bower_components/jquery/dist/jquery.min.js"></script>
 
@@ -134,13 +152,21 @@
     <script src="/static/bower_components/metisMenu/dist/metisMenu.min.js"></script>
 
     <!-- Morris Charts JavaScript -->
-    <script src="/static//bower_components/raphael/raphael-min.js"></script>
+    <script src="/static/bower_components/raphael/raphael-min.js"></script>
     <script src="/static/bower_components/morrisjs/morris.min.js"></script>
     <script src="/static/js/morris-data.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="/static/dist/js/sb-admin-2.js"></script>
 
+    <!-- mapbox javascript -->
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
+    <script src="/static/js/maps.js"></script>
+
+    <!-- sesh javascript -->
+    <script src="/static/dist/js/sesh_dashboard.js"></script>
+    {% endblock %}
+    
   </body>
     
 
