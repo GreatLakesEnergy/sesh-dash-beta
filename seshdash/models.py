@@ -19,9 +19,15 @@ class Sesh_Site(models.Model):
     enphase_ID = models.CharField( max_length = 100)
     vrm_user_id = models.CharField(max_length=100)
     vrm_password = models.CharField(max_length=100)
-    battery_bank_capactiy = models.IntegerField()
+    battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
+
+    class Meta:
+        permissions = (
+            ('view_Sesh_Site', 'View Sesh Site'),
+        )
+
 """
 Data point for PV production at a site
 """

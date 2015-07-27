@@ -17,14 +17,14 @@ from pprint import pprint
 @login_required
 def index(request,site_id=0):
 
-    sites = Sesh_Site.objects.all()
-    sites = get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
     if not site_id:
         #return first site user has action
         print "no side id recieved"
-        site_id = sites[0].pk
-    #TODO this will break when there is no site created
-    context_dict, content_json = get_user_data(request.user,site_id,sites)
+        sites = Sesh_Site.objects.all()
+        #TODO bug in guardian need to pass object querset explicitly 
+        #passing as a string doesn't work
+        sites = get_objects_for_user(request.user,'view_Sesh_Site',klass=sites)
+    context_dict, content_json = get_user_data(request.user,)
     context_dict = jsonify_dict(context_dict,content_json)
     print context_dict
     return render(request,'seshdash/main-dash.html',context_dict)
@@ -39,11 +39,10 @@ def login_user(request):
     context_dict = {}
     #is the user already logged in?
     if request.user.is_authenticated():
-            #context_dict, content_json = get_user_data(request.user,1)
-            #context_dict['data_json'] = content_json
+            context_dict, content_json = get_user_data(request.user,1)
+            context_dict['data_json'] = content_json
             #TODO call the function index directly instead. Will reduce code
-            #return render(request,'seshdash/main-dash.html',context_dict)
-            return index(request)
+            return render(request,'seshdash/main-dash.html',context_dict)
     #if not did we get post request ?
     if not request.POST:
         return render(request,'seshdash/login.html')
@@ -55,10 +54,9 @@ def login_user(request):
         if user.is_active:
             login(request,user)
             #send user name and favorite site data to index page for initial login load
-            #context_dict, content_json = get_user_data(user,1)
-            #context_dict = jsonify_dict(context_dict,content_json)
-            #return render(request,'seshdash/main-dash.html',context_dict)
-            return index(request)
+            context_dict, content_json = get_user_data(user,1)
+            context_dict = jsonify_dict(context_dict,content_json)
+            return render(request,'seshdash/main-dash.html',context_dict)
         else:
             #return an error message
             return render(request,'seshdash/login.html')
@@ -67,12 +65,14 @@ def login_user(request):
             return render(request,'seshdash/login.html')
 
 
-def get_user_data(user,site_id,sites):
+
+def get_user_data(user,site_id):
     site = Sesh_Site.objects.get(pk=site_id)
-    if not user.has_perm('seshdash.view_Sesh_Site',site):
+    if user.has_perm('view_Sesh_Site',site):
         print "user doesn't have permission to view site %s"%site_id
         #TODO return 403 permission denied
         return {},{}
+    sites = get_objects_for_user(user)
     context_data = {}
     context_data_json = {}
     context_data['sites'] = sites
