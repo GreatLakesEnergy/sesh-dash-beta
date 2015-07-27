@@ -13,7 +13,7 @@ class Sesh_Site(models.Model):
     location_country = models.CharField(max_length = 100)
     latitude = models.FloatField()
     longitude = models.FloatField()
-    installed_kw = models.IntegerField()
+    installed_kw = models.FloatField()
     number_of_pv_strings = models.IntegerField()
     Number_of_panels = models.IntegerField()
     enphase_ID = models.CharField( max_length = 100)
