@@ -94,9 +94,9 @@ class EnphaseAPI:
         if start and end:
             print system_id,start,end
             return self.make_request(function_name="stats",
-                                    system_id=system_id,
+                                     system_id=system_id,
                                     start_at=start,
-                                    end_at=end,
+                                    end_at=end)
                                     datetime_format='iso8601')
 
         return self.make_request("stats",system_id)

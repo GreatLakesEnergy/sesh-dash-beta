@@ -39,10 +39,6 @@ def login_user(request):
     context_dict = {}
     #is the user already logged in?
     if request.user.is_authenticated():
-            #context_dict, content_json = get_user_data(request.user,1)
-            #context_dict['data_json'] = content_json
-            #TODO call the function index directly instead. Will reduce code
-            #return render(request,'seshdash/main-dash.html',context_dict)
             return index(request)
     #if not did we get post request ?
     if not request.POST:
@@ -55,9 +51,6 @@ def login_user(request):
         if user.is_active:
             login(request,user)
             #send user name and favorite site data to index page for initial login load
-            #context_dict, content_json = get_user_data(user,1)
-            #context_dict = jsonify_dict(context_dict,content_json)
-            #return render(request,'seshdash/main-dash.html',context_dict)
             return index(request)
         else:
             #return an error message

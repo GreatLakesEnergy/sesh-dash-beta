@@ -7,9 +7,24 @@ def get_epoch():
     now = datetime.now()
     epoch = datetime(1970,1,1)
     diff = now - epoch
+    diff = str(diff.total_seconds())
+    diff_seconds = diff.split('.')
+    diff_int = diff_seconds[0]
+    return diff_int
 
-    return diff.total_seconds()
+"""
+Return number of seconds since 1970-01-01- epoch
+from given date
+@params: dateobject
+"""
+def get_epoch_from_datetime(date):
 
+    epoch = datetime(1970,1,1)
+    diff = date - epoch
+    seconds_only = str(diff.total_seconds())
+    seconds_only_str = seconds_only.split('.')
+    seconds_only = seconds_only_str[0]
+    return seconds_only
 """
 Return number of seconds since 1970-01-01- epoch
 from given date
@@ -45,5 +60,20 @@ def get_last_five_days(from_date="now"):
         delta = delta + timedelta(1)
     return days
 
+"""
+return the days inbetween the two sepcified dates
+@params:
+start: when is the interval stardate, datetime object
+end: when should the interval end , datatime object
+delta: increments in which to return dates, integer, default 1 day
+"""
+def get_days_interval_delta(start, end, delta=1):
+    delta =  timedelta(delta)
+    curr = start
+    days  = []
+    while curr < end:
+        days.append(curr)
+        curr += delta
+    return days
 
 

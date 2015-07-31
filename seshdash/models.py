@@ -35,6 +35,7 @@ class PV_Production_Point(models.Model):
     site = models.ForeignKey(Sesh_Site)
     time = models.DateTimeField()
     w_production = models.IntegerField()
+    wh_production = models.IntegerField()
 
 """
 BoM data Soc,, battery voltage system voltage etc
