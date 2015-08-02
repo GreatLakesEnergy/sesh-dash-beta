@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import timedelta
 # Create your models here.
 
 """
@@ -29,16 +29,19 @@ class Sesh_Site(models.Model):
         )
 
 """
-Data point for PV production at a site
+Data point for PV production at a site from pv panels.
+Currently comes form enphase
 """
 class PV_Production_Point(models.Model):
     site = models.ForeignKey(Sesh_Site)
     time = models.DateTimeField()
     w_production = models.IntegerField()
     wh_production = models.IntegerField()
+    data_duration = models.DurationField(default=timedelta())
 
 """
 BoM data Soc,, battery voltage system voltage etc
+Currently comes from Victron
 """
 class BoM_Data_Point(models.Model):
     site = models.ForeignKey(Sesh_Site)

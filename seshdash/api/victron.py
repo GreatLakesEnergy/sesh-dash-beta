@@ -1,5 +1,7 @@
 import requests, json, logging
-import urllib3
+from os import path
+import csv
+from pprint import pprint
 class VictronAPI:
     #API_BASE_URL = "http://juice.m2mobi.com/{call_type}/{function}"
     API_BASE_URL = "https://juice.victronenergy.com/{call_type}/{function}"
@@ -11,6 +13,24 @@ class VictronAPI:
 
     SESSION_ID = ""
     VERIFICATION_TOKEN = "seshdev"
+    _SYSTEM_STAT_KEYS = [
+       'VE.Bus state',
+        'Input power 1',
+        'AC Input 1 ',
+        'Input frequency 1',
+        'Output power 1',
+        'AC Consumption L1',
+        'Input voltage phase 1',
+        'Input current phase 1',
+        'Output current phase 1',
+        'Output voltage phase 1']
+
+    _BATTERY_STAT_KEYS = [
+        'Battery State of Charge (System)',
+        'Battery current',
+        'Battery voltage',
+        'Battery Power (System)',
+        'Battery state']
 
     API_VERSION = "220"
     SYSTEMS_IDS = []
@@ -33,7 +53,6 @@ class VictronAPI:
 
         self.initialize()
         if self.IS_INITIALIZED:
-            print "system initialized"
             logging.info("System Initialized with %s systems"%len(self.SYSTEMS_IDS))
         else:
             logging.error("unable to initialize the api")
@@ -47,45 +66,41 @@ class VictronAPI:
         response  = self._make_request(
                 "user",
                 "login",
-                response="requests",
                 username=self.USERNAME,
                 password=self.PASSWORD)
-        if response.status_code == 403:
-            logging.error("Access denied unable to initialize \nresponse: %s:" %response)
+        if response['status']['code'] == 403:
+            logging.error("Access denied unable to initialize check credentials \nresponse: %s:" %response)
             self.IS_INITIALIZED = False
-        if response.status_code== 200:
-            response_parsed = response.json()
-            if response_parsed.has_key("data"):
-                self.SESSION_ID = response_parsed["data"]["user"]["sessionid"]
-                v_sites = self.get_site_list()
-                print "gettin site list"
-                for site in v_sites:
-                    self.SYSTEMS_IDS.append((site['idSite'],site['name']))
-                    logging.info("initializing sites, getting attributes")
-                    atr = self.get_site_attributes_list(site['idSite'])
-                    #make attribute dictionary more usefull
-                    atr [site['idSite']] =  atr['attributes']
-                    self.ATTRIBUTE_DICT = self._reformat_attr_dict(atr)
-                    self.IS_INITIALIZED = True
-            else:
-                logging.error("Problem getting session id")
-                self.IS_INITIALIZED = False
+        if response.has_key("data"):
+            self.SESSION_ID = response["data"]["user"]["sessionid"]
+            v_sites = self.get_site_list()
+            #Populate sites  under account
+            for site in v_sites:
+                self.SYSTEMS_IDS.append((site['idSite'],site['name']))
+                logging.info("initializing sites, getting attributes")
+                atr = self.get_site_attributes_list(site['idSite'])
+                #make attribute dictionary more usefull
+                atr_site = {}
+                atr_site[site['idSite']] =  atr['attributes']
+                for site in  self.SYSTEMS_IDS:
+                    #create a dictionary with site_id as key
+                    self.ATTRIBUTE_DICT[site[0]] = self._reformat_attr_dict(atr_site[site[0]])
+
+                self.IS_INITIALIZED = True
         else:
-                logging.error("other error while initializing %s"% response.status_code)
+            logging.error("Problem getting session id %s"%response)
+            self.IS_INITIALIZED = False
 
 
     """
     reformat attribute dic so it's easier to use
     """
     def _reformat_attr_dict(self,atr_dict):
-        flatten_dict = {}
-        for site in  self.SYSTEMS_IDS:
-            flat = {}
-            c =  map(lambda x:{x['customLabel']:x},atr_dict[site[0]])
-            for val in c:
+        flat = {}
+        c =  map(lambda x:{x['customLabel']:x},atr_dict)
+        for val in c:
                 flat[val.keys()[0]] = val[val.keys()[0]]
-            flatten_dict[site[0]] = flat
-        return flatten_dict
+        return flat
 
     """
     Utiliy function to make requsts.
@@ -102,25 +117,20 @@ class VictronAPI:
         data['sessionid'] = self.SESSION_ID
         data['verification_token'] = self.VERIFICATION_TOKEN
         ###
-        logging.debug(data)
+        logging.info(data)
         if  data:
             r = requests.post(formated_URL,data=data, headers = headers)
+
         else:
             r = requests.post(formated_URL, headers = headers)
         if r.status_code == 200:
-            if response == "json":
                 return r.json()
-            else:
-                return r
         elif r.status_code == 401:
             logging.error("recieved error code %s %s"%(r.status_code,r.json()))
             logging.error("The system needs o be re_initialized please run intialize()")
             return r.json()
         else:
             return r.json()
-
-
-
 
     """
     unwrap each package
@@ -183,32 +193,28 @@ class VictronAPI:
          return parsed
 
     """
-    Get the
+    Get the  basic system stats
     """
     def get_system_stats(self,site_id):
         code_arr = []
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['VE.Bus state'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Input power 1'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['AC Input 1 '])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Input frequency 1'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Output power 1'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['AC Consumption L1'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Input voltage phase 1'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Output current phase 1'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Output voltage phase 1'])
-        return self.get_site_attribute(site_id,code_arr)
+        for key in self._SYSTEM_STAT_KEYS:
+            code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+        result_arr = self.get_site_attribute(site_id,code_arr)
+        resut_dict = self._reformat_attr_dict(result_arr)
+        return resut_dict
 
     """
     Get the battery stats:
     """
-    def get_battery_Stats(self,site_id):
+    def get_battery_stats(self,site_id):
+        #TODO  merge this function with system stats and other stas as they are identical
         code_arr = []
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Battery State of Charge (System)'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Battery Current (System)'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Battery voltage'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Battery Power (System)'])
-        code_arr.append(self.ATTRIBUTE_DICT[site_id]['Battery state'])
-        return self.get_site_attribute(site_id,code_arr)
+        for key in self._BATTERY_STAT_KEYS:
+            code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+
+        result_arr = self.get_site_attribute(site_id,code_arr)
+        resut_dict = self._reformat_attr_dict(result_arr)
+        return resut_dict
 
 
 class VictronHistoricalAPI:
@@ -226,6 +232,33 @@ class VictronHistoricalAPI:
     DOWNLOAD_FOLDER = "/tmp/"
     USER_AGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
 
+    CSV_KEYS = ['Africa/Kigali (+02:00)',
+                'Input voltage phase 1',
+                'Input current phase 1',
+                'Input frequency 1',
+                'Input power 1',
+                'Output voltage phase 1',
+                'Output current phase 1',
+                'Output frequency',
+                'Output power 1',
+                'Battery voltage',
+                'Battery current Phase count',
+                'Active input',
+                'Active input current limit',
+                'VE.Bus state of charge VE.Bus state',
+                'VE.Bus Error',
+                'Switch Position',
+                'Temperature alarm',
+                'Low battery alarm',
+                'Overload alarm',
+                'AC Consumption L1',
+                'Grid L1 Battery Voltage (System)',
+                'Battery Current (System)',
+                'VE.Bus charge current (System)',
+                'Battery Power (System)',
+                'VE.Bus charge power (System)',
+                'Battery State of Charge (System)',
+                'Battery state']
     IS_HIST_INITIALIZED = False
 
     def __init__(self , user_name, user_password, timezone=-4,dl_fldr="/tmp"):
@@ -238,6 +271,9 @@ class VictronHistoricalAPI:
          self.initialize()
 
     def initialize(self):
+         """
+         Login to the portal and save the cookie for later reuse
+         """
          data= {}
          data['password'] = self.PASSWORD
          data['username'] = self.USERNAME
@@ -256,19 +292,40 @@ class VictronHistoricalAPI:
         Will download a csv containt all data for provided seconds from epoch time window.
         """
         chunksize = 10
-        filename = self.DOWNLOAD_FOLDER
         formated_URL = self.API_HIST_FETCH_URL.format(
                SITE_ID = site_id,
                START_AT = start_at,
                END_AT = end_at
                 )
+        filepath = self.DOWNLOAD_FOLDER
+        filename = "%s.csv"%(start_at)
+        full_file = path.join(self.DOWNLOAD_FOLDER,filename)
+        #need to trick the VRM
         headers  = {'user-agent':self.USER_AGENT}
         data = self.SESSION.get(formated_URL,headers=headers)
-        print data.text
-        with open(filename, 'wb') as fd:
+        with open(full_file, 'wb') as fd:
+            logging.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
                 fd.write(chunk)
-                print writing chunks to file
 
+        #DEBUG
+        return self.parse_csv_data(full_file)
 
+    def parse_csv_data(self,csv_data_file):
+        """
+        return iterable csv reader object
 
+        """
+        logging.debug("parsing csv data %s")
+        data_arr = []
+        try:
+            csvfile  = open(csv_data_file)
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                data_arr.append(row)
+            csvfile.close()
+            return data_arr
+        except Exception,e:
+            logging.error("unable to find file or key %s"%e)
+        finally:
+            csvfile.close()
