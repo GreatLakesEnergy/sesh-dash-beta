@@ -14,7 +14,7 @@ from __future__ import absolute_import
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from celery.schedules import crontab
-
+from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
@@ -48,12 +48,17 @@ CELERY_TIMEZONE = 'Africa/Kigali'
 CELERYBEAT_SCHEDULE = {
     'get_daily_enphase_data': {
         'task': 'seshdash.tasks.get_enphase_daily_summary',
-        'schedule': crontab(minute=0, hour=0),
-        'args': None,
+        'schedule': timedelta(days=1),
+        'args': (1,),
     },
     'get_daily_weather_forecast': {
         'task': 'seshdash.tasks.get_weather_data',
         'schedule': crontab(minute=5, hour=0),
+        'args': None,
+    },
+    'get_BOM_data': {
+        'task': 'seshdash.tasks.get_BOM_data',
+        'schedule': timedelta(minutes=30),
         'args': None,
     },
 }

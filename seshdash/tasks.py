@@ -23,10 +23,10 @@ def get_BOM_data():
         #TODO figure out a way to get these automatically or add
         #them manually to the model for now
         for site_id in v_client.SYSTEMS_IDS:
+            print "##### system id's %s out of %s"%(site_id,v_client.SYSTEMS_IDS)
             bat_data = v_client.get_battery_stats(site_id[0])
             sys_data = v_client.get_system_stats(site_id[0])
             date = time_utils.epoch_to_date(sys_data['VE.Bus state']['timestamp'] )
-#TODO finish up
             print bat_data.keys()
             print sys_data
             data_point = BoM_Data_Point(
@@ -45,33 +45,43 @@ def get_BOM_data():
                 )
             data_point.save()
             #TODO get bulk historical data with enphase and weather
-            print "BoS Data saved"
+            print "BoM Data saved"
 
 
 @shared_task
 def get_enphase_daily_summary(date_range=5):
         #create enphaseAPI
         sites = Sesh_Site.objects.all()
-        #TODO enphase id needs to go into site object
         en_client = EnphaseAPI(settings.ENPHASE_KEY,settings.ENPHASE_ID)
         #return 'The test task executed with argument "%s" ' % param
-
+        #get dates we want to get
         datetime_now = datetime.now()
         datetime_start = datetime_now - timedelta(date_range)
         system_results = {}
+        #turn them into epoch seconds
         datetime_now_epoch = time_utils.get_epoch_from_datetime(datetime_now)
         datetime_start_epoch = time_utils.get_epoch_from_datetime(datetime_start)
         for site in sites:
-                system_results = en_client.get_stats(site.enphase_ID,start=datetime_start_epoch,end=datetime_now_epoch)
-                #TODO handle exception of empty result
-                print system_results
-                for interval in system_results['intervals']:
-                #store the data
-                    system_pv_data = PV_Production_Point(
-                        site = site,
-                        time = interval,
-                        w_production = interval['enwh'])
-                    #system_pv_data.save()
+                #TODO need to fetch for all sites associated with enphase key Best incorporate this into admin UI To check
+                for system_id in en_client.SYSTEMS_IDS.keys():
+                    print "gettig stats for %s"%system_id
+                    #NOTE: changing to not use end time is giving prase problems currently ,end=datetime_now_epoch is redundent
+                    system_results = en_client.get_stats(system_id,start=datetime_start_epoch)
+                    #TODO handle exception of empty result
+                    for interval in system_results['intervals']:
+                    #store the data
+                        print interval
+                        end_time_str = time_utils.epoch_to_date(interval['end_at'])
+                        system_pv_data = PV_Production_Point(
+                            site = site,
+                            time = end_time_str,
+                            wh_production = interval['enwh'],
+                            #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
+                            w_production = interval['powr'],
+                            #TODO time interval shouldn't be static this needs to be calculated based on data returned,
+                            data_duration = timedelta(minutes=15)
+                            )
+                        system_pv_data.save()
         return "updated enphase data %s"%site
 
 @shared_task
