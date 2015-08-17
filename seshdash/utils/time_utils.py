@@ -38,10 +38,17 @@ def get_epoch_from_date(year,month,day,hours,minutes):
     return diff.total_seconds()
 
 """
-Translate seconds time to datetime object
+Translate seconds time to date
 """
 def epoch_to_date(seconds_time):
-    return strftime('%Y-%m-%d',localtime(seconds_time))
+   return strftime('%Y-%m-%d',localtime(seconds_time))
+
+"""
+Translate seconds time to datetime object
+"""
+def epoch_to_datetime(seconds_time):
+    return strftime('%Y-%m-%dT%XZ',localtime(seconds_time))
+
 
 """
 Get last days returned to you as datetime objects in array
@@ -76,4 +83,10 @@ def get_days_interval_delta(start, end, delta=1):
         curr += delta
     return days
 
+"""
+get the delta of days ago from given start date
+"""
+def get_start_end_date(days_ago, start_day):
+    delta = start_day - timedelta(days=days_ago)
+    return delta
 

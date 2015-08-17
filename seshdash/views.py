@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.views import generic
@@ -11,8 +11,9 @@ from guardian.shortcuts import get_perms
 
 from .models import Sesh_Site, PV_Production_Point, Site_Weather_Data
 from seshdash.utils import time_utils
-import json
 from pprint import pprint
+
+import json,time,random,datetime
 
 @login_required
 def index(request,site_id=0):
@@ -28,6 +29,67 @@ def index(request,site_id=0):
     context_dict = jsonify_dict(context_dict,content_json)
     print context_dict
     return render(request,'seshdash/main-dash.html',context_dict)
+
+#testing out some nvd3 graphs
+def pie(request):
+    xdata = ["Apple", "Apricot", "Avocado", "Banana", "Boysenberries", "Blueberries", "Dates", "Grapefruit", "Kiwi", "Lemon"]
+    ydata = [52, 48, 160, 94, 75, 71, 490, 82, 46, 17]
+    chartdata = {'x': xdata, 'y': ydata}
+    charttype = "pieChart"
+    chartcontainer = 'piechart_container'
+    data = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra': {
+            'x_is_date': False,
+            'x_axis_format': '',
+            'tag_script_js': True,
+            'jquery_on_ready': False,
+        }
+    }
+    return render_to_response('seshdash/piechart.html', data)
+
+def linebar(request):
+    """
+    lineplusbarchart page
+    """
+    start_time = int(time.mktime(datetime.datetime(2012, 6, 1).timetuple()) * 1000)
+    nb_element = 100
+    xdata = range(nb_element)
+    xdata = map(lambda x: start_time + x * 1000000000, xdata)
+    ydata = [i + random.randint(1, 10) for i in range(nb_element)]
+    ydata2 = [i + random.randint(1, 10) for i in reversed(range(nb_element))]
+    kwargs1 = {}
+    kwargs1['bar'] = True
+
+    tooltip_date = "%d %b %Y %H:%M:%S %p"
+    extra_serie1 = {"tooltip": {"y_start": "$ ", "y_end": ""},
+                    "date_format": tooltip_date}
+    extra_serie2 = {"tooltip": {"y_start": "", "y_end": " min"},
+                    "date_format": tooltip_date}
+
+    chartdata = {
+        'x': xdata,
+        'name1': 'series 1', 'y1': ydata, 'extra1': extra_serie1, 'kwargs1': kwargs1,
+        'name2': 'series 2', 'y2': ydata2, 'extra2': extra_serie2,
+    }
+
+    charttype = "linePlusBarChart"
+    chartcontainer = 'chart_container'  # container name
+    data = {
+        'charttype': charttype,
+        'chartdata': chartdata,
+        'chartcontainer': chartcontainer,
+        'extra': {
+            'x_is_date': True,
+            'x_axis_format': '%d %b %Y %H',
+            'tag_script_js': True,
+            'jquery_on_ready': True,
+            'focus_enable': True,
+        },
+    }
+    return render_to_response('seshdash/line_bar.html', data)
 
 
 def logout_user(request):

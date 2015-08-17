@@ -16,6 +16,7 @@ import os
 from celery.schedules import crontab
 from datetime import timedelta
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 
@@ -77,7 +78,18 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'seshdash',
     'guardian',
+    'djangobower',
+    'django_nvd3',
 )
+
+#BOWER
+BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
+BOWER_INSTALLED_APPS = (
+            'jquery#1.9',
+            'mapbox.js',
+            'd3#3.3.13',
+            'nvd3#1.7.1',
+            )
 
 ANONYMOUS_USER_ID = None
 
@@ -151,3 +163,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_FINDERS = (
+                        "django.contrib.staticfiles.finders.FileSystemFinder",
+                        "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+                        "djangobower.finders.BowerFinder",)
+

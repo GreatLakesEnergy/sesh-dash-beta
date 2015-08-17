@@ -4,11 +4,7 @@ from datetime import datetime
 class EnphaseAPI:
     API_BASE_URL = "https://api.enphaseenergy.com/api/v2/systems/{system_id}/{function}?key={key}&user_id={user_id}"
     API_BASE_URL_INDEX = "https://api.enphaseenergy.com/api/v2/systems/?key={key}&user_id={user_id}"
-    KEY = ""
-    SYSTEMS_IDS = {}
-    USER_ID = ""
     FORMAT = "json"
-    IS_INITIALIZED = False
 
     """
     Provide API key and User Key to get started
@@ -16,6 +12,8 @@ class EnphaseAPI:
 
     """
     def __init__(self , key, user_id, format_type=json):
+        self.IS_INITIALIZED = False
+        self.SYSTEMS_IDS = {}
         self.KEY = key
         self.FORMAT =  format_type
         self.USER_ID = user_id

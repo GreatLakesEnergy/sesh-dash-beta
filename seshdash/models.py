@@ -33,6 +33,7 @@ Data point for PV production at a site from pv panels.
 Currently comes form enphase
 """
 class PV_Production_Point(models.Model):
+    #TODO unique together contraing on time and site
     site = models.ForeignKey(Sesh_Site)
     time = models.DateTimeField()
     w_production = models.IntegerField()
@@ -44,6 +45,7 @@ BoM data Soc,, battery voltage system voltage etc
 Currently comes from Victron
 """
 class BoM_Data_Point(models.Model):
+    #TODO unique together contraing on time and site
     site = models.ForeignKey(Sesh_Site)
     time = models.DateTimeField()
     soc = models.FloatField()

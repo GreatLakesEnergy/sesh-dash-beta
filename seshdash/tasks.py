@@ -22,6 +22,8 @@ def get_BOM_data():
         v_client = VictronAPI(site.vrm_user_id,site.vrm_password)
         #TODO figure out a way to get these automatically or add
         #them manually to the model for now
+        #Also will the user have site's under thier account that they wouldn't like to pull data form?
+        #This will throw an error when the objects are getting created
         for site_id in v_client.SYSTEMS_IDS:
             print "##### system id's %s out of %s"%(site_id,v_client.SYSTEMS_IDS)
             bat_data = v_client.get_battery_stats(site_id[0])
@@ -48,6 +50,52 @@ def get_BOM_data():
             print "BoM Data saved"
 
 
+"""
+Get Historical Data from VRM to backfill any days
+"""
+@shared_task
+def get_historical_BoM(date_range=5):
+        datetime_now = datetime.now()
+        datetime_start = datetime_now - timedelta(date_range)
+
+        datetime_now_epoch = time_utils.get_epoch_from_datetime(datetime_now)
+        datetime_start_epoch = time_utils.get_epoch_from_datetime(datetime_start)
+
+        sites = Sesh_Site.objects.all()
+        count = 0
+        for site in sites:
+            v_client = VictronAPI(site.vrm_user_id,site.vrm_password)
+            vh_client = VictronHistoricalAPI(site.vrm_user_id,site.vrm_password)
+            for site_id in v_client.SYSTEMS_IDS:
+                #site_id is a tuple
+                data = vh_client.get_data(site_id[0],datetime_start_epoch,datetime_now_epoch)
+                for row in data:
+                    data_point = BoM_Data_Point(
+                        site = site,
+                        time = row['Date Time'],
+                        soc = row['Battery State of Charge (System)'],
+                        battery_voltage = row['Battery voltage'],
+                        AC_input = row['Input power 1'],
+                        AC_output =  row['Output power 1'],
+                        AC_Load_in =  row['Input current phase 1'],
+                        AC_Load_out =  row['Output current phase 1'],
+                        inverter_state = row['VE.Bus Error'],
+                        #TODO these need to be activated
+                        genset_state =  "off",
+                        relay_state = "off",
+                        )
+                    data_point.save()
+                    count = count +1
+            print "saved %s BoM data points"%count
+
+
+
+
+
+
+"""
+Get enphase daily data or get aggregate data
+"""
 @shared_task
 def get_enphase_daily_summary(date_range=5):
         #create enphaseAPI
@@ -71,7 +119,7 @@ def get_enphase_daily_summary(date_range=5):
                     for interval in system_results['intervals']:
                     #store the data
                         print interval
-                        end_time_str = time_utils.epoch_to_date(interval['end_at'])
+                        end_time_str = time_utils.epoch_to_datetime(interval['end_at'])
                         system_pv_data = PV_Production_Point(
                             site = site,
                             time = end_time_str,

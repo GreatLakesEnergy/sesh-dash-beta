@@ -1,17 +1,18 @@
 import requests, json, logging
-from os import path
 import csv
+import urllib2
+
+from os import path
 from pprint import pprint
+from datetime import datetime,timedelta
+from ..utils import time_utils
+
 class VictronAPI:
     #API_BASE_URL = "http://juice.m2mobi.com/{call_type}/{function}"
     API_BASE_URL = "https://juice.victronenergy.com/{call_type}/{function}"
 
     API_HIST_LOGIN_URL = "https://vrm.victronenergy.com/user/login"
     API_HIST_FETCH_URL = "https://vrm.victronenergy.com/site/download-csv/site/{SITE_ID}/start_time/{START_TIME}/end_time/{END_TIME}"
-    USERNAME = ""
-    PASSWORD = ""
-
-    SESSION_ID = ""
     VERIFICATION_TOKEN = "seshdev"
     _SYSTEM_STAT_KEYS = [
        'VE.Bus state',
@@ -33,11 +34,9 @@ class VictronAPI:
         'Battery state']
 
     API_VERSION = "220"
-    SYSTEMS_IDS = []
     ATTRIBUTE_DICT = {}
 
     FORMAT = "json"
-    IS_INITIALIZED = False
 
     """
     Provide API key and User Key to get started
@@ -45,6 +44,13 @@ class VictronAPI:
 
     """
     def __init__(self , user_name, user_password, format_type=json):
+        #Initiate object constants within object
+        self.SYSTEMS_IDS = []
+        self.USERNAME = ""
+        self.PASSWORD = ""
+        self.SESSION_ID = ""
+        self.IS_INITIALIZED = False
+
         #TODO disabling sl warnings
         requests.packages.urllib3.disable_warnings()
 
@@ -93,7 +99,7 @@ class VictronAPI:
 
 
     """
-    reformat attribute dic so it's easier to use
+    reformat attribute dictionary so it's easier to use
     """
     def _reformat_attr_dict(self,atr_dict):
         flat = {}
@@ -232,7 +238,7 @@ class VictronHistoricalAPI:
     DOWNLOAD_FOLDER = "/tmp/"
     USER_AGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
 
-    CSV_KEYS = ['Africa/Kigali (+02:00)',
+    CSV_KEYS = ['Date Time',
                 'Input voltage phase 1',
                 'Input current phase 1',
                 'Input frequency 1',
@@ -259,9 +265,9 @@ class VictronHistoricalAPI:
                 'VE.Bus charge power (System)',
                 'Battery State of Charge (System)',
                 'Battery state']
-    IS_HIST_INITIALIZED = False
 
     def __init__(self , user_name, user_password, timezone=-4,dl_fldr="/tmp"):
+         self.IS_HIST_INITIALIZED = False
          requests.packages.urllib3.disable_warnings()
          self.USERNAME = user_name
          self.PASSWORD = user_password
@@ -279,39 +285,46 @@ class VictronHistoricalAPI:
          data['username'] = self.USERNAME
          data['local_timezone'] = self.TIMEZONE
          data['is_dst'] = 0
-
          r = self.SESSION.post(self.API_HIST_LOGIN_URL,data=data)
-         self.SESSION_COOKIES = r.cookies
-
-         if r.status_code == 200:
+         self.SESSION_COOKIES = r.cookies.get_dict()
+         #TODO this is border line screan scraping so this error condition will not be caught
+         if r.status_code == 200 and self.SESSION_COOKIES:
                 self.IS_HIST_INITIALIZED = True
                 logging.info("Victron historical API initialized")
 
-    def get_data(self,site_id,start_at,end_at):
+    def get_data(self,site_id,start_at,end_at=None):
         """
         Will download a csv containt all data for provided seconds from epoch time window.
         """
+
+        if not end_at:
+            print "minus 1 day"
+            end_at = time_utils.get_epoch_from_datetime(datetime.now()-timedelta(days=1))
         chunksize = 10
         formated_URL = self.API_HIST_FETCH_URL.format(
                SITE_ID = site_id,
                START_AT = start_at,
                END_AT = end_at
                 )
+        print  "getting %s"%formated_URL
         filepath = self.DOWNLOAD_FOLDER
         filename = "%s.csv"%(start_at)
         full_file = path.join(self.DOWNLOAD_FOLDER,filename)
         #need to trick the VRM
         headers  = {'user-agent':self.USER_AGENT}
-        data = self.SESSION.get(formated_URL,headers=headers)
+        print "skipping headers"
+        print "Manual Labour"
+        #data = self.SESSION.get(formated_URL,stream=True)
+        data = self.SESSION.get(formated_URL,stream=True)
         with open(full_file, 'wb') as fd:
             logging.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
                 fd.write(chunk)
 
         #DEBUG
-        return self.parse_csv_data(full_file)
+        return self._parse_csv_data(full_file)
 
-    def parse_csv_data(self,csv_data_file):
+    def _parse_csv_data(self,csv_data_file):
         """
         return iterable csv reader object
 
@@ -320,7 +333,11 @@ class VictronHistoricalAPI:
         data_arr = []
         try:
             csvfile  = open(csv_data_file)
-            reader = csv.DictReader(csvfile)
+            #need to skip first row
+            csvfile.readline()
+            csvfile.readline()
+            print "skipping first 2 lines"
+            reader = csv.DictReader(csvfile,self.CSV_KEYS)
             for row in reader:
                 data_arr.append(row)
             csvfile.close()
