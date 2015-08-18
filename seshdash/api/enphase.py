@@ -14,6 +14,7 @@ class EnphaseAPI:
     def __init__(self , key, user_id, format_type=json):
         self.IS_INITIALIZED = False
         self.SYSTEMS_IDS = {}
+        self.SYSTEMS_INFO = {}
         self.KEY = key
         self.FORMAT =  format_type
         self.USER_ID = user_id
@@ -43,6 +44,10 @@ class EnphaseAPI:
                 for system in response_parsed['systems']:
                     #extract the system id, we'll need this later
                     self.SYSTEMS_IDS[system["system_id"]] = system['system_name']
+                    #Get System summary for each site so we can get critical system stats:
+                    sys_sum = self.get_summary(system["system_id"])
+                    self.SYSTEMS_INFO[system["system_id"]] = sys_sum
+
                 self.IS_INITIALIZED = True
             else:
                 logging.warning("No systems registerd")
@@ -89,16 +94,21 @@ class EnphaseAPI:
              end_date (mandatory if start_date  provided)
     """
 
-    def get_stats(self,system_id,start=0,end=0):
+    def get_stats(self,system_id,start=0,end=0,datetime_format='epoch'):
         if start and end:
-            print system_id,start,end
+            print "#systemid %s start %s end %s"%(system_id,start,end)
             return self.make_request(function_name="stats",
                                      system_id=system_id,
                                     start_at=start,
                                     end_at=end,
-                                    datetime_format='iso8601')
+                                    datetime_format=datetime_format)
+        if start:
+            print "#systemid %s start %s end %s"%(system_id,start,end)
+            return self.make_request(function_name="stats",
+                                     system_id=system_id,
+                                    start_at=start,datetime_format=datetime_format)
 
-        return self.make_request("stats",system_id)
+        return self.make_request("stats",system_id,datetime_format=datetime_format)
 
     """
     return monthly production from start date

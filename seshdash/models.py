@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+
 from django.db import models
 from datetime import timedelta
 # Create your models here.
@@ -6,7 +8,6 @@ from datetime import timedelta
 Model for each PV SESH installed site
 """
 class Sesh_Site(models.Model):
-
     site_name = models.CharField(max_length=100)
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
@@ -27,6 +28,32 @@ class Sesh_Site(models.Model):
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
+class Sesh_User(models.Model):
+    #TODO each user will have his her own settings / alarms this needs
+    #to be added
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    department = models.CharField(max_length=100)
+
+
+class Alert_Rule(models.Model):
+    site = models.ForeignKey(Sesh_Site)
+    users = models.ForeignKey(Sesh_User)
+    field1 = models.CharField(max_length=100)
+    value1 = models.FloatField()
+    operator1 = models.IntegerField() #0 equals , 1 less than, 2 greater than
+    field2 = models.CharField(max_length=100)
+    value2 = models.FloatField()
+    operator2 =  models.IntegerField()
+    #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
+
+#TODO Add alert Object to save alerts
+class Sesh_Alert(models.Model):
+    site = models.ForeignKey(Sesh_Site)
+    alert = models.ForeignKey(Alert_Rule)
+    date = models.DateTimeField()
+    isSilence = models.BooleanField()
+    alertSent = models.BooleanField()
+
 
 """
 Data point for PV production at a site from pv panels.
@@ -59,6 +86,8 @@ class BoM_Data_Point(models.Model):
 #TODO relay will likely need to be it's own model
     relay_state = models.CharField(max_length = 100)
 
+    unique_together = ('site','time')
+
 """
 weather data to overlay with each stite
 
@@ -71,6 +100,9 @@ class Site_Weather_Data(models.Model):
     cloud_cover = models.FloatField()
     sunrise = models.TimeField()
     sunset = models.TimeField()
+
+    unique_together = ('site','date')
+
 
 
 

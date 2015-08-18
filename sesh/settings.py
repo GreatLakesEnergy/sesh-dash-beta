@@ -15,30 +15,38 @@ from __future__ import absolute_import
 import os
 from celery.schedules import crontab
 from datetime import timedelta
+from ConfigParser import RawConfigParser
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 
+config = RawConfigParser()
+config.read( os.path.join(BASE_DIR,'settings_local.ini'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_3&v$%ayjm@_@c=!@)j3bc+q9r!$^k4midq*$dl%5#0&f7hdh-'
+SECRET_KEY = config.get('secret','SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-#API Keys:
-ENPHASE_KEY = '9cf3d0ab84bb0ec5d72eea7f1e8ffa39'
-#TODO This should go in the model not here move this when you can
-ENPHASE_ID = '4e44497a4d5459320a'
-VICTRON_KEY = ''
-FORECAST_KEY = '8eefab4d187a39b993ca9c875fef6159'
+ENPHASE_KEY = config.get('api','ENPHASE_KEY')
+FORECAST_KEY = config.get('api','FORECAST_KEY')
 
+DATABASES = {
+    'default': {
+        'ENGINE': config.get('database','ENGINE'),
+        'NAME': config.get('database','NAME'),
+        'USER': config.get('database','USER'),
+        'PASSWORD': config.get('database','PASSWORD'),
+        'HOST': config.get('database','HOST'),
+    }
+}
 
 # CELERY SETTINGS
 BROKER_URL = 'redis://localhost:6379/0'
@@ -47,8 +55,14 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Kigali'
 CELERYBEAT_SCHEDULE = {
-    'get_daily_enphase_data': {
+    'get_daily_enphase_summary': {
         'task': 'seshdash.tasks.get_enphase_daily_summary',
+        'schedule': timedelta(days=1),
+        'args': None,
+    },
+
+    'get_daily_enphase_data': {
+        'task': 'seshdash.tasks.get_enphase_daily_stats',
         'schedule': timedelta(days=1),
         'args': (1,),
     },
@@ -70,6 +84,7 @@ LOGIN_URL = '/login'
 
 # Application definition
 INSTALLED_APPS = (
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -111,6 +126,7 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'sesh.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -122,6 +138,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.request',
             ],
         },
     },
@@ -129,20 +146,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sesh.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'sesh',
-        'USER' : 'sesh',
-        'PASSWORD' : 'gle12345',
-        'HOST':'sesh-db',
-        '' : ''
-    }
-}
+#ADMIN UI SETTINGS
+GRAPPELLI_ADMIN_TITLE = "SESH Administration Dashboard"
 
 
 # Internationalization
@@ -168,4 +173,5 @@ STATICFILES_FINDERS = (
                         "django.contrib.staticfiles.finders.FileSystemFinder",
                         "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                         "djangobower.finders.BowerFinder",)
+
 

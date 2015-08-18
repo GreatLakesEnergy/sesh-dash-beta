@@ -11,11 +11,11 @@ from seshdash.utils import time_utils
 from datetime import datetime, date, timedelta
 
 
-"""
-Get data related to system voltage, SoC, battery voltage through Victro VRM portal
-"""
 @shared_task
 def get_BOM_data():
+    """
+    Get data related to system voltage, SoC, battery voltage through Victro VRM portal
+    """
 
     sites = Sesh_Site.objects.all()
     for site in sites:
@@ -28,7 +28,7 @@ def get_BOM_data():
             print "##### system id's %s out of %s"%(site_id,v_client.SYSTEMS_IDS)
             bat_data = v_client.get_battery_stats(site_id[0])
             sys_data = v_client.get_system_stats(site_id[0])
-            date = time_utils.epoch_to_date(sys_data['VE.Bus state']['timestamp'] )
+            date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] )
             print bat_data.keys()
             print sys_data
             data_point = BoM_Data_Point(
@@ -50,11 +50,11 @@ def get_BOM_data():
             print "BoM Data saved"
 
 
-"""
-Get Historical Data from VRM to backfill any days
-"""
 @shared_task
 def get_historical_BoM(date_range=5):
+        """
+        Get Historical Data from VRM to backfill any days
+        """
         datetime_now = datetime.now()
         datetime_start = datetime_now - timedelta(date_range)
 
@@ -89,35 +89,70 @@ def get_historical_BoM(date_range=5):
             print "saved %s BoM data points"%count
 
 
-
-
-
-
-"""
-Get enphase daily data or get aggregate data
-"""
 @shared_task
-def get_enphase_daily_summary(date_range=5):
+def get_enphase_daily_summary(date=None):
+        calc_range = timedelta(hours = 24)
+        if not date:
+            date = datetime.now()
+
+        sites = Sesh_Site.objects.all()
+
+        for site in sites:
+                en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
+                #TODO need to fetch for all sites associated with enphase key Best incorporate this into admin UI To check
+                for system_id in en_client.SYSTEMS_INFO.keys():
+                     end_time_str = en_client.SYSTEMS_INFO[system_id]['summary_date']
+                     system_pv_data = PV_Production_Point(
+                         site = site,
+                         time = end_time_str,
+                         wh_production = en_client.SYSTEMS_INFO[system_id]['energy_today'],
+                         #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
+                         w_production = en_client.SYSTEMS_INFO[system_id]['current_power'],
+                         #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
+                         #TODO time interval shouldn't be static this needs to be calculated based on data returned,
+                         data_duration = calc_range
+                        )
+                     system_pv_data.save()
+
+
+@shared_task
+def get_enphase_daily_stats(date=None):
+        """
+        Get enphase daily data or get aggregate data
+        """
+        #TODO clen this method up. It's way over complicated and only needs to be complicated as the summary function
+        #flag to calculate interval this is a bit of a hack as enphase will
+        #return 15 minute intervals for 1 day or 23 hour intervals for multiple days
+        calc_range = timedelta(minutes=15)
+
         #create enphaseAPI
         sites = Sesh_Site.objects.all()
-        en_client = EnphaseAPI(settings.ENPHASE_KEY,settings.ENPHASE_ID)
+
         #return 'The test task executed with argument "%s" ' % param
         #get dates we want to get
         datetime_now = datetime.now()
-        datetime_start = datetime_now - timedelta(date_range)
+        datetime_start = datetime_now - timedelta(days=1)
         system_results = {}
+
+        if date:
+            datetime_now = date
+            datetime_start = datetime_now - timedelta(days=1)
+
+
         #turn them into epoch seconds
-        datetime_now_epoch = time_utils.get_epoch_from_datetime(datetime_now)
         datetime_start_epoch = time_utils.get_epoch_from_datetime(datetime_start)
         for site in sites:
+                en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
                 #TODO need to fetch for all sites associated with enphase key Best incorporate this into admin UI To check
                 for system_id in en_client.SYSTEMS_IDS.keys():
                     print "gettig stats for %s"%system_id
                     #NOTE: changing to not use end time is giving prase problems currently ,end=datetime_now_epoch is redundent
                     system_results = en_client.get_stats(system_id,start=datetime_start_epoch)
+
                     #TODO handle exception of empty result
+                    print len(system_results['intervals'])
                     for interval in system_results['intervals']:
-                    #store the data
+                        #store the data
                         print interval
                         end_time_str = time_utils.epoch_to_datetime(interval['end_at'])
                         system_pv_data = PV_Production_Point(
@@ -127,7 +162,7 @@ def get_enphase_daily_summary(date_range=5):
                             #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
                             w_production = interval['powr'],
                             #TODO time interval shouldn't be static this needs to be calculated based on data returned,
-                            data_duration = timedelta(minutes=15)
+                            data_duration = calc_range
                             )
                         system_pv_data.save()
         return "updated enphase data %s"%site
@@ -171,11 +206,11 @@ def get_weather_data(days=7,historical=False):
                 )
                 w_data.save()
     return "updated weather for %s"%sites
-"""
-bulk operation functions
-"""
 @shared_task
 def get_historical_solar(days):
+    """
+    bulk operation functions
+    """
     get_enphase_daily_summary(days)
     get_weather_data(days=days,historical=True)
 
