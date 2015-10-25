@@ -9,5 +9,7 @@ urlpatterns = [
             url(r'^linebar/$', views.linebar, name='pie'),
             url(r'^login/$', views.login_user, name='login_user'),
             url(r'^logout/$', views.logout_user, name='logout_user'),
+            url(r'^bom-data-points/$', views.BoM_Data_Stream.as_view()),
+            url(r'^bom-data-points/(?P<pk>[0-9]+)/$', views.BoM_Data_Detail.as_view()),
             ]
 
