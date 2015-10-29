@@ -2,4 +2,4 @@
 *.pyo
 *settings_local.py
 *settings.ini
-
+*.swp
