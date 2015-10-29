@@ -166,10 +166,15 @@ Turn django objects in JSON
 def serialize_objects(objects, format_ = 'json'):
     return serializers.serialize('json',objects)
 
-class BoM_Data_Stream(generics.ListAPIView):
+class BoM_Data_Stream(generics.ListCreateAPIView):
     queryset = BoM_Data_Point.objects.all()
     serializer_class = BoM_Data_PointSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,) 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
-class BoM_Data_Detail(generics.RetrieveAPIView):
+
+class BoM_Data_Detail(generics.RetrieveUpdateDestroyAPIView):
     queryset = BoM_Data_Point.objects.all()
     serializer_class = BoM_Data_PointSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)

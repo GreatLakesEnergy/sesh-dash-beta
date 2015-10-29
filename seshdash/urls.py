@@ -1,5 +1,5 @@
 from django.conf.urls import url
-
+from rest_framework.authtoken import views as authtokenviews
 from . import views
 
 urlpatterns = [
@@ -11,5 +11,6 @@ urlpatterns = [
             url(r'^logout/$', views.logout_user, name='logout_user'),
             url(r'^bom-data-points/$', views.BoM_Data_Stream.as_view()),
             url(r'^bom-data-points/(?P<pk>[0-9]+)/$', views.BoM_Data_Detail.as_view()),
+            url(r'^api-token-auth/', authtokenviews.obtain_auth_token),
             ]
 

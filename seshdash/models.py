@@ -1,7 +1,10 @@
 from django.contrib.auth.models import User
-
 from django.db import models
 from datetime import timedelta
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 # Create your models here.
 
 """
@@ -85,8 +88,30 @@ class BoM_Data_Point(models.Model):
     genset_state = models.CharField(max_length = 100)
 #TODO relay will likely need to be it's own model
     relay_state = models.CharField(max_length = 100)
-
     unique_together = ('site','time')
+    
+    owner = models.ForeignKey('auth.User', related_name='snippets')
+    highlighted = models.TextField()
+
+    def save(self, *args, **kwargs):
+        site = self.site
+        time = self.time
+        soc = self.soc
+        battery_voltage = self.battery_voltage
+        AC_input = self.AC_input
+        AC_output = self.AC_output
+        AC_Load_in = self.AC_Load_in
+        AC_Load_out = self.AC_Load_out
+        inverter_state = self.inverter_state
+        genset_state = self.genset_state
+        relay_state = self.relay_state
+        owner = self.owner
+        super(BoM_Data_Point, self).save(*args, **kwargs)
+    
+    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+    def create_auth_token(sender, instance=None, created=False, **kwargs):
+        if created:
+            Token.objects.create(user=instance)
 
 """
 weather data to overlay with each stite
