@@ -17,7 +17,8 @@ import json,time,random,datetime
 
 # Import for API
 from rest_framework import generics, permissions
-from seshdash.serializers import BoM_Data_PointSerializer
+from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
+from django.contrib.auth.models import User
 
 @login_required
 def index(request,site_id=0):
@@ -178,3 +179,12 @@ class BoM_Data_Detail(generics.RetrieveUpdateDestroyAPIView):
     queryset = BoM_Data_Point.objects.all()
     serializer_class = BoM_Data_PointSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

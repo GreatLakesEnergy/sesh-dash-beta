@@ -12,5 +12,7 @@ urlpatterns = [
             url(r'^bom-data-points/$', views.BoM_Data_Stream.as_view()),
             url(r'^bom-data-points/(?P<pk>[0-9]+)/$', views.BoM_Data_Detail.as_view()),
             url(r'^api-token-auth/', authtokenviews.obtain_auth_token),
+            url(r'^users/$', views.UserList.as_view()),
+            url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
             ]
 
