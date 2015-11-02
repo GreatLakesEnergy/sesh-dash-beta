@@ -18,8 +18,11 @@ class Sesh_Site(models.Model):
     number_of_pv_strings = models.IntegerField()
     Number_of_panels = models.IntegerField()
     enphase_ID = models.CharField( max_length = 100)
+    #TODO need to figure a way to show this in admin to automatically populate
+    enphase_site_id = models.IntegerField()
     vrm_user_id = models.CharField(max_length=100)
     vrm_password = models.CharField(max_length=100)
+    vrm_site_id = models.CharField(max_length=20)
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
@@ -28,6 +31,8 @@ class Sesh_Site(models.Model):
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
+
+
 class Sesh_User(models.Model):
     #TODO each user will have his her own settings / alarms this needs
     #to be added
@@ -67,6 +72,9 @@ class PV_Production_Point(models.Model):
     wh_production = models.IntegerField()
     data_duration = models.DurationField(default=timedelta())
 
+    class Meta:
+        unique_together = ('site','time')
+
 """
 BoM data Soc,, battery voltage system voltage etc
 Currently comes from Victron
@@ -86,7 +94,8 @@ class BoM_Data_Point(models.Model):
 #TODO relay will likely need to be it's own model
     relay_state = models.CharField(max_length = 100)
 
-    unique_together = ('site','time')
+    class Meta:
+        unique_together = ('site','time')
 
 """
 weather data to overlay with each stite
@@ -101,7 +110,8 @@ class Site_Weather_Data(models.Model):
     sunrise = models.TimeField()
     sunset = models.TimeField()
 
-    unique_together = ('site','date')
+    class Meta:
+        unique_together = ('site','date')
 
 
 

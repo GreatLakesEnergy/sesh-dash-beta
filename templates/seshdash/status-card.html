@@ -1,0 +1,46 @@
+    
+
+    {% block status_card %}
+    
+    <div class="col-lg-4">
+        <!-- TODO make the panel heading variable for color -->
+        <div class="panel panel-{{ type }}">
+                <div class="panel-heading">
+                    <!-- TODO make this a variable -->
+                    <i class="fa fa-power-off fa-fw"></i>
+                    {{ title }}
+                </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr><th>Metric</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% with bom_data|first as latest_bom %}
+                                    <tr class="warning">
+                                        <td>State of Charge</td>
+                                        <td>{{ latest_bom.soc }} % </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Battery Voltage</td>
+                                        <td>{{ latest_bom.battery_voltage }}V </td>
+                                    </tr>
+                                    <tr class="warning">
+                                        <td>Micro Inverters Online</td>
+                                        <td>4  out of  6</td>
+                                   </tr>
+                                    <tr class="sucess">
+                                        <td>Last Contact</td>
+                                        <td>{{latest_bom.time|timesince }}</td>
+                                   </tr>
+                                {% endwith %}
+                                </tbody>
+                            </table>
+                        </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

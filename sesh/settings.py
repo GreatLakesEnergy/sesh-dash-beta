@@ -57,18 +57,18 @@ CELERY_TIMEZONE = 'Africa/Kigali'
 CELERYBEAT_SCHEDULE = {
     'get_daily_enphase_summary': {
         'task': 'seshdash.tasks.get_enphase_daily_summary',
-        'schedule': timedelta(days=1),
+        'schedule': timedelta(minutes=10),
         'args': None,
     },
 
     'get_daily_enphase_data': {
         'task': 'seshdash.tasks.get_enphase_daily_stats',
-        'schedule': timedelta(days=1),
-        'args': (1,),
+        'schedule': timedelta(minutes=5),
+        'args': None,
     },
     'get_daily_weather_forecast': {
         'task': 'seshdash.tasks.get_weather_data',
-        'schedule': crontab(minute=5, hour=0),
+        'schedule': timedelta(hours=5),
         'args': None,
     },
     'get_BOM_data': {

@@ -260,7 +260,7 @@ table.dataTable thead .sorting:after {
     width: 30px;
     height: 30px;
     padding: 6px 0;
-    border-radius: 0px;
+    border-radius: 15px;
     text-align: center;
     font-size: 12px;
     line-height: 1.428571429;
@@ -270,7 +270,7 @@ table.dataTable thead .sorting:after {
     width: 50px;
     height: 50px;
     padding: 10px 16px;
-    border-radius: 0px;
+    border-radius: 25px;
     font-size: 18px;
     line-height: 1.33;
 }
@@ -279,7 +279,7 @@ table.dataTable thead .sorting:after {
     width: 70px;
     height: 70px;
     padding: 10px 16px;
-    border-radius: 0px;
+    border-radius: 35px;
     font-size: 24px;
     line-height: 1.33;
 }

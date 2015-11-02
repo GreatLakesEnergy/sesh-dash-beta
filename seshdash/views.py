@@ -9,10 +9,11 @@ from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 
-from .models import Sesh_Site, PV_Production_Point, Site_Weather_Data
+from .models import Sesh_Site, PV_Production_Point, Site_Weather_Data,BoM_Data_Point
 from seshdash.utils import time_utils
 from pprint import pprint
 
+from datetime import timedelta
 import json,time,random,datetime
 
 @login_required
@@ -27,69 +28,77 @@ def index(request,site_id=0):
     #TODO this will break when there is no site created
     context_dict, content_json = get_user_data(request.user,site_id,sites)
     context_dict = jsonify_dict(context_dict,content_json)
+    y_data,x_data = prep_time_series(context_dict['site_power'],'wh_production','time')
+    y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
+    #create graphs for PV dailt prod vs cloud cover
+    context_dict =  linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
+    print "len x1: %s, x2 len: %s len y1:%s, len y2: %s"%(len(x_data),len(x2_data),len(y_data),len(y2_data))
     print context_dict
     return render(request,'seshdash/main-dash.html',context_dict)
 
-#testing out some nvd3 graphs
-def pie(request):
-    xdata = ["Apple", "Apricot", "Avocado", "Banana", "Boysenberries", "Blueberries", "Dates", "Grapefruit", "Kiwi", "Lemon"]
-    ydata = [52, 48, 160, 94, 75, 71, 490, 82, 46, 17]
-    chartdata = {'x': xdata, 'y': ydata}
-    charttype = "pieChart"
-    chartcontainer = 'piechart_container'
-    data = {
-        'charttype': charttype,
-        'chartdata': chartdata,
-        'chartcontainer': chartcontainer,
-        'extra': {
-            'x_is_date': False,
-            'x_axis_format': '',
-            'tag_script_js': True,
-            'jquery_on_ready': False,
-        }
-    }
-    return render_to_response('seshdash/piechart.html', data)
 
-def linebar(request):
+def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):
+    """
+    Create time series data from model data to use for graphing
+    """
+    y_data = []
+    y2_data = []
+    x_data = []
+
+    for point in data:
+        y_data.append(getattr(point,field_1_y))
+        if field_2_y:
+            y_data.append(getattr(point,field_2_y))
+        date = getattr(point,field_2_date)
+        #havascript expets this in milliseconds multiply by 1000
+        time_epoch = int(time_utils.get_epoch_from_datetime(date)) * 1000
+        x_data.append(time_epoch)
+    if field_2_y:
+        return y_data,y2_data,x_data
+    return y_data,x_data
+
+
+#testing out some nvd3 graphs
+#TODO move graphing functions to different library
+def linebar(xdata,ydata,ydata2,label_1,label_2,chart_container,data):
     """
     lineplusbarchart page
     """
-    start_time = int(time.mktime(datetime.datetime(2012, 6, 1).timetuple()) * 1000)
-    nb_element = 100
-    xdata = range(nb_element)
-    xdata = map(lambda x: start_time + x * 1000000000, xdata)
-    ydata = [i + random.randint(1, 10) for i in range(nb_element)]
-    ydata2 = [i + random.randint(1, 10) for i in reversed(range(nb_element))]
+    #start_time = int(time.mktime(datetime.datetime(2012, 6, 1).timetuple()) * 1000)
+    #nb_element = 100
+    #xdata = range(nb_element)
+    #xdata = map(lambda x: start_time + x * 1000000000, xdata)
+    #ydata = [i + random.randint(1, 10) for i in range(nb_element)]
+    #ydata2 = [i + random.randint(1, 10) for i in reversed(range(nb_element))]
     kwargs1 = {}
     kwargs1['bar'] = True
 
-    tooltip_date = "%d %b %Y %H:%M:%S %p"
-    extra_serie1 = {"tooltip": {"y_start": "$ ", "y_end": ""},
+    tooltip_date = "%d %b %Y"
+    extra_serie1 = {"tooltip": {"y_start": "wh ", "y_end": ""},
                     "date_format": tooltip_date}
-    extra_serie2 = {"tooltip": {"y_start": "", "y_end": " min"},
+    extra_serie2 = {"tooltip": {"y_start": "", "y_end": ""},
                     "date_format": tooltip_date}
 
     chartdata = {
         'x': xdata,
-        'name1': 'series 1', 'y1': ydata, 'extra1': extra_serie1, 'kwargs1': kwargs1,
-        'name2': 'series 2', 'y2': ydata2, 'extra2': extra_serie2,
+        'name1': label_1, 'y1': ydata, 'extra1': extra_serie1, 'kwargs1': kwargs1,
+        'name2': label_2, 'y2': ydata2, 'extra2': extra_serie2,
     }
 
     charttype = "linePlusBarChart"
-    chartcontainer = 'chart_container'  # container name
-    data = {
-        'charttype': charttype,
-        'chartdata': chartdata,
-        'chartcontainer': chartcontainer,
-        'extra': {
+    chartcontainer = chart_container # container name
+    data['charttype'] =  charttype
+    data['chartdata'] =  chartdata
+    data['chartcontainer'] = chartcontainer
+    data['extra'] = {
             'x_is_date': True,
             'x_axis_format': '%d %b %Y %H',
             'tag_script_js': True,
             'jquery_on_ready': True,
             'focus_enable': True,
-        },
-    }
-    return render_to_response('seshdash/line_bar.html', data)
+        }
+
+    return  data
 
 
 def logout_user(request):
@@ -124,35 +133,53 @@ def login_user(request):
 
 def get_user_data(user,site_id,sites):
     site = Sesh_Site.objects.get(pk=site_id)
+    context_data = {}
+    context_data_json = {}
     if not user.has_perm('seshdash.view_Sesh_Site',site):
         print "user doesn't have permission to view site %s"%site_id
         #TODO return 403 permission denied
-        return {},{}
-    context_data = {}
-    context_data_json = {}
+        return context_data,context_data_json
     context_data['sites'] = sites
     context_data['active_site'] = site
     context_data_json['sites'] = serialize_objects(sites)
+    #get 5 days ago and 5 days in future for weather
+    now = datetime.datetime.now()
+    five_day_past = now - timedelta(days=5)
+    five_day_future = now + timedelta(days=5)
+
     last_5_days = time_utils.get_last_five_days()
 
-    weather_data = Site_Weather_Data.objects.filter(site=site,date__range=[last_5_days[0],last_5_days[4]])
-    power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]])
+    weather_data = Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past,five_day_future]).order_by('date')
 
-    weather_data_json = serialize_objects(weather_data)
-    power_data_json = serialize_objects(power_data)
+    #granular pv data
+    power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[2]]).order_by('time')
+
+    #daily pv data
+    power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
+
+    #BOM data
+    bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
+
+    #NOTE remvong JSON versions of data for now as it's not necassary
+    #weather_data_json = serialize_objects(weather_data)
+    #power_data_json = serialize_objects(power_data)
+    #bom_data_json = serialize_objects(power_data)
 
     context_data['site_weather'] = weather_data
     context_data['site_power'] = power_data
+    context_data['bom_data'] = bom_data
 
-    context_data_json['site_weather'] = weather_data_json
-    context_data_json['site_power'] = power_data_json
+    #NOTE remvong JSON versions of data for now as it's not necassary
+    #context_data_json['site_weather'] = weather_data_json
+    #context_data_json['site_power'] = power_data_json
+    #context_data_json['bom_data'] = bom_data_json
 
     return context_data,context_data_json
 
 
 def jsonify_dict(context_dict,content_json):
-            context_dict['weather_json'] = content_json['site_weather']
-            context_dict['power_json'] = content_json['site_power']
+            #context_dict['weather_json'] = content_json['site_weather']
+            #context_dict['power_json'] = content_json['site_power']
             context_dict['sites_json'] = content_json['sites']
             return context_dict
 """

@@ -66,6 +66,7 @@ def get_historical_BoM(date_range=5):
         for site in sites:
             v_client = VictronAPI(site.vrm_user_id,site.vrm_password)
             vh_client = VictronHistoricalAPI(site.vrm_user_id,site.vrm_password)
+            site_id = site.vrm_site_id
             for site_id in v_client.SYSTEMS_IDS:
                 #site_id is a tuple
                 data = vh_client.get_data(site_id[0],datetime_start_epoch,datetime_now_epoch)
@@ -98,21 +99,19 @@ def get_enphase_daily_summary(date=None):
         sites = Sesh_Site.objects.all()
 
         for site in sites:
-                en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
-                #TODO need to fetch for all sites associated with enphase key Best incorporate this into admin UI To check
-                for system_id in en_client.SYSTEMS_INFO.keys():
-                     end_time_str = en_client.SYSTEMS_INFO[system_id]['summary_date']
-                     system_pv_data = PV_Production_Point(
-                         site = site,
-                         time = end_time_str,
-                         wh_production = en_client.SYSTEMS_INFO[system_id]['energy_today'],
-                         #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
-                         w_production = en_client.SYSTEMS_INFO[system_id]['current_power'],
-                         #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
-                         #TODO time interval shouldn't be static this needs to be calculated based on data returned,
-                         data_duration = calc_range
-                        )
-                     system_pv_data.save()
+                 en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
+                 system_id = site.enphase_site_id
+
+                 end_time_str = en_client.SYSTEMS_INFO[system_id]['summary_date']
+                 system_pv_data = PV_Production_Point(
+                     site = site,
+                     time = end_time_str,
+                     wh_production = en_client.SYSTEMS_INFO[system_id]['energy_today'],
+                     #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
+                     w_production = en_client.SYSTEMS_INFO[system_id]['current_power'],
+                     data_duration = calc_range
+                    )
+                 system_pv_data.save()
 
 
 @shared_task
@@ -120,9 +119,6 @@ def get_enphase_daily_stats(date=None):
         """
         Get enphase daily data or get aggregate data
         """
-        #TODO clen this method up. It's way over complicated and only needs to be complicated as the summary function
-        #flag to calculate interval this is a bit of a hack as enphase will
-        #return 15 minute intervals for 1 day or 23 hour intervals for multiple days
         calc_range = timedelta(minutes=15)
 
         #create enphaseAPI
@@ -143,15 +139,13 @@ def get_enphase_daily_stats(date=None):
         datetime_start_epoch = time_utils.get_epoch_from_datetime(datetime_start)
         for site in sites:
                 en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
-                #TODO need to fetch for all sites associated with enphase key Best incorporate this into admin UI To check
-                for system_id in en_client.SYSTEMS_IDS.keys():
-                    print "gettig stats for %s"%system_id
-                    #NOTE: changing to not use end time is giving prase problems currently ,end=datetime_now_epoch is redundent
-                    system_results = en_client.get_stats(system_id,start=datetime_start_epoch)
+                system_id = site.enphase_site_id
+                print "gettig stats for %s"%system_id
+                system_results = en_client.get_stats(system_id,start=datetime_start_epoch)
 
-                    #TODO handle exception of empty result
-                    print len(system_results['intervals'])
-                    for interval in system_results['intervals']:
+                #TODO handle exception of empty result
+                print len(system_results['intervals'])
+                for interval in system_results['intervals']:
                         #store the data
                         print interval
                         end_time_str = time_utils.epoch_to_datetime(interval['end_at'])
@@ -159,7 +153,6 @@ def get_enphase_daily_stats(date=None):
                             site = site,
                             time = end_time_str,
                             wh_production = interval['enwh'],
-                            #TODO this is not alwyas there when we are tlking about aggrearegate data needs to be resolved
                             w_production = interval['powr'],
                             #TODO time interval shouldn't be static this needs to be calculated based on data returned,
                             data_duration = calc_range

@@ -13,6 +13,7 @@ function ready_graph_data(data,x_value,y_value){
 
 
 // energy production graph
+/* NOTE commenting out for now, switching out nvd3 graphs
 Morris.Bar({
       element: 'energy-production-last-5-days',
       data: ready_graph_data(power_data,'time','w_production'),
@@ -22,7 +23,7 @@ Morris.Bar({
 });
 
 //cloudcover forecast
-Morris.Area({
+Morris.Bar({
   element: 'cloud-cover-forecast',
   data: ready_graph_data(weather_data,'date','cloud_cover'),
   xLabels : 'day',
@@ -30,3 +31,4 @@ Morris.Area({
   ykeys: ['a'],
   labels: ['Cloud Cover %']
 });
+*/
