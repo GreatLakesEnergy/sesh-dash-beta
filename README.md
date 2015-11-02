@@ -1,5 +1,8 @@
 # README #
 
+# sesh-dash-beta
+SESH Dashboard beta. Working dev code.
+
 This README would normally document whatever steps are necessary to get your application up and running.
 
 ### What is this repository for? ###

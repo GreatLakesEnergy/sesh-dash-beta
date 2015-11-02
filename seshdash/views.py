@@ -9,12 +9,17 @@ from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 
-from .models import Sesh_Site, PV_Production_Point, Site_Weather_Data,BoM_Data_Point
+from seshdash.models import Sesh_Site, PV_Production_Point, Site_Weather_Data, BoM_Data_Point
 from seshdash.utils import time_utils
 from pprint import pprint
 
 from datetime import timedelta
 import json,time,random,datetime
+
+# Import for API
+from rest_framework import generics, permissions
+from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
+from django.contrib.auth.models import User
 
 @login_required
 def index(request,site_id=0):
@@ -188,3 +193,25 @@ Turn django objects in JSON
 
 def serialize_objects(objects, format_ = 'json'):
     return serializers.serialize('json',objects)
+
+class BoM_Data_Stream(generics.ListCreateAPIView):
+    queryset = BoM_Data_Point.objects.all()
+    serializer_class = BoM_Data_PointSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class BoM_Data_Detail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BoM_Data_Point.objects.all()
+    serializer_class = BoM_Data_PointSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

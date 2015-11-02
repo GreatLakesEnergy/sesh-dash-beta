@@ -95,6 +95,8 @@ INSTALLED_APPS = (
     'guardian',
     'djangobower',
     'django_nvd3',
+    'rest_framework',
+    'rest_framework.authtoken',
 )
 
 #BOWER
