@@ -1,5 +1,7 @@
-<<<<<<< HEAD
 # README #
+
+# sesh-dash-beta
+SESH Dashboard beta. Working dev code.
 
 This README would normally document whatever steps are necessary to get your application up and running.
 
@@ -28,7 +30,3 @@ This README would normally document whatever steps are necessary to get your app
 
 * Repo owner or admin
 * Other community or team contact
-=======
-# sesh-dash-beta
-SESH Dashboard beta. Working dev code
->>>>>>> 5e1f42a1dfe65b35be0476e79f017f6faa851f84
