@@ -6,12 +6,6 @@ Sesh-dashboard is a dasboard that's designed to display data from you Solar Ener
 
 It also has the capacity to get data from both systems locally through modbus-TCP(CCGX) or scraping of the envoy(web scraping)
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
 ### How do I get set up? ###
 
 * Create alocal virtual-env
@@ -27,7 +21,7 @@ It also has the capacity to get data from both systems locally through modbus-TC
 
 ### System Overview ###
 * Sample diagram of PV system
-*   ![sample system diagram ](http://full/path/to/img.jpg "Optional title")
+*   ![sample system diagram ](https://raw.githubusercontent.com/GreatLakesEnergy/sesh-diagrams/master/sesh-system-diagram.png "sesh system diagram")
 
 ### Who do I talk to? ###
 
