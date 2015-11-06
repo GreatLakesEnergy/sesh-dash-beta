@@ -9,7 +9,7 @@ It also has the capacity to get data from both systems locally through modbus-TC
 ### How do I get set up? ###
 
 * Create alocal virtual-env
-* Install requirement defined in requirements.txt
+* Install requirement defined in requirements.txt > pip install -r requirements.txt.
 * Get the UI components with bower ./manage.py bower install
 * You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.
 * Start cellary with this command to start getting data  form your sources.  celery --app=sesh.celery:app worker --loglevel-INFO
