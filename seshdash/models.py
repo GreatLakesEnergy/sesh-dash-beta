@@ -30,6 +30,10 @@ class Sesh_Site(models.Model):
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
 
+    def __str__(self):
+        return self.site_name
+
+
     class Meta:
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),

@@ -1,3 +1,4 @@
+#Django libs
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -9,10 +10,13 @@ from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 
+#Import Models and Forms
 from seshdash.models import Sesh_Site, PV_Production_Point, Site_Weather_Data, BoM_Data_Point
 from seshdash.utils import time_utils
 from pprint import pprint
+from seshdash.forms import SiteForm
 
+#Import utils
 from datetime import timedelta
 import json,time,random,datetime
 
@@ -26,6 +30,11 @@ def index(request,site_id=0):
 
     sites = Sesh_Site.objects.all()
     sites = get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
+    context_dict = {}
+    #Handle fisrt login if user has no site setup:
+    if not sites:
+        context_dict['form'] = SiteForm()
+        return render(request,'seshdash/initial-login.html',context_dict)
     if not site_id:
         #return first site user has action
         print "no side id recieved"
@@ -41,6 +50,21 @@ def index(request,site_id=0):
     print context_dict
     return render(request,'seshdash/main-dash.html',context_dict)
 
+@login_required
+def create_site(request):
+    context_dict = {}
+    if request.method == "POST":
+        form = SiteForm(request.POST)
+
+        if (form.is_valid):
+            context_dict['message'] = "success"
+            form.save()
+        else:
+            #TODO provide meaning full erro message from validate
+            context_dict['message'] = "failure"
+            return render(request,'seshdash/initial-login.html',context_dict)
+
+        return render(request,'seshdash/main-dash.html',context_dict)
 
 def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):
     """

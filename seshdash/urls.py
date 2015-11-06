@@ -8,6 +8,7 @@ urlpatterns = [
             url(r'^linebar/$', views.linebar, name='linebar'),
             url(r'^login/$', views.login_user, name='login_user'),
             url(r'^logout/$', views.logout_user, name='logout_user'),
+            url(r'^create-site/$', views.create_site, name='create_site'),
             url(r'^bom-data-points/$', views.BoM_Data_Stream.as_view()),
             url(r'^bom-data-points/(?P<pk>[0-9]+)/$', views.BoM_Data_Detail.as_view()),
             url(r'^api-token-auth/', authtokenviews.obtain_auth_token),

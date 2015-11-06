@@ -1,7 +1,13 @@
 {% extends "seshdash/base.html" %}
 
 {% block header %}
-<h2 class="page-header">Welcome {{ user }}, viewing dashboard for {{active_site.site_name}}</h2> 
+<h2 class="page-header">
+	{% if message %}
+		Site creation was a {{ message }}
+	{% else %}
+		Welcome {{ user }}, viewing dashboard for {{active_site.site_name}}
+	{% endif %}
+</h2> 
     {% endblock %}
 
 {% block dash_1 %}
