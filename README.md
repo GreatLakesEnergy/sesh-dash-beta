@@ -9,13 +9,16 @@ It also has the capacity to get data from both systems locally through modbus-TC
 ### How do I get set up? ###
 
 * Create alocal virtual-env
-* Install requirement defined in requirements.txt > pip install -r requirements.txt.
-* Get the UI components with bower ./manage.py bower install
+* Install requirement defined in
+    `$ requirements.txt > pip install -r requirements.txt`
+* Get the UI components with
+   ` $ bower ./manage.py bower install`
 * You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.
 
 ### Getting Data ###
-* The system requires data to be coming in from the API's this happens asynchronously with celery. T
-* Start cellary with this command to start getting data  form your sources.  celery --app=sesh.celery:app worker --loglevel-INFO --beat
+* The system requires data to be coming in from the API's this happens asynchronously with celery. 
+* Start cellary with this command to start getting data  form your sources.
+   ` $ celery --app=sesh.celery:app worker --loglevel-INFO --beat`
 
 ### API locations ###
 * enphase: https://developer.enphase.com/
