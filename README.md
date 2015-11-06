@@ -19,9 +19,15 @@ It also has the capacity to get data from both systems locally through modbus-TC
 * You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.
 * Start cellary with this command to start getting data  form your sources.  celery --app=sesh.celery:app worker --loglevel-INFO
 
+### API locations ###
+* enphase: https://developer.enphase.com/
+* victron: http://www.victronenergy.com/live/vrm_portal:vrm_juice_json_api_notes
+* weather: https://developer.forecast.io/
+
 
 ### System Overview ###
-* 
+* Sample diagram of PV system
+*   ![sample system diagram ](http://full/path/to/img.jpg "Optional title")
 
 ### Who do I talk to? ###
 
