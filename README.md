@@ -2,8 +2,9 @@
 
 # sesh-dash-beta
 SESH Dashboard beta. Working dev code.
+Sesh-dashboard is a dasboard that's designed to display data from you Solar Energy system. It's built on top of python django. Data coming into the system can come form Victron QUattro inverters- Via CCGX/ Enphase micro inverters via Envoy.
 
-This README would normally document whatever steps are necessary to get your application up and running.
+It also has the capacity to get data from both systems locally through modbus-TCP(CCGX) or scraping of the envoy(web scraping)
 
 ### What is this repository for? ###
 
@@ -13,18 +14,14 @@ This README would normally document whatever steps are necessary to get your app
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* Create alocal virtual-env
+* Install requirement defined in requirements.txt
+* You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.
+* Start cellary with this command to start getting data  form your sources.  celery --app=sesh.celery:app worker --loglevel-INFO
 
-### Contribution guidelines ###
 
-* Writing tests
-* Code review
-* Other guidelines
+### System Overview ###
+* 
 
 ### Who do I talk to? ###
 
