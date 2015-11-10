@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 
 config = RawConfigParser()
-config.read( os.path.join(BASE_DIR,'settings_local.ini'))
+config.read( os.path.join(BASE_DIR, "ocal_settings.ini"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -98,14 +98,15 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
 )
-
 #BOWER
-BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
+BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'seshdash/static/')
 BOWER_INSTALLED_APPS = (
             'jquery#1.9',
             'mapbox.js',
             'd3#3.3.13',
             'nvd3#1.7.1',
+            'highcharts-release',
+            'highstock-release',
             )
 
 ANONYMOUS_USER_ID = None
