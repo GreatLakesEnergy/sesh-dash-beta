@@ -8,19 +8,20 @@ It also has the capacity to get data from both systems locally through modbus-TC
 
 ### How do I get set up? ###
 
-* Create alocal virtual-env
-* Install requirement defined in
+* Create a local virtual-env (install virtualenv if you dont have it already)
+    `$ virtualenv <sesh-dash-beta>`
+* Install requirements defined in
     `$ requirements.txt > pip install -r requirements.txt`
 * Get the UI components with
    ` $ bower ./manage.py bower install`
-* You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.
+* You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.(contact repo owner for keys)
 
 ### Getting Data ###
-* The system requires data to be coming in from the API's this happens asynchronously with celery. 
-* Start cellary with this command to start getting data  form your sources.
+* The system requires data to be coming in from the API's this happens asynchronously and periodically
+* Start celery with command in a different screen
    ` $ celery --app=sesh.celery:app worker --loglevel-INFO --beat`
 
-### API locations ###
+### API docs ###
 * enphase: https://developer.enphase.com/
 * victron: http://www.victronenergy.com/live/vrm_portal:vrm_juice_json_api_notes
 * weather: https://developer.forecast.io/
