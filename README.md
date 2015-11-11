@@ -27,7 +27,7 @@ Follow the steps below to setup a development environment. This will setup a vir
 
 You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.(contact repo owner for keys).
 
-#### Virtualenv Only ### 
+#### Virtualenv Only ####
 * Create a local virtual-env (install virtualenv if you dont have it already)
     `$ virtualenv <sesh-dash-beta>`
 * Install requirements defined in
