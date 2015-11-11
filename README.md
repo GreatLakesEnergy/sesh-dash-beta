@@ -12,7 +12,7 @@ To setup a development environment:
  1. `cd sesh-dash-beta`
  1. `vagrant up`
  1. `vagrant ssh`
- 1. `cd ~/dev/sesh`
+ 1. `cd ~/dev/sesh-dash-beta`
  1. `sudo pip install -r requirements.txt`
  
 
