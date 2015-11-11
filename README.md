@@ -4,7 +4,30 @@
 SESH Dashboard beta. Working dev code.
 Sesh-dashboard is a dasboard that's designed to display data from you Solar Energy system. It's built on top of python django. Data coming into the system can come form Victron QUattro inverters- Via CCGX/ Enphase micro inverters via Envoy.
 
+<<<<<<< HEAD
 It also has the capacity to get data from both systems locally through modbus-TCP(CCGX) or scraping of the envoy(web scraping)
+=======
+This README would normally document whatever steps are necessary to get your application up and running.
+
+**Make sure you have [Vagrant](https://www.vagrantup.com/downloads.html), [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed.**
+
+Follow the steps below to setup a development environment. This will setup a virtual machine with the required dependencies:
+ 1. `git clone https://github.com/GreatLakesEnergy/sesh-dash-beta.git`
+ 1. `cd sesh-dash-beta`
+ 1. `vagrant up`
+ 1. `vagrant ssh`
+ 1. `cd ~/dev/sesh/`
+ 1. `sudo pip install -r requirements.txt`
+
+To run the development server, rename the settings_local.ini.txt file to settings_local.ini and add Database settings and Secret Key
+ 
+
+### What is this repository for? ###
+
+* Quick summary
+* Version
+* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+>>>>>>> c0fae660a75c666ecccb8461686fdca6852faee0
 
 ### How do I get set up? ###
 
