@@ -31,13 +31,20 @@ To run the development server, rename the settings_local.ini.txt file to setting
 
 ### How do I get set up? ###
 
-* Create alocal virtual-env
-* Install requirement defined in requirements.txt
-* Get the UI components with bower ./manage.py bower install
-* You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.
-* Start cellary with this command to start getting data  form your sources.  celery --app=sesh.celery:app worker --loglevel-INFO
+* Create a local virtual-env (install virtualenv if you dont have it already)
+    `$ virtualenv <sesh-dash-beta>`
+* Install requirements defined in
+    `$ requirements.txt > pip install -r requirements.txt`
+* Get the UI components with
+   ` $ bower ./manage.py bower install`
+* You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.(contact repo owner for keys)
 
-### API locations ###
+### Getting Data ###
+* The system requires data to be coming in from the API's this happens asynchronously and periodically
+* Start celery with command in a different screen
+   ` $ celery --app=sesh.celery:app worker --loglevel-INFO --beat`
+
+### API docs ###
 * enphase: https://developer.enphase.com/
 * victron: http://www.victronenergy.com/live/vrm_portal:vrm_juice_json_api_notes
 * weather: https://developer.forecast.io/
@@ -49,5 +56,5 @@ To run the development server, rename the settings_local.ini.txt file to setting
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* Contact repo owner alp@gle.solar
+
