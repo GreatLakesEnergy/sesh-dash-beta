@@ -1,0 +1,31 @@
+---                                                                                                                                                           
+- hosts: all 
+  remote_user: vagrant
+  sudo: yes 
+  tasks: 
+  - name: Update the repositories
+    apt: update_cache=yes
+
+  - name: Upgrade all packages non-interactively
+    shell: DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
+  
+  - name: Install basic packages  
+    action: apt state=installed pkg={{ item }}
+    with_items: 
+    - python-dev
+    - vim 
+    - python-pip
+    tags:
+    - packages
+  
+  - name: Install python packages
+    action: pip state=present name={{ item }}
+    with_items:
+    - ipython
+    - virtualenv
+    - virtualenvwrapper
+    tags:
+    - pip-packages 
+
+  - name: Create a projects directory
+    file: path=/home/vagrant/projects state=directory

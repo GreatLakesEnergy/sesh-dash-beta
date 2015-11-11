@@ -5,6 +5,13 @@ SESH Dashboard beta. Working dev code.
 
 This README would normally document whatever steps are necessary to get your application up and running.
 
+**Make sure you have Vagrant/Virtualbox and Ansible installed.**
+
+To run:
+ 1. git clone
+ 1. vagrant up
+ 1. vagrant ssh
+
 ### What is this repository for? ###
 
 * Quick summary
