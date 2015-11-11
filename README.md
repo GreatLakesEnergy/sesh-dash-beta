@@ -7,13 +7,15 @@ This README would normally document whatever steps are necessary to get your app
 
 **Make sure you have [Vagrant](https://www.vagrantup.com/downloads.html), [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed.**
 
-To setup a development environment:
+Follow the steps below to setup a development environment. This will setup a virtual machine with the required dependencies:
  1. `git clone https://github.com/GreatLakesEnergy/sesh-dash-beta.git`
  1. `cd sesh-dash-beta`
  1. `vagrant up`
  1. `vagrant ssh`
- 1. `cd ~/dev/sesh-dash-beta`
+ 1. `cd ~/dev/sesh/`
  1. `sudo pip install -r requirements.txt`
+
+To run the development server, rename the settings_local.ini.txt file to settings_local.ini and add Database settings and Secret Key
  
 
 ### What is this repository for? ###

@@ -15,6 +15,10 @@
     - python-dev
     - vim 
     - python-pip
+    - git
+    - libpq-dev
+    - libxml2-dev
+    - libxslt1-dev
     tags:
     - packages
   
@@ -27,5 +31,3 @@
     tags:
     - pip-packages 
 
-  - name: Create a projects directory
-    file: path=/home/vagrant/projects state=directory
