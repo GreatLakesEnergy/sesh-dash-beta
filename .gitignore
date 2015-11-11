@@ -2,6 +2,7 @@
 *.pyc
 *.pyo
 *settings_local.py
+*settings_local.ini
 *settings.ini
 *.swp
 =======
