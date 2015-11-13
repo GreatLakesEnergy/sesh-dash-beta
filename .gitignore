@@ -1,7 +1,7 @@
-<<<<<<< HEAD
 *.pyc
 *.pyo
 *settings_local.py
+*settings_local.ini
 *settings.ini
 *.swp
 =======
@@ -63,4 +63,6 @@ docs/_build/
 
 # PyBuilder
 target/
->>>>>>> 5e1f42a1dfe65b35be0476e79f017f6faa851f84
+
+#Vagrant box files
+.vagrant*
