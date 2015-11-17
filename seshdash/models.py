@@ -20,9 +20,9 @@ class Sesh_Site(models.Model):
     installed_kw = models.FloatField()
     number_of_pv_strings = models.IntegerField()
     Number_of_panels = models.IntegerField()
-    enphase_ID = models.CharField( max_length = 100)
+    #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
-    enphase_site_id = models.IntegerField()
+    #enphase_site_id = models.IntegerField()
     vrm_user_id = models.CharField(max_length=100)
     vrm_password = models.CharField(max_length=100)
     vrm_site_id = models.CharField(max_length=20)
@@ -33,7 +33,7 @@ class Sesh_Site(models.Model):
     def __str__(self):
         return self.site_name
 
-
+    #Row based permissioning using django guardian not every user should be able to see all sites
     class Meta:
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
@@ -70,17 +70,18 @@ class Sesh_Alert(models.Model):
 """
 Data point for PV production at a site from pv panels.
 Currently comes form enphase
-"""
-class PV_Production_Point(models.Model):
-    #TODO unique together contraing on time and site
-    site = models.ForeignKey(Sesh_Site)
-    time = models.DateTimeField()
-    w_production = models.IntegerField()
-    wh_production = models.IntegerField()
-    data_duration = models.DurationField(default=timedelta())
 
-    class Meta:
-        unique_together = ('site','time')
+REMMOVING because enphase API SUCS and  victron now provides us with this data
+"""
+# class PV_Production_Point(models.Model):
+    # site = models.ForeignKey(Sesh_Site)
+    # time = models.DateTimeField()
+    # w_production = models.IntegerField()
+    # wh_production = models.IntegerField()
+    # data_duration = models.DurationField(default=timedelta())
+
+    # class Meta:
+     #    unique_together = ('site','time')
 
 """
 BoM data Soc,, battery voltage system voltage etc
@@ -96,6 +97,8 @@ class BoM_Data_Point(models.Model):
     AC_output = models.FloatField()
     AC_Load_in = models.FloatField()
     AC_Load_out = models.FloatField()
+    #NEW  victron now tells us pv production
+    pv_production = models.FloatField(default=0)
     inverter_state = models.CharField(max_length = 100)
     genset_state = models.CharField(max_length = 100)
 #TODO relay will likely need to be it's own model
@@ -103,7 +106,8 @@ class BoM_Data_Point(models.Model):
 
     class Meta:
           unique_together = ('site','time')
-
+"""
+TODO removing for now as it's breaking celery object creation
     owner = models.ForeignKey('auth.User', related_name='snippets')
     highlighted = models.TextField()
 
@@ -126,6 +130,7 @@ class BoM_Data_Point(models.Model):
     def create_auth_token(sender, instance=None, created=False, **kwargs):
         if created:
             Token.objects.create(user=instance)
+"""
 
 """
 weather data to overlay with each stite
