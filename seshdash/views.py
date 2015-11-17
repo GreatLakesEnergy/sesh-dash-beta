@@ -11,7 +11,7 @@ from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site, PV_Production_Point, Site_Weather_Data, BoM_Data_Point
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point
 from seshdash.utils import time_utils
 from pprint import pprint
 from seshdash.forms import SiteForm
@@ -39,10 +39,11 @@ def index(request,site_id=0):
         #return first site user has action
         print "no side id recieved"
         site_id = sites[0].pk
-    #TODO this will break when there is no site created
+    #Check if user has any sites under their permission
     context_dict, content_json = get_user_data(request.user,site_id,sites)
     context_dict = jsonify_dict(context_dict,content_json)
-    y_data,x_data = prep_time_series(context_dict['site_power'],'wh_production','time')
+    #Generate date for dashboard  TODO use victron solar yield data using mock weather data for now
+    y_data,x_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     #create graphs for PV dailt prod vs cloud cover
     context_dict =  linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
@@ -181,10 +182,10 @@ def get_user_data(user,site_id,sites):
     weather_data = Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past,five_day_future]).order_by('date')
 
     #granular pv data
-    power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[2]]).order_by('time')
+    #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[2]]).order_by('time')
 
     #daily pv data
-    power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
+    #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
 
     #BOM data
     bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
@@ -195,7 +196,7 @@ def get_user_data(user,site_id,sites):
     #bom_data_json = serialize_objects(power_data)
 
     context_data['site_weather'] = weather_data
-    context_data['site_power'] = power_data
+    #context_data['site_power'] = power_data
     context_data['bom_data'] = bom_data
 
     #NOTE remvong JSON versions of data for now as it's not necassary
