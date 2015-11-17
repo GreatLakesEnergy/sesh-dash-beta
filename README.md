@@ -23,7 +23,7 @@ Follow the steps below to setup a development environment. This will setup a vir
  1. Install python dependencies:
     `sudo pip install -r requirements.txt`
  1. Get the UI components:
-    `bower ./manager.py bower install` 
+    `bower ./manager.py bower install`
 
 You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.(contact repo owner for keys).
 
@@ -32,7 +32,8 @@ You'll need to configure paramters for the APIs. Modify  settings_local.ini to p
     `$ virtualenv <sesh-dash-beta>`
 * Install requirements defined in
     `$ requirements.txt > pip install -r requirements.txt`
-* Get the UI components with
+* Get the UI components with (first need to install bower)
+   ` $ sudo npm install -g bower`
    ` $ bower ./manage.py bower install`
 
 ### Getting Data ###
@@ -53,4 +54,3 @@ You'll need to configure paramters for the APIs. Modify  settings_local.ini to p
 ### Who do I talk to? ###
 
 * Contact repo owner alp@gle.solar
-

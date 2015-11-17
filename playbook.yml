@@ -20,6 +20,9 @@
     - libxml2-dev
     - libxslt1-dev
     - libmysqlclient-dev
+    - npm
+    - nodejs-legacy
+
     tags:
     - packages
 
