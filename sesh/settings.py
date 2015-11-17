@@ -55,26 +55,16 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Kigali'
+#TODO Move time constants to config file
 CELERYBEAT_SCHEDULE = {
-    'get_daily_enphase_summary': {
-        'task': 'seshdash.tasks.get_enphase_daily_summary',
-        'schedule': timedelta(minutes=10),
-        'args': None,
-    },
-
-    'get_daily_enphase_data': {
-        'task': 'seshdash.tasks.get_enphase_daily_stats',
-        'schedule': timedelta(minutes=5),
-        'args': None,
-    },
-    'get_daily_weather_forecast': {
+   'get_daily_weather_forecast': {
         'task': 'seshdash.tasks.get_weather_data',
         'schedule': timedelta(hours=5),
         'args': None,
     },
     'get_BOM_data': {
         'task': 'seshdash.tasks.get_BOM_data',
-        'schedule': timedelta(minutes=30),
+        'schedule': timedelta(minutes=5),
         'args': None,
     },
 }
