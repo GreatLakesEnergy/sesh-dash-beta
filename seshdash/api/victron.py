@@ -24,7 +24,9 @@ class VictronAPI:
         'Input voltage phase 1',
         'Input current phase 1',
         'Output current phase 1',
-        'Output voltage phase 1']
+        'Output voltage phase 1',
+        'PV - AC-coupled on output L1'
+        ]
 
     _BATTERY_STAT_KEYS = [
         'Battery State of Charge (System)',
@@ -52,7 +54,7 @@ class VictronAPI:
         self.IS_INITIALIZED = False
 
         #TODO disabling sl warnings
-        requests.packages.urllib3.disable_warnings()
+        #requests.packages.urllib3.disable_warnings()
 
         self.USERNAME = user_name
         self.PASSWORD = user_password
@@ -77,6 +79,7 @@ class VictronAPI:
         if response['status']['code'] == 403:
             logging.error("Access denied unable to initialize check credentials \nresponse: %s:" %response)
             self.IS_INITIALIZED = False
+            return None
         if response.has_key("data"):
             self.SESSION_ID = response["data"]["user"]["sessionid"]
             v_sites = self.get_site_list()
@@ -84,13 +87,13 @@ class VictronAPI:
             for site in v_sites:
                 self.SYSTEMS_IDS.append((site['idSite'],site['name']))
                 logging.info("initializing sites, getting attributes")
-                atr = self.get_site_attributes_list(site['idSite'])
+                site_id =  site['idSite']
+                atr = self.get_site_attributes_list(site_id)
                 #make attribute dictionary more usefull
                 atr_site = {}
-                atr_site[site['idSite']] =  atr['attributes']
-                for site in  self.SYSTEMS_IDS:
-                    #create a dictionary with site_id as key
-                    self.ATTRIBUTE_DICT[site[0]] = self._reformat_attr_dict(atr_site[site[0]])
+                atr_site[site_id] =  atr['attributes']
+                #create a dictionary with site_id as key
+                self.ATTRIBUTE_DICT[site_id] = self._reformat_attr_dict(atr_site[site_id])
 
                 self.IS_INITIALIZED = True
         else:
