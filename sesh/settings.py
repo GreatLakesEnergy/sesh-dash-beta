@@ -73,6 +73,14 @@ CELERYBEAT_SCHEDULE = {
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
 
+#Mail
+EMAIL_USE_TLS = True
+EMAIL_HOST = config.get('mail','EMAIL_HOST')
+EMAIL_PORT = config.get('mail','EMAIL_PORT')
+EMAIL_HOST_USER = config.get('mail','EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 # Application definition
 INSTALLED_APPS = (
     'grappelli',
@@ -166,5 +174,3 @@ STATICFILES_FINDERS = (
                         "django.contrib.staticfiles.finders.FileSystemFinder",
                         "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                         "djangobower.finders.BowerFinder",)
-
-
