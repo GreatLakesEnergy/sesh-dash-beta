@@ -10,39 +10,45 @@ It also has the capacity to get data from both systems locally through modbus-TC
 **Make sure you have [Vagrant](https://www.vagrantup.com/downloads.html), [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed.**
 
 Follow the steps below to setup a development environment. This will setup a virtual machine with the required dependencies:
- 1. Clone this repo:
-    `git clone https://github.com/GreatLakesEnergy/sesh-dash-beta.git`
- 1. CD into the directory:
-    `cd sesh-dash-beta`
- 1. First time you run this, it will provision a machine. May take 10-15 minutes to do so:
-    `vagrant up`
- 1. SSH into the newly created VM:
-    `vagrant ssh`
- 1. CD into the working directory:
-    `cd ~/dev/sesh/`
- 1. Install python dependencies:
-    `sudo pip install -r requirements.txt`
- 1. Get the UI components:
-    `bower ./manager.py bower install`
-
-You'll need to configure paramters for the APIs. Modify  settings_local.ini to put in your api keys and databse settings.(contact repo owner for keys).
+ 1. Clone this repo:  
+    `$ git clone https://github.com/GreatLakesEnergy/sesh-dash-beta.git`
+ 1. CD into the directory:  
+    `$ cd sesh-dash-beta`
+ 1. First time you run this, it will provision a machine. May take 10-15 minutes to do so:  
+    `$ vagrant up`
+ 1. SSH into the newly created VM:  
+    `$ vagrant ssh`
+ 1. CD into the working directory:  
+    `$ cd ~/dev/sesh/`  
+ 1. Install python dependencies:  
+    `$ sudo pip install -r requirements.txt`
+ 1. Get the UI components:  
+    `$ bower ./manager.py bower install` 
 
 #### Virtualenv Only ####
-* Create a local virtual-env (install virtualenv if you dont have it already)
+* Create a local virtual-env (install virtualenv if you dont have it already):  
     `$ virtualenv <sesh-dash-beta>`
-* Install requirements defined in
+* Install requirements defined in requirements.txt:  
     `$ requirements.txt > pip install -r requirements.txt`
-* Get the UI components with (first need to install bower)
-   ` $ sudo npm install -g bower`
+* Get the UI components with:  
    ` $ bower ./manage.py bower install`
+
+### Before you start ###
+You'll need to configure paramters for the APIs. Modify copy sample_settings.ini.txt.txt to  settings_local.ini to put in your api keys and databse settings.(contact repo owner for keys). Also setup database parameters
+ 1. Sync up local DB if using a local database:  
+    `$ python manage.py makemigrations`  
+    `$ python manage.py migrate`  
+ 1. Create super user:  
+    `$ python manage.py createsuperuser`  
+ 1. Run dev server:  
+    `$ python manage.py runserver`   
 
 ### Getting Data ###
 * The system requires data to be coming in from the API's this happens asynchronously and periodically
-* Start celery with command in a different screen
+* Start celery with command in a different screen:  
    ` $ celery --app=sesh.celery:app worker --loglevel-INFO --beat`
 
 ### API docs ###
-* enphase: https://developer.enphase.com/
 * victron: http://www.victronenergy.com/live/vrm_portal:vrm_juice_json_api_notes
 * weather: https://developer.forecast.io/
 
@@ -54,3 +60,4 @@ You'll need to configure paramters for the APIs. Modify  settings_local.ini to p
 ### Who do I talk to? ###
 
 * Contact repo owner alp@gle.solar
+
