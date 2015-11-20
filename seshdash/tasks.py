@@ -50,6 +50,7 @@ def get_BOM_data():
                             relay_state = "off",
                             )
                         data_point.save()
+                        # alert if check(data_point) fails
                         #TODO get bulk historical data with enphase and weather
                         print "BoM Data saved"
         except Exception ,e:
@@ -219,5 +220,3 @@ def get_historical_solar(days):
 def get_all_data_initial(days):
     get_weather_data(days)
     get_enphase_daily_summary(days)
-
-
