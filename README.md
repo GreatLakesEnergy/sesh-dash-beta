@@ -36,14 +36,15 @@ Follow the steps below to setup a development environment. This will setup a vir
    ` $ bower ./manage.py bower install`
 
 ### Before you start ###
-You'll need to configure paramters for the APIs. Modify copy sample_settings.ini.txt.txt to  settings_local.ini to put in your api keys and databse settings.(contact repo owner for keys). Also setup database parameters
+You'll need to configure parameters for the APIs. Modify copy sample_settings.ini.txt.txt to  settings_local.ini to put in your api keys and database settings.(contact repo owner for keys). Also setup database parameters
  1. Sync up local DB if using a local database:
     `$ python manage.py makemigrations`
     `$ python manage.py migrate`
  1. Create super user:
     `$ python manage.py createsuperuser`
  1. Run dev server:
-    `$ python manage.py runserver`
+    `$ python manage.py runserver 0.0.0.0:5000`
+ 1. Now start the browser and hit localhost:5000 or 127.0.0.1:5000 and your application works!!!
 
 ### Getting Data ###
 * The system requires data to be coming in from the API's this happens asynchronously and periodically
