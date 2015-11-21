@@ -104,6 +104,9 @@ class BoM_Data_Point(models.Model):
 #TODO relay will likely need to be it's own model
     relay_state = models.CharField(max_length = 100)
 
+    def __str__(self):
+        return " %s : %s : %s" %(self.time,self.site,self.soc)
+
     class Meta:
           unique_together = ('site','time')
 """
