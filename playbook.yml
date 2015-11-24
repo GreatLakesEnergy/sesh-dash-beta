@@ -19,6 +19,8 @@
     - libpq-dev
     - libxml2-dev
     - libxslt1-dev
+    - redis-server
+    - redis-tools
     tags:
     - packages
   
