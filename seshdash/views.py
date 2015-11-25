@@ -39,6 +39,7 @@ def index(request,site_id=0):
         #return first site user has action
         print "no side id recieved"
         site_id = sites[0].pk
+   
     #Check if user has any sites under their permission
     context_dict, content_json = get_user_data(request.user,site_id,sites)
     context_dict = jsonify_dict(context_dict,content_json)
@@ -46,9 +47,14 @@ def index(request,site_id=0):
     y_data,x_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     #create graphs for PV dailt prod vs cloud cover
-    context_dict =  linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
+    data='me'
+
+    context_dict=linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
+    context_dict['test'] = 'test'
+
     print "len x1: %s, x2 len: %s len y1:%s, len y2: %s"%(len(x_data),len(x2_data),len(y_data),len(y2_data))
     print context_dict
+
     return render(request,'seshdash/main-dash.html',context_dict)
 
 @login_required
@@ -188,7 +194,9 @@ def get_user_data(user,site_id,sites):
     #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
 
     #BOM data
-    bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
+   # bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
+
+    bom_data = BoM_Data_Point.objects.filter(site=site).order_by('-time')
 
     #NOTE remvong JSON versions of data for now as it's not necassary
     #weather_data_json = serialize_objects(weather_data)
