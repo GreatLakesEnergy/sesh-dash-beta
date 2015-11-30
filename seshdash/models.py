@@ -103,6 +103,7 @@ class BoM_Data_Point(models.Model):
     genset_state = models.CharField(max_length = 100)
 #TODO relay will likely need to be it's own model
     relay_state = models.CharField(max_length = 100)
+    trans = models.IntegerField(default=0)
 
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
