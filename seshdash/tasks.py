@@ -1,4 +1,6 @@
+#needed to import some relative libs
 from __future__ import absolute_import
+import logging
 
 from django.conf import settings
 from celery import shared_task
@@ -27,10 +29,8 @@ def get_BOM_data():
             #Also will the user have site's under thier account that they wouldn't like to pull data form?
             #This will throw an error when the objects are getting created
             if v_client.IS_INITIALIZED:
-                for site_id in v_client.SYSTEMS_IDS:
-                        print "##### system id's %s out of %s"%(site_id,v_client.SYSTEMS_IDS)
-                        bat_data = v_client.get_battery_stats(site_id[0])
-                        sys_data = v_client.get_system_stats(site_id[0])
+                        bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+                        sys_data = v_client.get_system_stats(int(site.vrm_site_id))
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] )
                         print bat_data.keys()
                         print sys_data
@@ -54,6 +54,7 @@ def get_BOM_data():
                         print "BoM Data saved"
         except Exception ,e:
             print "error with geting site %s data exception %s"%(site,e)
+            logging.exception("error with geting site %s data exception")
             pass
 
 

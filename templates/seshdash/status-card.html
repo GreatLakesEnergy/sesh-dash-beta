@@ -29,11 +29,12 @@
                                         <td>{{ latest_bom.battery_voltage }}V </td>
                                     </tr>
                                     <tr class="warning">
-                                        <td>Micro Inverters Online</td>
-                                        <td>4  out of  6</td>
+                                        <td>Consumption data</td>
+                                        <td>{{ latest_bom.AC_output}} W</td>
                                    </tr>
-                                    <tr class="sucess">
+                                    <tr class="success">
                                         <td>Last Contact</td>
+                                        <!--{{latest_bom.time}} -->
                                         <td>{{latest_bom.time|timesince }}</td>
                                    </tr>
                                 {% endwith %}
