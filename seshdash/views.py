@@ -53,8 +53,12 @@ def index(request,site_id=0):
     context_dict['test'] = 'test'
 
     print "len x1: %s, x2 len: %s len y1:%s, len y2: %s"%(len(x_data),len(x2_data),len(y_data),len(y2_data))
+<<<<<<< HEAD
     print context_dict
 
+=======
+    #pprint( context_dict)
+>>>>>>> a2adcefb6f1aae688b47089dd1caafbb0d70431b
     return render(request,'seshdash/main-dash.html',context_dict)
 
 @login_required
@@ -194,10 +198,15 @@ def get_user_data(user,site_id,sites):
     #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
 
     #BOM data
+<<<<<<< HEAD
    # bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
 
     bom_data = BoM_Data_Point.objects.filter(site=site).order_by('-time')
 
+=======
+    bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],now]).order_by('-id')
+    pprint( bom_data.first())
+>>>>>>> a2adcefb6f1aae688b47089dd1caafbb0d70431b
     #NOTE remvong JSON versions of data for now as it's not necassary
     #weather_data_json = serialize_objects(weather_data)
     #power_data_json = serialize_objects(power_data)
