@@ -44,7 +44,7 @@ You'll need to configure parameters for the APIs. Modify copy sample_settings.in
     `$ python manage.py createsuperuser`
  1. Run dev server:
     `$ python manage.py runserver 0.0.0.0:5000`
- 1. Now start the browser and hit localhost:5000 or 127.0.0.1:5000 and your application works!!!
+ 1. Now start the browser and hit http://localhost:5000 or http://127.0.0.1:5000 and your application works!!!
 
 ### Getting Data ###
 * The system requires data to be coming in from the API's this happens asynchronously and periodically
