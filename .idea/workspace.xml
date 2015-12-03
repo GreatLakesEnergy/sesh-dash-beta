@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="60ffc3e1-8edc-44e1-a6b9-e2ee8cd070b2" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/templates/seshdash/high_chart_line_bar.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/celerybeat-schedule" afterPath="$PROJECT_DIR$/celerybeat-schedule" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sesh/settings.py" afterPath="$PROJECT_DIR$/sesh/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/seshdash/views.py" afterPath="$PROJECT_DIR$/seshdash/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/seshdash/base.html" afterPath="$PROJECT_DIR$/templates/seshdash/base.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/seshdash/line_bar.html" afterPath="$PROJECT_DIR$/templates/seshdash/line_bar.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/seshdash/main-dash.html" afterPath="$PROJECT_DIR$/templates/seshdash/main-dash.html" />
-    </list>
+    <list default="true" id="60ffc3e1-8edc-44e1-a6b9-e2ee8cd070b2" name="Default" comment="" />
     <ignored path="sesh-dash-beta.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />

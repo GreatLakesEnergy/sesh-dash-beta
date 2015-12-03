@@ -66,7 +66,7 @@ def index(request,site_id=0):
     last_date=None
     high_pv_production =[]
     for elt in high_date:
-        date1=elt.strftime("%Y %B %A")
+        date1=elt.strftime("%d %B %Y")
         high_date2.append(date1)
         if last_date==None:
             last_date= elt
