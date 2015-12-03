@@ -1,4 +1,4 @@
-import requests json
+import json
 
 class Wunnderground():
     API_BASE_URL = " http://api.wunderground.com/api/{key}/{features}/{settings}/q/{query}.{format}"
