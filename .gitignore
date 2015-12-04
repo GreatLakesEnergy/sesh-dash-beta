@@ -67,4 +67,4 @@ target/
 #Vagrant box files
 .vagrant*
 #remove all .idea files 
-*.idea
+.idea/
