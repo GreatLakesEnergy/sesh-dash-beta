@@ -1,0 +1,103 @@
+ {% block high_chart_line_bar %}
+
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+                <div class="panel-heading">
+                    <!-- TODO make this a variable -->
+                    <i class="fa fa-bar-chart-o fa-fw"></i>
+                    Daily PV Production with Cloud cover forecast In High Chart
+                </div>
+            <div class="panel-body" id="containerhigh">
+
+
+            </div>
+        </div>
+    </div>
+
+<script language="JavaScript">
+ $(function () {
+    $('#containerhigh').highcharts({
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: ' Daily PV Production with Cloud cover forecast In High Chart'
+        },
+        xAxis: [{
+            categories:[
+            {% for date2 in high_date2 %}
+                          '{{date2}}' ,
+             {%endfor%}
+
+
+            ],
+            crosshair: true
+        }],
+        yAxis: [{ // Primary yAxis
+            labels: {
+                format: '{value}%',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            title: {
+                text: 'Cloud Cover',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: 'PV Production',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value} HW',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 120,
+            verticalAlign: 'top',
+            y: 100,
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+        },
+        series: [{
+            name: 'PV Day Production',
+            type: 'column',
+            yAxis: 1,
+            data:[
+            {% for pv_sum in high_pv_production %}
+                          {{pv_sum}} ,
+             {%endfor%}
+
+
+            ],
+            tooltip: {
+                valueSuffix: ' HW'
+            }
+
+        }, {
+            name: 'Cloud Cover',
+            type: 'spline',
+            data: {{high_cloud_cover}},
+            tooltip: {
+                valueSuffix: ' % '
+            }
+        }]
+    });
+});
+</script>
+
+    {% endblock %}
