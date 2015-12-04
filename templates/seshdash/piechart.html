@@ -1,0 +1,25 @@
+{% load nvd3_tags %}
+<html>
+<head>
+
+{% include_chart_jscss %}
+{% load_chart charttype chartdata chartcontainer extra %}
+
+</head>
+<body>
+    {% block piechart %}
+    
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <!-- TODO movestyle to css -->
+                {% include_container chartcontainer 400 600 %}
+
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+   {% extends "seshdash/base.html" %}
+
+  {% block top_navbar %}
+
+    {% endblock %}
+    
+    {% block side_navbar %}
+
+    {% endblock %}
+
+    {% block main_content %}
+    <div class="container">
+
+      <form class="form-signin" action="/login/" method="post" >
+        <h2 class="form-signin-heading">Sign in to SESH</h2>
+        <label for="inputEmail" name="inputEmail" apassa class="sr-only">Email address</label>
+        <input type="text" name="inputEmail" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input name="inputPassword" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="remember-me"> Remember me
+          </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        {% csrf_token %}
+      </form>
+
+    </div> <!-- /container -->
+ {% endblock %}
+
