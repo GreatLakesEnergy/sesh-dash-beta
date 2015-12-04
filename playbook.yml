@@ -22,7 +22,8 @@
     - libmysqlclient-dev
     - npm
     - nodejs-legacy
-
+    - redis-server
+    - redis-tools
     tags:
     - packages
 
