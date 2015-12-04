@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 
 config = RawConfigParser()
-config.read( os.path.join(BASE_DIR, "ocal_settings.ini"))
+config.read( os.path.join(BASE_DIR, "local_settings.ini"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
