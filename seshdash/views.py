@@ -53,6 +53,8 @@ def index(request,site_id=0):
 
     context_dict=linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
 
+    # Create an object of the get_high_chart_date
+
     context_dict['high_chart']= get_high_chart_data()
 
     return render(request,'seshdash/main-dash.html',context_dict)
@@ -255,13 +257,17 @@ class UserDetail(generics.RetrieveAPIView):
 
 
 def get_high_chart_data():
-     context_high_data = {}
-     now2 = datetime.datetime.now()
-     five_day_past2 = now2 - timedelta(days=5)
-     five_day_future2 = now2 + timedelta(days=6)
-
+    # this the content object
+     content_data = {}
+    # Initializing Date
+     now = datetime.datetime.now()
+     five_day_past2 = now - timedelta(days=5)
+     five_day_future2 = now + timedelta(days=6)
+    # Queries and Data retreiving of the climate
      high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
-     context_high_data['high_cloud_cover']=high_cloud_cover
+     content_data['high_cloud_cover']=high_cloud_cover
+    # Queries and Data retreiving of the PV Production and Dates
+
      high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
      high_date2 = []
      last_date=None
@@ -280,7 +286,7 @@ def get_high_chart_data():
             pv_sum_day2 = 0
 
         high_pv_production.append(pv_sum_day2)
-     context_high_data['high_date2']= high_date2
-     context_high_data['high_pv_production']= high_pv_production
-     print (context_high_data['high_pv_production'])
-     return context_high_data
+     content_data['high_date2']= high_date2
+     content_data['high_pv_production']= high_pv_production
+     print (content_data['high_pv_production'])
+     return content_data
