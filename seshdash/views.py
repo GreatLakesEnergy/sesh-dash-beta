@@ -50,38 +50,10 @@ def index(request,site_id=0):
     y_data,x_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     #create graphs for PV dailt prod vs cloud cover
-    data='me'
 
     context_dict=linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
-    context_dict['test'] = 'test'
 
-    now2 = datetime.datetime.now()
-    five_day_past2 = now2 - timedelta(days=5)
-    five_day_future2 = now2 + timedelta(days=6)
-
-    high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
-    context_dict['high_cloud_cover']=high_cloud_cover
-    high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
-    high_date2 = []
-    last_date=None
-    high_pv_production =[]
-    for elt in high_date:
-        date1=elt.strftime("%d %B %Y")
-        high_date2.append(date1)
-        if last_date==None:
-            last_date= elt
-
-        pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,elt]).aggregate(pv_sum=Sum('pv_production'))
-        last_date=elt
-
-        pv_sum_day2 = pv_sum_day.get('pv_sum', 0)
-        if pv_sum_day2 is None:
-            pv_sum_day2 = 0
-
-        high_pv_production.append(pv_sum_day2)
-    context_dict['high_date2']= high_date2
-    context_dict['high_pv_production']= high_pv_production
-    print (context_dict['high_pv_production'])
+    context_dict['high_chart']= get_high_chart_data()
 
     return render(request,'seshdash/main-dash.html',context_dict)
 0
@@ -280,3 +252,35 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+def get_high_chart_data():
+     context_high_data = {}
+     now2 = datetime.datetime.now()
+     five_day_past2 = now2 - timedelta(days=5)
+     five_day_future2 = now2 + timedelta(days=6)
+
+     high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
+     context_high_data['high_cloud_cover']=high_cloud_cover
+     high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
+     high_date2 = []
+     last_date=None
+     high_pv_production =[]
+     for elt in high_date:
+        date1=elt.strftime("%d %B %Y")
+        high_date2.append(date1)
+        if last_date==None:
+            last_date= elt
+
+        pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,elt]).aggregate(pv_sum=Sum('pv_production'))
+        last_date=elt
+
+        pv_sum_day2 = pv_sum_day.get('pv_sum', 0)
+        if pv_sum_day2 is None:
+            pv_sum_day2 = 0
+
+        high_pv_production.append(pv_sum_day2)
+     context_high_data['high_date2']= high_date2
+     context_high_data['high_pv_production']= high_pv_production
+     print (context_high_data['high_pv_production'])
+     return context_high_data
