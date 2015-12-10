@@ -255,15 +255,23 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+# This function  get_high_chart_data is help to get object to use in the High Chart Daily PV production and cloud cover
 
 def get_high_chart_data():
+
+
      context_high_data = {}
-     now2 = datetime.datetime.now()
-     five_day_past2 = now2 - timedelta(days=5)
-     five_day_future2 = now2 + timedelta(days=6)
+     now = datetime.datetime.now()
+     five_day_past2 = now - timedelta(days=5)
+     five_day_future2 = now + timedelta(days=6)
+
+# Getting climat conditions
 
      high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
      context_high_data['high_cloud_cover']=high_cloud_cover
+
+# Getting climat Dates and the Pv Daily production
+
      high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
      high_date_data = []
      last_date=None
@@ -282,6 +290,9 @@ def get_high_chart_data():
             pv_sum_day_data = 0
 
         high_pv_production.append(pv_sum_day_data)
+        
+# initiating the context_high_data Object
+
      context_high_data['high_date']= high_date_data
      context_high_data['high_pv_production']= high_pv_production
      print (context_high_data['high_pv_production'])
