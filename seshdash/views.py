@@ -257,36 +257,32 @@ class UserDetail(generics.RetrieveAPIView):
 
 
 def get_high_chart_data():
-    # this the content object
-     content_data = {}
-    # Initializing Date
-     now = datetime.datetime.now()
-     five_day_past2 = now - timedelta(days=5)
-     five_day_future2 = now + timedelta(days=6)
-    # Queries and Data retreiving of the climate
-     high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
-     content_data['high_cloud_cover']=high_cloud_cover
-    # Queries and Data retreiving of the PV Production and Dates
+     context_high_data = {}
+     now2 = datetime.datetime.now()
+     five_day_past2 = now2 - timedelta(days=5)
+     five_day_future2 = now2 + timedelta(days=6)
 
+     high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
+     context_high_data['high_cloud_cover']=high_cloud_cover
      high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
-     high_date2 = []
+     high_date_data = []
      last_date=None
      high_pv_production =[]
-     for elt in high_date:
-        date1=elt.strftime("%d %B %Y")
-        high_date2.append(date1)
+     for date in high_date:
+        date1=date.strftime("%d %B %Y")
+        high_date_data.append(date1)
         if last_date==None:
-            last_date= elt
+            last_date= date
 
-        pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,elt]).aggregate(pv_sum=Sum('pv_production'))
-        last_date=elt
+        pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,date]).aggregate(pv_sum=Sum('pv_production'))
+        last_date=date
 
-        pv_sum_day2 = pv_sum_day.get('pv_sum', 0)
-        if pv_sum_day2 is None:
-            pv_sum_day2 = 0
+        pv_sum_day_data = pv_sum_day.get('pv_sum', 0)
+        if pv_sum_day_data is None:
+            pv_sum_day_data = 0
 
-        high_pv_production.append(pv_sum_day2)
-     content_data['high_date2']= high_date2
-     content_data['high_pv_production']= high_pv_production
-     print (content_data['high_pv_production'])
-     return content_data
+        high_pv_production.append(pv_sum_day_data)
+     context_high_data['high_date']= high_date_data
+     context_high_data['high_pv_production']= high_pv_production
+     print (context_high_data['high_pv_production'])
+     return context_high_data
