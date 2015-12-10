@@ -271,26 +271,30 @@ def get_high_chart_data():
      context_high_data['high_cloud_cover']=high_cloud_cover
 
 # Getting climat Dates and the Pv Daily production
-
+# Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
      high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
      high_date_data = []
      last_date=None
      high_pv_production =[]
+# extract date form high_pv_production  and give them a ready life time format , put it in list high_date_data
      for date in high_date:
-        date1=date.strftime("%d %B %Y")
-        high_date_data.append(date1)
+        date_data=date.strftime("%d %B %Y")
+        high_date_data.append(date_data)
         if last_date==None:
             last_date= date
 
+        # Getting sum   Pv Production in the interval of 24 hours
+
         pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,date]).aggregate(pv_sum=Sum('pv_production'))
         last_date=date
+# extract pv sum value form pv_sum_day object   and put it in a list high_pv_production
 
         pv_sum_day_data = pv_sum_day.get('pv_sum', 0)
         if pv_sum_day_data is None:
             pv_sum_day_data = 0
 
         high_pv_production.append(pv_sum_day_data)
-        
+
 # initiating the context_high_data Object
 
      context_high_data['high_date']= high_date_data
