@@ -32,3 +32,82 @@ Morris.Bar({
   labels: ['Cloud Cover %']
 });
 */
+
+
+/*
+ High Chart Draw Function
+*/
+function get_high_chart(date,pv,cloud)
+{
+
+$('#containerhigh').highcharts({
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: ' Daily PV Production with Cloud cover forecast In High Chart'
+        },
+        xAxis: [{
+            categories:date,
+            crosshair: true
+        }],
+        yAxis: [{ // Primary yAxis
+            labels: {
+                format: '{value}%',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            title: {
+                text: 'Cloud Cover',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: 'PV Production',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value} HW',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 120,
+            verticalAlign: 'top',
+            y: 100,
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+        },
+        series: [{
+            name: 'PV Day Production',
+            type: 'column',
+            yAxis: 1,
+            data:pv,
+            tooltip: {
+                valueSuffix: ' HW'
+            }
+
+        }, {
+            name: 'Cloud Cover',
+            type: 'spline',
+            data: cloud,
+            tooltip: {
+                valueSuffix: ' % '
+            }
+        }]
+    });
+
+}
