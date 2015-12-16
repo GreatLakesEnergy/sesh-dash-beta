@@ -51,7 +51,6 @@ def get_BOM_data():
                         data_point.save()
                         #TODO get bulk historical data with enphase and weather
                         print "BoM Data saved"
-                        logging.info('BoM Data saved here!!')
                         # alert if check(data_point) fails
                         alert_check(data_point)
         except Exception ,e:
