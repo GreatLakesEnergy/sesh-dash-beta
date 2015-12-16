@@ -3,11 +3,12 @@ from django.template.loader import get_template
 from django.template import Context
 import traceback
 
-def send_mail(subject,to_email):
+def send_mail(subject,to_email,content):
     try:
         plaintext = get_template('mail/site_mail.txt')
         htmly     = get_template('mail/site_mail.html')
-        d = Context({ 'username' : "User2"
+        d = Context({ 'username' : "User2",
+                      'content'  : content,
                       })
         from_email = "seshdash@gmail.com"
         text_content = plaintext.render(d)

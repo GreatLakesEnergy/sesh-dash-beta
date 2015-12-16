@@ -45,17 +45,25 @@ class Sesh_User(models.Model):
     #to be added
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     department = models.CharField(max_length=100)
+    def __str__(self):
+        return self.user.username
 
 
 class Alert_Rule(models.Model):
+    OPERATOR_CHOICES = (
+        ("eq" , "equals"),
+        ("lt" , "less than"),
+        ("gt" , "greater than"),
+        )
     site = models.ForeignKey(Sesh_Site)
-    users = models.ForeignKey(Sesh_User)
-    field1 = models.CharField(max_length=100)
-    value1 = models.FloatField()
-    operator1 = models.IntegerField() #0 equals , 1 less than, 2 greater than
-    field2 = models.CharField(max_length=100)
-    value2 = models.FloatField()
-    operator2 =  models.IntegerField()
+    users = models.ManyToManyField(Sesh_User)
+    check_field = models.CharField(max_length=100)
+    value = models.FloatField()
+    operator = models.CharField(max_length=2,
+                                      choices=OPERATOR_CHOICES,
+                                      default="lt")
+    send_mail = models.BooleanField(default=True)
+    #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
 
 #TODO Add alert Object to save alerts
@@ -151,7 +159,3 @@ class Site_Weather_Data(models.Model):
 
     class Meta:
         unique_together = ('site','date')
-
-
-
-

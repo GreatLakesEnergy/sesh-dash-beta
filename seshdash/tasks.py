@@ -12,7 +12,6 @@ from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils import time_utils
 from datetime import datetime, date, timedelta
 
-
 @shared_task
 def get_BOM_data():
     """
@@ -50,9 +49,11 @@ def get_BOM_data():
                             relay_state = "off",
                             )
                         data_point.save()
-                        # alert if check(data_point) fails
                         #TODO get bulk historical data with enphase and weather
                         print "BoM Data saved"
+                        logging.info('BoM Data saved here!!')
+                        # alert if check(data_point) fails
+                        alert_check(data_point)
         except Exception ,e:
             print "error with geting site %s data exception %s"%(site,e)
             logging.exception("error with geting site %s data exception")
