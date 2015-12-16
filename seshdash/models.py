@@ -56,7 +56,6 @@ class Alert_Rule(models.Model):
         ("gt" , "greater than"),
         )
     site = models.ForeignKey(Sesh_Site)
-    users = models.ManyToManyField(Sesh_User)
     check_field = models.CharField(max_length=100)
     value = models.FloatField()
     operator = models.CharField(max_length=2,
