@@ -9,7 +9,7 @@ from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point
 #from seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
-from seshdash.utils import time_util
+from seshdash.utils import time_utils
 from seshdash.utils.alert import alert_check
 from datetime import datetime, date, timedelta
 
