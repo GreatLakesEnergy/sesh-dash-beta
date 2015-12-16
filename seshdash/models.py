@@ -64,6 +64,8 @@ class Alert_Rule(models.Model):
     send_mail = models.BooleanField(default=True)
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
+    def __str__(self):
+        return "site:%s rule:[%s '%s' %s]" %(self.site.site_name,self.check_field,self.operator,self.value)
 
 #TODO Add alert Object to save alerts
 class Sesh_Alert(models.Model):

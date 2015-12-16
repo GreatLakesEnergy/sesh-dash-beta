@@ -17,4 +17,4 @@ def alert_check(data_point):
             print("Sent mail for %s" %content)
 
 def alert(data_point,content):
-    send_mail("subject","culusahin@gmail.com",content)
+    send_mail("Alert email from seshdash","seshdash@gmail.com",content)
