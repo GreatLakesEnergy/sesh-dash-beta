@@ -19,14 +19,14 @@ class AlertTestCase(TestCase):
         Alert_Rule.objects.create(site = self.site, check_field="soc", value=30, operator="gt")
         Alert_Rule.objects.create(site = self.site, check_field="soc", value=35.5, operator="eq")
         Alert_Rule.objects.create(site = self.site, check_field="battery_voltage", value=25, operator="lt",send_mail=False)
+        alert.alert_check(self.data_point)
 
     def test_alert_fires(self):
         """ Alert working correctly"""
-        alert.alert_check(self.data_point)
-        alerts_created = Sesh_Alert.objects.filter(site=self.site)
         # test if necessary alerts has triggered and if alert objects saved
+        alerts_created = Sesh_Alert.objects.filter(site=self.site)
         self.assertEqual(alerts_created.count(),3)
-        # test if alert mails has been sent
+        """ Alert mails working correctly"""
         self.assertEqual(alerts_created.filter(alertSent=True).count(),2)
 
-        # TODO add negative test cases
+    # TODO add negative test cases
