@@ -11,33 +11,32 @@
     <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
 
     {% load nvd3_tags %}
+        
 
-    <!-- TODO move compatible libs of the JS libs to django Bower -->
+    {% load static %}
 
     <!-- jQuery TODO moving this here for debugging needs to be here for nvd3 to work -->
-    <script src="/static/bower_components/jquery/jquery.min.js"></script>
+    <script src='{% static 'jquery/jquery.js' %}'></script>
 
     <!-- mapbox-->
-    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
+    <link href='{% static 'mapbox.js/mapbox.css' %}' rel='stylesheet' />
 
-    <!-- bootstrap TODO: switch to min version  -->
-    <link href="/static/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <!-- bootstrap   -->
+    <link href='{% static 'bootstrap/dist/css/bootstrap.css' %}' rel="stylesheet">
 
     <!-- MetisMenu CSS -->
-    <link href="/static/bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+    <link href='{% static 'metisMenu/dist/metisMenu.css' %}' rel="stylesheet">
 
     <!-- Timeline CSS -->
-    <link href="/static/dist/css/timeline.css" rel="stylesheet">
+    <link href='{% static 'sesh-ui/css/timeline.css' %}' rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="/static/dist/css/sb-admin-2.css" rel="stylesheet">
-    <!-- Morris Charts CSS -->
-    <link href="/static/bower_components/morrisjs/morris.css" rel="stylesheet">
+    <link href='{% static 'sesh-ui/css/sb-admin-2.css' %}' rel="stylesheet">
     <!-- SESH CSS -->
-    <link href="/static/dist/css/sesh.css" rel="stylesheet">
+    <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="/static/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel="stylesheet" type="text/css">
 
 
   <title>SESH Dashboard (beta)</title>
@@ -151,29 +150,31 @@
     
     {% endblock %}
     </script>
-
     <!-- Bootstrap Core JavaScript -TODO switch to min after-->
-    <script src="/static/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src='{% static 'bootstrap/dist/js/bootstrap.js' %}' ></script>
 
     <!-- Metis Menu Plugin JavaScript -->
-    <script src="/static/bower_components/metisMenu/dist/metisMenu.min.js"></script>
+    <script src='{% static 'metisMenu/dist/metisMenu.min.js' %}' ></script>
 
     <!-- Morris Charts JavaScript -->
-    <script src="/static/bower_components/raphael/raphael-min.js"></script>
-    <script src="/static/bower_components/morrisjs/morris.min.js"></script>
-    <script src="/static/js/morris-data.js"></script>
+    <script src='{% static 'raphael/raphael-min.js' %}' ></script>
+
+    <script src='{% static 'morris.js/morris.min.js' %}' ></script>
 
     <!-- Custom Theme JavaScript -->
-    <script src="/static/dist/js/sb-admin-2.js"></script>
+    <script src='{% static  'sesh-ui/js/sb-admin-2.js' %}'  > </script>
 
     <!-- mapbox javascript -->
-    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
-    <script src="/static/js/maps.js"></script>
+    <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
+    <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
 
     <!-- sesh javascript -->
-    <script src="/static/dist/js/sesh_dashboard.js"></script>
-       <script  src="/static/bower_components/highcharts/highcharts.js" /></script>
-    {% endblock %}
+    <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  > </script>
+
+    <!-- high charts -->
+    <script src='{% static  'highcharts/highcharts.js' %}'  > </script>
+
+   {% endblock %}
     
   </body>
     

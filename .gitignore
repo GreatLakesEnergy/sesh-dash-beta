@@ -5,6 +5,7 @@
 *settings.ini
 *.swp
 =======
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -30,6 +31,7 @@ parts/
 sdist/
 var/
 bower_components/
+components/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -72,3 +74,7 @@ target/
 .vagrant*
 #remove all .idea files
 .idea
+
+#Project static files
+seshdash/static/
+seshdash/migrations/
