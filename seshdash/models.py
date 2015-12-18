@@ -102,6 +102,8 @@ class BoM_Data_Point(models.Model):
     time = models.DateTimeField()
     soc = models.FloatField()
     battery_voltage = models.FloatField()
+    AC_Voltage_in = models.FloatField(default=-0)
+    AC_Voltage_out = models.FloatField(default=0)
     AC_input = models.FloatField()
     AC_output = models.FloatField()
     AC_Load_in = models.FloatField()
@@ -109,6 +111,7 @@ class BoM_Data_Point(models.Model):
     #NEW  victron now tells us pv production
     pv_production = models.FloatField(default=0)
     inverter_state = models.CharField(max_length = 100)
+    main_on = models.BooleanField(default=False)
     genset_state = models.CharField(max_length = 100)
 #TODO relay will likely need to be it's own model
     relay_state = models.CharField(max_length = 100)
