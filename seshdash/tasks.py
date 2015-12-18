@@ -46,7 +46,7 @@ def get_BOM_data():
                             time = date,
                             soc = bat_data['Battery State of Charge (System)']['valueFloat'],
                             battery_voltage = bat_data['Battery voltage']['valueFloat'],
-                            AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'], 
+                            AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
@@ -56,7 +56,7 @@ def get_BOM_data():
                             pv_production = sys_data['PV - AC-coupled on output L1']['valueFloat'],
                             #TODO these need to be activated
                             genset_state =  "off",
-                            mains_on = mains,
+                            main_on = mains,
                             relay_state = "off",
                             )
                         data_point.save()
