@@ -15,9 +15,12 @@ from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point
 from seshdash.utils import time_utils
 from pprint import pprint
 from seshdash.forms import SiteForm
+from django.db.models import Avg
+from django.db.models import Sum
 
 #Import utils
 from datetime import timedelta
+from datetime import datetime, date, time, tzinfo
 import json,time,random,datetime
 
 # Import for API
@@ -41,16 +44,21 @@ def index(request,site_id=0):
         site_id = sites[0].pk
     #Check if user has any sites under their permission
     context_dict, content_json = get_user_data(request.user,site_id,sites)
+
     context_dict = jsonify_dict(context_dict,content_json)
     #Generate date for dashboard  TODO use victron solar yield data using mock weather data for now
     y_data,x_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     #create graphs for PV dailt prod vs cloud cover
-    context_dict =  linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
-    print "len x1: %s, x2 len: %s len y1:%s, len y2: %s"%(len(x_data),len(x2_data),len(y_data),len(y2_data))
-    #pprint( context_dict)
-    return render(request,'seshdash/main-dash.html',context_dict)
 
+    context_dict=linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
+
+    # Create an object of the get_high_chart_date
+
+    context_dict['high_chart']= get_high_chart_data()
+
+    return render(request,'seshdash/main-dash.html',context_dict)
+0
 @login_required
 def create_site(request):
     context_dict = {}
@@ -188,8 +196,14 @@ def get_user_data(user,site_id,sites):
     #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
 
     #BOM data
+
+   # bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
+
+    bom_data = BoM_Data_Point.objects.filter(site=site).order_by('-time')
+
     bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],now]).order_by('-id')
     pprint( bom_data.first())
+
     #NOTE remvong JSON versions of data for now as it's not necassary
     #weather_data_json = serialize_objects(weather_data)
     #power_data_json = serialize_objects(power_data)
@@ -240,3 +254,49 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+# This function  get_high_chart_data is help to get object to use in the High Chart Daily PV production and cloud cover
+
+def get_high_chart_data():
+
+
+     context_high_data = {}
+     now = datetime.datetime.now()
+     five_day_past2 = now - timedelta(days=5)
+     five_day_future2 = now + timedelta(days=6)
+
+    # Getting climat conditions
+
+     high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
+     context_high_data['high_cloud_cover']=high_cloud_cover
+     # Getting climat Dates and the Pv Daily production
+     # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
+     high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
+     high_date_data = []
+     last_date=None
+     high_pv_production =[]
+     # extract date form high_pv_production  and give them a ready life time format , put it in list high_date_data
+     for date in high_date:
+        date_data=date.strftime("%d %B %Y")
+        high_date_data.append(date_data)
+        if last_date==None:
+            last_date= date
+
+    # Getting sum   Pv Production in the interval of 24 hours
+
+        pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,date]).aggregate(pv_sum=Sum('pv_production'))
+        last_date=date
+    # extract pv sum value form pv_sum_day object   and put it in a list high_pv_production
+
+        pv_sum_day_data = pv_sum_day.get('pv_sum', 0)
+        if pv_sum_day_data is None:
+            pv_sum_day_data = 0
+
+        high_pv_production.append(pv_sum_day_data)
+
+
+    # initiating the context_high_data Object
+     context_high_data['high_date']= high_date_data
+     context_high_data['high_pv_production']= high_pv_production
+     print (context_high_data['high_pv_production'])
+     return context_high_data

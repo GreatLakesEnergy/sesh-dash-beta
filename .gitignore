@@ -8,6 +8,9 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+celerybeat-schedule
+
+
 
 # C extensions
 *.so
@@ -26,6 +29,7 @@ lib64/
 parts/
 sdist/
 var/
+bower_components/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -66,3 +70,5 @@ target/
 
 #Vagrant box files
 .vagrant*
+#remove all .idea files
+.idea

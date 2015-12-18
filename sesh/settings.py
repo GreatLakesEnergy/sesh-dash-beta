@@ -80,6 +80,7 @@ EMAIL_PORT = config.get('mail','EMAIL_PORT')
 EMAIL_HOST_USER = config.get('mail','EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
 # Application definition
 INSTALLED_APPS = (

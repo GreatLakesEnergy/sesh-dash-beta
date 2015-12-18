@@ -10,8 +10,8 @@ from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils import time_utils
+from seshdash.utils.alert import alert_check
 from datetime import datetime, date, timedelta
-
 
 @shared_task
 def get_BOM_data():
@@ -62,6 +62,8 @@ def get_BOM_data():
                         data_point.save()
                         #TODO get bulk historical data with enphase and weather
                         print "BoM Data saved"
+                        # alert if check(data_point) fails
+                        alert_check(data_point)
         except Exception ,e:
             print "error with geting site %s data exception %s"%(site,e)
             logging.exception("error with geting site %s data exception")
@@ -230,5 +232,3 @@ def get_historical_solar(days):
 def get_all_data_initial(days):
     get_weather_data(days)
     get_enphase_daily_summary(days)
-
-
