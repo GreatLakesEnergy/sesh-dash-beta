@@ -19,6 +19,7 @@ from ConfigParser import RawConfigParser
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_DIR = os.path.join(BASE_DIR,'seshdash')
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 
 config = RawConfigParser()
@@ -84,7 +85,6 @@ FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
 # Application definition
 INSTALLED_APPS = (
-    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -106,6 +106,12 @@ BOWER_INSTALLED_APPS = (
             'mapbox.js',
             'd3#3.3.13',
             'nvd3#1.7.1',
+            'highcharts-release',
+            'bootstrap',
+            'font-awesome',
+            'metisMenu',
+            'morrisjs',
+            'raphael'
             )
 
 ANONYMOUS_USER_ID = None
@@ -149,7 +155,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sesh.wsgi.application'
 
 #ADMIN UI SETTINGS
-GRAPPELLI_ADMIN_TITLE = "SESH Administration Dashboard"
+#GRAPPELLI_ADMIN_TITLE = "SESH Administration Dashboard"
 
 
 # Internationalization
@@ -170,6 +176,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 
 STATICFILES_FINDERS = (
                         "django.contrib.staticfiles.finders.FileSystemFinder",
