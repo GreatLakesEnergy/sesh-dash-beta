@@ -34,11 +34,20 @@ def get_BOM_data():
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] )
                         print bat_data.keys()
                         print sys_data
+                        mains = False
+                        #check if we have an output voltage on inverter input. Indicitave of if mains on
+                        if sys_data['Input voltage phase 1']['valueFloat'] > 0:
+                            mains = True
+
+
+
                         data_point = BoM_Data_Point(
                             site = site,
                             time = date,
                             soc = bat_data['Battery State of Charge (System)']['valueFloat'],
                             battery_voltage = bat_data['Battery voltage']['valueFloat'],
+                            AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
+                            AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
@@ -47,6 +56,7 @@ def get_BOM_data():
                             pv_production = sys_data['PV - AC-coupled on output L1']['valueFloat'],
                             #TODO these need to be activated
                             genset_state =  "off",
+                            main_on = mains,
                             relay_state = "off",
                             )
                         data_point.save()
