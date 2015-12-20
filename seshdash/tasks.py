@@ -64,6 +64,9 @@ def get_BOM_data():
                         print "BoM Data saved"
                         # alert if check(data_point) fails
                         alert_check(data_point)
+        except IntegrityError, e:
+            logging.debug("Duplicate entry skipping data point")
+            pass
         except Exception ,e:
             print "error with geting site %s data exception %s"%(site,e)
             logging.exception("error with geting site %s data exception")

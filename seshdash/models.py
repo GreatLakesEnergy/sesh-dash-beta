@@ -55,8 +55,16 @@ class Alert_Rule(models.Model):
         ("lt" , "less than"),
         ("gt" , "greater than"),
         )
+    FIELD_CHOICES = (('battery_voltage','battery voltage'),
+                     ('soc','System State of Charge'),
+                     ('AC_output','AC Loads'),
+                     ('pv_production','Solar Energy Produced'),
+                     ('main_on','Grid Availible'),
+                     ('genset_state','Generator on'),
+                )
+
     site = models.ForeignKey(Sesh_Site)
-    check_field = models.CharField(max_length=100)
+    check_field = models.CharField(choices=FIELD_CHOICES,max_length=100)
     value = models.FloatField()
     operator = models.CharField(max_length=2,
                                       choices=OPERATOR_CHOICES,

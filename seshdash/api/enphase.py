@@ -120,6 +120,7 @@ class EnphaseAPI:
 
 
 
+<<<<<<< Updated upstream
 class EnphaseLocalAPI:
 
 	_ENVOY_IP = '0.0.0.0'
@@ -173,3 +174,5 @@ class EnphaseLocalAPI:
 
 
 
+=======
+>>>>>>> Stashed changes
