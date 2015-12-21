@@ -16,5 +16,5 @@ class Alert_RuleAdmin(GuardedModelAdmin):
 admin.site.register(Sesh_Site,Sesh_SiteAdmin)
 admin.site.register(BoM_Data_Point,BoM_Data_PointAdmin)
 admin.site.register(Alert_Rule,Alert_RuleAdmin)
-admin.site.register(Sesh_User)
+#admin.site.register(Sesh_User)
 admin.site.register(Sesh_Alert)

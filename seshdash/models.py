@@ -35,6 +35,8 @@ class Sesh_Site(models.Model):
 
     #Row based permissioning using django guardian not every user should be able to see all sites
     class Meta:
+        verbose_name = 'Sesh Site'
+        verbose_name_plural = 'Sesh Sites'
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
@@ -48,6 +50,9 @@ class Sesh_User(models.Model):
     def __str__(self):
         return self.user.username
 
+    class Meta:
+         verbose_name = 'User'
+         verbose_name_plural = 'Users'
 
 class Alert_Rule(models.Model):
     OPERATOR_CHOICES = (
@@ -55,8 +60,16 @@ class Alert_Rule(models.Model):
         ("lt" , "less than"),
         ("gt" , "greater than"),
         )
+    FIELD_CHOICES = (('battery_voltage','battery voltage'),
+                     ('soc','System State of Charge'),
+                     ('AC_output','AC Loads'),
+                     ('pv_production','Solar Energy Produced'),
+                     ('main_on','Grid Availible'),
+                     ('genset_state','Generator on'),
+                )
+
     site = models.ForeignKey(Sesh_Site)
-    check_field = models.CharField(max_length=100)
+    check_field = models.CharField(choices=FIELD_CHOICES,max_length=100)
     value = models.FloatField()
     operator = models.CharField(max_length=2,
                                       choices=OPERATOR_CHOICES,
@@ -67,6 +80,10 @@ class Alert_Rule(models.Model):
     def __str__(self):
         return "site:%s rule:[%s '%s' %s]" %(self.site.site_name,self.check_field,self.operator,self.value)
 
+    class Meta:
+         verbose_name = 'System Alert Rule'
+         verbose_name_plural = 'System Alert Rules'
+
 #TODO Add alert Object to save alerts
 class Sesh_Alert(models.Model):
     site = models.ForeignKey(Sesh_Site)
@@ -74,6 +91,16 @@ class Sesh_Alert(models.Model):
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     alertSent = models.BooleanField()
+
+    def __str__(self):
+        return "Alert triggered %s at %s silenced: %s"%(site,date,isSilence)
+
+    def __unicode__(self):
+        return "Alerts"
+
+    class Meta:
+        verbose_name = 'System Alert'
+        verbose_name_plural = 'System Alerts'
 
 
 """
@@ -121,7 +148,8 @@ class BoM_Data_Point(models.Model):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
     class Meta:
-          unique_together = ('site','time')
+         verbose_name = 'Data Point'
+         unique_together = ('site','time')
 """
 TODO removing for now as it's breaking celery object creation
     owner = models.ForeignKey('auth.User', related_name='snippets')
@@ -147,8 +175,8 @@ TODO removing for now as it's breaking celery object creation
         if created:
             Token.objects.create(user=instance)
 """
-
 """
+
 weather data to overlay with each stite
 
 """
@@ -162,4 +190,5 @@ class Site_Weather_Data(models.Model):
     sunset = models.TimeField()
 
     class Meta:
+        verbose_name = 'Weather Data'
         unique_together = ('site','date')

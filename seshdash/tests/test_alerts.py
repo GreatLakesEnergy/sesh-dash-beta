@@ -2,6 +2,9 @@ from django.test import TestCase
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site, BoM_Data_Point as Data_Point
 from seshdash.utils import alert
 from django.utils import timezone
+from django.contrib.auth.models import User
+from guardian.shortcuts import assign_perm
+
 
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
@@ -16,6 +19,11 @@ class AlertTestCase(TestCase):
                                     time=timezone.now(),AC_input=0.0,
                                     AC_output=15.0,AC_Load_in=0.0,
                                     AC_Load_out=-0.7)
+        #create test user
+        self.test_user = User.objects.create_user("john doe","alp@gle.solar","gle12345")
+        #assign a user to the sites
+        assign_perm("view_Sesh_Site",self.test_user,self.site)
+
         Alert_Rule.objects.create(site = self.site, check_field="soc", value=30, operator="gt")
         Alert_Rule.objects.create(site = self.site, check_field="soc", value=35.5, operator="eq")
         Alert_Rule.objects.create(site = self.site, check_field="battery_voltage", value=25, operator="lt",send_mail=False)
@@ -26,6 +34,7 @@ class AlertTestCase(TestCase):
         # test if necessary alerts has triggered and if alert objects saved
         alerts_created = Sesh_Alert.objects.filter(site=self.site)
         self.assertEqual(alerts_created.count(),3)
+        self.assertEqual()
         """ Alert mails working correctly"""
         self.assertEqual(alerts_created.filter(alertSent=True).count(),2)
 

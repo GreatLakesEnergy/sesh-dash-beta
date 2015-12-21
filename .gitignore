@@ -4,6 +4,7 @@
 *settings_local.ini
 *settings.ini
 *.swp
+*.db
 =======
 
 # Byte-compiled / optimized / DLL files
