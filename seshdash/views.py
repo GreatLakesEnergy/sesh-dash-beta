@@ -267,11 +267,11 @@ def get_high_chart_data():
 
     # Getting climat conditions
 
-     high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
+     high_cloud_cover = list(Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
      context_high_data['high_cloud_cover']=high_cloud_cover
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
-     high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
+     high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date').distinct()
      high_date_data = []
      last_date=None
      high_pv_production =[]
