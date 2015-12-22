@@ -99,6 +99,7 @@ INSTALLED_APPS = (
     'django_nvd3',
     'rest_framework',
     'rest_framework.authtoken',
+    'geoposition',
 )
 
 #BOWER
@@ -184,3 +185,12 @@ STATICFILES_FINDERS = (
                         "django.contrib.staticfiles.finders.FileSystemFinder",
                         "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                         "djangobower.finders.BowerFinder",)
+
+GEOPOSITION_MAP_OPTIONS = {
+    'minZoom': 3,
+    'maxZoom': 15,
+}
+
+GEOPOSITION_MARKER_OPTIONS = {
+    'cursor': 'move'
+}
