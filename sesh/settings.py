@@ -48,6 +48,13 @@ DATABASES = {
         'HOST': config.get('database','HOST'),
     }
 }
+#INFLUX Settings
+INFLUX_HOST = config.get('influx','HOST')
+INFLUX_PORT = config.get('influx','PORT')
+INFLUX_USERNAME =  config.get('influx','USERNAME')
+INFLUX_PASSWORD = config.get('influx','PASSWORD')
+INFLUX_DB = config.get('influx','DB')
+
 
 # CELERY SETTINGS
 BROKER_URL = 'redis://localhost:6379/0'

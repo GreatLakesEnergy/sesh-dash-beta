@@ -7,6 +7,7 @@ urlpatterns = [
             url(r'^dash/([0-9]{1,5})$', views.index, name='index'),
             url(r'^linebar/$', views.linebar, name='linebar'),
             url(r'^login/$', views.login_user, name='login_user'),
+            #url(r'^login\?next=/$', views.login_user, name='login_user_2'),
             url(r'^logout/$', views.logout_user, name='logout_user'),
             url(r'^create-site/$', views.create_site, name='create_site'),
             url(r'^bom-data-points/$', views.BoM_Data_Stream.as_view()),

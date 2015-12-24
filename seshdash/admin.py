@@ -1,7 +1,7 @@
 from django.contrib import admin
 from guardian.admin import GuardedModelAdmin
 
-from .models import Sesh_Site, BoM_Data_Point, Sesh_Alert , Alert_Rule, Sesh_User
+from .models import *
 # Register your models here.
 
 class Sesh_SiteAdmin(GuardedModelAdmin):
@@ -19,8 +19,17 @@ class Sesh_AlertAdmin(GuardedModelAdmin):
     list_display = ('site','alert','date','isSilence')
     list_filter = ('site','isSilence', 'date')
 
+class Sesh_AlertAdmin(GuardedModelAdmin):
+    list_display = ('site','alert','date','isSilence')
+    list_filter = ('site','isSilence', 'date')
+
+class Daily_Data_PointAdmin(GuardedModelAdmin):
+    list_display = ('site','date','daily_pv_yield','daily_power_consumption','daily_battery_charge')
+
+
 admin.site.register(Sesh_Site,Sesh_SiteAdmin)
 admin.site.register(BoM_Data_Point,BoM_Data_PointAdmin)
 admin.site.register(Alert_Rule,Alert_RuleAdmin)
 #admin.site.register(Sesh_User)
 admin.site.register(Sesh_Alert,Sesh_AlertAdmin)
+admin.site.register(Daily_Data_Point,Daily_Data_PointAdmin)

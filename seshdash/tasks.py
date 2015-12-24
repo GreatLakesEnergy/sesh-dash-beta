@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import logging
 
 from django.conf import settings
+from django.db import IntegrityError
+
 from celery import shared_task
 from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point
 
@@ -60,7 +62,7 @@ def get_BOM_data():
                             relay_state = "off",
                             )
                         data_point.save()
-                        #TODO get bulk historical data with enphase and weather
+
                         print "BoM Data saved"
                         # alert if check(data_point) fails
                         alert_check(data_point)
@@ -120,7 +122,6 @@ def get_enphase_daily_summary(date=None):
             date = datetime.now()
 
         sites = Sesh_Site.objects.all()
-
         for site in sites:
                  en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
                  system_id = site.enphase_site_id
@@ -222,6 +223,25 @@ def get_weather_data(days=7,historical=False):
                 )
                 w_data.save()
     return "updated weather for %s"%sites
+
+@shared_task
+def aggregate_daily_data():
+    #get all sites
+
+    sites  = Sesh_Site.objects.all()
+    one_day = timdelta(day=1)
+    date_yesterday = datetime.now() - one_day
+    for site in sites:
+        daily_data_points = BoM_Data_Point.objects.filter(site=site,time=date_yesterday)
+        pv_yield = 0
+        battery_yield = 0
+        total_consumption = 0
+
+        for data_point in daily_data_points:
+            #create buckets of one hour (group by the average of values in an hour
+            #FINiSH
+
+
 @shared_task
 def get_historical_solar(days):
     """
