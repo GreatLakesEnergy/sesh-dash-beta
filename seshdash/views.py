@@ -28,7 +28,7 @@ from rest_framework import generics, permissions
 from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
 from django.contrib.auth.models import User
 
-@login_required
+@login_required(login_url='/login/')
 def index(request,site_id=0):
 
     sites = Sesh_Site.objects.all()
@@ -256,7 +256,6 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
 # This function  get_high_chart_data is help to get object to use in the High Chart Daily PV production and cloud cover
-
 def get_high_chart_data():
 
 
@@ -266,15 +265,16 @@ def get_high_chart_data():
      five_day_future2 = now + timedelta(days=6)
 
     # Getting climat conditions
-
      high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
      context_high_data['high_cloud_cover']=high_cloud_cover
+
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
      high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
      high_date_data = []
      last_date=None
      high_pv_production =[]
+
      # extract date form high_pv_production  and give them a ready life time format , put it in list high_date_data
      for date in high_date:
         date_data=date.strftime("%d %B %Y")
@@ -282,12 +282,11 @@ def get_high_chart_data():
         if last_date==None:
             last_date= date
 
-    # Getting sum   Pv Production in the interval of 24 hours
-
+        # Getting sum   Pv Production in the interval of 24 hours
         pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,date]).aggregate(pv_sum=Sum('pv_production'))
         last_date=date
-    # extract pv sum value form pv_sum_day object   and put it in a list high_pv_production
 
+        # extract pv sum value form pv_sum_day object   and put it in a list high_pv_production
         pv_sum_day_data = pv_sum_day.get('pv_sum', 0)
         if pv_sum_day_data is None:
             pv_sum_day_data = 0
