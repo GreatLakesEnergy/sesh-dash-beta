@@ -6,14 +6,17 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from celery import shared_task
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point
 
 #from seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils import time_utils
 from seshdash.utils.alert import alert_check
+from seshdash.data.db.influx import Influx
+
 from datetime import datetime, date, timedelta
+
 
 @shared_task
 def get_BOM_data():
@@ -224,22 +227,54 @@ def get_weather_data(days=7,historical=False):
                 w_data.save()
     return "updated weather for %s"%sites
 
+def get_pv_yield():
+    """
+    Calucalte Daily PV Yield
+    """
+    i = Influx()
+    delta = '24h'
+    bucket_size = '1h'
+    measurements = {'pv_production':'pv_yield'}
+    #get all sites
+    sites  = Sesh_Site.objects.all()
+    resultdict = {}
+    for site in sites:
+        for measurement in measurements.keys():
+            #get measurement values from influx
+            aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.id,delta)
+            #we have mean values by the hour now aggregate them
+            print aggr_results
+            if aggr_results:
+                agr_value = 0
+                for item in aggr_results:
+                    agr_value = agr_value + item['mean']
+                    #sum_measurement = reduce(lambda x,y:x['mean']+y['mean'],aggr_results)
+                resultdict[site.id] = agr_value
+            else:
+                logging.warning("No Values returend for aggregate. Not Good.")
+    return resultdict
+
+
 @shared_task
 def aggregate_daily_data():
-    #get all sites
 
+    pv_yield_dic = get_pv_yield()
+    logging.debug("PV_YIELD %s "%pv_yield_dic)
+    #TODO this is redundent.
     sites  = Sesh_Site.objects.all()
-    one_day = timdelta(day=1)
-    date_yesterday = datetime.now() - one_day
-    for site in sites:
-        daily_data_points = BoM_Data_Point.objects.filter(site=site,time=date_yesterday)
-        pv_yield = 0
-        battery_yield = 0
-        total_consumption = 0
 
-        for data_point in daily_data_points:
-            #create buckets of one hour (group by the average of values in an hour
-            #FINiSH
+    daily_consumption_dic = {1:0}
+    daily_battery_dict = {1:0}
+    for site in sites:
+        daily_aggr = Daily_Data_Point(
+                                     site = site,
+                                     daily_pv_yield = pv_yield_dic[site.id],
+                                     daily_power_consumption = daily_consumption_dic[site.id],
+                                     daily_battery_charge = daily_battery_dict[site.id],
+                                     date = time_utils.get_yesterday()
+                                        )
+
+        daily_aggr.save()
 
 
 @shared_task

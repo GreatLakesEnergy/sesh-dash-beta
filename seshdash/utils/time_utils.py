@@ -12,6 +12,13 @@ def get_epoch():
     diff_int = diff_seconds[0]
     return diff_int
 
+def get_yesterday():
+    now = datetime.now()
+    one_day = timedelta(days=1)
+    return now-one_day
+
+
+
 def get_epoch_from_datetime(date):
     """
     Return number of seconds since 1970-01-01- epoch

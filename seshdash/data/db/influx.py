@@ -24,7 +24,7 @@ class Influx:
         return the requsted measurement values in given bucket size
         """
         start_time = "now()"
-        query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  time  >  now() - {time_delta} GROUP BY time({bucket_size})"
+        query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  time  >  now() - {time_delta} GROUP BY time({bucket_size}) fill(0)"
 
 
         if not start == "now":
@@ -35,19 +35,21 @@ class Influx:
                                                     bucket_size = bucket_size,
                                                     clause = clause,
                                                     clause_value = clause_val,
-                                                    time_delta = time_delta
+                                                    time_delta = time_delta,
+                                                    operator = operator
                                                     )
 
 
         try:
             result_set = self._influx_client.query(query_string_formatted,database = self.db)
-
-            return result_set
+            #get values
+            result_set_gen = result_set.get_points(measurement=measurement)
+            return list(result_set_gen)
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"%e)
         except InfluxDBClientError,e:
             logging.error("Error running  query"%e)
         except Exception,e:
             logging.error("influxdb unkown error %s"%e)
-
+        return []
 
