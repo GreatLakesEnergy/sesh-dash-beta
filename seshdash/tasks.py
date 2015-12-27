@@ -37,8 +37,6 @@ def get_BOM_data():
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] )
-                        print bat_data.keys()
-                        print sys_data
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
@@ -53,6 +51,7 @@ def get_BOM_data():
                             battery_voltage = bat_data['Battery voltage']['valueFloat'],
                             AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
+                        print sys_data
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
@@ -108,6 +107,7 @@ def get_historical_BoM(date_range=5):
                         AC_output =  row['Output power 1'],
                         AC_Load_in =  row['Input current phase 1'],
                         AC_Load_out =  row['Output current phase 1'],
+                        print sys_data
                         inverter_state = row['VE.Bus Error'],
                         #TODO these need to be activated
                         genset_state =  "off",
@@ -227,6 +227,16 @@ def get_weather_data(days=7,historical=False):
                 w_data.save()
     return "updated weather for %s"%sites
 
+
+def get_daily_consumption():
+    """calcuulate daily energy used"""
+    #TODO  needs to be implemented
+    pass
+
+def get_daily_battery():
+    "Calculate how much of the production was stored in the batteries"
+    #TODO needs to be implemented
+
 def get_pv_yield():
     """
     Calucalte Daily PV Yield
@@ -251,7 +261,7 @@ def get_pv_yield():
                     #sum_measurement = reduce(lambda x,y:x['mean']+y['mean'],aggr_results)
                 resultdict[site.id] = agr_value
             else:
-                logging.warning("No Values returend for aggregate. Not Good.")
+                logging.warning("No Values returned for aggregate. Check Influx Connection.")
     return resultdict
 
 

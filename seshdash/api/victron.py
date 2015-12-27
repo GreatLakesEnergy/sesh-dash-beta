@@ -86,7 +86,7 @@ class VictronAPI:
             #Populate sites  under account
             for site in v_sites:
                 self.SYSTEMS_IDS.append((site['idSite'],site['name']))
-                logging.info("initializing sites, getting attributes")
+                logging.debug("initializing sites, getting attributes")
                 site_id =  site['idSite']
                 atr = self.get_site_attributes_list(site_id)
                 #make attribute dictionary more usefull
@@ -126,7 +126,7 @@ class VictronAPI:
         data['sessionid'] = self.SESSION_ID
         data['verification_token'] = self.VERIFICATION_TOKEN
         ###
-        logging.info(data)
+        logging.debug(data)
         if  data:
             r = requests.post(formated_URL,data=data, headers = headers)
 
@@ -301,7 +301,6 @@ class VictronHistoricalAPI:
         """
 
         if not end_at:
-            print "minus 1 day"
             end_at = time_utils.get_epoch_from_datetime(datetime.now()-timedelta(days=1))
         chunksize = 10
         formated_URL = self.API_HIST_FETCH_URL.format(
@@ -309,14 +308,11 @@ class VictronHistoricalAPI:
                START_AT = start_at,
                END_AT = end_at
                 )
-        print  "getting %s"%formated_URL
         filepath = self.DOWNLOAD_FOLDER
         filename = "%s.csv"%(start_at)
         full_file = path.join(self.DOWNLOAD_FOLDER,filename)
         #need to trick the VRM
         headers  = {'user-agent':self.USER_AGENT}
-        print "skipping headers"
-        print "Manual Labour"
         #data = self.SESSION.get(formated_URL,stream=True)
         data = self.SESSION.get(formated_URL,stream=True)
         with open(full_file, 'wb') as fd:
@@ -339,7 +335,6 @@ class VictronHistoricalAPI:
             #need to skip first row
             csvfile.readline()
             csvfile.readline()
-            print "skipping first 2 lines"
             reader = csv.DictReader(csvfile,self.CSV_KEYS)
             for row in reader:
                 data_arr.append(row)

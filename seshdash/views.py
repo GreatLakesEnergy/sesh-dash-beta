@@ -9,12 +9,16 @@ from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
+from django.forms import modelformset_factory
+from django.forms import inlineformset_factory
+from django.contrib.auth.models import User
+
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account
 from seshdash.utils import time_utils
 from pprint import pprint
-from seshdash.forms import SiteForm
+from seshdash.forms import SiteForm,VRMForm
 from django.db.models import Avg
 from django.db.models import Sum
 
@@ -26,7 +30,7 @@ import json,time,random,datetime
 # Import for API
 from rest_framework import generics, permissions
 from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
-from django.contrib.auth.models import User
+from seshdash.api.victron import VictronAPI
 
 @login_required(login_url='/login/')
 def index(request,site_id=0):
@@ -36,8 +40,13 @@ def index(request,site_id=0):
     context_dict = {}
     #Handle fisrt login if user has no site setup:
     if not sites:
-        context_dict['form'] = SiteForm()
+        VRM_form = VRMForm()
+        form = SiteForm()
+        context_dict['form'] = form
+        context_dict['VRM_form'] = VRM_form
+        print context_dict
         return render(request,'seshdash/initial-login.html',context_dict)
+
     if not site_id:
         #return first site user has action
         print "no side id recieved"
@@ -58,19 +67,37 @@ def index(request,site_id=0):
     context_dict['high_chart']= get_high_chart_data()
 
     return render(request,'seshdash/main-dash.html',context_dict)
-0
+
+@login_required
+def get_user_sites(request):
+    context_dict = {}
+    vrm_account = VRM_Account.objects.all()
+    site_list = []
+    for account in vrm_account:
+        v = VictronAPI(account.vrm_user_id,account.vrm_user_password)
+        if v.IS_INITIALIZED:
+            sites = v.get_site_list
+            site_list.append(sites)
+    #make list of lists flat
+    flatten_list = reduce(lambda x,y: x+y,site_list)
+    context_dict[sites] = flatten_list
+    return render(request,'seshdash/import_sites.html',context_dict)
+
 @login_required
 def create_site(request):
+    """
+    Initial login create site form
+    """
     context_dict = {}
     if request.method == "POST":
         form = SiteForm(request.POST)
-
-        if (form.is_valid):
+        if (form.is_valid()):
             context_dict['message'] = "success"
             form.save()
         else:
             #TODO provide meaning full erro message from validate
             context_dict['message'] = "failure"
+            context_dict['form'] = form
             return render(request,'seshdash/initial-login.html',context_dict)
 
         return render(request,'seshdash/main-dash.html',context_dict)

@@ -5,7 +5,15 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-# Create your models here.
+
+class VRM_Account(models.Model):
+    """
+    seperating VRM account for simplicity
+    """
+    vrm_user_id = models.CharField(max_length=100,default="")
+    vrm_password = models.CharField(max_length=100,default="")
+    vrm_site_id = models.CharField(max_length=20,default="")
+
 
 class Sesh_Site(models.Model):
     """
@@ -23,13 +31,10 @@ class Sesh_Site(models.Model):
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
-    vrm_user_id = models.CharField(max_length=100)
-    vrm_password = models.CharField(max_length=100)
-    vrm_site_id = models.CharField(max_length=20)
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
-
+    vrm_account = models.ForeignKey(VRM_Account,default=None)
     def __str__(self):
         return self.site_name
 
@@ -179,7 +184,11 @@ class Trend_Data_Point(models.Model):
     system_capacity = models.FloatField(default=0)
     battery_efficieny = models.FloatField(default=0)
 
-
+class SESH_RMC_Account(models.Model):
+    """
+    API key used by SESH EMON clone to communicate
+    """
+    API_KEY = models.CharField(max_length=100,default="")
 
 
 """
