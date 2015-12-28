@@ -10,7 +10,6 @@ from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory
-from django.forms import inlineformset_factory
 from django.contrib.auth.models import User
 
 
@@ -32,6 +31,9 @@ from rest_framework import generics, permissions
 from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
 from seshdash.api.victron import VictronAPI
 
+#generics
+import logging
+
 @login_required(login_url='/login/')
 def index(request,site_id=0):
 
@@ -44,7 +46,8 @@ def index(request,site_id=0):
         form = SiteForm()
         context_dict['form'] = form
         context_dict['VRM_form'] = VRM_form
-        print context_dict
+        context_dict['form_type'] = "VRM Account"
+
         return render(request,'seshdash/initial-login.html',context_dict)
 
     if not site_id:
@@ -68,20 +71,24 @@ def index(request,site_id=0):
 
     return render(request,'seshdash/main-dash.html',context_dict)
 
-@login_required
-def get_user_sites(request):
+def get_user_sites():
+    """
+    Import user sites from VRM
+    """
     context_dict = {}
     vrm_account = VRM_Account.objects.all()
     site_list = []
     for account in vrm_account:
-        v = VictronAPI(account.vrm_user_id,account.vrm_user_password)
+        v = VictronAPI(account.vrm_user_id,account.vrm_password)
         if v.IS_INITIALIZED:
-            sites = v.get_site_list
+            logging.debug("victron API is initialized ")
+            sites = v.get_site_list()
+            logging.info("Found sites %s "%sites)
             site_list.append(sites)
     #make list of lists flat
     flatten_list = reduce(lambda x,y: x+y,site_list)
-    context_dict[sites] = flatten_list
-    return render(request,'seshdash/import_sites.html',context_dict)
+    context_dict['sites'] = flatten_list
+    return context_dict
 
 @login_required
 def create_site(request):
@@ -90,17 +97,33 @@ def create_site(request):
     """
     context_dict = {}
     if request.method == "POST":
-        form = SiteForm(request.POST)
-        if (form.is_valid()):
+        form = VRMForm(request.POST)
+        if form.is_valid():
             context_dict['message'] = "success"
             form.save()
+
+            #now get user sites
+            site_list = get_user_sites()
+            context_dict['form_type'] = "VRM Account"
+            context_dict['site_list'] = site_list
+            #create initial data for formset
+            pre_pop_data = []
+            for site in site_list['sites']:
+                site_model_form = {'site_name':site['name'],
+                                    'vrm_site_id':site['idSite'],
+                                    'has_genset': site['hasGenerator']
+                                    }
+                pre_pop_data.append(site_model_form)
+
+            site_forms_factory = modelformset_factory(Sesh_Site,extra=len(site_list['sites']),exclude=('vrm_account',))
+            context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data )
         else:
             #TODO provide meaning full erro message from validate
             context_dict['message'] = "failure"
             context_dict['form'] = form
             return render(request,'seshdash/initial-login.html',context_dict)
 
-        return render(request,'seshdash/main-dash.html',context_dict)
+        return render(request,'seshdash/initial-login.html',context_dict)
 
 def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):
     """
@@ -282,7 +305,7 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-# This function  get_high_chart_data is help to get object to use in the High Chart Daily PV production and cloud cover
+# This functimn  get_high_chart_data is help to get object to use in the High Chart Daily PV production and cloud cover
 def get_high_chart_data():
 
 

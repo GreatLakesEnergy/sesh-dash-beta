@@ -5,14 +5,23 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.contrib import admin
 
 class VRM_Account(models.Model):
     """
     seperating VRM account for simplicity
     """
-    vrm_user_id = models.CharField(max_length=100,default="")
+    vrm_user_id = models.CharField(max_length=100,default="",primary_key=True)
     vrm_password = models.CharField(max_length=100,default="")
-    vrm_site_id = models.CharField(max_length=20,default="")
+
+    def __str__(self):
+        return self.vrm_user_id
+
+
+    class Meta:
+        verbose_name = "VRM Account"
+
+
 
 
 class Sesh_Site(models.Model):
@@ -35,6 +44,7 @@ class Sesh_Site(models.Model):
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
     vrm_account = models.ForeignKey(VRM_Account,default=None)
+    vrm_site_id = models.CharField(max_length=20,default="")
     def __str__(self):
         return self.site_name
 
