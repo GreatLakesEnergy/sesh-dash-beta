@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from geoposition.fields import GeopositionField
 # Create your models here.
 
 """
@@ -17,6 +18,7 @@ class Sesh_Site(models.Model):
     location_country = models.CharField(max_length = 100)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    position = GeopositionField(blank=True)
     installed_kw = models.FloatField()
     number_of_pv_strings = models.IntegerField()
     Number_of_panels = models.IntegerField()
