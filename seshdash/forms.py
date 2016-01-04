@@ -4,12 +4,12 @@ from seshdash.models import Sesh_Site,VRM_Account
 class SiteForm(ModelForm):
     class Meta:
         model = Sesh_Site
-        exclude = ('VRM_Account',)
+        exclude = ('Delete',)
 
 
 class VRMForm(ModelForm):
     class Meta:
         model = VRM_Account
-        exclude = ('',)
+        exclude = ('number_of_sites',)
 
 

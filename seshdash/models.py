@@ -13,6 +13,7 @@ class VRM_Account(models.Model):
     """
     vrm_user_id = models.CharField(max_length=100,default="",primary_key=True)
     vrm_password = models.CharField(max_length=100,default="")
+    number_of_sites = models.IntegerField(default=0)
 
     def __str__(self):
         return self.vrm_user_id

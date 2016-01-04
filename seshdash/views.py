@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
-from django.forms import modelformset_factory
+from django.forms import modelformset_factory, inlineformset_factory
 from django.contrib.auth.models import User
 
 
@@ -36,7 +36,10 @@ import logging
 
 @login_required(login_url='/login/')
 def index(request,site_id=0):
-
+    """
+    Initial user view user needs to be logged
+    Get user related site data initially to display on main-dashboard view
+    """
     sites = Sesh_Site.objects.all()
     sites = get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
     context_dict = {}
@@ -71,19 +74,19 @@ def index(request,site_id=0):
 
     return render(request,'seshdash/main-dash.html',context_dict)
 
-def get_user_sites():
+def get_user_sites(vrm_user_id,vrm_password):
     """
     Import user sites from VRM
     """
     context_dict = {}
-    vrm_account = VRM_Account.objects.all()
     site_list = []
-    for account in vrm_account:
-        v = VictronAPI(account.vrm_user_id,account.vrm_password)
-        if v.IS_INITIALIZED:
+    v = VictronAPI(vrm_user_id,vrm_password)
+    if v.IS_INITIALIZED:
             logging.debug("victron API is initialized ")
+            print "victron api initialized"
             sites = v.get_site_list()
             logging.info("Found sites %s "%sites)
+            print "found sites  %s"%sites
             site_list.append(sites)
     #make list of lists flat
     flatten_list = reduce(lambda x,y: x+y,site_list)
@@ -91,39 +94,72 @@ def get_user_sites():
     return context_dict
 
 @login_required
-def create_site(request):
+def import_site(request):
     """
-    Initial login create site form
+    Initial login to gather VRM and Account information
     """
     context_dict = {}
     if request.method == "POST":
-        form = VRMForm(request.POST)
+            #check if post is VRM Account form
+            form = VRMForm(request.POST)
+            if form.is_valid():
+                context_dict['message'] = "success"
+                #do a psuedo save first we need to modify a field later
+                form.save(commit=False)
+                #now get user sites
+                site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
+                context_dict['form_type'] = "VRM Account"
+                context_dict['site_list'] = site_list
+                context_dict['no_sites'] = len(site_list)
+                #modify field
+                form.number_of_sites = len(site_list)
+                #save for real
+                form.save()
+                #create initial data for formset
+                pre_pop_data = []
+                for site in site_list['sites']:
+                    #get one and only vrm account
+                    VRM = VRM_Account.objects.first()
+
+                    site_model_form = {'site_name':site['name'],
+                                        'vrm_site_id':site['idSite'],
+                                        'has_genset': site['hasGenerator'],
+                                        'vrm_account': VRM
+                                        }
+                    pre_pop_data.append(site_model_form)
+                site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,extra=len(site_list['sites']),exclude=('vrm_account',))
+                context_dict['site_forms'] = site_forms_factory(instance=VRM,initial = pre_pop_data )
+            else:
+                #TODO provide meaning full erro message from validate
+                print "Form Invalid"
+                context_dict['message'] = "failure"
+                context_dict['error'] = True
+                context_dict['VRM_form'] = form
+                return render(request,'seshdash/initial-login.html',context_dict)
+
+    return render(request,'seshdash/initial-login.html',context_dict)
+
+@login_required
+def create_site(request):
+    """
+    Create the sites imported from VRM account
+    """
+    context_dict = {}
+    VRM = VRM_Account.objects.first()
+    site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,exclude=('vrm_account',))
+    if request.method == "POST":
+        form = site_forms_factory(request.POST,instance=VRM)
         if form.is_valid():
-            context_dict['message'] = "success"
             form.save()
-
-            #now get user sites
-            site_list = get_user_sites()
-            context_dict['form_type'] = "VRM Account"
-            context_dict['site_list'] = site_list
-            #create initial data for formset
-            pre_pop_data = []
-            for site in site_list['sites']:
-                site_model_form = {'site_name':site['name'],
-                                    'vrm_site_id':site['idSite'],
-                                    'has_genset': site['hasGenerator']
-                                    }
-                pre_pop_data.append(site_model_form)
-
-            site_forms_factory = modelformset_factory(Sesh_Site,extra=len(site_list['sites']),exclude=('vrm_account',))
-            context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data )
         else:
-            #TODO provide meaning full erro message from validate
-            context_dict['message'] = "failure"
-            context_dict['form'] = form
-            return render(request,'seshdash/initial-login.html',context_dict)
+                context_dict['message'] = "failure"
+                context_dict['error'] = True
+                context_dict['site_forms'] = form
+                return render(request,'seshdash/initial-login.html',context_dict)
+        return render(request,'seshdash/main-dash.html',context_dict)
 
-        return render(request,'seshdash/initial-login.html',context_dict)
+
+
 
 def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):
     """
@@ -190,11 +226,16 @@ def linebar(xdata,ydata,ydata2,label_1,label_2,chart_container,data):
 
 
 def logout_user(request):
+    """
+    Logout user
+    """
     logout(request)
     return render(request,'seshdash/logout.html')
 
 def login_user(request):
-
+    """
+    Login motions for user logging into system
+    """
     context_dict = {}
     #is the user already logged in?
     if request.user.is_authenticated():
@@ -220,6 +261,9 @@ def login_user(request):
 
 
 def get_user_data(user,site_id,sites):
+    """
+    Get site data for logged in user
+    """
     site = Sesh_Site.objects.get(pk=site_id)
     context_data = {}
     context_data_json = {}
@@ -276,10 +320,10 @@ def jsonify_dict(context_dict,content_json):
             #context_dict['power_json'] = content_json['site_power']
             context_dict['sites_json'] = content_json['sites']
             return context_dict
-"""
-Turn django objects in JSON
-"""
 
+"""
+BEGIN Turn django objects in JSON
+"""
 def serialize_objects(objects, format_ = 'json'):
     return serializers.serialize('json',objects)
 
@@ -305,16 +349,21 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-# This functimn  get_high_chart_data is help to get object to use in the High Chart Daily PV production and cloud cover
+"""
+END
+"""
 def get_high_chart_data():
-
+     """
+     This functimn  get_high_chart_data is help to get
+     object to use in the High Chart Daily PV production and cloud cover
+     """
 
      context_high_data = {}
      now = datetime.datetime.now()
      five_day_past2 = now - timedelta(days=5)
      five_day_future2 = now + timedelta(days=6)
 
-    # Getting climat conditions
+     # Getting climat conditions
      high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
      context_high_data['high_cloud_cover']=high_cloud_cover
 

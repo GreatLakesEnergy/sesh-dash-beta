@@ -91,7 +91,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_TEMPLATES_DIR = os.path.join(TEMPLATE_DIR,'email')
 FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
+#LOGGING
+#TODO
+"""
+LOGGING = {
+        'version':1,
+        'disable_existing_loggers': False,
+        'loggers':{
+            'django':
 
+            }
+        }
+"""
 # Application definition
 INSTALLED_APPS = (
     'django.contrib.admin',
