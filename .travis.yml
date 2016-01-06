@@ -4,13 +4,13 @@ python:
 addons:
     apt:
         packages:
-    - python-dev
-    - libpq-dev
-    - libxml2-dev
-    - libxslt1-dev
-    - nodejs-legacy
-    - redis-server
-    - redis-client
+            - python-dev
+            - libpq-dev
+            - libxml2-dev
+            - libxslt1-dev
+            - nodejs-legacy
+            - redis-server
+            - redis-client
 
 install:
     - pip install -r requirements.txt
