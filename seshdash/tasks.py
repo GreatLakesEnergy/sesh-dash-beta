@@ -3,15 +3,20 @@ from __future__ import absolute_import
 import logging
 
 from django.conf import settings
+from django.db import IntegrityError
+
 from celery import shared_task
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point
 
 #from seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils import time_utils
 from seshdash.utils.alert import alert_check
+from seshdash.data.db.influx import Influx
+
 from datetime import datetime, date, timedelta
+
 
 @shared_task
 def get_BOM_data():
@@ -32,8 +37,6 @@ def get_BOM_data():
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] )
-                        print bat_data.keys()
-                        print sys_data
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
@@ -48,6 +51,7 @@ def get_BOM_data():
                             battery_voltage = bat_data['Battery voltage']['valueFloat'],
                             AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
+                        print sys_data
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
@@ -60,7 +64,7 @@ def get_BOM_data():
                             relay_state = "off",
                             )
                         data_point.save()
-                        #TODO get bulk historical data with enphase and weather
+
                         print "BoM Data saved"
                         # alert if check(data_point) fails
                         alert_check(data_point)
@@ -103,6 +107,7 @@ def get_historical_BoM(date_range=5):
                         AC_output =  row['Output power 1'],
                         AC_Load_in =  row['Input current phase 1'],
                         AC_Load_out =  row['Output current phase 1'],
+                        print sys_data
                         inverter_state = row['VE.Bus Error'],
                         #TODO these need to be activated
                         genset_state =  "off",
@@ -120,7 +125,6 @@ def get_enphase_daily_summary(date=None):
             date = datetime.now()
 
         sites = Sesh_Site.objects.all()
-
         for site in sites:
                  en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
                  system_id = site.enphase_site_id
@@ -222,6 +226,67 @@ def get_weather_data(days=7,historical=False):
                 )
                 w_data.save()
     return "updated weather for %s"%sites
+
+
+def get_daily_consumption():
+    """calcuulate daily energy used"""
+    #TODO  needs to be implemented
+    pass
+
+def get_daily_battery():
+    "Calculate how much of the production was stored in the batteries"
+    #TODO needs to be implemented
+
+def get_pv_yield():
+    """
+    Calucalte Daily PV Yield
+    """
+    i = Influx()
+    delta = '24h'
+    bucket_size = '1h'
+    measurements = {'pv_production':'pv_yield'}
+    #get all sites
+    sites  = Sesh_Site.objects.all()
+    resultdict = {}
+    for site in sites:
+        for measurement in measurements.keys():
+            #get measurement values from influx
+            aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.id,delta)
+            #we have mean values by the hour now aggregate them
+            print aggr_results
+            if aggr_results:
+                agr_value = 0
+                for item in aggr_results:
+                    agr_value = agr_value + item['mean']
+                    #sum_measurement = reduce(lambda x,y:x['mean']+y['mean'],aggr_results)
+                resultdict[site.id] = agr_value
+            else:
+                logging.warning("No Values returned for aggregate. Check Influx Connection.")
+    return resultdict
+
+
+@shared_task
+def aggregate_daily_data():
+
+    pv_yield_dic = get_pv_yield()
+    logging.debug("PV_YIELD %s "%pv_yield_dic)
+    #TODO this is redundent.
+    sites  = Sesh_Site.objects.all()
+
+    daily_consumption_dic = {1:0}
+    daily_battery_dict = {1:0}
+    for site in sites:
+        daily_aggr = Daily_Data_Point(
+                                     site = site,
+                                     daily_pv_yield = pv_yield_dic[site.id],
+                                     daily_power_consumption = daily_consumption_dic[site.id],
+                                     daily_battery_charge = daily_battery_dict[site.id],
+                                     date = time_utils.get_yesterday()
+                                        )
+
+        daily_aggr.save()
+
+
 @shared_task
 def get_historical_solar(days):
     """

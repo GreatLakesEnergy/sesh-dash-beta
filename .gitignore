@@ -5,13 +5,16 @@
 *settings.ini
 *.swp
 *.db
+
 =======
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-celerybeat-schedule
 
+#celery files
+celerybeat-schedule
+celerbeat.ped
 
 
 # C extensions

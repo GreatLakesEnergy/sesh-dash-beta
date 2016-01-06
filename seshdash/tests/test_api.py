@@ -1,14 +1,12 @@
 from django.test import TestCase
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point
-from seshdash.utils import alert
 from django.utils import timezone
 from django.contrib.auth.models import User
 from guardian.shortcuts import assign_perm
 
 
-# This test case written to test alerting module.
-# It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
-class AlertTestCase(TestCase):
+# This test case written to test API module.
+class APITestCase(TestCase):
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
@@ -36,17 +34,10 @@ class AlertTestCase(TestCase):
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
-        Alert_Rule.objects.create(site = self.site, check_field="soc", value=30, operator="gt")
-        Alert_Rule.objects.create(site = self.site, check_field="soc", value=35.5, operator="eq")
-        Alert_Rule.objects.create(site = self.site, check_field="battery_voltage", value=25, operator="lt",send_mail=False)
-        alert.alert_check(self.data_point)
 
-    def test_alert_fires(self):
-        """ Alert working correctly"""
-        # test if necessary alerts has triggered and if alert objects saved
-        alerts_created = Sesh_Alert.objects.filter(site=self.site)
-        self.assertEqual(alerts_created.count(),3)
-        """ Alert mails working correctly"""
-        self.assertEqual(alerts_created.filter(alertSent=True).count(),2)
+    def test_api_connects(self):
+        """ API's workng correctly """
+        #TODO Use configs in settings.ini
+        sites_created = VRM_Account.objects.all()
+        self.assertEqual(sites_created.count(),1)
 
-    # TODO add negative test cases

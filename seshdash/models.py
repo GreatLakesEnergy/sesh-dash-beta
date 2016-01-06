@@ -5,13 +5,32 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.contrib import admin
 from geoposition.fields import GeopositionField
-# Create your models here.
 
-"""
-Model for each PV SESH installed site
-"""
+# Create your models here.
+class VRM_Account(models.Model):
+    """
+    seperating VRM account for simplicity
+    """
+    vrm_user_id = models.CharField(max_length=100,default="",primary_key=True)
+    vrm_password = models.CharField(max_length=100,default="")
+    number_of_sites = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.vrm_user_id
+
+
+    class Meta:
+        verbose_name = "VRM Account"
+
+
+
+
 class Sesh_Site(models.Model):
+    """
+    Model for each PV SESH installed site
+    """
     site_name = models.CharField(max_length=100)
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
@@ -25,13 +44,11 @@ class Sesh_Site(models.Model):
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
-    vrm_user_id = models.CharField(max_length=100)
-    vrm_password = models.CharField(max_length=100)
-    vrm_site_id = models.CharField(max_length=20)
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
-
+    vrm_account = models.ForeignKey(VRM_Account,default=None)
+    vrm_site_id = models.CharField(max_length=20,default="")
     def __str__(self):
         return self.site_name
 
@@ -95,7 +112,7 @@ class Sesh_Alert(models.Model):
     alertSent = models.BooleanField()
 
     def __str__(self):
-        return "Alert triggered %s at %s silenced: %s"%(site,date,isSilence)
+        return "Alert triggered %s at %s silenced: %s"%(self.site,self.date,self.isSilence)
 
     def __unicode__(self):
         return "Alerts"
@@ -121,11 +138,11 @@ REMMOVING because enphase API SUCS and  victron now provides us with this data
     # class Meta:
      #    unique_together = ('site','time')
 
-"""
-BoM data Soc,, battery voltage system voltage etc
-Currently comes from Victron
-"""
 class BoM_Data_Point(models.Model):
+    """
+    BoM data Soc,, battery voltage system voltage etc
+    Currently comes from Victron
+    """
     #TODO unique together contraing on time and site
     site = models.ForeignKey(Sesh_Site)
     time = models.DateTimeField()
@@ -152,6 +169,42 @@ class BoM_Data_Point(models.Model):
     class Meta:
          verbose_name = 'Data Point'
          unique_together = ('site','time')
+
+class Daily_Data_Point(models.Model):
+    """
+    Daily aggregate of data points
+    """
+    site = models.ForeignKey(Sesh_Site)
+    daily_pv_yield = models.FloatField(default=0) #aggregate pv produced that day Kwh
+    daily_power_consumption = models.FloatField(default=0) #aggreagate power used that day Kwh
+    daily_battery_charge = models.FloatField(default=0) # Amount of charge put in battery
+    date = models.DateTimeField()
+
+    class Meta:
+         verbose_name = 'Daily Aggregate Data Point'
+         unique_together = ('site','date')
+
+
+
+class Trend_Data_Point(models.Model):
+    """
+    Data that's calculated from individual data points. Used to displat an aggregate view
+    Overall aggregates
+    """
+    site = models.ForeignKey(Sesh_Site)
+    pv_yield = models.FloatField(default=0) #
+    battery_usage = models.FloatField(default=0)
+    system_efficiency  = models.FloatField(default=0)
+    system_capacity = models.FloatField(default=0)
+    battery_efficieny = models.FloatField(default=0)
+
+class SESH_RMC_Account(models.Model):
+    """
+    API key used by SESH EMON clone to communicate
+    """
+    API_KEY = models.CharField(max_length=100,default="")
+
+
 """
 TODO removing for now as it's breaking celery object creation
     owner = models.ForeignKey('auth.User', related_name='snippets')
@@ -177,12 +230,14 @@ TODO removing for now as it's breaking celery object creation
         if created:
             Token.objects.create(user=instance)
 """
-"""
 
-weather data to overlay with each stite
 
-"""
 class Site_Weather_Data(models.Model):
+    """
+
+    weather data to overlay with each stite
+
+    """
     site = models.ForeignKey(Sesh_Site)
     date = models.DateTimeField('date',unique_for_date=True)
     temp = models.IntegerField()

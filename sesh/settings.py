@@ -29,6 +29,7 @@ config.read( os.path.join(BASE_DIR,'settings_local.ini'))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '5dsf0sfg5243dfgr26'
 SECRET_KEY = config.get('secret','SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -48,6 +49,13 @@ DATABASES = {
         'HOST': config.get('database','HOST'),
     }
 }
+#INFLUX Settings
+INFLUX_HOST = config.get('influx','HOST')
+INFLUX_PORT = config.get('influx','PORT')
+INFLUX_USERNAME =  config.get('influx','USERNAME')
+INFLUX_PASSWORD = config.get('influx','PASSWORD')
+INFLUX_DB = config.get('influx','DB')
+
 
 # CELERY SETTINGS
 BROKER_URL = 'redis://localhost:6379/0'
@@ -84,7 +92,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_TEMPLATES_DIR = os.path.join(TEMPLATE_DIR,'email')
 FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
+#LOGGING
+#TODO
+"""
+LOGGING = {
+        'version':1,
+        'disable_existing_loggers': False,
+        'loggers':{
+            'django':
 
+            }
+        }
+"""
 # Application definition
 INSTALLED_APPS = (
     'django.contrib.admin',
