@@ -1,8 +1,8 @@
 *.pyc
 *.pyo
 *settings_local.py
-*settings_local.ini
-*settings.ini
+settings_local.ini
+settings.ini
 *.swp
 *.db
 
@@ -66,7 +66,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-*.ini
 
 # Sphinx documentation
 docs/_build/
