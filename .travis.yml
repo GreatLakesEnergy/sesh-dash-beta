@@ -8,7 +8,6 @@ addons:
     - libpq-dev
     - libxml2-dev
     - libxslt1-dev
-    - npm
     - nodejs-legacy
     - redis-server
     - redis-client
