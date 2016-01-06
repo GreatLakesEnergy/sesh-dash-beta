@@ -89,7 +89,7 @@ $('#containerhigh').highcharts({
             verticalAlign: 'top',
             y: 100,
             floating: true,
-            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#ffffff'
         },
         series: [{
             name: 'PV Day Production',
@@ -97,7 +97,7 @@ $('#containerhigh').highcharts({
             yAxis: 1,
             data:pv,
             tooltip: {
-                valueSuffix: ' HW'
+                valueSuffix: 'HW'
             }
 
         }, {

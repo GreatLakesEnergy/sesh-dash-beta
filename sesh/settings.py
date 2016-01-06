@@ -99,12 +99,14 @@ INSTALLED_APPS = (
 )
 
 #BOWER
-BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
+BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'seshdash/static')
 BOWER_INSTALLED_APPS = (
             'jquery#1.9',
             'mapbox.js',
             'd3#3.3.13',
             'nvd3#1.7.1',
+            'highcharts-release',
+            'highstock-release',
             )
 
 ANONYMOUS_USER_ID = None
