@@ -1,6 +1,20 @@
 language: python
 python:
     - "2.7"
+addons:
+    apt:
+        packages:
+            - python-dev
+            - libpq-dev
+            - libxml2-dev
+            - libxslt1-dev
+            - nodejs-legacy
+            - redis-server
+            - redis-client
+
 install:
     - pip install -r requirements.txt
-script: python manage.py test
+script: 
+    - python manage.py makemigrations
+    - python manage.py migrate
+    - python manage.py test
