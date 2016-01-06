@@ -55,7 +55,7 @@ def index(request,site_id=0):
 
     # Create an object of the get_high_chart_date
 
-    context_dict['high_chart']= get_high_chart_data()
+    context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
 
     return render(request,'seshdash/main-dash.html',context_dict)
 0
@@ -257,21 +257,26 @@ class UserDetail(generics.RetrieveAPIView):
 
 # This function  get_high_chart_data is help to get object to use in the High Chart Daily PV production and cloud cover
 
-def get_high_chart_data():
+def get_high_chart_data(user,site_id,sites):
 
-
+     site = Sesh_Site.objects.get(pk=site_id)
      context_high_data = {}
+     if not user.has_perm('seshdash.view_Sesh_Site',site):
+        print "user doesn't have permission to view site %s"%site_id
+        #TODO return 403 permission denied
+        return context_high_data
+
      now = datetime.datetime.now()
      five_day_past2 = now - timedelta(days=5)
      five_day_future2 = now + timedelta(days=6)
 
     # Getting climat conditions
 
-     high_cloud_cover = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date')
+     high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
      context_high_data['high_cloud_cover']=high_cloud_cover
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
-     high_date = Site_Weather_Data.objects.filter(date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date')
+     high_date = Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('date', flat=True).order_by('date').distinct()
      high_date_data = []
      last_date=None
      high_pv_production =[]
@@ -284,7 +289,7 @@ def get_high_chart_data():
 
     # Getting sum   Pv Production in the interval of 24 hours
 
-        pv_sum_day= BoM_Data_Point.objects.filter(time__range=[last_date,date]).aggregate(pv_sum=Sum('pv_production'))
+        pv_sum_day= BoM_Data_Point.objects.filter(site=site,time__range=[last_date,date]).aggregate(pv_sum=Sum('pv_production'))
         last_date=date
     # extract pv sum value form pv_sum_day object   and put it in a list high_pv_production
 

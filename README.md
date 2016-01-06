@@ -25,9 +25,7 @@ Follow the steps below to setup a development environment. This will setup a vir
  1. Install bower
    ` $ sudo npm install -g bower`
  1. Get the UI components:
-    `$ python ./manager.py bower_install`
- 1. Collect Static files in one place:
-    `$ python ./manager.py collectstatic`
+    `$ bower ./manager.py bower install`
 
 #### Virtualenv Only ####
 * Create a local virtual-env (install virtualenv if you dont have it already):
