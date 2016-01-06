@@ -22,6 +22,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.join(BASE_DIR,'seshdash')
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 
+CONFIG_FILE =  os.path.join(BASE_DIR,'settings_local.ini')
+if not os.path.isfile(CONFIG_FILE):
+    CONFIG_FILE =  os.path.join(BASE_DIR,'settings_local_example.ini')
+
+
 config = RawConfigParser()
 config.read( os.path.join(BASE_DIR,'settings_local.ini'))
 
