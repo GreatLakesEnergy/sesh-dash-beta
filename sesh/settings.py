@@ -24,6 +24,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 
 CONFIG_FILE =  os.path.join(BASE_DIR,'settings_local.ini')
 if not os.path.isfile(CONFIG_FILE):
+    print "Using temp config file"
     CONFIG_FILE =  os.path.join(BASE_DIR,'sample_settings_local.ini')
 
 
