@@ -1,15 +1,17 @@
 language: python
 python:
     - "2.7"
-before_install:
-    - sudo apt-get install python-dev
-    - sudo apt-get install libpq-dev
-    - sudo apt-get install libxml2-dev
-    - sudo apt-get install libxslt1-dev
-    - sudo apt-get install npm
-    - sudo apt-get install nodejs-legacy
-    - sudo apt-get install redis-server
-    - sudo apt-get install redis-client
+addons:
+    apt:
+        packages:
+    - python-dev
+    - libpq-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - npm
+    - nodejs-legacy
+    - redis-server
+    - redis-client
 
 install:
     - pip install -r requirements.txt
