@@ -268,6 +268,7 @@ def get_pv_yield():
 @shared_task
 def aggregate_daily_data():
 
+    i = Influx()
     pv_yield_dic = get_pv_yield()
     logging.debug("PV_YIELD %s "%pv_yield_dic)
     #TODO this is redundent.
@@ -285,6 +286,7 @@ def aggregate_daily_data():
                                         )
 
         daily_aggr.save()
+        i.send_object_measurments(daily_aggr,timestamp=date,tags={"site"=site.id})
 
 
 @shared_task

@@ -1,11 +1,11 @@
 from __future__ import absolute_import
+import logging
+from datetime import datetime
 
 from django.conf import settings
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError,InfluxDBServerError
-from datetime import datetime
 
-import logging
 
 class Influx:
 
@@ -15,7 +15,7 @@ class Influx:
                                               settings.INFLUX_USERNAME,
                                               settings.INFLUX_PASSWORD,
                                               settings.INFLUX_DB
-                                                )
+                                              )
         self.db = settings.INFLUX_DB
 
 
@@ -52,4 +52,49 @@ class Influx:
         except Exception,e:
             logging.error("influxdb unkown error %s"%e)
         return []
+
+    def send_object_measurements(self,measurement_object,timestamp=None,tags={}):
+        """
+        returns True if objects are submitted False otherwise
+        send Django object as seperate measurements to influx
+        @param Timestamps is assumed now if not provided
+        @param Tags will be applied to all measurments
+        """
+        data_point = {"measurement":None,
+                      "tags":{},
+                      "time":None,
+                      "fields":{"value":None}
+                     }
+        data_point_list = []
+
+        # Create our timestamp if one was not provided.
+        if not timestamp:
+            timestamp = datetime.now()
+            timestamp = timestamp.isoformat()
+
+        for key in measurement_object.keys():
+            # Incoming data is likely to have datetime object. We need to ignore this
+            if not isinstance(measurement_object[key],datetime):
+                data_point["measurement"] = key
+                data_point["tags"] = tags
+                data_point["time"] = timestamp
+                data_point["fields"] = {"value":measurement_object[key]}
+                # Get the data point array ready.
+                data_point_list.append(data_point)
+        try:
+            #Send the data blob to influx.
+            self._influx_client(data_point_list)
+        except InfluxDBServerError,e:
+            logging.error("Error running query on server %s"%e)
+        except InfluxDBClientError,e:
+            logging.error("Error running  query"%e)
+        except Exception,e:
+            logging.error("influxdb unkown error %s"%e)
+        else:
+            return False
+
+        return True
+
+
+
 
