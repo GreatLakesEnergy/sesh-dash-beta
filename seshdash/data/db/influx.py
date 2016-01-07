@@ -53,7 +53,7 @@ class Influx:
             logging.error("influxdb unkown error %s"%e)
         return []
 
-    def send_object_measurements(self,measurement_object,timestamp=None,tags={}):
+    def send_object_measurements(self,measurement_dict, timestamp=None, tags={}):
         """
         returns True if objects are submitted False otherwise
         send Django object as seperate measurements to influx
@@ -72,18 +72,18 @@ class Influx:
             timestamp = datetime.now()
             timestamp = timestamp.isoformat()
 
-        for key in measurement_object.keys():
+        for key in measurement_dict:
             # Incoming data is likely to have datetime object. We need to ignore this
-            if not isinstance(measurement_object[key],datetime):
+            if not 'time' in key:
                 data_point["measurement"] = key
                 data_point["tags"] = tags
-                data_point["time"] = timestamp
-                data_point["fields"] = {"value":measurement_object[key]}
+                data_point["time"] = timestamp.isoformat()
+                data_point["fields"] = {"value":measurement_dict[key]}
                 # Get the data point array ready.
                 data_point_list.append(data_point)
         try:
             #Send the data blob to influx.
-            self._influx_client(data_point_list)
+            self._influx_client.write_points(data_point_list)
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"%e)
         except InfluxDBClientError,e:

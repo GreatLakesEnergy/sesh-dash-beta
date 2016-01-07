@@ -4,7 +4,7 @@ import logging
 
 from django.conf import settings
 from django.db import IntegrityError
-
+from django.forms.models import model_to_dict
 from celery import shared_task
 from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point
 
@@ -51,7 +51,6 @@ def get_BOM_data():
                             battery_voltage = bat_data['Battery voltage']['valueFloat'],
                             AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
-                        print sys_data
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
@@ -107,7 +106,6 @@ def get_historical_BoM(date_range=5):
                         AC_output =  row['Output power 1'],
                         AC_Load_in =  row['Input current phase 1'],
                         AC_Load_out =  row['Output current phase 1'],
-                        print sys_data
                         inverter_state = row['VE.Bus Error'],
                         #TODO these need to be activated
                         genset_state =  "off",
@@ -267,26 +265,33 @@ def get_pv_yield():
 
 @shared_task
 def aggregate_daily_data():
-
+    """
+    Batch job to get daily aggregate data for each site
+    """
     i = Influx()
     pv_yield_dic = get_pv_yield()
     logging.debug("PV_YIELD %s "%pv_yield_dic)
+    print "PV_YIELD %s "%pv_yield_dic
     #TODO this is redundent.
     sites  = Sesh_Site.objects.all()
 
-    daily_consumption_dic = {1:0}
-    daily_battery_dict = {1:0}
+    # Dummy data for now
+    daily_consumption_dic = {1:0,2:0}
+    daily_battery_dict = {1:0,2:0}
     for site in sites:
-        daily_aggr = Daily_Data_Point(
-                                     site = site,
-                                     daily_pv_yield = pv_yield_dic[site.id],
-                                     daily_power_consumption = daily_consumption_dic[site.id],
-                                     daily_battery_charge = daily_battery_dict[site.id],
-                                     date = time_utils.get_yesterday()
-                                        )
+        # This is normally an unecassary check bu requred in development
+        if site.id in pv_yield_dic.keys():
+            daily_aggr = Daily_Data_Point(
+                                         site = site,
+                                         daily_pv_yield = pv_yield_dic[site.id],
+                                         daily_power_consumption = daily_consumption_dic[site.id],
+                                         daily_battery_charge = daily_battery_dict[site.id],
+                                         date = time_utils.get_yesterday()
+                                            )
 
-        daily_aggr.save()
-        i.send_object_measurments(daily_aggr,timestamp=date,tags={"site"=site.id})
+            daily_aggr.save()
+            dict_aggregate_val = model_to_dict(daily_aggr)
+            i.send_object_measurements(dict_aggregate_val,timestamp=time_utils.get_yesterday(),tags={"site":site.id})
 
 
 @shared_task
