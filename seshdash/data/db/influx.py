@@ -70,6 +70,7 @@ class Influx:
         # Create our timestamp if one was not provided.
         if not timestamp:
             timestamp = datetime.now()
+        if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
 
         for key in measurement_dict:
@@ -77,7 +78,7 @@ class Influx:
             if not 'time' in key:
                 data_point["measurement"] = key
                 data_point["tags"] = tags
-                data_point["time"] = timestamp.isoformat()
+                data_point["time"] = timestamp
                 data_point["fields"] = {"value":measurement_dict[key]}
                 # Get the data point array ready.
                 data_point_list.append(data_point)

@@ -189,8 +189,10 @@ def get_enphase_daily_stats(date=None):
 def get_weather_data(days=7,historical=False):
     #TODO figure out way to get weather daya periodicall for forecast of 7 days
     #get all sites
+    i = Influx()
     sites = Sesh_Site.objects.all()
     forecast_result = []
+
     for site in sites:
         forecast_client = ForecastAPI(settings.FORECAST_KEY,site.latitude,site.longitude)
         if historical:
@@ -222,7 +224,12 @@ def get_weather_data(days=7,historical=False):
                                 sunrise =  forecast_result[day]["sunrise"],
                                 sunset =  forecast_result[day]["sunset"]
                 )
+
                 w_data.save()
+                w_data_dict = model_to_dict(w_data)
+                print day
+                i.send_object_measurements(w_data_dict, timestamp=day, tags={"site":site.id})
+
     return "updated weather for %s"%sites
 
 
