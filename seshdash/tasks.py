@@ -4,7 +4,7 @@ import logging
 
 from django.conf import settings
 from django.db import IntegrityError
-
+from django.forms.models import model_to_dict
 from celery import shared_task
 from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point
 
@@ -28,7 +28,7 @@ def get_BOM_data():
     for site in sites:
         print "getting data for site %s "%site
         try:
-            v_client = VictronAPI(site.vrm_user_id,site.vrm_password)
+            v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
             #TODO figure out a way to get these automatically or add
             #them manually to the model for now
             #Also will the user have site's under thier account that they wouldn't like to pull data form?
@@ -51,17 +51,18 @@ def get_BOM_data():
                             battery_voltage = bat_data['Battery voltage']['valueFloat'],
                             AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
-                        print sys_data
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
+                            AC_output_absolute =  float(sys_data['Output power 1']['valueFloat']) +
+                                                    float(sys_data['PV - AC-coupled on output L1']['valueFloat']),
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
                             AC_Load_out =  sys_data['Output current phase 1']['valueFloat'],
                             inverter_state = sys_data['VE.Bus state']['nameEnum'],
                             pv_production = sys_data['PV - AC-coupled on output L1']['valueFloat'],
                             #TODO these need to be activated
-                            genset_state =  "off",
+                            genset_state =  0,
                             main_on = mains,
-                            relay_state = "off",
+                            relay_state = 0,
                             )
                         data_point.save()
 
@@ -107,7 +108,6 @@ def get_historical_BoM(date_range=5):
                         AC_output =  row['Output power 1'],
                         AC_Load_in =  row['Input current phase 1'],
                         AC_Load_out =  row['Output current phase 1'],
-                        print sys_data
                         inverter_state = row['VE.Bus Error'],
                         #TODO these need to be activated
                         genset_state =  "off",
@@ -191,8 +191,10 @@ def get_enphase_daily_stats(date=None):
 def get_weather_data(days=7,historical=False):
     #TODO figure out way to get weather daya periodicall for forecast of 7 days
     #get all sites
+    i = Influx()
     sites = Sesh_Site.objects.all()
     forecast_result = []
+
     for site in sites:
         forecast_client = ForecastAPI(settings.FORECAST_KEY,site.latitude,site.longitude)
         if historical:
@@ -224,26 +226,31 @@ def get_weather_data(days=7,historical=False):
                                 sunrise =  forecast_result[day]["sunrise"],
                                 sunset =  forecast_result[day]["sunset"]
                 )
+
                 w_data.save()
+                w_data_dict = model_to_dict(w_data)
+                print day
+                i.send_object_measurements(w_data_dict, timestamp=day, tags={"site":site.id})
+
     return "updated weather for %s"%sites
 
 
-def get_daily_consumption():
+def get_daily_consumption(delta='24h', bucket_size='1h'):
     """calcuulate daily energy used"""
     #TODO  needs to be implemented
-    pass
+    i = Influx()
+    measurements = {'meas'}
 
 def get_daily_battery():
     "Calculate how much of the production was stored in the batteries"
     #TODO needs to be implemented
 
-def get_pv_yield():
+def get_pv_yield(delta='24h', bucket_size='1h'):
     """
     Calucalte Daily PV Yield
     """
     i = Influx()
-    delta = '24h'
-    bucket_size = '1h'
+    #PV production mapping {'value_to_map_to':'value_to_map_from'}
     measurements = {'pv_production':'pv_yield'}
     #get all sites
     sites  = Sesh_Site.objects.all()
@@ -266,25 +273,34 @@ def get_pv_yield():
 
 
 @shared_task
-def aggregate_daily_data():
-
+def get_aggregate_daily_data():
+    """
+    Batch job to get daily aggregate data for each site
+    """
+    i = Influx()
     pv_yield_dic = get_pv_yield()
     logging.debug("PV_YIELD %s "%pv_yield_dic)
+    print "PV_YIELD %s "%pv_yield_dic
     #TODO this is redundent.
     sites  = Sesh_Site.objects.all()
-
-    daily_consumption_dic = {1:0}
-    daily_battery_dict = {1:0}
+    print "Aggregating daily consumption and production stats"
+    # Dummy data for now
+    daily_consumption_dic = {1:0,2:0}
+    daily_battery_dict = {1:0,2:0}
     for site in sites:
-        daily_aggr = Daily_Data_Point(
-                                     site = site,
-                                     daily_pv_yield = pv_yield_dic[site.id],
-                                     daily_power_consumption = daily_consumption_dic[site.id],
-                                     daily_battery_charge = daily_battery_dict[site.id],
-                                     date = time_utils.get_yesterday()
-                                        )
+        # This is normally an unecassary check bu requred in development
+        if site.id in pv_yield_dic.keys():
+            daily_aggr = Daily_Data_Point(
+                                         site = site,
+                                         daily_pv_yield = pv_yield_dic[site.id],
+                                         daily_power_consumption = daily_consumption_dic[site.id],
+                                         daily_battery_charge = daily_battery_dict[site.id],
+                                         date = time_utils.get_yesterday()
+                                            )
 
-        daily_aggr.save()
+            daily_aggr.save()
+            dict_aggregate_val = model_to_dict(daily_aggr)
+            i.send_object_measurements(dict_aggregate_val,timestamp=time_utils.get_yesterday(),tags={"site":site.id})
 
 
 @shared_task
