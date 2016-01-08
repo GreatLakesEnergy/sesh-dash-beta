@@ -271,7 +271,7 @@ def get_pv_yield():
 
 
 @shared_task
-def aggregate_daily_data():
+def get_aggregate_daily_data():
     """
     Batch job to get daily aggregate data for each site
     """
@@ -281,7 +281,7 @@ def aggregate_daily_data():
     print "PV_YIELD %s "%pv_yield_dic
     #TODO this is redundent.
     sites  = Sesh_Site.objects.all()
-
+    print "Aggregating daily consumption and production stats"
     # Dummy data for now
     daily_consumption_dic = {1:0,2:0}
     daily_battery_dict = {1:0,2:0}

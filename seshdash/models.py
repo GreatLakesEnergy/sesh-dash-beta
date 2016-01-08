@@ -74,6 +74,10 @@ class Sesh_User(models.Model):
          verbose_name_plural = 'Users'
 
 class Alert_Rule(models.Model):
+    """
+    Basic Alert rule model
+    TODO think about how to make this more power/generic
+    """
     OPERATOR_CHOICES = (
         ("eq" , "equals"),
         ("lt" , "less than"),
