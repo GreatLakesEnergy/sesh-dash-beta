@@ -150,21 +150,22 @@ class BoM_Data_Point(models.Model):
     #TODO unique together contraing on time and site
     site = models.ForeignKey(Sesh_Site)
     time = models.DateTimeField()
-    soc = models.FloatField()
-    battery_voltage = models.FloatField()
-    AC_Voltage_in = models.FloatField(default=-0)
+    soc = models.FloatField(default=0)
+    battery_voltage = models.FloatField(default=0)
+    AC_Voltage_in = models.FloatField(default=0)
     AC_Voltage_out = models.FloatField(default=0)
-    AC_input = models.FloatField()
-    AC_output = models.FloatField()
-    AC_Load_in = models.FloatField()
-    AC_Load_out = models.FloatField()
+    AC_input = models.FloatField(default=0)
+    AC_output = models.FloatField(default=0)
+    AC_output_absolute = models.FloatField(default=0)
+    AC_Load_in = models.FloatField(default=0)
+    AC_Load_out = models.FloatField(default=0)
     #NEW  victron now tells us pv production
     pv_production = models.FloatField(default=0)
     inverter_state = models.CharField(max_length = 100)
     main_on = models.BooleanField(default=False)
-    genset_state = models.CharField(max_length = 100)
-#TODO relay will likely need to be it's own model
-    relay_state = models.CharField(max_length = 100)
+    genset_state = models.IntegerField(default=0)
+    #TODO relay will likely need to be it's own model
+    relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
 
     def __str__(self):

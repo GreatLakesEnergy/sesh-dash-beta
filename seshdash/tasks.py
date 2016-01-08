@@ -28,7 +28,7 @@ def get_BOM_data():
     for site in sites:
         print "getting data for site %s "%site
         try:
-            v_client = VictronAPI(site.vrm_user_id,site.vrm_password)
+            v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
             #TODO figure out a way to get these automatically or add
             #them manually to the model for now
             #Also will the user have site's under thier account that they wouldn't like to pull data form?
@@ -53,14 +53,16 @@ def get_BOM_data():
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
+                            AC_output_absolute =  float(sys_data['Output power 1']['valueFloat']) +
+                                                    float(sys_data['PV - AC-coupled on output L1']['valueFloat']),
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
                             AC_Load_out =  sys_data['Output current phase 1']['valueFloat'],
                             inverter_state = sys_data['VE.Bus state']['nameEnum'],
                             pv_production = sys_data['PV - AC-coupled on output L1']['valueFloat'],
                             #TODO these need to be activated
-                            genset_state =  "off",
+                            genset_state =  0,
                             main_on = mains,
-                            relay_state = "off",
+                            relay_state = 0,
                             )
                         data_point.save()
 
@@ -233,22 +235,22 @@ def get_weather_data(days=7,historical=False):
     return "updated weather for %s"%sites
 
 
-def get_daily_consumption():
+def get_daily_consumption(delta='24h', bucket_size='1h'):
     """calcuulate daily energy used"""
     #TODO  needs to be implemented
-    pass
+    i = Influx()
+    measurements = {'meas'}
 
 def get_daily_battery():
     "Calculate how much of the production was stored in the batteries"
     #TODO needs to be implemented
 
-def get_pv_yield():
+def get_pv_yield(delta='24h', bucket_size='1h'):
     """
     Calucalte Daily PV Yield
     """
     i = Influx()
-    delta = '24h'
-    bucket_size = '1h'
+    #PV production mapping {'value_to_map_to':'value_to_map_from'}
     measurements = {'pv_production':'pv_yield'}
     #get all sites
     sites  = Sesh_Site.objects.all()
