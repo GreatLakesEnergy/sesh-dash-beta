@@ -8,7 +8,7 @@ from guardian.shortcuts import assign_perm
 
 # This test case written to test API module.
 class TaskTestCase(TestCase):
-    def setup(self):
+    def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
         self.site = Sesh_Site.objects.create(site_name=u"Test site",
