@@ -63,35 +63,35 @@ class Influx:
         @param Tags will be applied to all measurments
         """
         tags['source'] = self._influx_tag
-        data_point = {"measurement":None,
-                      "tags":tags,
-                      "time":None,
-                      "fields":{"value":None}
-                     }
         data_point_list = []
-
+        logging.debug("recieved data point %s"%measurement_dict)
         # Create our timestamp if one was not provided.
         if not timestamp:
             timestamp = datetime.now()
         if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
 
-        for key in measurement_dict:
+        for key in measurement_dict.keys():
             # Incoming data is likely to have datetime object. We need to ignore this
-            if not 'time' in key:
+            if not 'time' in key.lower() or not 'date' in key.lower():
+                data_point = {}
                 data_point["measurement"] = key
                 data_point["tags"] = tags
+                # Datetime needs to be converted to epoch
                 data_point["time"] = timestamp
                 data_point["fields"] = {"value":measurement_dict[key]}
+
+                logging.debug("prepping data point %s"%(data_point))
                 # Get the data point array ready.
                 data_point_list.append(data_point)
         try:
-            #Send the data blob to influx.
+            #Send the data blob to influx
+            logging.debug("sending %s"%data_point_list)
             self._influx_client.write_points(data_point_list)
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"%e)
         except InfluxDBClientError,e:
-            logging.error("Error running  query"%e)
+            logging.error("Error running  query %s "%e)
         except Exception,e:
             logging.error("influxdb unkown error %s"%e)
         else:

@@ -17,6 +17,14 @@ from seshdash.data.db.influx import Influx
 
 from datetime import datetime, date, timedelta
 
+def send_to_influx(model_data,site,timestamp):
+    """
+    Utility function to send data to influx
+    """
+    i = Influx()
+    model_data_dict = model_to_dict(model_data)
+    i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site":site.id, "site_name":site.site_name})
+
 
 @shared_task
 def get_BOM_data():
@@ -65,9 +73,11 @@ def get_BOM_data():
                             relay_state = 0,
                             )
                         data_point.save()
+                        # Send to influx
+                        send_to_influx(data_point, site, date)
 
                         print "BoM Data saved"
-                        # alert if check(data_point) fails
+                        # Alert if check(data_point) fails
                         alert_check(data_point)
         except IntegrityError, e:
             logging.debug("Duplicate entry skipping data point")
@@ -228,19 +238,13 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                w_data_dict = model_to_dict(w_data)
-                print day
-                i.send_object_measurements(w_data_dict, timestamp=day, tags={"site":site.id})
+                send_to_influx(site,w_data,date)
 
     return "updated weather for %s"%sites
 
 
 
-def get_daily_battery():
-    "Calculate how much of the production was stored in the batteries"
-    #TODO needs to be implemented
-
-def get_aggregate_data(site, measuerment, delta='24h', bucket_size='1h', clause=None):
+def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=None):
     """
     Calucalte aggregate values from Influx for provided measuruements
     """
@@ -253,8 +257,8 @@ def get_aggregate_data(site, measuerment, delta='24h', bucket_size='1h', clause=
 
     i = Influx()
     #get all sites
-    sites  = Sesh_Site.objects.all()
-    result = a0
+    sites = Sesh_Site.objects.all()
+    result = 0
 
     #get measurement values from influx
     aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.id,delta)
@@ -297,8 +301,8 @@ def get_aggregate_daily_data():
                                             )
 
             daily_aggr.save()
-            dict_aggregate_val = model_to_dict(daily_aggr)
-            i.send_object_measurements(dict_aggregate_val,timestamp=time_utils.get_yesterday(),tags={"site":site.id, "site_name":site.name})
+            #send to influx
+            send_to_influx(daily_aggr, site, time_utils.get_yesterday())
 
 
 @shared_task
