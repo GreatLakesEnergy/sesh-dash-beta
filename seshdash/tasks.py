@@ -298,7 +298,7 @@ def get_aggregate_daily_data():
 
             daily_aggr.save()
             dict_aggregate_val = model_to_dict(daily_aggr)
-            i.send_object_measurements(dict_aggregate_val,timestamp=time_utils.get_yesterday(),tags={"site":site.id})
+            i.send_object_measurements(dict_aggregate_val,timestamp=time_utils.get_yesterday(),tags={"site":site.id, "site_name":site.name})
 
 
 @shared_task

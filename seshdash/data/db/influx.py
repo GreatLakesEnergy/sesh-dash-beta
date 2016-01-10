@@ -17,6 +17,8 @@ class Influx:
                                               settings.INFLUX_DB
                                               )
         self.db = settings.INFLUX_DB
+        #TODO draw this from settings
+        self._influx_tag = 'sesh_dash'
 
 
     def get_measurement_bucket(self,measurement,bucket_size,clause,clause_val,time_delta,start="now",operator="mean") :
@@ -60,8 +62,9 @@ class Influx:
         @param Timestamps is assumed now if not provided
         @param Tags will be applied to all measurments
         """
+        tags['source'] = self._influx_tag
         data_point = {"measurement":None,
-                      "tags":{},
+                      "tags":tags,
                       "time":None,
                       "fields":{"value":None}
                      }
