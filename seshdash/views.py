@@ -253,10 +253,11 @@ def login_user(request):
             #send user name and favorite site data to index page for initial login load
             return index(request)
         else:
-            #return an error message
+            #TODO return an error message
+            message = "Error logging in"
             return render(request,'seshdash/login.html')
     else:
-            #return invalid login page
+            #TODO return invalid login page
             return render(request,'seshdash/login.html')
 
 

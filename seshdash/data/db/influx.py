@@ -17,6 +17,8 @@ class Influx:
                                               settings.INFLUX_DB
                                               )
         self.db = settings.INFLUX_DB
+        #TODO draw this from settings
+        self._influx_tag = 'sesh_dash'
 
 
     def get_measurement_bucket(self,measurement,bucket_size,clause,clause_val,time_delta,start="now",operator="mean") :
@@ -60,35 +62,39 @@ class Influx:
         @param Timestamps is assumed now if not provided
         @param Tags will be applied to all measurments
         """
-        data_point = {"measurement":None,
-                      "tags":{},
-                      "time":None,
-                      "fields":{"value":None}
-                     }
+        tags['source'] = self._influx_tag
         data_point_list = []
-
+        logging.debug("recieved data point %s"%measurement_dict)
         # Create our timestamp if one was not provided.
         if not timestamp:
             timestamp = datetime.now()
         if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
 
-        for key in measurement_dict:
-            # Incoming data is likely to have datetime object. We need to ignore this
-            if not 'time' in key:
+        for key in measurement_dict.keys():
+                # Incoming data is likely to have datetime object. We need to ignore this
+                data_point = {}
                 data_point["measurement"] = key
                 data_point["tags"] = tags
+                # Datetime needs to be converted to epoch
                 data_point["time"] = timestamp
-                data_point["fields"] = {"value":measurement_dict[key]}
+                #Cast everything not string to Float
+                if isinstance(measurement_dict[key], str) or isinstance(measurement_dict[key],unicode):
+                    data_point["fields"] = {"value" : measurement_dict[key]}
+                else:
+                    data_point["fields"] = {"value" : float(measurement_dict[key])}
+
+                logging.debug("prepping data point %s"%(data_point))
                 # Get the data point array ready.
                 data_point_list.append(data_point)
         try:
-            #Send the data blob to influx.
+            #Send the data blob to influx
+            logging.debug("sending %s"%data_point_list)
             self._influx_client.write_points(data_point_list)
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"%e)
         except InfluxDBClientError,e:
-            logging.error("Error running  query"%e)
+            logging.error("Error running  query %s "%e)
         except Exception,e:
             logging.error("influxdb unkown error %s"%e)
         else:

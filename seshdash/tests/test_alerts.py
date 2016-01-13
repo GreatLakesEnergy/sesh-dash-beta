@@ -4,7 +4,7 @@ from seshdash.utils import alert
 from django.utils import timezone
 from django.contrib.auth.models import User
 from guardian.shortcuts import assign_perm
-
+from geoposition import Geoposition
 
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
@@ -12,14 +12,15 @@ class AlertTestCase(TestCase):
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
+        self.location = Geoposition(52.5,24.3)
+
         self.site = Sesh_Site.objects.create(site_name=u"Test site",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
                                              location_city=u"kigali",
                                              location_country=u"rwanda",
-                                             latitude=2.0,
-                                             longitude=-2.0,
                                              vrm_account = self.VRM,
                                              installed_kw=123.0,
+                                             position=self.location,
                                              number_of_pv_strings=12,
                                              Number_of_panels=12,
                                              vrm_site_id=213,

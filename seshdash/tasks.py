@@ -17,6 +17,23 @@ from seshdash.data.db.influx import Influx
 
 from datetime import datetime, date, timedelta
 
+def send_to_influx(model_data, site, timestamp, to_exclude=[]):
+    """
+    Utility function to send data to influx
+    """
+
+    i = Influx()
+    model_data_dict = model_to_dict(model_data)
+
+    if to_exclude:
+        # Remove any value we wish not to be submitted
+        # Generally used with datetime measurement
+        for val in to_exclude:
+            #if to_exclude  in model_data_dict.keys():
+            model_data_dict.pop(val)
+
+    i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
+
 
 @shared_task
 def get_BOM_data():
@@ -65,9 +82,11 @@ def get_BOM_data():
                             relay_state = 0,
                             )
                         data_point.save()
+                        # Send to influx
+                        send_to_influx(data_point, site, date, to_exclude=['time'])
 
                         print "BoM Data saved"
-                        # alert if check(data_point) fails
+                        # Alert if check(data_point) fails
                         alert_check(data_point)
         except IntegrityError, e:
             logging.debug("Duplicate entry skipping data point")
@@ -196,7 +215,7 @@ def get_weather_data(days=7,historical=False):
     forecast_result = []
 
     for site in sites:
-        forecast_client = ForecastAPI(settings.FORECAST_KEY,site.latitude,site.longitude)
+        forecast_client = ForecastAPI(settings.FORECAST_KEY,site.position.latitude,site.position.longitude)
         if historical:
             #Get weather dates for an extended historical interval
             now = datetime.now()
@@ -228,48 +247,45 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                w_data_dict = model_to_dict(w_data)
-                print day
-                i.send_object_measurements(w_data_dict, timestamp=day, tags={"site":site.id})
+                send_to_influx(site, w_data, date, to_exclude=['date'])
 
     return "updated weather for %s"%sites
 
 
-def get_daily_consumption(delta='24h', bucket_size='1h'):
-    """calcuulate daily energy used"""
-    #TODO  needs to be implemented
-    i = Influx()
-    measurements = {'meas'}
 
-def get_daily_battery():
-    "Calculate how much of the production was stored in the batteries"
-    #TODO needs to be implemented
-
-def get_pv_yield(delta='24h', bucket_size='1h'):
+def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=None):
     """
-    Calucalte Daily PV Yield
+    Calucalte aggregate values from Influx for provided measuruements
     """
     i = Influx()
-    #PV production mapping {'value_to_map_to':'value_to_map_from'}
-    measurements = {'pv_production':'pv_yield'}
+    clause_opts = {
+            'negative': (lambda x : x < 0),
+            'positive' : (lambda x: x > 0 )}
+    if clause and not clause in clause_opts.keys():
+        logging.error("unkown clause provided %s allowed %s"%(clause,clause_opts.keys()))
+        return 0
+
     #get all sites
-    sites  = Sesh_Site.objects.all()
-    resultdict = {}
-    for site in sites:
-        for measurement in measurements.keys():
-            #get measurement values from influx
-            aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.id,delta)
-            #we have mean values by the hour now aggregate them
-            print aggr_results
-            if aggr_results:
-                agr_value = 0
-                for item in aggr_results:
-                    agr_value = agr_value + item['mean']
-                    #sum_measurement = reduce(lambda x,y:x['mean']+y['mean'],aggr_results)
-                resultdict[site.id] = agr_value
-            else:
-                logging.warning("No Values returned for aggregate. Check Influx Connection.")
-    return resultdict
+    sites = Sesh_Site.objects.all()
+    result = 0
+
+    #get measurement values from influx
+    aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.site_name,delta)
+    #we have mean values by the hour now aggregate them
+    print aggr_results
+    if aggr_results:
+        agr_value = 0
+        if clause:
+            #if we have a cluase filter to apply
+            aggr_results = filter(clause_opts[clause],aggr_results)
+
+        for item in aggr_results:
+            agr_value = agr_value + item['mean']
+            #sum_measurement = reduce(lambda x,y:x['mean']+y['mean'],aggr_results)
+        result = agr_value
+    else:
+        logging.warning("No Values returned for aggregate. Check Influx Connection.")
+    return result
 
 
 @shared_task
@@ -277,30 +293,25 @@ def get_aggregate_daily_data():
     """
     Batch job to get daily aggregate data for each site
     """
-    i = Influx()
-    pv_yield_dic = get_pv_yield()
-    logging.debug("PV_YIELD %s "%pv_yield_dic)
-    print "PV_YIELD %s "%pv_yield_dic
-    #TODO this is redundent.
     sites  = Sesh_Site.objects.all()
     print "Aggregating daily consumption and production stats"
-    # Dummy data for now
-    daily_consumption_dic = {1:0,2:0}
-    daily_battery_dict = {1:0,2:0}
     for site in sites:
-        # This is normally an unecassary check bu requred in development
-        if site.id in pv_yield_dic.keys():
+            aggregate_data_pv = get_aggregate_data (site, 'pv_production')
+            aggregate_data_AC = get_aggregate_data (site, 'AC_output_absolute')
+            aggregate_data_batt = get_aggregate_data (site, 'AC_output',clause='negative')
+            # This is normally an unecassary check bu requred in development
             daily_aggr = Daily_Data_Point(
                                          site = site,
-                                         daily_pv_yield = pv_yield_dic[site.id],
-                                         daily_power_consumption = daily_consumption_dic[site.id],
-                                         daily_battery_charge = daily_battery_dict[site.id],
+                                         daily_pv_yield = aggregate_data_pv,
+                                         daily_power_consumption = aggregate_data_AC,
+                                         daily_battery_charge = aggregate_data_batt,
                                          date = time_utils.get_yesterday()
                                             )
 
             daily_aggr.save()
-            dict_aggregate_val = model_to_dict(daily_aggr)
-            i.send_object_measurements(dict_aggregate_val,timestamp=time_utils.get_yesterday(),tags={"site":site.id})
+            #send to influx
+            send_to_influx(daily_aggr, site, time_utils.get_yesterday(), to_exclude=['date'])
+
 
 
 @shared_task

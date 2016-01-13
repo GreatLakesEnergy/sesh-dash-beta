@@ -14,7 +14,7 @@ __pycache__/
 
 #celery files
 celerybeat-schedule
-celerbeat.ped
+*celerbeat.pid
 
 
 # C extensions

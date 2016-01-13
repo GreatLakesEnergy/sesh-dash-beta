@@ -35,8 +35,6 @@ class Sesh_Site(models.Model):
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
     position = GeopositionField(blank=True)
     installed_kw = models.FloatField()
     number_of_pv_strings = models.IntegerField()

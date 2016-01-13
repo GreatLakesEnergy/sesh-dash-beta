@@ -82,6 +82,12 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(minutes=5),
         'args': None,
     },
+    'aggregate_data': {
+        'task': 'seshdash.tasks.get_aggregate_daily_data',
+        #'schedule': crontab(hour=0,minute=0),
+        'schedule': timedelta(minutes=5), # Only for dev
+        'args': None,
+    },
 }
 
 #Authentication
