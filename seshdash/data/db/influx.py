@@ -72,14 +72,18 @@ class Influx:
             timestamp = timestamp.isoformat()
 
         for key in measurement_dict.keys():
-            # Incoming data is likely to have datetime object. We need to ignore this
-            if not 'time' in key.lower() or not 'date' in key.lower():
+                # Incoming data is likely to have datetime object. We need to ignore this
                 data_point = {}
                 data_point["measurement"] = key
                 data_point["tags"] = tags
                 # Datetime needs to be converted to epoch
                 data_point["time"] = timestamp
-                data_point["fields"] = {"value":measurement_dict[key]}
+                #Cast everything not string to Float
+                if isinstance(measurement_dict[key], str) or isinstance(measurement_dict[key],unicode):
+                    data_point["fields"] = {"value" : measurement_dict[key]}
+                else:
+                    logging.debug("isinstance %s %s %s" % (isinstance(measurement_dict[key],str),measurement_dict[key],type(measurement_dict[key])))
+                    data_point["fields"] = {"value" : float(measurement_dict[key])}
 
                 logging.debug("prepping data point %s"%(data_point))
                 # Get the data point array ready.

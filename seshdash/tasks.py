@@ -17,12 +17,21 @@ from seshdash.data.db.influx import Influx
 
 from datetime import datetime, date, timedelta
 
-def send_to_influx(model_data,site,timestamp):
+def send_to_influx(model_data, site, timestamp, to_exclude=[]):
     """
     Utility function to send data to influx
     """
+
     i = Influx()
     model_data_dict = model_to_dict(model_data)
+
+    if to_exclude:
+        # Remove any value we wish not to be submitted
+        # Generally used with datetime measurement
+        for val in to_exclude:
+            #if to_exclude  in model_data_dict.keys():
+            model_data_dict.pop(val)
+
     i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site":site.id, "site_name":site.site_name})
 
 
@@ -74,7 +83,7 @@ def get_BOM_data():
                             )
                         data_point.save()
                         # Send to influx
-                        send_to_influx(data_point, site, date)
+                        send_to_influx(data_point, site, date, to_exclude=['time'])
 
                         print "BoM Data saved"
                         # Alert if check(data_point) fails
@@ -206,7 +215,7 @@ def get_weather_data(days=7,historical=False):
     forecast_result = []
 
     for site in sites:
-        forecast_client = ForecastAPI(settings.FORECAST_KEY,site.latitude,site.longitude)
+        forecast_client = ForecastAPI(settings.FORECAST_KEY,site.position.latitude,site.position.longitude)
         if historical:
             #Get weather dates for an extended historical interval
             now = datetime.now()
@@ -238,7 +247,7 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                send_to_influx(site,w_data,date)
+                send_to_influx(site, w_data, date, to_exclude=['date'])
 
     return "updated weather for %s"%sites
 
@@ -248,6 +257,7 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
     """
     Calucalte aggregate values from Influx for provided measuruements
     """
+    i = Influx()
     clause_opts = {
             'negative': (lambda x : x < 0),
             'positive' : (lambda x: x > 0 )}
@@ -255,7 +265,6 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
         logging.error("unkown clause provided %s allowed %s"%(clause,clause_opts.keys()))
         return 0
 
-    i = Influx()
     #get all sites
     sites = Sesh_Site.objects.all()
     result = 0
@@ -284,7 +293,6 @@ def get_aggregate_daily_data():
     """
     Batch job to get daily aggregate data for each site
     """
-    i = Influx()
     sites  = Sesh_Site.objects.all()
     print "Aggregating daily consumption and production stats"
     for site in sites:
@@ -302,7 +310,8 @@ def get_aggregate_daily_data():
 
             daily_aggr.save()
             #send to influx
-            send_to_influx(daily_aggr, site, time_utils.get_yesterday())
+            send_to_influx(daily_aggr, site, time_utils.get_yesterday(), to_exclude=['date'])
+
 
 
 @shared_task
