@@ -90,7 +90,7 @@
 {% block javascript %}
 {% autoescape off %}
 site = {{ sites_json  }};
-active_site_coords = {"lat":{{active_site.latitude}},"lon":{{active_site.longitude}} };
+active_site_coords = {"lat":{{active_site.position.latitude}},"lon":{{active_site.position.longitude}} };
 {% endautoescape %}
 {% endblock %}
 
