@@ -32,7 +32,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[]):
             #if to_exclude  in model_data_dict.keys():
             model_data_dict.pop(val)
 
-    i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site":site.id, "site_name":site.site_name})
+    i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
 
 
 @shared_task
@@ -270,7 +270,7 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
     result = 0
 
     #get measurement values from influx
-    aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.id,delta)
+    aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.site_name,delta)
     #we have mean values by the hour now aggregate them
     print aggr_results
     if aggr_results:

@@ -82,7 +82,6 @@ class Influx:
                 if isinstance(measurement_dict[key], str) or isinstance(measurement_dict[key],unicode):
                     data_point["fields"] = {"value" : measurement_dict[key]}
                 else:
-                    logging.debug("isinstance %s %s %s" % (isinstance(measurement_dict[key],str),measurement_dict[key],type(measurement_dict[key])))
                     data_point["fields"] = {"value" : float(measurement_dict[key])}
 
                 logging.debug("prepping data point %s"%(data_point))
