@@ -177,11 +177,18 @@ class Daily_Data_Point(models.Model):
     """
     Daily aggregate of data points
     """
+
     site = models.ForeignKey(Sesh_Site)
-    daily_pv_yield = models.FloatField(default=0) #aggregate pv produced that day Kwh
-    daily_power_consumption = models.FloatField(default=0) #aggreagate power used that day Kwh
+    daily_pv_yield = models.FloatField(default=0) # Aggregate pv produced that day Kwh
+    daily_power_consumption_total = models.FloatField(default=0) # Aggreagate power used that day Kwh
+    daily_power_cons_pv = models.FloatField(default=0)
     daily_battery_charge = models.FloatField(default=0) # Amount of charge put in battery
+    daily_grid_outage_t = models.FloatField(default=0) # Amount of time the grid was off
+    daily_grid_outage_n = models.FloatField(default=0) # Aggregate amount times  grid was off
+    daily_grid_usage = models.FloatField(default=0) # Aggregate amount of grid used
+    daily_no_of_alerts = models.FloatField(default=0) # Amount of charge put in battery
     date = models.DateTimeField()
+
 
     class Meta:
          verbose_name = 'Daily Aggregate Data Point'
