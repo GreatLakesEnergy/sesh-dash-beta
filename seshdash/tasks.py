@@ -13,6 +13,7 @@ from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils import time_utils
 from seshdash.utils.alert import alert_check
+from seshdash.utils.reporting import prepare_report
 from seshdash.data.db.influx import Influx
 
 from datetime import datetime, date, timedelta
@@ -397,3 +398,16 @@ def get_historical_solar(days):
 def get_all_data_initial(days):
     get_weather_data(days)
     get_enphase_daily_summary(days)
+
+@shared_task
+def send_reports():
+    """
+    Schedule email report sending
+    """
+
+    sites = Sesh_Site.objects.all()
+    for site in sites:
+        logging.debug("Sending report for site %s"%site)
+        prepare_report(site)
+
+

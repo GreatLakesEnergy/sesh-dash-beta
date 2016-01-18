@@ -16,7 +16,9 @@ import os
 from celery.schedules import crontab
 from datetime import timedelta
 from ConfigParser import RawConfigParser
+import djcelery
 
+djcelery.setup_loader()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.join(BASE_DIR,'seshdash')
@@ -31,83 +33,90 @@ if not os.path.isfile(CONFIG_FILE):
 config = RawConfigParser()
 config.read( os.path.join(BASE_DIR,CONFIG_FILE))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
+# quick-start development settings - unsuitable for production
+# see https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# security warning: keep the secret key used in production secret!
 SECRET_KEY = '5dsf0sfg5243dfgr26'
-SECRET_KEY = config.get('secret','SECRET_KEY')
+SECRET_KEY = config.get('secret','secret_key')
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# security warning: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-ENPHASE_KEY = config.get('api','ENPHASE_KEY')
-FORECAST_KEY = config.get('api','FORECAST_KEY')
+ENPHASE_KEY = config.get('api','enphase_key')
+FORECAST_KEY = config.get('api','forecast_key')
 
 DATABASES = {
     'default': {
-        'ENGINE': config.get('database','ENGINE'),
-        'NAME': config.get('database','NAME'),
-        'USER': config.get('database','USER'),
-        'PASSWORD': config.get('database','PASSWORD'),
-        'HOST': config.get('database','HOST'),
+        'ENGINE': config.get('database','engine'),
+        'NAME': config.get('database','name'),
+        'USER': config.get('database','user'),
+        'PASSWORD': config.get('database','password'),
+        'HOST': config.get('database','host'),
     }
 }
-#INFLUX Settings
-INFLUX_HOST = config.get('influx','HOST')
-INFLUX_PORT = config.get('influx','PORT')
-INFLUX_USERNAME =  config.get('influx','USERNAME')
-INFLUX_PASSWORD = config.get('influx','PASSWORD')
-INFLUX_DB = config.get('influx','DB')
+#influx settings
+INFLUX_HOST = config.get('influx','host')
+INFLUX_PORT = config.get('influx','port')
+INFLUX_USERNAME =  config.get('influx','username')
+INFLUX_PASSWORD = config.get('influx','password')
+INFLUX_DB = config.get('influx','db')
 
+# Guardian settings
+ANONYMOUS_USER_ID = -1
 
-# CELERY SETTINGS
+# celery settings
 BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost/0'
+#celery_result_backend = 'redis://localhost/0'
+CELERY_RESULT_BACKEND = 'djcelery.backends.database.DatabaseBackend'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler' # needed for djcelery admin
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Africa/Kigali'
-#TODO Move time constants to config file
-CELERYBEAT_SCHEDULE = {
+CELERY_TIMEZONE = 'africa/kigali'
+#todo move time constants to config file
+"""
+celerybeat_schedule = {
    'get_daily_weather_forecast': {
         'task': 'seshdash.tasks.get_weather_data',
         'schedule': timedelta(hours=5),
-        'args': None,
+        'args': none,
     },
-    'get_BOM_data': {
-        'task': 'seshdash.tasks.get_BOM_data',
+    'get_bom_data': {
+        'task': 'seshdash.tasks.get_bom_data',
         'schedule': timedelta(minutes=5),
-        'args': None,
+        'args': none,
     },
     'aggregate_data': {
         'task': 'seshdash.tasks.get_aggregate_daily_data',
         #'schedule': crontab(hour=0,minute=0),
-        'schedule': timedelta(minutes=5), # Only for dev
-        'args': None,
+        'schedule': timedelta(minutes=5), # only for dev
+        'args': none,
     },
 }
+"""
 
-#Authentication
+
+#authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
 
-#Mail
+#mail
 EMAIL_USE_TLS = True
-EMAIL_HOST = config.get('mail','EMAIL_HOST')
-EMAIL_PORT = config.get('mail','EMAIL_PORT')
-EMAIL_HOST_USER = config.get('mail','EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
+EMAIL_HOST = config.get('mail','email_host')
+EMAIL_PORT = config.get('mail','email_port')
+EMAIL_HOST_USER = config.get('mail','email_host_user')
+EMAIL_HOST_PASSWORD = config.get('mail','email_host_password')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_TEMPLATES_DIR = os.path.join(TEMPLATE_DIR,'email')
-FROM_EMAIL = config.get('mail','FROM_EMAIL')
+#email_templates_dir = os.path.join(template_dir,'email')
+FROM_EMAIL = config.get('mail','from_email')
 
-#LOGGING
+#logging
 #TODO
 """
-LOGGING = {
+logging = {
         'version':1,
         'disable_existing_loggers': False,
         'loggers':{
@@ -116,7 +125,7 @@ LOGGING = {
             }
         }
 """
-# Application definition
+# application definition
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -131,6 +140,8 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'geoposition',
+    'djcelery',
+    'django_extensions',
 )
 
 #BOWER
@@ -187,9 +198,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'sesh.wsgi.application'
-
-#ADMIN UI SETTINGS
-#GRAPPELLI_ADMIN_TITLE = "SESH Administration Dashboard"
 
 
 # Internationalization
