@@ -92,16 +92,16 @@ $('#containerhigh').highcharts({
             backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
         },
         series: [{
-            name: 'PV Day Production',
+            name: 'PV Production',
             type: 'column',
             yAxis: 1,
             data:pv,
             tooltip: {
-                valueSuffix: ' HW'
+                valueSuffix: ' Wh'
             }
 
         }, {
-            name: 'Cloud Cover',
+            name: 'Percent Cloud Cover',
             type: 'spline',
             data: cloud,
             tooltip: {
