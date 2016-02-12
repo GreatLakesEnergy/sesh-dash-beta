@@ -38,31 +38,30 @@ config.read( os.path.join(BASE_DIR,CONFIG_FILE))
 
 # security warning: keep the secret key used in production secret!
 SECRET_KEY = '5dsf0sfg5243dfgr26'
-SECRET_KEY = config.get('secret','secret_key')
+SECRET_KEY = config.get('secret','SECRET_KEY')
 
 # security warning: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-ENPHASE_KEY = config.get('api','enphase_key')
 FORECAST_KEY = config.get('api','forecast_key')
 
 DATABASES = {
     'default': {
-        'ENGINE': config.get('database','engine'),
-        'NAME': config.get('database','name'),
-        'USER': config.get('database','user'),
-        'PASSWORD': config.get('database','password'),
-        'HOST': config.get('database','host'),
+        'ENGINE': config.get('database','ENGINE'),
+        'NAME': config.get('database','NAME'),
+        'USER': config.get('database','USER'),
+        'PASSWORD': config.get('database','PASSWORD'),
+        'HOST': config.get('database','HOST'),
     }
 }
 #influx settings
-INFLUX_HOST = config.get('influx','host')
-INFLUX_PORT = config.get('influx','port')
-INFLUX_USERNAME =  config.get('influx','username')
-INFLUX_PASSWORD = config.get('influx','password')
-INFLUX_DB = config.get('influx','db')
+INFLUX_HOST = config.get('influx','HOST')
+INFLUX_PORT = config.get('influx','PORT')
+INFLUX_USERNAME =  config.get('influx','USERNAME')
+INFLUX_PASSWORD = config.get('influx','PASSWORD')
+INFLUX_DB = config.get('influx','DB')
 
 # Guardian settings
 ANONYMOUS_USER_ID = -1
@@ -105,13 +104,13 @@ LOGIN_URL = '/login'
 
 #mail
 EMAIL_USE_TLS = True
-EMAIL_HOST = config.get('mail','email_host')
-EMAIL_PORT = config.get('mail','email_port')
-EMAIL_HOST_USER = config.get('mail','email_host_user')
-EMAIL_HOST_PASSWORD = config.get('mail','email_host_password')
+EMAIL_HOST = config.get('mail','EMAIL_HOST')
+EMAIL_PORT = config.get('mail','EMAIL_PORT')
+EMAIL_HOST_USER = config.get('mail','EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #email_templates_dir = os.path.join(template_dir,'email')
-FROM_EMAIL = config.get('mail','from_email')
+FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
 #logging
 #TODO
@@ -159,7 +158,7 @@ BOWER_INSTALLED_APPS = (
             'raphael'
             )
 
-ANONYMOUS_USER_ID = None
+ANONYMOUS_USER_ID = -1
 
 AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
