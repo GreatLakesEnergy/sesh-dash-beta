@@ -66,10 +66,7 @@ def index(request,site_id=0):
     y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
     #create graphs for PV dailt prod vs cloud cover
 
-    context_dict=linebar(x2_data,y_data,y2_data,'WH produced','% cloud cover','chartcontainer',context_dict)
-
     # Create an object of the get_high_chart_date
-
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
 
     return render(request,'seshdash/main-dash.html',context_dict)
@@ -392,7 +389,6 @@ def get_high_chart_data(user,site_id,sites):
             last_date= date
 
         # Getting sum   Pv Production in the interval of 24 hours
-
         pv_sum_day= BoM_Data_Point.objects.filter(site=site,time__range=[last_date,date]).aggregate(pv_sum=Sum('pv_production'))
         last_date=date
 

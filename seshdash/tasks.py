@@ -6,13 +6,14 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.forms.models import model_to_dict
 from celery import shared_task
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert
 
 #from seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils import time_utils
 from seshdash.utils.alert import alert_check
+from seshdash.utils.reporting import prepare_report
 from seshdash.data.db.influx import Influx
 
 from datetime import datetime, date, timedelta
@@ -253,36 +254,88 @@ def get_weather_data(days=7,historical=False):
 
 
 
-def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=None):
+def find_chunks(input_list,key):
+    """
+    Find consecutive chunks in list
+    will return a list comprimised of dictionaries [{value:number_of_interval},..]
+    """
+    result_list = []
+    section = {}
+    count = 0
+    for i in xrange(0,len(input_list)-1):
+        if count > 0:
+            section[input_list[i][key]] = count
+        if input_list[i][key] == input_list[i+1][key]:
+            count = count + 1
+            if i == (len(input_list)-2):
+            # We are at end of list
+                result_list.append(section)
+        else:
+            count = 0
+            section = {}
+            result_list.append(section)
+
+    return result_list
+
+
+def get_grid_stats(measurement_dict_list, measurement_value, measurement_key, bucket_size):
+    """
+    Utility tool that will calculate time delta for consecutive measurements
+    if a measurement is happens to be 0 X times this will find the duration
+    """
+    time_gap = bucket_size #TODO this should be a global defined by celery job runtime
+    result_dict = {}
+    chunked_list = find_chunks(measurement_dict_list,measurement_key)
+    logging.debug("Chunked list  %s"%chunked_list)
+    count = 0
+    for chunk_dict in chunked_list:
+        if measurement_value in chunk_dict.keys():
+            result_dict['duration'] = time_gap * chunk_dict[measurement_value]
+            result_dict['count'] = count + 1
+    logging.debug("Found chunks %s"%result_dict)
+    return result_dict
+
+
+def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=None, toSum=True):
     """
     Calucalte aggregate values from Influx for provided measuruements
     """
     i = Influx()
+    result = 0
+    operator = 'mean'
+
     clause_opts = {
-            'negative': (lambda x : x < 0),
-            'positive' : (lambda x: x > 0 )}
+            'negative': (lambda x : x[operator] < 0),
+            'positive' : (lambda x: x[operator] > 0 ),
+            'zero' : (lambda x: x[operator] == 0)}
+
     if clause and not clause in clause_opts.keys():
         logging.error("unkown clause provided %s allowed %s"%(clause,clause_opts.keys()))
         return 0
 
-    #get all sites
-    sites = Sesh_Site.objects.all()
-    result = 0
-
     #get measurement values from influx
-    aggr_results = i.get_measurement_bucket(measurement,bucket_size,'site_name',site.site_name,delta)
+    if not toSum:
+        operator = 'min'
+
+    aggr_results = i.get_measurement_bucket(measurement, bucket_size, 'site_name', site.site_name, delta, operator=operator)
+
+    #logging.debug("influx results %s "%(aggr_results))
+
     #we have mean values by the hour now aggregate them
-    print aggr_results
     if aggr_results:
-        agr_value = 0
+        agr_value = []
         if clause:
             #if we have a cluase filter to apply
             aggr_results = filter(clause_opts[clause],aggr_results)
 
-        for item in aggr_results:
-            agr_value = agr_value + item['mean']
-            #sum_measurement = reduce(lambda x,y:x['mean']+y['mean'],aggr_results)
-        result = agr_value
+        if toSum:
+            agr_value.append(sum(map(lambda x: x[operator], aggr_results)))
+            resuls = agr_value
+        else:
+            result = aggr_results
+
+
+        logging.debug("Aggregateing %s %s agr:%s"%(measurement,aggr_results,agr_value))
     else:
         logging.warning("No Values returned for aggregate. Check Influx Connection.")
     return result
@@ -296,16 +349,34 @@ def get_aggregate_daily_data():
     sites  = Sesh_Site.objects.all()
     print "Aggregating daily consumption and production stats"
     for site in sites:
+            yesterday = time_utils.get_yesterday()
+
+            logging.debug("aggregate data for %s"%site)
             aggregate_data_pv = get_aggregate_data (site, 'pv_production')
             aggregate_data_AC = get_aggregate_data (site, 'AC_output_absolute')
-            aggregate_data_batt = get_aggregate_data (site, 'AC_output',clause='negative')
-            # This is normally an unecassary check bu requred in development
+            aggregate_data_batt = get_aggregate_data (site, 'AC_output', clause='negative')
+            aggregate_data_grid = get_aggregate_data (site, 'AC_input', clause='positive')
+            aggregate_data_grid_data = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False)
+
+            logging.debug("aggregate date for grid %s "%aggregate_data_grid_data)
+            aggregate_data_grid_outage_stats = get_grid_stats(aggregate_data_grid_data, 0, 'min',10)
+            aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=yesterday)
+            sum_power_pv = aggregate_data_AC - aggregate_data_grid
+
+
+
+            # Create model of aggregates
             daily_aggr = Daily_Data_Point(
                                          site = site,
                                          daily_pv_yield = aggregate_data_pv,
-                                         daily_power_consumption = aggregate_data_AC,
+                                         daily_power_consumption_total = aggregate_data_AC,
                                          daily_battery_charge = aggregate_data_batt,
-                                         date = time_utils.get_yesterday()
+                                         daily_power_cons_pv = sum_power_pv,
+                                         daily_grid_usage = aggregate_data_grid,
+                                         daily_grid_outage_t = aggregate_data_grid_outage_stats['duration'],
+                                         daily_grid_outage_n = aggregate_data_grid_outage_stats['count'],
+                                         daily_no_of_alerts = aggregate_data_alerts.count(),
+                                         date = yesterday,
                                             )
 
             daily_aggr.save()
@@ -327,3 +398,16 @@ def get_historical_solar(days):
 def get_all_data_initial(days):
     get_weather_data(days)
     get_enphase_daily_summary(days)
+
+@shared_task
+def send_reports():
+    """
+    Schedule email report sending
+    """
+
+    sites = Sesh_Site.objects.all()
+    for site in sites:
+        logging.debug("Sending report for site %s"%site)
+        prepare_report(site)
+
+

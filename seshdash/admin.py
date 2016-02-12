@@ -25,7 +25,7 @@ class Sesh_AlertAdmin(GuardedModelAdmin):
 
 @admin.register(Daily_Data_Point)
 class Daily_Data_PointAdmin(GuardedModelAdmin):
-    list_display = ('site','date','daily_pv_yield','daily_power_consumption','daily_battery_charge')
+    list_display = ('site','date','daily_pv_yield','daily_power_consumption_total','daily_battery_charge')
 
 @admin.register(VRM_Account)
 class VRM_AccountAdmin(GuardedModelAdmin):
