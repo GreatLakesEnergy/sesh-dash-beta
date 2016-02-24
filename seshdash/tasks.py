@@ -35,6 +35,10 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[]):
 
     i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
 
+@task_failure_.connect
+def handle_task_failure(**kw):
+    import rollbar
+    rollbar.report_exc_info(extra_data=kw)
 
 @shared_task
 def get_BOM_data():
@@ -337,7 +341,10 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
         logging.debug("Aggregateing %s %s agr:%s"%(measurement,aggr_results,agr_value))
     else:
-        logging.warning("No Values returned for aggregate. Check Influx Connection.")
+        message = "No Values returned for aggregate. Check Influx Connection."
+        logging.warning(message)
+        import rollbar
+        rollbar.report_message(message)
     return result
 
 

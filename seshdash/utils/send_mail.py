@@ -4,6 +4,7 @@ from django.template import Context
 from sesh.settings import FROM_EMAIL
 
 import traceback
+import logging
 
 # example: send_mail("Hello World", [me@gmail.com,you@gmail.com],"Here is your email")
 # Sends and email to me@gmail.com and you@gmail.com addresses an email
@@ -18,11 +19,14 @@ def send_mail(subject,list_of_recipients,content,email_template='alert'):
         text_content = plaintext.render(d)
         html_content = htmly.render(d)
 
-        print html_content
+        logging.debug(html_content)
         msg = EmailMultiAlternatives(subject, text_content, FROM_EMAIL, list_of_recipients)
         msg.attach_alternative(html_content, "text/html")
         msg.send()
         return True
     except:
         traceback.print_exc()
+        import rollbar
+        rollbar.report_message("Error sending email with content %s "%content)
+        rollbar.report_exc_info()
         return False

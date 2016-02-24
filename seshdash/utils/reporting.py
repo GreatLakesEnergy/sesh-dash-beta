@@ -54,6 +54,9 @@ def prepare_report(site, duration="week"):
     aggeragete_data["title"] = subject
     aggeragete_data["site_name"] = site.site_name
     aggeragete_data["duration"] = duration
+    aggeragete_data["generator_stat"] = "NA" #TODO
+    aggeragete_data["url_to_dash"] = 'http://sesh-dev1.cloudapp.net:3030/site/<site_name>' #TODO fix this
+
 
     # TODO hack alert
     aggeragete_data["cost_savings"] = aggeragete_data["total_pv"] * cash_power_cost
