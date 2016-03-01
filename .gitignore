@@ -81,4 +81,3 @@ target/
 
 #Project static files
 seshdash/static/
-seshdash/migrations/
