@@ -166,20 +166,20 @@ ul li {
 			<table>
 				<tr>
 					<td>
-						<h1>SESH {{ title }} Report </h1>
-						<p>Hi there {{user_name}} ,</p>
-						<p>Here is your <i>energy usage</i> for last {{ duration }}</p>
+						<h1>SESH {{ content.title }} </h1>
+						<p>Hi there {{username}} ,</p>
+						<p>Here is your <i>energy usage</i> for last {{ content.duration }}</p>
 						
-						<h2>Last {{duration}} </h2>
-						<li><p> Total Energy used was {{ total_consumption}} </p> </li>
-						<li><p> Total energy produced was {{ total_pv }} </p> </li>
-						<li><p> Energy used from grid was {{ grid_used  }} </p> </li>
-						<li><p> The grid was unavailible for  {{ grid_outage  }} </p> </li>
-						<li><p> Total generator use was {{ generator_stat  }} </p> </li>
-						<li><p> Total alarms triggered was {{ no_alarms }} </p> </li>
+						<h2>Last {{ content.duration }} </h2>
+						<li><p> Total energy used was {{ content.total_consumption| floatformat}} KWh </p> </li>
+						<li><p> Total energy produced was {{ content.total_pv | floatformat }} KWh</p> </li>
+						<li><p> Energy used from grid was {{ content.grid_used | floatformat }} KWh</p> </li>
+						<li><p> The grid was unavailible for  {{ content.grid_outage  }} Minutes</p> </li>
+						<li><p> Total generator use was 0 {{ content.generator_stat  }} minutes</p> </li>
+						<li><p> Total alarms triggered was {{ content.no_alarms }} </p> </li>
 
-						<H3><p> Total dollars saved was {{ cost_savings  }} </p> </h3>
-						<a href="https://{{ url_to_dash }}" class="btn-primary">See the realtime stats here </a>
+						<h3><p> Total dollars saved was <i>{{ content.cost_savings | floatformat:"-2" }} RWF </i> </p> </h3>
+						<a href="https://{{ content.url_to_dash }}" class="btn-primary">See the realtime stats here </a>
 						<p>Thanks, have a lovely week.</p>
 						<p>Seshina</p>
 						<p><a href="http://twitter.com/sesh-dash">Follow @sesh-dash on Twitter</a>

@@ -43,23 +43,23 @@ def prepare_report(site, duration="week"):
                     )
     # Get Users for site
     users = get_users_with_perms(site)
-    print "users %s"%users
     for user in users:
         recipients.append(user.email)
     logging.debug("emailing %s" %recipients)
-    print "emailing %s"%recipients
 
     # Add in meta
     subject = "%sly energy usage for %s"%(duration,site.site_name)
     aggeragete_data["title"] = subject
     aggeragete_data["site_name"] = site.site_name
     aggeragete_data["duration"] = duration
+    aggeragete_data["generator_stat"] = "NA" #TODO
+    aggeragete_data["url_to_dash"] = 'http://sesh-dev1.cloudapp.net:3030/site/<site_name>' #TODO fix this
+
 
     # TODO hack alert
     aggeragete_data["cost_savings"] = aggeragete_data["total_pv"] * cash_power_cost
 
     mail_sent = report(subject, aggeragete_data, recipients)
-    print("Sent mail for %s" %aggeragete_data)
 
 def report(subject,content,recipients):
     return send_mail(subject, recipients, content, email_template="reporting")
