@@ -43,11 +43,9 @@ def prepare_report(site, duration="week"):
                     )
     # Get Users for site
     users = get_users_with_perms(site)
-    print "users %s"%users
     for user in users:
         recipients.append(user.email)
     logging.debug("emailing %s" %recipients)
-    print "emailing %s"%recipients
 
     # Add in meta
     subject = "%sly energy usage for %s"%(duration,site.site_name)
@@ -62,7 +60,6 @@ def prepare_report(site, duration="week"):
     aggeragete_data["cost_savings"] = aggeragete_data["total_pv"] * cash_power_cost
 
     mail_sent = report(subject, aggeragete_data, recipients)
-    print("Sent mail for %s" %aggeragete_data)
 
 def report(subject,content,recipients):
     return send_mail(subject, recipients, content, email_template="reporting")

@@ -1,11 +1,13 @@
 #needed to import some relative libs
 from __future__ import absolute_import
 import logging
+import sys
 
 from django.conf import settings
 from django.db import IntegrityError
 from django.forms.models import model_to_dict
 from celery import shared_task
+from celery.signals import task_failure,task_success
 from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert
 
 #from seshdash.api.enphase import EnphaseAPI
@@ -18,27 +20,34 @@ from seshdash.data.db.influx import Influx
 
 from datetime import datetime, date, timedelta
 
+@task_failure.connect
+def handle_task_failure(**kw):
+    import rollbar
+    trace = sys.exc_info()
+    kw['trace'] = trace
+    rollbar.report_message(message='Error occured in task',extra_data=kw)
+
+
 def send_to_influx(model_data, site, timestamp, to_exclude=[]):
     """
     Utility function to send data to influx
     """
+    try:
+        i = Influx()
+        model_data_dict = model_to_dict(model_data)
 
-    i = Influx()
-    model_data_dict = model_to_dict(model_data)
+        if to_exclude:
+            # Remove any value we wish not to be submitted
+            # Generally used with datetime measurement
+            for val in to_exclude:
+                #if to_exclude  in model_data_dict.keys():
+                model_data_dict.pop(val)
 
-    if to_exclude:
-        # Remove any value we wish not to be submitted
-        # Generally used with datetime measurement
-        for val in to_exclude:
-            #if to_exclude  in model_data_dict.keys():
-            model_data_dict.pop(val)
+        i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
+    except Exception,e:
+        message = "Error sending to influx with exception %s"%e
+        handle_task_failure(message= message,exception=e,data=model_data)
 
-    i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
-
-@task_failure_.connect
-def handle_task_failure(**kw):
-    import rollbar
-    rollbar.report_exc_info(extra_data=kw)
 
 @shared_task
 def get_BOM_data():
@@ -97,8 +106,9 @@ def get_BOM_data():
             logging.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
-            print "error with geting site %s data exception %s"%(site,e)
+            message = "error with geting site %s data exception %s"(site,e)
             logging.exception("error with geting site %s data exception")
+            handle_task_failure(message = message)
             pass
 
 
@@ -342,9 +352,9 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
         logging.debug("Aggregateing %s %s agr:%s"%(measurement,aggr_results,agr_value))
     else:
         message = "No Values returned for aggregate. Check Influx Connection."
-        logging.warning(message)
-        import rollbar
-        rollbar.report_message(message)
+        raise Exception (message)
+        #logging.warning(message)
+        #rollbar.report_message(message)
     return result
 
 

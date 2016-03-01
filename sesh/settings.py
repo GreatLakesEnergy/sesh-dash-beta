@@ -33,7 +33,7 @@ if not os.path.isfile(CONFIG_FILE):
 # Initialize config reader with defaults
 config = RawConfigParser(
        {
-               'ENGINE':'django.db.backends.sql',
+               'ENGINE':'django.db.backends.sqlite3',
                'NAME' : 'SESH_DB',
                'USER':'',
                'PASSWORD':'',
@@ -54,7 +54,8 @@ config = RawConfigParser(
                'EMAIL_HOST_BACKEND':'django.core.mail.backends.smtp.EmailBackend',
                'FROM_EMAIL':'some_email@gmail.com',
                'ENPHASE_KEY':'enphase_api_key',
-               'FORCAST_KEY':'ASDASFAG'
+               'FORCAST_KEY':'ASDASFAG',
+               'TOKEN':''
                }
         )
 
