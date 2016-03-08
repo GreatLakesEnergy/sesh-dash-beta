@@ -154,8 +154,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='VRM_Account',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('vrm_user_id', models.CharField(default=b'', max_length=100)),
+                ('vrm_user_id', models.CharField(default=b'', max_length=100,  primary_key=True,)),
                 ('vrm_password', models.CharField(default=b'', max_length=100)),
                 ('vrm_site_id', models.CharField(default=b'', max_length=20)),
             ],
