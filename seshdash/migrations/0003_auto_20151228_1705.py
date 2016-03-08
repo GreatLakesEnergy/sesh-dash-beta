@@ -12,10 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='vrm_account',
-            name='id',
-        ),
         migrations.AlterField(
             model_name='vrm_account',
             name='vrm_user_id',
