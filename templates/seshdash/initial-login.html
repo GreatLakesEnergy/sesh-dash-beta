@@ -6,7 +6,7 @@
 		Welcome {{ user }} looks like you don't have any sites setup
 		</h2> 
         {% if site_forms  %}
-			m{% if error %}
+			{% if error %}
                 <p class="text-danger"> Site create was failure    </p>
             {% else %}
                 <p class="text-info"> Found {{ site_forms|length }} sites availible for import </p>

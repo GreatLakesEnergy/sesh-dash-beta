@@ -104,7 +104,28 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Kigali'
-
+CELERYBEAT_SCHEDULE = {
+   'get_daily_weather_forecast': {
+        'task': 'seshdash.tasks.get_weather_data',
+        'schedule': timedelta(hours=5),
+        'args': None,
+    },
+    'get_BOM_data': {
+        'task': 'seshdash.tasks.get_BOM_data',
+        'schedule': timedelta(minutes=5),
+        'args': None,
+    },
+    'aggregate_daily_data': {
+        'task': 'seshdash.tasks.get_aggregate_data',
+        'schedule': timedelta(days=1),
+        'args': None,
+    },
+    'get_send_reports': {
+        'task': 'seshdash.tasks.send_reports',
+        'schedule': timedelta(days=1),
+        'args': None,
+    },
+}
 #authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
@@ -216,7 +237,7 @@ INSTALLED_APPS = (
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
-            'jquery#1.9',
+            'jquery#2.2.0',
             'mapbox.js',
             'd3#3.3.13',
             'nvd3#1.7.1',
