@@ -48,11 +48,11 @@ class Influx:
             result_set_gen = result_set.get_points(measurement=measurement)
             return list(result_set_gen)
         except InfluxDBServerError,e:
-            logging.error("Error running query on server %s"%e)
+            logging.error("Error running query on server %s"% str(e))
         except InfluxDBClientError,e:
-            logging.error("Error running  query"%e)
+            logging.error("Error running  query"%str(e))
         except Exception,e:
-            logging.error("influxdb unkown error %s"%e)
+            logging.error("influxdb unkown error %s" %str(e))
         return []
 
     def send_object_measurements(self,measurement_dict, timestamp=None, tags={}):
