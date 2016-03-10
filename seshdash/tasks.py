@@ -106,7 +106,7 @@ def get_BOM_data():
             logging.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
-            message = "error with geting site %s data exception %s"(site,e)
+            message = "error with geting site %s data exception %s"%(site,e)
             logging.exception("error with geting site %s data exception")
             handle_task_failure(message = message)
             pass
