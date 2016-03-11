@@ -163,7 +163,6 @@ class Sesh_Alert(models.Model):
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     alertSent = models.BooleanField()
-    trigger_alert = models.ForeignKey(BoM_Data_Point)
 
     def __str__(self):
         return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
