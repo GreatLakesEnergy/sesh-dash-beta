@@ -23,7 +23,7 @@
                                 {% for alert in alerts %}
                                     <tr>
 	                                <td>{{alert.site}}</td>
-                                        <td>{{alert.alert}}</td>
+                                        <td>{{alert}}</td>
                                         <td>{{alert.date|timesince}}</td>
                                     <tr>
                                 {% endfor %}

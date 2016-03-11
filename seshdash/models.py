@@ -99,7 +99,7 @@ class Alert_Rule(models.Model):
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
-        return "At %s %s %s %s " %(self.site.site_name,self.get_check_field_display(),self.get_operator_display(),self.value)
+        return "If %s is %s %s" %(self.get_check_field_display(), self.get_operator_display() ,self.value)
 
     class Meta:
          verbose_name = 'System Alert Rule'
@@ -160,16 +160,22 @@ class BoM_Data_Point(models.Model):
 class Sesh_Alert(models.Model):
     site = models.ForeignKey(Sesh_Site)
     alert = models.ForeignKey(Alert_Rule)
+    point = models.ForeignKey(BoM_Data_Point)
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     alertSent = models.BooleanField()
+        
+
+    # def __str__(self):
+    #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
-        return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
-
-    def __unicode__(self):
-        return "Alerts"
-
+        return "At %s, %s is %s which is %s %s " % (self.site.site_name, self.alert.get_check_field_display(), \
+                                      str(getattr(self.point, self.alert.check_field)), \
+                                      self.alert.get_operator_display(), \
+                                      self.alert.value)
+                                        
+   
     class Meta:
         verbose_name = 'System Alert'
         verbose_name_plural = 'System Alerts'
