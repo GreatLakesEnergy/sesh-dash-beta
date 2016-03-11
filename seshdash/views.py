@@ -250,12 +250,13 @@ def login_user(request):
             #send user name and favorite site data to index page for initial login load
             return index(request)
         else:
-            #TODO return an error message
-            message = "Error logging in"
-            return render(request,'seshdash/login.html')
+            message = "Incorrect password"
+            context_dict['error'] = message
+            return render(request,'seshdash/login.html',context_dict)
     else:
-            #TODO return invalid login page
-            return render(request,'seshdash/login.html')
+            message = "Error user doesn't exist"
+            context_dict['error'] = message
+            return render(request,'seshdash/login.html',context_dict)
 
 
 def get_user_data(user,site_id,sites):
