@@ -5,7 +5,12 @@
  height: 300px;
 }
 
+.table-fixed tbody {
+ height: 300px;
+ overflow: auto;
+}
+
 .panel-body.system-alerts {
- height: 235px;
+ height: 350px;
  overflow-y: scroll;
 }
