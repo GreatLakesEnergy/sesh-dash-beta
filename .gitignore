@@ -36,6 +36,7 @@ parts/
 sdist/
 var/
 bower_components/
+node_modules/
 components/
 *.egg-info/
 .installed.cfg

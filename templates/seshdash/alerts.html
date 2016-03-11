@@ -1,0 +1,39 @@
+{% block alerts %}
+
+    <div class="col-lg-8">
+        <!-- TODO make the panel heading variable for color -->
+        <div class="panel panel-{{ type }}">
+                <div class="panel-heading">
+                    <!-- TODO make this a variable -->
+                    <i class="fa fa-exclamation-triangle fa-fw"></i>
+                    {{ title }}
+                {% autoescape on %}
+                </div>
+                    <div class="panel-body system-alerts">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-fixed ">
+                                <thead>
+                                    <tr>
+                                        <th>Site</th>
+                                        <th>Alert</th>
+				        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for alert in alerts %}
+                                    <tr>
+	                                <td>{{alert.site}}</td>
+                                        <td>{{alert}}</td>
+                                        <td>{{alert.date|timesince}}</td>
+                                    <tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                 {% endautoescape %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+

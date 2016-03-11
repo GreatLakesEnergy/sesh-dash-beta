@@ -183,15 +183,15 @@ LOGGING = {
         }
         '''
 # Error reporting
+if not DEBUG:
+     ROLLBAR = {
+             'access_token': config.get('rollbar','token'),
+             'environment': 'development' if DEBUG else 'production',
+             'root': BASE_DIR,
+             }
 
-ROLLBAR = {
-        'access_token': config.get('rollbar','token'),
-        'environment': 'development' if DEBUG else 'production',
-        'root': BASE_DIR,
-        }
-
-import rollbar
-rollbar.init(**ROLLBAR)
+     import rollbar
+     rollbar.init(**ROLLBAR)
 
 
 # application definition

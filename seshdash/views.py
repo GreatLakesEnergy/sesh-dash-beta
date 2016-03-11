@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert
 from seshdash.utils import time_utils
 from pprint import pprint
 from seshdash.forms import SiteForm,VRMForm
@@ -310,6 +310,8 @@ def get_user_data(user,site_id,sites):
     #context_data_json['site_power'] = power_data_json
     #context_data_json['bom_data'] = bom_data_json
 
+    context_data['alerts'] = display_alerts(site_id)                
+
     return context_data,context_data_json
 
 
@@ -405,3 +407,13 @@ def get_high_chart_data(user,site_id,sites):
      context_high_data['high_pv_production']= high_pv_production
      print (context_high_data['high_pv_production'])
      return context_high_data
+
+def display_alerts(site_id):
+     alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
+     
+     alert_list = []    
+
+     for alert in alerts:
+          alert_list.append(alert)
+
+     return alert_list
