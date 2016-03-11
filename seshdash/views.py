@@ -409,7 +409,7 @@ def get_high_chart_data(user,site_id,sites):
      return context_high_data
 
 def display_alerts(site_id):
-     alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False)[:5]
+     alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
      
      alert_list = []    
 
