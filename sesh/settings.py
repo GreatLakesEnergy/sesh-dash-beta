@@ -237,7 +237,7 @@ INSTALLED_APPS = (
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
-            'jquery#2.2.0',
+            'jquery#2.2.1',
             'mapbox.js',
             'd3#3.3.13',
             'nvd3#1.7.1',
