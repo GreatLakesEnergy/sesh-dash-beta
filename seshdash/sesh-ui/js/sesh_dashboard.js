@@ -111,3 +111,5 @@ $('#containerhigh').highcharts({
     });
 
 }
+
+

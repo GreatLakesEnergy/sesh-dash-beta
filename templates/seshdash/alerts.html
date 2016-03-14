@@ -21,12 +21,31 @@
                                 </thead>
                                 <tbody>
                                 {% for alert in alerts %}
-                                    <tr>
+                                    <tr class="modal-toggle">
 	                                <td>{{alert.site}}</td>
                                         <td>{{alert}}</td>
                                         <td>{{alert.date|timesince}}</td>
                                     <tr>
+                                  
                                 {% endfor %}
+                                     <!-- Modal window for extra info about the alert -->
+                                    <div class="modal fade" tab-index="-1" role="dialog" id="alert-modal" >
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button class="close" data-dismiss="modal" aria-labeled="Close">
+                                                        <span aria-hidden="true">&times</span>
+                                                    </button>
+                                                    <h4 class="modal-title">Modal title</h4>
+                                                    <div class="modal-body">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-primary" >Silence Alert </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div><!--End of the Modal -->
                             </tbody>
                         </table>
                     </div>
