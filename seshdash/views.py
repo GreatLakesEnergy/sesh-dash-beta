@@ -77,6 +77,7 @@ def get_user_sites(vrm_user_id,vrm_password):
     """
     context_dict = {}
     site_list = []
+    flatten_list = []
     v = VictronAPI(vrm_user_id,vrm_password)
     if v.IS_INITIALIZED:
             logging.debug("victron API is initialized ")
@@ -85,8 +86,9 @@ def get_user_sites(vrm_user_id,vrm_password):
             logging.info("Found sites %s "%sites)
             print "found sites  %s"%sites
             site_list.append(sites)
-    #make list of lists flat
-    flatten_list = reduce(lambda x,y: x+y,site_list)
+    if site_list:
+        #make list of lists flat
+        flatten_list = reduce(lambda x,y: x+y,site_list)
     context_dict['sites'] = flatten_list
     return context_dict
 
