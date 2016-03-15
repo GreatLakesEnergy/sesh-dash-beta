@@ -424,25 +424,11 @@ def display_alert_data(request):
     alert_id = request.POST.get("alert_id",'')
     alert_id = int(alert_id)
     alerts = Sesh_Alert.objects.filter(id=alert_id)
-
+    
+    # Getting the first alert ( Converting from QuerySet )
     if len(alerts) >= 1:
          alert = alerts[0]
     
-    # Getting the values at the alert
-    # battery_voltage = alert.point.battery_voltage
-    # AC_Voltage_in = alert.point.AC_Voltage_in
-    # AC_Voltage_out = alert.point.AC_Voltage_out
-    # AC_input = alert.point.AC_input
-    # AC_output = alert.point.AC_output
-    # AC_output_absolute = alert.point.AC_output_absolute
-    # AC_Load_in = alert.point.AC_Load_in
-    # AC_Load_out = alert.point.AC_Load_out
-    # pv_production = alert.point.pv_production
-    # inverter_state = alert.point.inverter_state
-    # main_on = alert.point.main_on
-    # genset_state = alert.point.genset_state
-    # relay_state = alert.point.relay_state
-    # trans = alert.point.trans
 
     alert_values = {}
     
@@ -461,12 +447,20 @@ def display_alert_data(request):
     alert_values ['genset_state'] = alert.point.genset_state
     alert_values ['relay_state'] = alert.point.relay_state
     alert_values ['trans'] = alert.point.trans
-    
-    print alert_values
+    alert_values ['alert_id'] = alert.id
+    alert_values ['alert_value'] = alert.alert.check_field
+
     
     return HttpResponse(json.dumps(alert_values))
-    
-    
-    
-    
-    
+   
+def silence_alert(request):
+    alert_id = request.POST.get("alert_id", '')
+    alerts = Sesh_Alert.objects.filter(id=alert_id)
+
+    if len(alerts) >= 1:
+       alert = alerts[0]
+       alert.isSilence = True
+       alert.save()
+       return HttpResponse("Done");
+    else:
+       return HttpResponse("Not Done");
