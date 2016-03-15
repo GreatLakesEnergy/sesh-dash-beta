@@ -461,6 +461,6 @@ def silence_alert(request):
        alert = alerts[0]
        alert.isSilence = True
        alert.save()
-       return HttpResponse("Done");
+       return HttpResponse(True);
     else:
-       return HttpResponse("Not Done");
+       return HttpResponse(False);
