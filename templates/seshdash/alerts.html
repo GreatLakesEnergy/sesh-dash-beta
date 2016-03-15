@@ -21,10 +21,11 @@
                                 </thead>
                                 <tbody>
                                 {% for alert in alerts %}
-                                    <tr class="modal-toggle">
+                                    <tr class="modal-toggle" data-id="{{alert.id}}" data-time="{{alert.date}}">
 	                                <td>{{alert.site}}</td>
                                         <td>{{alert}}</td>
                                         <td>{{alert.date|timesince}}</td>
+                                        <td class="hidden">{{alert.pk}}</td>
                                     <tr>
                                   
                                 {% endfor %}
@@ -37,7 +38,11 @@
                                                         <span aria-hidden="true">&times</span>
                                                     </button>
                                                     <h4 class="modal-title">Modal title</h4>
+                                                    <hr>
                                                     <div class="modal-body">
+                                                        <ul class="alert-data-point-info">
+                                                             <h3> Other Points at alert </h3>
+                                                        </ul>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button class="btn btn-primary" >Silence Alert </button>

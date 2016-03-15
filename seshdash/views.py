@@ -412,8 +412,61 @@ def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
      
      alert_list = []    
-
+    
      for alert in alerts:
+          print alert.alert
           alert_list.append(alert)
 
      return alert_list
+
+def display_alert_data(request):
+    # Getting the clicked alert via ajax
+    alert_id = request.POST.get("alert_id",'')
+    alert_id = int(alert_id)
+    alerts = Sesh_Alert.objects.filter(id=alert_id)
+
+    if len(alerts) >= 1:
+         alert = alerts[0]
+    
+    # Getting the values at the alert
+    # battery_voltage = alert.point.battery_voltage
+    # AC_Voltage_in = alert.point.AC_Voltage_in
+    # AC_Voltage_out = alert.point.AC_Voltage_out
+    # AC_input = alert.point.AC_input
+    # AC_output = alert.point.AC_output
+    # AC_output_absolute = alert.point.AC_output_absolute
+    # AC_Load_in = alert.point.AC_Load_in
+    # AC_Load_out = alert.point.AC_Load_out
+    # pv_production = alert.point.pv_production
+    # inverter_state = alert.point.inverter_state
+    # main_on = alert.point.main_on
+    # genset_state = alert.point.genset_state
+    # relay_state = alert.point.relay_state
+    # trans = alert.point.trans
+
+    alert_values = {}
+    
+    # Getting alert BoM_Data_Point Values   
+    alert_values ['battery_voltage'] = alert.point.battery_voltage
+    alert_values ['AC_Voltage_in'] = alert.point.AC_Voltage_in
+    alert_values ['AC_Voltage_out'] = alert.point.AC_Voltage_out
+    alert_values ['AC_input'] = alert.point.AC_input
+    alert_values ['AC_output'] = alert.point.AC_output
+    alert_values ['AC_output_absolute'] = alert.point.AC_output_absolute
+    alert_values ['AC_Load_in'] = alert.point.AC_Load_in
+    alert_values ['AC_Load_out'] = alert.point.AC_Load_out
+    alert_values ['pv_production'] = alert.point.pv_production
+    alert_values ['inverter_state'] = alert.point.inverter_state
+    alert_values ['main_on'] = alert.point.main_on
+    alert_values ['genset_state'] = alert.point.genset_state
+    alert_values ['relay_state'] = alert.point.relay_state
+    alert_values ['trans'] = alert.point.trans
+    
+    print alert_values
+    
+    return HttpResponse(json.dumps(alert_values))
+    
+    
+    
+    
+    
