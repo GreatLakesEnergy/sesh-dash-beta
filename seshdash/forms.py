@@ -1,4 +1,5 @@
 from django.forms import ModelForm
+from django import forms
 from seshdash.models import Sesh_Site,VRM_Account
 
 class SiteForm(ModelForm):
@@ -17,5 +18,7 @@ class VRMForm(ModelForm):
     class Meta:
         model = VRM_Account
         exclude = ('number_of_sites',)
-
+        widgets = {
+                  'vrm_password': forms.PasswordInput(),
+                   }
 
