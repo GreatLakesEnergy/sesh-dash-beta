@@ -92,6 +92,16 @@ def get_user_sites(vrm_user_id,vrm_password):
     context_dict['sites'] = flatten_list
     return context_dict
 
+
+def _return_error_import(request,context_dict,form,message):
+    print "######## Error logging in"
+    # TODO provide meaning full erro message from validate
+    context_dict['message'] = "failure"
+    context_dict['error'] = True
+    context_dict['VRM_form'] = form
+    return render(request,'seshdash/initial-login.html',context_dict)
+
+
 @login_required
 def import_site(request):
     """
@@ -102,11 +112,14 @@ def import_site(request):
             #check if post is VRM Account form
             form = VRMForm(request.POST)
             if form.is_valid():
+                site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
+                print "###### %s"%site_list
+                if not site_list['sites']:
+                   return _return_error_import(request,context_dict,form,"check credentials")
                 context_dict['message'] = "success"
                 #do a psuedo save first we need to modify a field later
                 form.save(commit=False)
                 #now get user sites
-                site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
                 context_dict['form_type'] = "VRM Account"
                 context_dict['site_list'] = site_list
                 context_dict['no_sites'] = len(site_list)
@@ -129,14 +142,8 @@ def import_site(request):
                 site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,extra=len(site_list['sites']),exclude=('vrm_account',))
                 context_dict['site_forms'] = site_forms_factory(instance=VRM,initial = pre_pop_data )
             else:
-                #TODO provide meaning full erro message from validate
-                print "Form Invalid"
-                context_dict['message'] = "failure"
-                context_dict['error'] = True
-                context_dict['VRM_form'] = form
-                return render(request,'seshdash/initial-login.html',context_dict)
-
-    return render(request,'seshdash/initial-login.html',context_dict)
+                   return _return_error_import(request,context_dict,form,"unknown error")
+            return render(request,'seshdash/initial-login.html',context_dict)
 
 @login_required
 def create_site(request):
@@ -151,11 +158,12 @@ def create_site(request):
         if form.is_valid():
             form.save()
         else:
-                context_dict['message'] = "failure"
+                context_dict['message'] = "failure creating site"
                 context_dict['error'] = True
                 context_dict['site_forms'] = form
                 return render(request,'seshdash/initial-login.html',context_dict)
-        return render(request,'seshdash/main-dash.html',context_dict)
+        return index(request)
+        #return render(request,'seshdash/main-dash.html',context_dict)
 
 
 
