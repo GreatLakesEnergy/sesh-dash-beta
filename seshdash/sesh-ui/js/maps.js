@@ -14,5 +14,5 @@ L.marker([lat, lon], {
     })
 }).addTo(map);
 
-map.scrollZoom.disable();
+map.scrollWheelZoom.disable();
 
