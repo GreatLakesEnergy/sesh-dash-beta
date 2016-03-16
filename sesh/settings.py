@@ -115,7 +115,7 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(minutes=5),
         'args': None,
     },
-    'aggregate_daily_data': {
+    'get_aggregate_daily_data': {
         'task': 'seshdash.tasks.get_aggregate_data',
         'schedule': timedelta(days=1),
         'args': None,
