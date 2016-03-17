@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,SESH_RMC_Account
 from seshdash.utils import time_utils
 from pprint import pprint
 from seshdash.forms import SiteForm,VRMForm
@@ -45,11 +45,13 @@ def index(request,site_id=0):
     context_dict = {}
     #Handle fisrt login if user has no site setup:
     if not sites:
+        # Simplt give the option first
         VRM_form = VRMForm()
         form = SiteForm()
         context_dict['form'] = form
         context_dict['VRM_form'] = VRM_form
-        context_dict['form_type'] = "VRM Account"
+        #Removing as form_type is arbiter now
+        #context_dict['form_type'] = "VRM Account"
 
         return render(request,'seshdash/initial-login.html',context_dict)
 
@@ -151,19 +153,41 @@ def create_site(request):
     Create the sites imported from VRM account
     """
     context_dict = {}
-    VRM = VRM_Account.objects.first()
-    site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,exclude=('vrm_account',))
+    # Check if it's a VRM or RMC site input"
+    print "getting into create site"
     if request.method == "POST":
-        form = site_forms_factory(request.POST,instance=VRM)
-        if form.is_valid():
-            form.save()
+        if request.POST["form_type"] == 'vrm':
+            print "request recieved formtype vrm"
+            VRM = VRM_Account.objects.first()
+            site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,exclude=('vrm_account',))
+            form = site_forms_factory(request.POST,instance=VRM)
+            context_dict["form_type"] = "vrm"
+            if form.is_valid():
+                form.save()
+            else:
+                 context_dict['message'] = "failure creating site"
+                 context_dict['error'] = True
+                 context_dict['site_forms'] = form
+                 return render(request,'seshdash/initial-login.html',context_dict)
+       # If we adding an RMC site
+        elif request.POST["form_type"] == 'rmc':
+             print "request recieved is rmc request getting form ready"
+             site_forms_factory = inlineformset_factory(SESH_RMC_Account,
+                     Sesh_Site,
+                     exclude=('vrm_account','vrm_site_id')
+                     ,can_delete=False,
+                     extra=1)
+             # Todo create RMC ACCOUNT prepopulate API KEY
+             form = site_forms_factory()
+             context_dict['site_forms'] = form
+             context_dict["form_type"] = "rmc"
+             print context_dict
+             return render(request,'seshdash/initial-login.html',context_dict)
         else:
-                context_dict['message'] = "failure creating site"
-                context_dict['error'] = True
-                context_dict['site_forms'] = form
-                return render(request,'seshdash/initial-login.html',context_dict)
-        return index(request)
-        #return render(request,'seshdash/main-dash.html',context_dict)
+             return render(request,'seshdash/initial-login.html',context_dict)
+
+    # Go to normal startup mode
+    return index(request)
 
 
 
@@ -321,7 +345,7 @@ def get_user_data(user,site_id,sites):
     #context_data_json['site_power'] = power_data_json
     #context_data_json['bom_data'] = bom_data_json
 
-    context_data['alerts'] = display_alerts(site_id)                
+    context_data['alerts'] = display_alerts(site_id)
 
     return context_data,context_data_json
 
@@ -421,8 +445,8 @@ def get_high_chart_data(user,site_id,sites):
 
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
-     
-     alert_list = []    
+
+     alert_list = []
 
      for alert in alerts:
           alert_list.append(alert)

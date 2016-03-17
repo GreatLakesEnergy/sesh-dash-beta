@@ -24,8 +24,21 @@ class VRM_Account(models.Model):
     class Meta:
         verbose_name = "VRM Account"
 
+class SESH_RMC_Account(models.Model):
+    """
+    API key used by SESH EMON clone to communicate
+    """
+    API_KEY = models.CharField(max_length=100,default="")
 
-
+class RMC_status(models.Model):
+    """
+    Table containing status information for each RMC unit
+    """
+    rmc = models.ForeignKey(SESH_RMC_Account)
+    ip_address = models.GenericIPAddressField(default=None)
+    last_contact = models.DateTimeField(default=None)
+    signal_strength = models.IntegerField(default=None)
+    data_sent_24h = models.IntegerField(default=None)
 
 class Sesh_Site(models.Model):
     """
@@ -45,8 +58,10 @@ class Sesh_Site(models.Model):
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
-    vrm_account = models.ForeignKey(VRM_Account,default=None)
+    vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
+    rmc_account = models.ForeignKey(SESH_RMC_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="")
+
     def __str__(self):
         return self.site_name
 
@@ -164,7 +179,7 @@ class Sesh_Alert(models.Model):
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     alertSent = models.BooleanField()
-        
+
 
     # def __str__(self):
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
@@ -174,8 +189,8 @@ class Sesh_Alert(models.Model):
                                       str(getattr(self.point, self.alert.check_field)), \
                                       self.alert.get_operator_display(), \
                                       self.alert.value)
-                                        
-   
+
+
     class Meta:
         verbose_name = 'System Alert'
         verbose_name_plural = 'System Alerts'
@@ -208,7 +223,7 @@ class Daily_Data_Point(models.Model):
 
 class Trend_Data_Point(models.Model):
     """
-    Data that's calculated from individual data points. Used to displat an aggregate view
+    Data that's calculated from individual data points. Used to display an aggregate view
     Overall aggregates
     """
     site = models.ForeignKey(Sesh_Site)
@@ -217,13 +232,6 @@ class Trend_Data_Point(models.Model):
     system_efficiency  = models.FloatField(default=0)
     system_capacity = models.FloatField(default=0)
     battery_efficieny = models.FloatField(default=0)
-
-class SESH_RMC_Account(models.Model):
-    """
-    API key used by SESH EMON clone to communicate
-    """
-    API_KEY = models.CharField(max_length=100,default="")
-
 
 """
 TODO removing for now as it's breaking celery object creation
