@@ -22,6 +22,7 @@ from django.db.models import Avg
 from django.db.models import Sum
 
 #Import utils
+from seshdash.utils.time_utils import get_timesince
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 import json,time,random,datetime
@@ -68,6 +69,7 @@ def index(request,site_id=0):
 
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
+    context_dict['site_id'] = site_id
 
     return render(request,'seshdash/main-dash.html',context_dict)
 
@@ -310,7 +312,7 @@ def get_user_data(user,site_id,sites):
     #context_data_json['site_power'] = power_data_json
     #context_data_json['bom_data'] = bom_data_json
 
-    context_data['alerts'] = display_alerts(site_id)                
+    context_data['alerts'] = display_alerts(site_id)
 
     return context_data,context_data_json
 
@@ -410,29 +412,50 @@ def get_high_chart_data(user,site_id,sites):
 
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
-     
-     alert_list = []    
-    
+
+     alert_list = []
+
      for alert in alerts:
           print alert.alert
           alert_list.append(alert)
 
      return alert_list
 
+@login_required
+def get_alerts(request):
+    site_id = request.POST.get('site_id','')
+
+
+    alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
+
+    alert_data = []
+
+    # Loop to generate alert data
+    for alert in alerts:
+        alert_data.append({
+            "alertId": alert.id,
+            "site":alert.site.site_name,
+            "alert":str(alert.alert),
+            "date":get_timesince(alert.date),
+            })
+
+    return HttpResponse(json.dumps(alert_data))
+
+
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alert_id",'')
     alert_id = int(alert_id)
     alerts = Sesh_Alert.objects.filter(id=alert_id)
-    
+
     # Getting the first alert ( Converting from QuerySet )
     if len(alerts) >= 1:
          alert = alerts[0]
-    
+
 
     alert_values = {}
-    
-    # Getting alert BoM_Data_Point Values   
+
+    # Getting alert BoM_Data_Point Values
     alert_values ['battery_voltage'] = alert.point.battery_voltage
     alert_values ['AC_Voltage_in'] = alert.point.AC_Voltage_in
     alert_values ['AC_Voltage_out'] = alert.point.AC_Voltage_out
@@ -450,9 +473,9 @@ def display_alert_data(request):
     alert_values ['alert_id'] = alert.id
     alert_values ['alert_value'] = alert.alert.check_field
 
-    
+
     return HttpResponse(json.dumps(alert_values))
-   
+
 def silence_alert(request):
     alert_id = request.POST.get("alert_id", '')
     alerts = Sesh_Alert.objects.filter(id=alert_id)

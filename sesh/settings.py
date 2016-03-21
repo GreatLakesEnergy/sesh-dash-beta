@@ -225,7 +225,9 @@ BOWER_INSTALLED_APPS = (
             'font-awesome',
             'metisMenu',
             'morrisjs',
-            'raphael'
+            'raphael',
+            'react',
+            'babel',
             )
 
 ANONYMOUS_USER_ID = -1

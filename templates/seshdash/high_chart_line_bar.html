@@ -23,23 +23,24 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
     </div>
 
 
-<!---
-The javascript which call  to get_high_chart() to draw how chart and the function is in the sesh_dashboard.js
+    <!--The javascript which call  to get_high_chart() to draw how chart and the function is in the sesh_dashboard.js -->
 
--->
-
-<script language="JavaScript">
- $(function () {
-    var date= [
-            {% for date2 in high_chart.high_date %}
-                          '{{date2}}' ,
-             {%endfor%}
+    <script language="JavaScript">
+     
+        date = [
+                {% for date2 in high_chart.high_date %}
+                              '{{date2}}' ,
+                 {%endfor%}
 
 
-            ];
+                ];
 
-    get_high_chart( date  , {{high_chart.high_pv_production}}  , {{high_chart.high_cloud_cover}})
-});
-</script>
+        HighChartHighPvProduction = {{high_chart.high_pv_production}};
+        HighChartHighCloudCover = {{high_chart.high_cloud_cover}};
+
+        
+    </script>
+
+
 
     {% endblock %}
