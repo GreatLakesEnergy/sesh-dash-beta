@@ -79,6 +79,7 @@ def get_user_sites(vrm_user_id,vrm_password):
     """
     context_dict = {}
     site_list = []
+    flatten_list = []
     v = VictronAPI(vrm_user_id,vrm_password)
     if v.IS_INITIALIZED:
             logging.debug("victron API is initialized ")
@@ -87,10 +88,21 @@ def get_user_sites(vrm_user_id,vrm_password):
             logging.info("Found sites %s "%sites)
             print "found sites  %s"%sites
             site_list.append(sites)
-    #make list of lists flat
-    flatten_list = reduce(lambda x,y: x+y,site_list)
+    if site_list:
+        #make list of lists flat
+        flatten_list = reduce(lambda x,y: x+y,site_list)
     context_dict['sites'] = flatten_list
     return context_dict
+
+
+def _return_error_import(request,context_dict,form,message):
+    print "######## Error logging in"
+    # TODO provide meaning full erro message from validate
+    context_dict['message'] = "failure"
+    context_dict['error'] = True
+    context_dict['VRM_form'] = form
+    return render(request,'seshdash/initial-login.html',context_dict)
+
 
 @login_required
 def import_site(request):
@@ -102,11 +114,14 @@ def import_site(request):
             #check if post is VRM Account form
             form = VRMForm(request.POST)
             if form.is_valid():
+                site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
+                print "###### %s"%site_list
+                if not site_list['sites']:
+                   return _return_error_import(request,context_dict,form,"check credentials")
                 context_dict['message'] = "success"
                 #do a psuedo save first we need to modify a field later
                 form.save(commit=False)
                 #now get user sites
-                site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
                 context_dict['form_type'] = "VRM Account"
                 context_dict['site_list'] = site_list
                 context_dict['no_sites'] = len(site_list)
@@ -129,14 +144,8 @@ def import_site(request):
                 site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,extra=len(site_list['sites']),exclude=('vrm_account',))
                 context_dict['site_forms'] = site_forms_factory(instance=VRM,initial = pre_pop_data )
             else:
-                #TODO provide meaning full erro message from validate
-                print "Form Invalid"
-                context_dict['message'] = "failure"
-                context_dict['error'] = True
-                context_dict['VRM_form'] = form
-                return render(request,'seshdash/initial-login.html',context_dict)
-
-    return render(request,'seshdash/initial-login.html',context_dict)
+                   return _return_error_import(request,context_dict,form,"unknown error")
+            return render(request,'seshdash/initial-login.html',context_dict)
 
 @login_required
 def create_site(request):
@@ -151,11 +160,12 @@ def create_site(request):
         if form.is_valid():
             form.save()
         else:
-                context_dict['message'] = "failure"
+                context_dict['message'] = "failure creating site"
                 context_dict['error'] = True
                 context_dict['site_forms'] = form
                 return render(request,'seshdash/initial-login.html',context_dict)
-        return render(request,'seshdash/main-dash.html',context_dict)
+        return index(request)
+        #return render(request,'seshdash/main-dash.html',context_dict)
 
 
 
@@ -252,12 +262,13 @@ def login_user(request):
             #send user name and favorite site data to index page for initial login load
             return index(request)
         else:
-            #TODO return an error message
-            message = "Error logging in"
-            return render(request,'seshdash/login.html')
+            message = "Incorrect password"
+            context_dict['error'] = message
+            return render(request,'seshdash/login.html',context_dict)
     else:
-            #TODO return invalid login page
-            return render(request,'seshdash/login.html')
+            message = "Error user doesn't exist"
+            context_dict['error'] = message
+            return render(request,'seshdash/login.html',context_dict)
 
 
 def get_user_data(user,site_id,sites):
