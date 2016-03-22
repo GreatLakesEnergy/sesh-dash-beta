@@ -33,7 +33,7 @@ def alert_check(data_point):
             print "emailing %s"%recipients
             # recipients = ["seshdash@gmail.com",]
             alert_obj = Sesh_Alert.objects.create(site = data_point.site, alert=rule, date=timezone.now(),
-                                                  isSilence=True,alertSent=rule.send_mail, point=data_point)
+                                                  isSilence=False,alertSent=rule.send_mail, point=data_point)
             if rule.send_mail:
                 mail_sent = alert(data_point,content,recipients)
                 alert_obj.alertSent = mail_sent
