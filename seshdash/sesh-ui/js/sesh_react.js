@@ -1,49 +1,4 @@
-
-
-// Alert React Js
-
-var data = [
-    {site:"Mukuyu", alert:"Battery Voltage less than 30", date:"6 hours ago" },
-    {site:"Mukuyu", alert:"Battery Voltage less than 30", date:"6 hours ago" },
-    {site:"Mukuyu", alert:"Battery Voltage less than 30", date:"6 hours ago" },
-];
-
-var AlertsContainer = React.createClass({
-
-    render: function() {
-        return (
-            <div className="panel panel-danger">
-                <PanelHeading>System Alerts </PanelHeading>
-	        <div className="panel-body system-alerts">
-                    <div className="table-responsive">
-                        <table className="table table-hover table-fixed">
-                            <thead>
-                                <TableRow site="Site" alert="Alert" date="Date"></TableRow>
-                            </thead>
-                            <AlertList data={this.props.data} />
-                        </table>
-                    </div>
-                </div>
-            </div>
-        );
-    },
-});
-
-
-var PanelHeading = React.createClass({
-
-    render: function() {
-        return (
-            <div className="panel-heading">
-                <i className="fa fa-exclamation-triangle fa-fw"></i>
-                {this.props.children}
-            </div>
-        );
-    }
-
-});
-
-
+// Alerts 
 
 var TableRow = React.createClass({
 
@@ -62,6 +17,7 @@ var TableRow = React.createClass({
 
 var AlertList = React.createClass({
     render: function() {
+        console.log(this.props.data);
         var alertNodes = this.props.data.map(function(alert)  {
             return(
                 <TableRow site={alert.site} alert={alert.alert} date={alert.date} dataId={alert.alertId}/>
@@ -69,9 +25,7 @@ var AlertList = React.createClass({
         });
 
         return (
-            <tbody>
-                {alertNodes}
-            </tbody>
+            <div> {alertNodes} </div>
         );
     }
 });
@@ -82,20 +36,55 @@ $('.silence-alert').click(function(){
 
 
 
-
+const alertRefreshTime = 300000;
 var alertsJsonData = {csrfmiddlewaretoken: csrftoken,
                       site_id: active_site_id,
                      };
 
 getLatestAlerts();
+
 function getLatestAlerts () {
     $.post('/get-alerts', alertsJsonData,function(data) {
         var jsonData = JSON.parse(data);
+        console.log(jsonData);
         ReactDOM.render(
-            <AlertsContainer data={jsonData} />,
+            <AlertList data={jsonData} />,
             document.getElementById('alerts-container')
         );
     });
-   setTimeout(getLatestAlerts, 300000) // Get alerts for every five minutes
+   setTimeout(getLatestAlerts, alertRefreshTime) // Get alerts for every five minutes
 }
 
+
+
+// Status Card 
+var LatestBoMData = React.createClass({
+    render: function(){
+        return(
+            <div className="latestBoMData">
+                <BoMLatestDataRow item="battery Voltage" value="012" />
+            </div>
+        );
+    }
+});
+
+
+var BoMLatestDataRow = React.createClass({
+    render: function() {
+        return(
+            <tr>
+                <td>{this.props.item}</td>
+                <td>{this.props.value}</td>
+            </tr>
+        );
+    }
+});
+
+
+function getLatestBoMData(){};
+
+
+ReactDOM.render(
+    <LatestBoMData />,
+    document.getElementById('latest-bom-data')
+);

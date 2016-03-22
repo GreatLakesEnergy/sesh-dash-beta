@@ -148,9 +148,10 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
   var  modal = $('#alert-modal'),
        modalToggle = $('.modal-toggle'),
        alertDataPointInfo = $('.alert-data-point-info'),
-       silenceAlert = $('.silence-alert');
+       silenceAlert = $('.silence-alert'),
+       initiatingModalTime = 5000;
 
-  setTimeout(setModalLoad, 5000);
+  setTimeout(setModalLoad, initiatingModalTime);
 
   function setModalLoad() {
 
