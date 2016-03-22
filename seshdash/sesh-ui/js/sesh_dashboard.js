@@ -34,6 +34,8 @@ Morris.Bar({
 */
 
 
+
+
 /*
  High Chart Draw Function
 */
@@ -113,3 +115,95 @@ $('#containerhigh').highcharts({
 }
 
 
+
+
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies;
+        cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var csrftoken = getCookie('csrftoken');
+
+
+// Get high chart data here
+
+get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
+
+
+/* Alerts modal toggle script */
+
+  var  modal = $('#alert-modal'),
+       modalToggle = $('.modal-toggle'),
+       alertDataPointInfo = $('.alert-data-point-info'),
+       silenceAlert = $('.silence-alert'),
+       initiatingModalTime = 5000;
+
+  setTimeout(setModalLoad, initiatingModalTime);
+
+  function setModalLoad() {
+
+      $('.modal-toggle').click(function()  {
+          // Get necessary data for the get_alert_sort
+          alertId = $(this).attr('classid');
+          // Constructing the json
+          var jsonData = {alert_id : alertId,
+                          csrfmiddlewaretoken: csrftoken};
+
+          $.post('/get-alert-data', jsonData, function(data){
+
+              var alertData = JSON.parse(data);
+              alertValue = alertData.alert_value; // Getting the property that is triggering the alert
+
+                  for (var value in alertData) {
+
+                      if(value == 'alert_id'){ // Checking for alert_id so that it is not displayed
+                          element = '<tr><td class="alert-id hidden">' + alertData[value] + '</td></tr>';
+                          alertDataPointInfo.append(element)
+                          continue;
+                      }
+                      else if(value == 'alert_value') {
+                          continue;
+                      }
+                      else if(value == alertValue) {
+                          element = '<tr class=danger> <td>' + value + '</td> <td> ' + alertData[value] + '</td></tr>';
+                          alertDataPointInfo.append(element);
+                          continue;
+                      }
+                element = '<tr><td>' + value + '</td> <td> ' + alertData[value] + '</td></tr>';
+                      alertDataPointInfo.append(element);
+                  }
+          });
+          modal.modal('show');
+      });
+
+      modal.on('hidden.bs.modal',function(){
+          alertDataPointInfo.html('');
+      });
+
+      silenceAlert.click(function(){
+          alertId = parseInt($('.alert-id').text());
+          jsonData = {
+                      alert_id : alertId,
+                      csrfmiddlewaretoken: csrftoken
+                     };
+
+          $.post('/silence-alert', jsonData, function(data) {
+               modal.modal('hide');
+          });
+      });
+
+
+  }

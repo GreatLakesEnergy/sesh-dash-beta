@@ -1,5 +1,7 @@
 from datetime import datetime,timedelta
 from time import localtime,strftime
+from django.conf import settings
+from pytz import timezone
 """
 Return number of seconds since 1970-01-01- epoch
 """
@@ -101,3 +103,20 @@ def get_start_end_date(days_ago, start_day):
     delta = start_day - timedelta(days=days_ago)
     return delta
 
+def get_timesince(time):
+    now = datetime.now()
+    loc = timezone(settings.TIME_ZONE)
+    now = loc.localize(now)
+    diff =  now - time
+    diff = format_timesince_seconds(int(diff.total_seconds()))
+    return diff
+
+def format_timesince_seconds(seconds):
+    if seconds < 60:
+        return seconds, " seconds ago"
+    elif seconds < 3600:
+        return seconds/60, " minutes ago"
+    elif seconds < 86400:
+        return seconds/3600, " hours ago"
+    else:
+        return seconds/86400, " days ago"

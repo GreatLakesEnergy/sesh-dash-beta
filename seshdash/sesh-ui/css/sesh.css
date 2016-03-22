@@ -10,4 +10,14 @@
  overflow-y: scroll;
 }
 
+tr.modal-toggle {
+ cursor: pointer;
+}
 
+.hidden {
+ display: none;
+}
+
+.alert-data-point-info h1,h2,h3,h4,h5,h6 {
+ text-align: center;
+}

@@ -1,84 +1,54 @@
 {% block alerts %}
 
     <div class="col-lg-8">
-        <!-- TODO make the panel heading variable for color -->
-        <div class="panel panel-{{ type }}">
-                <div class="panel-heading">
-                    <!-- TODO make this a variable -->
-                    <i class="fa fa-exclamation-triangle fa-fw"></i>
-                    {{ title }}
-                {% autoescape on %}
+
+    <div class="modal fade" tab-index="-1" role="dialog" id="alert-modal" >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close" data-dismiss="modal" aria-labeled="Close">
+                        <span aria-hidden="true">&times</span>
+                    </button>
                 </div>
-                    <div class="panel-body system-alerts">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-fixed ">
-                                {% if alerts %}
+
+                <div class="modal-body">
+                    <div class="panel panel-primary">
+                         <div class="panel-heading">
+                             About the Alert
+                         </div>
+                         <div class="panel-body">
+                            <table class="table table-stripped">
                                 <thead>
                                     <tr>
-                                        <th>Site</th>
-                                        <th>Alert</th>
-				        <th>Time</th>
-                                        <th>IsSilence</th>
+                                        <th>Data </th>
+                                        <th>Value </th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                {% for alert in alerts %}
-                                    <tr class="modal-toggle" data-id="{{alert.id}}" data-time="{{alert.date}}">
-	                                <td>{{alert.site}}</td>
-                                        <td>{{alert}}</td>
-                                        <td>{{alert.date|timesince}}</td>
-                                        <td>{{alert.isSilence}}</td>
-                                        <td class="hidden">{{alert.pk}}</td>
-                                    <tr>
-                                  
-                                {% endfor %}
-                                {% else %}
-                                    <h3 class="text-muted ">They are no alerts right now </h3>
-                                {% endif %}
-                                </tbody>
-                            </table><!-- END OF TABLE -->
-                                
-                                     <!-- Modal window for extra info about the alert -->
-                                    <div class="modal fade" tab-index="-1" role="dialog" id="alert-modal" >
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button class="close" data-dismiss="modal" aria-labeled="Close">
-                                                        <span aria-hidden="true">&times</span>
-                                                    </button>
-                                                </div>
+                                <tbody class="alert-data-point-info">
 
-                                                <div class="modal-body">
-                                                    <div class="panel panel-primary">
-                                                         <div class="panel-heading">
-                                                             About the Alert
-                                                         </div>
-                                                         <div class="panel-body">
-                                                            <table class="table table-stripped">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Data </th>
-                                                                        <th>Value </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody class="alert-data-point-info">
-                                                                  
-                                                                </tbody>
-                                                            </table>
-                                                         </div>
-                                                     </div>
-                                                 </div>
-                                                <div class="modal-footer">
-                                                     <button class="btn btn-primary silence-alert " >Silence Alert </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!--End of the Modal -->
-                    </div>
-                 {% endautoescape %}
+                                </tbody>
+                            </table>
+                         </div>
+                     </div>
+                 </div>
+                <div class="modal-footer">
+                     <button class="btn btn-primary silence-alert " >Silence Alert </button>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <i class="fa fa-exclamation-triangle "></i>
+            System Alerts
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive" id="alerts-container">
+
+            </div>
+        </div>
+    </div>
+   </div>
+
 {% endblock %}
-
-
