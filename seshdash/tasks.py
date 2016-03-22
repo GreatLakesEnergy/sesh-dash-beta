@@ -6,7 +6,7 @@ import sys
 from django.conf import settings
 from django.db import IntegrityError
 from django.forms.models import model_to_dict
-from celery import shared_task
+from celery import shared_task,states
 from celery.signals import task_failure,task_success
 from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert
 
@@ -57,7 +57,6 @@ def get_BOM_data():
 
     sites = Sesh_Site.objects.all()
     for site in sites:
-        print "getting data for site %s "%site
         try:
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
             #TODO figure out a way to get these automatically or add
@@ -186,7 +185,7 @@ def get_enphase_daily_stats(date=None):
         sites = Sesh_Site.objects.all()
 
         #return 'The test task executed with argument "%s" ' % param
-        #get dates we want to get
+        #get dates we want to get default this is last 24 hours
         datetime_now = datetime.now()
         datetime_start = datetime_now - timedelta(days=1)
         system_results = {}
@@ -312,7 +311,7 @@ def get_grid_stats(measurement_dict_list, measurement_value, measurement_key, bu
 
 def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=None, toSum=True):
     """
-    Calucalte aggregate values from Influx for provided measuruements
+    Calculate aggregate values from Influx for provided measuruements
     """
     i = Influx()
     result = 0
@@ -425,6 +424,10 @@ def send_reports():
     sites = Sesh_Site.objects.all()
     for site in sites:
         logging.debug("Sending report for site %s"%site)
-        prepare_report(site)
-
+        result = prepare_report(site)
+        if not result:
+            self.update_state(
+                             state = states.FAILURE,
+                             meta = 'REASON FOR FAILURE'
+                             )
 

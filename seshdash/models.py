@@ -24,21 +24,19 @@ class VRM_Account(models.Model):
     class Meta:
         verbose_name = "VRM Account"
 
-class SESH_RMC_Account(models.Model):
-    """
-    API key used by SESH EMON clone to communicate
-    """
-    API_KEY = models.CharField(max_length=100,default="")
 
-class RMC_status(models.Model):
+class Sesh_RMC_Account(models.Model):
     """
-    Table containing status information for each RMC unit
+    API key used by SESH EMON node to communicate
     """
-    rmc = models.ForeignKey(SESH_RMC_Account)
-    ip_address = models.GenericIPAddressField(default=None)
-    last_contact = models.DateTimeField(default=None)
-    signal_strength = models.IntegerField(default=None)
-    data_sent_24h = models.IntegerField(default=None)
+    #site = models.ForeignKey(Sesh_Site)
+    API_KEY = models.CharField(max_length=130,default="")
+
+
+    class Meta:
+        verbose_name = "RMC API Account"
+
+
 
 class Sesh_Site(models.Model):
     """
@@ -50,28 +48,41 @@ class Sesh_Site(models.Model):
     location_country = models.CharField(max_length = 100)
     position = GeopositionField(blank=True)
     installed_kw = models.FloatField()
-    number_of_pv_strings = models.IntegerField()
-    Number_of_panels = models.IntegerField()
+    system_voltage = models.IntegerField()
+    number_of_panels = models.IntegerField()
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
+
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
-    rmc_account = models.ForeignKey(SESH_RMC_Account,default=None,blank=True,null=True)
-    vrm_site_id = models.CharField(max_length=20,default="")
+    vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
+    rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
 
     def __str__(self):
         return self.site_name
 
     #Row based permissioning using django guardian not every user should be able to see all sites
+
     class Meta:
         verbose_name = 'Sesh Site'
         verbose_name_plural = 'Sesh Sites'
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
+
+class RMC_status(models.Model):
+    """
+    Table containing status information for each RMC unit
+    """
+    rmc = models.ForeignKey(Sesh_RMC_Account)
+    ip_address = models.GenericIPAddressField(default=None)
+    last_contact = models.DateTimeField(default=None)
+    signal_strength = models.IntegerField(default=None)
+    data_sent_24h = models.IntegerField(default=None)
+
 
 
 class Sesh_User(models.Model):

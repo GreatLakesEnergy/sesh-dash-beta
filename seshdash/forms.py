@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from seshdash.models import Sesh_Site,VRM_Account
+from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account
 
 class SiteForm(ModelForm):
     error_css_class = "warning"
@@ -8,7 +8,18 @@ class SiteForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account')
+        #DateSelectorWidget
+        widgets = {'comission_date':forms.DateInput()}
+
+class RMCForm(ModelForm):
+    error_css_class = "warning"
+    required_css_class = "info"
+
+    class Meta:
+        model = Sesh_RMC_Account
         exclude = ('Delete',)
+
 
 
 class VRMForm(ModelForm):
