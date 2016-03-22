@@ -38,10 +38,27 @@
         </div>
     </div>
 
-
-    <div id="alerts-container">
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <i class="fa fa-exclamation-triangle "></i>
+            System Alerts
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Site</th>
+                            <th>Alert</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead> 
+                    <tbody id="alerts-container">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
    </div>
 
 {% endblock %}

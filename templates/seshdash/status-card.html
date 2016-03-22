@@ -18,8 +18,7 @@
                                         <th>Status</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                {% with bom_data|first as latest_bom %}
+                                <!--
                                     <tr class="warning">
                                         <td>State of Charge</td>
                                         <td>{{ latest_bom.soc }} % </td>
@@ -34,10 +33,11 @@
                                    </tr>
                                     <tr class="success">
                                         <td>Last Contact</td>
-                                        <!--{{latest_bom.time}} -->
+                                        <!--{{latest_bom.time}}
                                         <td>{{latest_bom.time|timesince }}</td>
                                    </tr>
-                                {% endwith %}
+                                -->
+                                <tbody id="latest-bom-data">
                                 </tbody>
                             </table>
                         </div>

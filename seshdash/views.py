@@ -498,3 +498,6 @@ def silence_alert(request):
        return HttpResponse(True);
     else:
        return HttpResponse(False);
+
+
+def get_latest_bom_data(request):
