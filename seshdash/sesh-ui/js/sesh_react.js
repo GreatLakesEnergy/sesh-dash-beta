@@ -1,9 +1,8 @@
-// Alerts 
+// Alerts
 
 var TableRow = React.createClass({
 
     render: function() {
-        console.log(this.props.alertId);
         return(
             <tr className="modal-toggle" classID={this.props.dataId}>
                 <td>{this.props.site}</td>
@@ -14,10 +13,22 @@ var TableRow = React.createClass({
     }
 });
 
+var TableRowHeader = React.createClass({
+  render: function(){
+    return(
+      <thead>
+        <tr>
+          <th>Site</th>
+          <th>Alert</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+    );
+  },
+});
 
 var AlertList = React.createClass({
     render: function() {
-        console.log(this.props.data);
         var alertNodes = this.props.data.map(function(alert)  {
             return(
                 <TableRow site={alert.site} alert={alert.alert} date={alert.date} dataId={alert.alertId}/>
@@ -25,18 +36,21 @@ var AlertList = React.createClass({
         });
 
         return (
-            <div> {alertNodes} </div>
+            <table className="table table-hover table-striped">
+              <TableRowHeader />
+              <tbody>{alertNodes}</tbody>
+            </table>
         );
     }
 });
 
-$('.silence-alert').click(function(){
-  getLatestAlerts();
-});
+// $('.silence-alert').click(function(){
+//   getLatestAlerts();
+// });
 
 
 
-const alertRefreshTime = 300000;
+const REFRESH_TIME = 300000;
 var alertsJsonData = {csrfmiddlewaretoken: csrftoken,
                       site_id: active_site_id,
                      };
@@ -45,25 +59,48 @@ getLatestAlerts();
 
 function getLatestAlerts () {
     $.post('/get-alerts', alertsJsonData,function(data) {
+        console.log(data);
         var jsonData = JSON.parse(data);
-        console.log(jsonData);
         ReactDOM.render(
             <AlertList data={jsonData} />,
             document.getElementById('alerts-container')
         );
     });
-   setTimeout(getLatestAlerts, alertRefreshTime) // Get alerts for every five minutes
+   setTimeout(getLatestAlerts, REFRESH_TIME) // Get alerts for every five minutes
 }
 
 
+$('.silence-alert').click(function(){
+   setTimeout(getLatestAlerts, 1000);
+});
 
-// Status Card 
+// Status Card
+var LatestBoMHeader = React.createClass({
+    render: function(){
+      return(
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+      );
+    }
+});
+
+
 var LatestBoMData = React.createClass({
     render: function(){
+        var BoMDataRows = this.props.data.map(function(BoMDataRow){
+            return(
+                 <BoMLatestDataRow item={BoMDataRow.item} value={BoMDataRow.value} />
+            );
+        });
         return(
-            <div className="latestBoMData">
-                <BoMLatestDataRow item="battery Voltage" value="012" />
-            </div>
+          <table className="table table-striped">
+                <LatestBoMHeader />
+                <tbody>{BoMDataRows}</tbody>
+          </table>
         );
     }
 });
@@ -71,20 +108,31 @@ var LatestBoMData = React.createClass({
 
 var BoMLatestDataRow = React.createClass({
     render: function() {
-        return(
+        return (
             <tr>
                 <td>{this.props.item}</td>
                 <td>{this.props.value}</td>
             </tr>
         );
-    }
+    },
 });
 
 
-function getLatestBoMData(){};
 
+function getLatestBoMData(){
+    var bomJsonData = {
+            csrfmiddlewaretoken: csrftoken,
+        };
 
-ReactDOM.render(
-    <LatestBoMData />,
-    document.getElementById('latest-bom-data')
-);
+    $.post('/get-latest-bom-data', bomJsonData, function(data){
+        data = JSON.parse(data);
+        console.log(data);
+        ReactDOM.render(
+           <LatestBoMData data={data} />,
+           document.getElementById('latest-bom-data')
+        );
+    });
+    setTimeout(getLatestBoMData, REFRESH_TIME);
+};
+
+getLatestBoMData();

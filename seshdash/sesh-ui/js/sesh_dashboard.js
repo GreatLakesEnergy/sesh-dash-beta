@@ -203,7 +203,6 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
           $.post('/silence-alert', jsonData, function(data) {
                modal.modal('hide');
           });
-
       });
 
 

@@ -1,7 +1,7 @@
-    
+
 
     {% block status_card %}
-    
+
     <div class="col-lg-4">
         <!-- TODO make the panel heading variable for color -->
         <div class="panel panel-{{ type }}">
@@ -11,34 +11,9 @@
                     {{ title }}
                 </div>
                     <div class="panel-body">
-                        <div class="table-responsive">
+                        <div class="table-responsive" id="latest-bom-data">
                             <table class="table table-hover">
-                                <thead>
-                                    <tr><th>Metric</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <!--
-                                    <tr class="warning">
-                                        <td>State of Charge</td>
-                                        <td>{{ latest_bom.soc }} % </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Battery Voltage</td>
-                                        <td>{{ latest_bom.battery_voltage }}V </td>
-                                    </tr>
-                                    <tr class="warning">
-                                        <td>Consumption data</td>
-                                        <td>{{ latest_bom.AC_output_absolute}} W</td>
-                                   </tr>
-                                    <tr class="success">
-                                        <td>Last Contact</td>
-                                        <!--{{latest_bom.time}}
-                                        <td>{{latest_bom.time|timesince }}</td>
-                                   </tr>
-                                -->
-                                <tbody id="latest-bom-data">
-                                </tbody>
+                                
                             </table>
                         </div>
             </div>
