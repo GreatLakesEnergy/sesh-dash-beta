@@ -1,9 +1,14 @@
 from datetime import datetime,timedelta
 from time import localtime,strftime
-"""
-Return number of seconds since 1970-01-01- epoch
-"""
+from django.conf import settings
+import pytz
+
+
+
 def get_epoch():
+    """
+    Return number of seconds since 1970-01-01- epoch
+    """
     now = datetime.now()
     epoch = datetime(1970,1,1)
     diff = now - epoch
@@ -18,6 +23,27 @@ def get_yesterday():
     return now-one_day
 
 
+def get_time_interval_array(interval,interval_type,start,end,tz=None):
+    """
+    Get an array between the provided time frame
+    with slices in the given interval timedelta
+    between start and end
+    """
+
+    if tz:
+        timezone = pytz.timezone(tz)
+    else:
+        timezone = pytz.timezone(settings.TIME_ZONE)
+    # TODO finish timezone implemenation
+    result = []
+    kwargs = {}
+    kwargs[interval_type] = interval
+    interval = timedelta(**kwargs)
+    while start < end:
+        start = start + interval
+        result.append(start)
+
+    return result
 
 def get_epoch_from_datetime(date):
     """
@@ -52,19 +78,19 @@ def epoch_to_date(seconds_time):
     """
     return strftime('%Y-%m-%d',localtime(seconds_time))
 
-"""
-Translate seconds time to datetime object
-"""
 def epoch_to_datetime(seconds_time):
+    """
+    Translate seconds time to datetime object
+    """
     return strftime('%Y-%m-%dT%XZ',localtime(seconds_time))
 
 
-"""
-Get last days returned to you as datetime objects in array
-@params:
-    from_date: (date to return consecutive days ongoing from) (optional)
-"""
 def get_last_five_days(from_date="now"):
+    """
+    Get last days returned to you as datetime objects in array
+    @params:
+        from_date: (date to return consecutive days ongoing from) (optional)
+    """
     days = []
     now = datetime.now()
     if not from_date == "now":
@@ -77,15 +103,15 @@ def get_last_five_days(from_date="now"):
     return days
 
 
-
-"""
-return the days inbetween the two sepcified dates
-@params:
-start: when is the interval stardate, datetime object
-end: when should the interval end , datatime object
-delta: increments in which to return dates, integer, default 1 day
-"""
 def get_days_interval_delta(start, end, delta=1):
+
+    """
+    return the days inbetween the two sepcified dates
+    @params:
+    start: when is the interval stardate, datetime object
+    end: when should the interval end , datatime object
+    delta: increments in which to return dates, integer, default 1 day
+    """
     delta =  timedelta(days=delta)
     curr = start
     days  = []
@@ -94,10 +120,10 @@ def get_days_interval_delta(start, end, delta=1):
         curr += delta
     return days
 
-"""
-get the delta of days ago from given start date
-"""
 def get_start_end_date(days_ago, start_day):
+    """
+    get the delta of days ago from given start date
+    """
     delta = start_day - timedelta(days=days_ago)
     return delta
 

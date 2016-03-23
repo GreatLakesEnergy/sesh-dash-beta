@@ -332,8 +332,8 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
     aggr_results = i.get_measurement_bucket(measurement, bucket_size, 'site_name', site.site_name, delta, operator=operator)
 
-    #logging.debug("influx results %s "%(aggr_results))
-
+    logging.debug("influx results %s "%(aggr_results))
+    #print "aggregating for %s %s"%(measurement,aggr_results)
     #we have mean values by the hour now aggregate them
     if aggr_results:
         agr_value = []
@@ -342,8 +342,10 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
             aggr_results = filter(clause_opts[clause],aggr_results)
 
         if toSum:
-            agr_value.append(sum(map(lambda x: x[operator], aggr_results)))
-            resuls = agr_value
+            to_sum_vals = map (lambda x: x[operator], aggr_results)
+            print to_sum_vals
+            agr_value.append(sum(to_sum_vals))
+            result = agr_value
         else:
             result = aggr_results
 
@@ -364,14 +366,14 @@ def get_aggregate_daily_data():
     """
     sites  = Sesh_Site.objects.all()
     print "Aggregating daily consumption and production stats"
+    yesterday = time_utils.get_yesterday()
     for site in sites:
-            yesterday = time_utils.get_yesterday()
 
-            logging.debug("aggregate data for %s"%site)
-            aggregate_data_pv = get_aggregate_data (site, 'pv_production')
-            aggregate_data_AC = get_aggregate_data (site, 'AC_output_absolute')
-            aggregate_data_batt = get_aggregate_data (site, 'AC_output', clause='negative')
-            aggregate_data_grid = get_aggregate_data (site, 'AC_input', clause='positive')
+            logging.debug("aggregate data for %s date: %ss"%(site,yesterday))
+            aggregate_data_pv = get_aggregate_data (site, 'pv_production')[0]
+            aggregate_data_AC = get_aggregate_data (site, 'AC_output_absolute')[0]
+            aggregate_data_batt = get_aggregate_data (site, 'AC_output', clause='negative')[0]
+            aggregate_data_grid = get_aggregate_data (site, 'AC_input', clause='positive')[0]
             aggregate_data_grid_data = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False)
 
             logging.debug("aggregate date for grid %s "%aggregate_data_grid_data)
@@ -397,7 +399,7 @@ def get_aggregate_daily_data():
 
             daily_aggr.save()
             #send to influx
-            send_to_influx(daily_aggr, site, time_utils.get_yesterday(), to_exclude=['date'])
+            send_to_influx(daily_aggr, site, yesterday, to_exclude=['date'])
 
 
 
