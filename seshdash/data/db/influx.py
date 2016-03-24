@@ -54,7 +54,7 @@ class Influx:
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"% str(e))
         except InfluxDBClientError,e:
-            logging.error("Error running  query"%str(e))
+            logging.error("Error running  query %s"%str(e))
         except Exception,e:
             logging.error("influxdb unkown error %s" %str(e))
         return []
