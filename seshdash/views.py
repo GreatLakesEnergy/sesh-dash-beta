@@ -501,12 +501,12 @@ def silence_alert(request):
 
 
 def get_latest_bom_data(request):
-    latest_bom = BoM_Data_Point.objects.order_by('-pk')[0]
+    latest_bom = BoM_Data_Point.objects.order_by('-time')[0]
 
     latest_bom_data = []
     latest_bom_data.append({"item": "State of Charge", "value":str(latest_bom.soc) + '%' })
     latest_bom_data.append({"item": "Battery Voltage", "value":latest_bom.battery_voltage})
     latest_bom_data.append({"item": "Consumption Data", "value":round(latest_bom.AC_output_absolute, 2)})
-    latest_bom_data.append({"item": "Recent Contact", "value":get_timesince(latest_bom.time)})
+    latest_bom_data.append({"item": "Recent Contact", "value": get_timesince(latest_bom.time)})
 
     return HttpResponse(json.dumps(latest_bom_data))

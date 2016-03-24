@@ -112,11 +112,25 @@ def get_timesince(time):
     return diff
 
 def format_timesince_seconds(seconds):
+    seconds = abs(seconds)
     if seconds < 60:
-        return seconds, " seconds ago"
+        if seconds == 1:
+            return seconds, " second ago"
+        else:
+            return seconds, " seconds ago"
     elif seconds < 3600:
-        return seconds/60, " minutes ago"
+        if seconds/60 < 2: # if it is still a minute
+            return seconds/60, " minute ago"
+        else: 
+            return seconds/60, " minutes ago"
     elif seconds < 86400:
-        return seconds/3600, " hours ago"
+        if seconds/3600 < 2:
+            return seconds/3600, " hour ago"
+        else:
+            return seconds/3600, " hours ago"
+
     else:
-        return seconds/86400, " days ago"
+        if seconds/86400 < 2:
+            return seconds/86400, " day ago"
+        else:
+            return seconds/86400, " days ago"
