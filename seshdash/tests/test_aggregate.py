@@ -83,8 +83,7 @@ class AggregateTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
     def tearDown(self):
-        #self.i.delete_database(self._influx_db_name)
-        pass
+        self.i.delete_database(self._influx_db_name)
 
     def test_data_point_creation(self):
         """

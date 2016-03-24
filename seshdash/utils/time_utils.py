@@ -1,7 +1,7 @@
 from datetime import datetime,timedelta
 from time import localtime,strftime
 from django.conf import settings
-import pytz
+from  pytz import timezone
 def get_epoch():
     """
     Return number of seconds since 1970-01-01- epoch
@@ -28,9 +28,9 @@ def get_time_interval_array(interval,interval_type,start,end,tz=None):
     """
 
     if tz:
-        timezone = pytz.timezone(tz)
+        timez = timezone(tz)
     else:
-        timezone = pytz.timezone(settings.TIME_ZONE)
+        timez = timezone(settings.TIME_ZONE)
     # TODO finish timezone implemenation
     result = []
     kwargs = {}
