@@ -52,7 +52,7 @@ You'll need to configure parameters for the APIs. Modify copy sample_settings.in
 ### Getting Data ###
 * The system requires data to be coming in from the API's this happens asynchronously and periodically
 * Start celery with command in a different screen:
-   ` $ celery --app=sesh.celery:app worker --loglevel-INFO --beat -E` 
+   ` $ celery --app=sesh.celery:app worker --loglevel=INFO --beat -E` 
 
 ### API docs ###
 * victron: http://www.victronenergy.com/live/vrm_portal:vrm_juice_json_api_notes
