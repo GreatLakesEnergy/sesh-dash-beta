@@ -115,8 +115,8 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(minutes=5),
         'args': None,
     },
-    'aggregate_daily_data': {
-        'task': 'seshdash.tasks.get_aggregate_data',
+    'get_aggregate_daily_data': {
+        'task': 'seshdash.tasks.get_aggregate_daily_data',
         'schedule': timedelta(days=1),
         'args': None,
     },
@@ -298,7 +298,7 @@ WSGI_APPLICATION = 'sesh.wsgi.application'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Africa/Kigali'
+TIME_ZONE = CELERY_TIMEZONE
 
 USE_I18N = True
 
@@ -312,6 +312,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
+FIXTURE_DIRS = os.path.join(PROJECT_DIR, 'sample_data')
 
 STATICFILES_FINDERS = (
                         "django.contrib.staticfiles.finders.FileSystemFinder",
