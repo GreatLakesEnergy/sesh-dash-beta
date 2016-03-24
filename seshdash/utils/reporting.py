@@ -1,6 +1,7 @@
 from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point
 from seshdash.utils.send_mail import send_mail
 
+from django.forms.models import model_to_dict
 from django.utils import timezone
 from django.db.models import Avg,Sum
 
@@ -19,16 +20,24 @@ def prepare_report(site, duration="week"):
 
     """
     recipients = []
-    cash_power_cost = 200
+    cash_power_cost = 220
 
     now = datetime.now()
     #TODO  This is terrible make decent date parser!
-    if duration == "week":
+    if duration == 'week':
         date_range = now - timedelta(days=7)
+    elif duration == 'month':
+        date_range = now - timedelta(days=31)
     else:
-        duration = "month"
-        date_range = now - timedelta(month=1)
+        duration = "dai"
+        date_range = now - timedelta(hours=24)
 
+    # Query for Daily data points and aggregate across the given time
+
+    print "reports: getting aggregate between  %s and %s" %(date_range,now)
+
+    test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
+    print "test %s"%test
 
     aggeragete_data = Daily_Data_Point.objects.filter(site=site,
             date__range= [date_range,now]).aggregate(
@@ -41,6 +50,8 @@ def prepare_report(site, duration="week"):
                     average_consumption = Avg('daily_power_consumption_total')/1000,
                     average_daily_grid = Avg('daily_grid_usage')/1000,
                     )
+
+    print "Generating report %s" %(aggeragete_data)
     # Get Users for site
     users = get_users_with_perms(site)
     for user in users:

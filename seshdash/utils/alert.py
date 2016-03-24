@@ -39,7 +39,7 @@ def alert_check(data_point):
             for user in users:
                 recipients.append(user.email)
             logging.debug("emailing %s" %recipients)
-            print "emailing %s"%recipients
+            #print "emailing %s"%recipients
             # recipients = ["seshdash@gmail.com",]
             alert_obj = Sesh_Alert.objects.create(
                     site = data_point.site,
@@ -51,7 +51,7 @@ def alert_check(data_point):
             if rule.send_mail:
                 mail_sent = alert(data_point,content,recipients)
                 alert_obj.alertSent = mail_sent
-                print("Sent mail for %s" %content)
+                #print("Sent mail for %s" %content)
             alert_obj.save()
 
 def alert(data_point,content,recipients):

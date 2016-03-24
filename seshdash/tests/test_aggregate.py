@@ -12,6 +12,7 @@ import pytz
 
 #Helper Functions
 from django.forms.models import model_to_dict
+from django.core import mail
 
 #Security
 from guardian.shortcuts import assign_perm
@@ -26,7 +27,7 @@ from django.forms.models import model_to_dict
 # To Test
 from seshdash.data.db.influx import Influx
 from django.conf import settings
-from seshdash.tasks import get_aggregate_daily_data
+from seshdash.tasks import get_aggregate_daily_data, send_reports
 
 
 # This test case written to test alerting module.
@@ -38,8 +39,10 @@ class AggregateTestCase(TestCase):
         # Setup Influx
         self._influx_db_name = 'test_db'
         self.i = Influx(database=self._influx_db_name)
+        self.no_points = 288
         try:
             self.i.create_database(self._influx_db_name)
+            # Generate random data  points for 24h
         except:
             self.i.delete_database(self._influx_db_name)
             sleep(1)
@@ -72,12 +75,12 @@ class AggregateTestCase(TestCase):
                 AC_Load_in=0.0,
                 AC_Load_out=0.7)
         """
+
+        self.no_points = self.create_test_data()
         #create test user
         self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
-        # Generate random data  points for 24h
-        self.no_points = self.create_test_data()
 
     def tearDown(self):
         #self.i.delete_database(self._influx_db_name)
@@ -105,7 +108,6 @@ class AggregateTestCase(TestCase):
 
         self.assertEqual(ddp.count(),1)
         ddp = ddp.first()
-
         self.assertNotEqual(ddp.daily_pv_yield,0)
         self.assertNotEqual(ddp.daily_power_consumption_total,0)
         self.assertNotEqual(ddp.daily_battery_charge,0)
@@ -114,8 +116,17 @@ class AggregateTestCase(TestCase):
         self.assertNotEqual(ddp.daily_grid_outage_t,0)
         self.assertNotEqual(ddp.daily_grid_usage,0)
 
+    def test_reporting(self):
+        """
+        Test email reporting for sites
+        """
+        get_aggregate_daily_data()
+        send_reports()
+        self.assertEqual(len(mail.outbox),1)
+
 
     def create_test_data(self):
+        print "Creating  data points "
         data_point_dates = generate_date_array()
         voltage_in = 220
         voltage_out = 220

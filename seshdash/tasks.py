@@ -200,11 +200,11 @@ def get_enphase_daily_stats(date=None):
         for site in sites:
                 en_client = EnphaseAPI(settings.ENPHASE_KEY,site.enphase_ID)
                 system_id = site.enphase_site_id
-                print "gettig stats for %s"%system_id
+                #print "gettig stats for %s"%system_id
                 system_results = en_client.get_stats(system_id,start=datetime_start_epoch)
 
                 #TODO handle exception of empty result
-                print len(system_results['intervals'])
+                #print len(system_results['intervals'])
                 for interval in system_results['intervals']:
                         #store the data
                         print interval
@@ -343,14 +343,13 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
         if toSum:
             to_sum_vals = map (lambda x: x[operator], aggr_results)
-            print to_sum_vals
             agr_value.append(sum(to_sum_vals))
             result = agr_value
         else:
             result = aggr_results
 
 
-        logging.debug("Aggregateing %s %s agr:%s"%(measurement,aggr_results,agr_value))
+        logging.debug("Aggregating %s %s agr:%s"%(measurement,aggr_results,agr_value))
     else:
         message = "No Values returned for aggregate. Check Influx Connection."
         raise Exception (message)
