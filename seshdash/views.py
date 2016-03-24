@@ -9,17 +9,19 @@ from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
-from django.forms import modelformset_factory, inlineformset_factory
+from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.contrib.auth.models import User
-
+from django import forms
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert
-from seshdash.utils import time_utils
-from pprint import pprint
-from seshdash.forms import SiteForm,VRMForm
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account
 from django.db.models import Avg
 from django.db.models import Sum
+from seshdash.forms import SiteForm, VRMForm, RMCForm
+
+# Special things we need
+from seshdash.utils import time_utils, rmc_tools
+from pprint import pprint
 
 #Import utils
 from seshdash.utils.time_utils import get_timesince
@@ -46,11 +48,13 @@ def index(request,site_id=0):
     context_dict = {}
     #Handle fisrt login if user has no site setup:
     if not sites:
+        # Simplt give the option first
         VRM_form = VRMForm()
         form = SiteForm()
         context_dict['form'] = form
         context_dict['VRM_form'] = VRM_form
-        context_dict['form_type'] = "VRM Account"
+        #Removing as form_type is arbiter now
+        #context_dict['form_type'] = "VRM Account"
 
         return render(request,'seshdash/initial-login.html',context_dict)
 
@@ -95,10 +99,12 @@ def get_user_sites(vrm_user_id,vrm_password):
     return context_dict
 
 
-def _return_error_import(request,context_dict,form,message):
-    print "######## Error logging in"
-    # TODO provide meaning full erro message from validate
-    context_dict['message'] = "failure"
+def _return_error_import( request, context_dict, form, message):
+    """
+    TODO Generalize this
+    """
+    #TODO
+    context_dict['message'] = message
     context_dict['error'] = True
     context_dict['VRM_form'] = form
     return render(request,'seshdash/initial-login.html',context_dict)
@@ -117,6 +123,7 @@ def import_site(request):
                 site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
                 print "###### %s"%site_list
                 if not site_list['sites']:
+                   print 'invalid creds'
                    return _return_error_import(request,context_dict,form,"check credentials")
                 context_dict['message'] = "success"
                 #do a psuedo save first we need to modify a field later
@@ -141,11 +148,34 @@ def import_site(request):
                                         'vrm_account': VRM
                                         }
                     pre_pop_data.append(site_model_form)
-                site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,extra=len(site_list['sites']),exclude=('vrm_account',))
-                context_dict['site_forms'] = site_forms_factory(instance=VRM,initial = pre_pop_data )
+                site_forms_factory = inlineformset_factory(VRM_Account,
+                        Sesh_Site,
+                        extra=len(site_list['sites']),
+                        exclude=('vrm_account','rmc_account'),
+                        can_delete= False)
+
+                context_dict['site_forms'] = site_forms_factory(instance=VRM,
+                        initial = pre_pop_data )
             else:
                    return _return_error_import(request,context_dict,form,"unknown error")
             return render(request,'seshdash/initial-login.html',context_dict)
+
+def _validate_form(form,context_dict):
+    """
+    Validate forms basedo no form input
+    """
+    if form.is_valid():
+        print "FORM is VALID"
+        form.save(commit=False)
+        context_dict['error'] =  False
+
+    else:
+
+         context_dict['message'] = "failure creating site"
+         context_dict['error'] = True
+         context_dict['site_forms'] = form
+
+    return context_dict,form
 
 @login_required
 def create_site(request):
@@ -153,19 +183,60 @@ def create_site(request):
     Create the sites imported from VRM account
     """
     context_dict = {}
-    VRM = VRM_Account.objects.first()
-    site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,exclude=('vrm_account',))
+    # Check if it's a VRM or RMC site input"
+    print "getting into create site"
     if request.method == "POST":
-        form = site_forms_factory(request.POST,instance=VRM)
-        if form.is_valid():
-            form.save()
+        if request.POST["form_type"] == 'rmc':
+            # if RMC site
+            context_dict['form_type'] = 'rmc'
+            site_forms_factory = inlineformset_factory(Sesh_RMC_Account,Sesh_Site,exclude=('delete',))
+
+            rmc = Sesh_RMC_Account(API_KEY=rmc_tools.generate_rmc_api_key())
+            rmc.save()
+            form = site_forms_factory(request.POST,instance = rmc)
         else:
-                context_dict['message'] = "failure creating site"
-                context_dict['error'] = True
-                context_dict['site_forms'] = form
-                return render(request,'seshdash/initial-login.html',context_dict)
-        return index(request)
-        #return render(request,'seshdash/main-dash.html',context_dict)
+            # Are we adding a VRM based side?
+            # Assume there are no other VRM accounts
+            print "request recieved formtype vrm"
+            context_dict['form_type'] = 'vrm'
+            VRM = VRM_Account.objects.first()
+            site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,exclude=('vrm_account',))
+            form = site_forms_factory(request.POST,instance=VRM)
+            context_dict["form_type"] = 'vrm'
+            return render(request,'seshdash/initial-login.html',context_dict)
+
+        # Run validation
+        context_dict, form = _validate_form(form,context_dict)
+
+        if context_dict['error']:
+            # Got Error return problem!
+            #Delete VRM or RmC Account if this fails
+            return render(request,'seshdash/initial-login.html',context_dict)
+        else:
+            # add our foreign key
+            #
+            #form.rmc_account = rmc
+            print "#### attaching RMC to site"
+
+        #finally
+        form.save()
+
+
+    else:
+         print "request recieved is rmc request getting form ready"
+         site_forms_factory = inlineformset_factory(
+                 Sesh_RMC_Account,
+                 Sesh_Site,
+                 widgets = {'comission_date':forms.DateInput()},
+                 exclude=('vrm_account','vrm_site_id','rmc_account','delete'),
+                 extra=1)
+
+         context_dict['site_forms'] = site_forms_factory
+         context_dict['form_type'] = 'rmc'
+         return render(request,'seshdash/initial-login.html',context_dict)
+
+    # Go to normal startup mode
+    return index(request)
 
 
 

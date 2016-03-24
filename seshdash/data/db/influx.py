@@ -9,14 +9,18 @@ from influxdb.exceptions import InfluxDBClientError,InfluxDBServerError
 
 class Influx:
 
-    def __init__(self):
+    def __init__(self,database=None):
+
+        self.db = settings.INFLUX_DB
+        if database:
+           self.db = database
+
         self._influx_client = InfluxDBClient (settings.INFLUX_HOST,
                                               settings.INFLUX_PORT,
                                               settings.INFLUX_USERNAME,
                                               settings.INFLUX_PASSWORD,
-                                              settings.INFLUX_DB
+                                              self.db
                                               )
-        self.db = settings.INFLUX_DB
         #TODO draw this from settings
         self._influx_tag = 'sesh_dash'
 
@@ -79,29 +83,39 @@ class Influx:
                 # Datetime needs to be converted to epoch
                 data_point["time"] = timestamp
                 #Cast everything not string to Float
-                if isinstance(measurement_dict[key], str) or isinstance(measurement_dict[key],unicode):
-                    data_point["fields"] = {"value" : measurement_dict[key]}
-                else:
-                    data_point["fields"] = {"value" : float(measurement_dict[key])}
-
+                try:
+                    if isinstance(measurement_dict[key], str) or isinstance(measurement_dict[key],unicode):
+                        data_point["fields"] = {"value" : measurement_dict[key]}
+                    else:
+                        data_point["fields"] = {"value" : float(measurement_dict[key])}
+                except Exception,e:
+                    logging.warning("INFLUX error casting %s key: %s"%(e,key))
                 logging.debug("prepping data point %s"%(data_point))
                 # Get the data point array ready.
                 data_point_list.append(data_point)
         try:
             #Send the data blob to influx
-            logging.debug("sending %s"%data_point_list)
+            logging.debug("INFLUX sending %s"%data_point_list)
             self._influx_client.write_points(data_point_list)
         except InfluxDBServerError,e:
-            logging.error("Error running query on server %s"%e)
+            logging.error("INFLUX Error running query on server %s %s"%(e,data_point_list))
         except InfluxDBClientError,e:
-            logging.error("Error running  query %s "%e)
+            logging.error("INFLUX Error running  query %s %s"%(e,data_point_list))
         except Exception,e:
-            logging.error("influxdb unkown error %s"%e)
+            logging.error("INFLUX unkown error %s %s"%(e,data_point))
         else:
             return False
 
         return True
 
+    def query(self,measurement_name):
+        query = "select value from %s"%measurement_name
+        return list(self._influx_client.query(query,database=self.db).get_points())
 
+    def create_database(self,name):
+        self._influx_client.create_database(name)
+
+    def delete_database(self,name):
+        self._influx_client.drop_database(name)
 
 

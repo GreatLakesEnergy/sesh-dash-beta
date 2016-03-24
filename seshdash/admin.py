@@ -31,3 +31,7 @@ class Daily_Data_PointAdmin(GuardedModelAdmin):
 class VRM_AccountAdmin(GuardedModelAdmin):
     pass
 
+@admin.register(Sesh_RMC_Account)
+class RMC_AccountAdmin(GuardedModelAdmin):
+    pass
+

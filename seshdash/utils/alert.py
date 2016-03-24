@@ -20,24 +20,38 @@ def alert_check(data_point):
            'eq' : lambda x,y: x==y,
     }
     recipients = []
+    content = {}
+
     rules = Alert_Rule.objects.filter(site = data_point.site)
     for rule in rules:
         real_value = getattr(data_point,rule.check_field)
         if ops[rule.operator](real_value,rule.value):
-            content = "site:%s\nrule:%s '%s' %s --> found %s " %(data_point.site.site_name,rule.check_field,rule.operator,rule.value,real_value)
+            content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(data_point.site.site_name,rule.check_field,rule.operator,rule.value,real_value)
+
+            # Get ready content for email
+            content['site'] = data_point.site.site_name
+            content['alert'] = content_str
+            content['time'] = data_point.time
+            content['data_point'] = data_point
+
             # TODO rule object should have the list of related persons to send alert mail
             users = get_users_with_perms(data_point.site)
             for user in users:
                 recipients.append(user.email)
             logging.debug("emailing %s" %recipients)
-            print "emailing %s"%recipients
+            #print "emailing %s"%recipients
             # recipients = ["seshdash@gmail.com",]
-            alert_obj = Sesh_Alert.objects.create(site = data_point.site, alert=rule, date=timezone.now(),
-                                                  isSilence=False,alertSent=rule.send_mail, point=data_point)
+            alert_obj = Sesh_Alert.objects.create(
+                    site = data_point.site,
+                    alert=rule, date=timezone.now(),
+                    isSilence=False,
+                    alertSent=rule.send_mail,
+                    point=data_point)
+
             if rule.send_mail:
                 mail_sent = alert(data_point,content,recipients)
                 alert_obj.alertSent = mail_sent
-                print("Sent mail for %s" %content)
+                #print("Sent mail for %s" %content)
             alert_obj.save()
 
 def alert(data_point,content,recipients):
