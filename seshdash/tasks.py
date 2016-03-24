@@ -8,7 +8,7 @@ from django.db import IntegrityError
 from django.forms.models import model_to_dict
 from celery import shared_task
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule
 
 #from seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
@@ -49,11 +49,10 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[]):
         handle_task_failure(message= message,exception=e,data=model_data)
 
 
+"""
 @shared_task
 def get_BOM_data():
-    """
-    Get data related to system voltage, SoC, battery voltage through Victro VRM portal
-    """
+
 
     sites = Sesh_Site.objects.all()
     for site in sites:
@@ -110,7 +109,7 @@ def get_BOM_data():
             logging.exception("error with geting site %s data exception")
             handle_task_failure(message = message)
             pass
-
+"""
 
 @shared_task
 def get_historical_BoM(date_range=5):
@@ -428,3 +427,13 @@ def send_reports():
         prepare_report(site)
 
 
+@shared_task
+def check_bom():
+    sites = Sesh_Site.objects.all()
+    
+    # TODO check for the latest 10 alerts
+    for site in sites:
+        latest_point = BoM_Data_Points.objects.filter(site_id=site.id).order_by('time')[0]
+        alert_check(latest_point) 
+
+            
