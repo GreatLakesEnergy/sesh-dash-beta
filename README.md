@@ -25,17 +25,18 @@ Follow the steps below to setup a development environment. This will setup a vir
  1. Install bower
    ` $ sudo npm install -g bower`
  1. Get the UI components:
-    `$ python ./manager.py bower_install`
+    `$ python ./manage.py bower_install`
  1. Collect Static files in one place:
-    `$ python ./manager.py collectstatic`
+    `$ python ./manage.py collectstatic`
 
 #### Virtualenv Only ####
+* Make sure system level dependencies are installed first see playbook.yml
 * Create a local virtual-env (install virtualenv if you dont have it already):
     `$ virtualenv <sesh-dash-beta>`
 * Install requirements defined in requirements.txt:
     `$ requirements.txt > pip install -r requirements.txt`
 * Get the UI components with:
-   ` $ bower ./manage.py bower install`
+   ` $ python ./manage.py bower install`
 
 ### Before you start ###
 You'll need to configure parameters for the APIs. Modify copy sample_settings.ini.txt.txt to  settings_local.ini to put in your api keys and database settings.(contact repo owner for keys). Also setup database parameters
@@ -51,7 +52,7 @@ You'll need to configure parameters for the APIs. Modify copy sample_settings.in
 ### Getting Data ###
 * The system requires data to be coming in from the API's this happens asynchronously and periodically
 * Start celery with command in a different screen:
-   ` $ celery --app=sesh.celery:app worker --loglevel-INFO --beat`
+   ` $ celery --app=sesh.celery:app worker --loglevel=INFO --beat -E` 
 
 ### API docs ###
 * victron: http://www.victronenergy.com/live/vrm_portal:vrm_juice_json_api_notes

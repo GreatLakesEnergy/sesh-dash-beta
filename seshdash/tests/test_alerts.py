@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point
 from seshdash.utils import alert
 from django.utils import timezone
@@ -51,3 +51,29 @@ class AlertTestCase(TestCase):
         self.assertEqual(alerts_created.filter(alertSent=True).count(),2)
 
     # TODO add negative test cases
+
+    def test_get_alerts(self):
+        """ Getting alerts correctly """
+        alerts = Sesh_Alert.objects.all().count()
+        self.assertEqual(alerts, 3)
+
+    def test_display_alert_data(self):
+        """Getting the display alert data"""
+        c = Client()
+        response = c.post('/get-alert-data/',{'alert_id':'1'})
+        self.assertEqual(response.status_code, 200)
+
+    def test_silence_alert(self):
+        """Silencing alert """
+        c = Client()
+        response = c.post('/silence-alert/',{'alert_id':'1'})
+        alerts = Sesh_Alert.objects.filter(isSilence=False).count()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(alerts, 2)
+	
+    def test_get_latest_bom_data(self):
+        """ Getting latest bom data"""
+        c = Client()
+        response = c.post('/get-latest-bom-data/',{})
+        self.assertEqual(response.status_code, 200)
+        
