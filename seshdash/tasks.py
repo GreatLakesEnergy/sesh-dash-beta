@@ -432,12 +432,12 @@ def send_reports():
                              )
 
 @shared_task
-def check_bom():
+def alert_engine():
     sites = Sesh_Site.objects.all()
     
     # TODO check for the latest 10 alerts
     for site in sites:
-        latest_point = BoM_Data_Points.objects.filter(site_id=site.id).order_by('time')[0]
+        latest_point = BoM_Data_Point.objects.filter(site_id=site.id).order_by('time')[0]
         alert_check(latest_point) 
 
             
