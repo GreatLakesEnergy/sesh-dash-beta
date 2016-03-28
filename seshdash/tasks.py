@@ -207,7 +207,7 @@ def get_enphase_daily_stats(date=None):
                 #print len(system_results['intervals'])
                 for interval in system_results['intervals']:
                         #store the data
-                        print interval
+                        #print interval
                         end_time_str = time_utils.epoch_to_datetime(interval['end_at'])
                         system_pv_data = PV_Production_Point(
                             site = site,
@@ -297,7 +297,11 @@ def get_grid_stats(measurement_dict_list, measurement_value, measurement_key, bu
     if a measurement is happens to be 0 X times this will find the duration
     """
     time_gap = bucket_size #TODO this should be a global defined by celery job runtime
-    result_dict = {}
+    result_dict = {
+                    'duration':0,
+                    'count':0
+                }
+
     chunked_list = find_chunks(measurement_dict_list,measurement_key)
     logging.debug("Chunked list  %s"%chunked_list)
     count = 0
@@ -427,7 +431,7 @@ def send_reports():
         logging.debug("Sending report for site %s"%site)
         result = prepare_report(site)
         if not result:
-            self.update_state(
+            send_reports.update_state(
                              state = states.FAILURE,
                              meta = 'REASON FOR FAILURE'
                              )
