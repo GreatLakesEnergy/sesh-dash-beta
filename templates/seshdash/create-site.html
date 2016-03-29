@@ -26,7 +26,6 @@
                             {{ site_forms.management_form}}
                             <div class="table-responsive">
 
-                                <table class="table table-striped table-bordered table-hover ">
                                     {% if form_type != 'vrm' %}
                                         <!-- RMC FORM -->
                                          <input type="hidden" name="form_type" value="rmc"> 
@@ -34,12 +33,16 @@
                                          <input type="hidden" name="form_type" value="vrm"> 
                                     {% endif %}
                                     {% for form in site_forms %}
+                                        <table class="table table-striped table-bordered table-hover ">
                                          <!-- Site form  -->
                                             {{form.media}}
                                             {{ form.as_table }}
 
+                                         {% if form_type != 'vrm' %}
+                                             <input type="checkbox" name="import_data">
+                                         {% endif %}
+                                        </table>
                                      {% endfor %}
-                                </table>
 
                             </div>
                             <input type="submit" value="Create Site">
