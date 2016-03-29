@@ -75,6 +75,13 @@ ALLOWED_HOSTS = []
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
 
+# Temp folder for misc files
+
+try:
+    TEMP_FOLDER = config.get('system','temp_folder')
+except:
+    TEMP_FOLDER = "/tmp/"
+print "using %s"%TEMP_FOLDER
 
 DATABASES = {
     'default': {
@@ -139,6 +146,7 @@ EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #email_templates_dir = os.path.join(template_dir,'email')
 FROM_EMAIL = config.get('mail','FROM_EMAIL')
+
 
 LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
 

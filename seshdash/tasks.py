@@ -112,42 +112,40 @@ def get_BOM_data():
 
 
 @shared_task
-def get_historical_BoM(date_range=5):
+def get_historical_BoM(sesh_site_id, start_at):
         """
         Get Historical Data from VRM to backfill any days
         """
-        datetime_now = datetime.now()
-        datetime_start = datetime_now - timedelta(date_range)
 
-        datetime_now_epoch = time_utils.get_epoch_from_datetime(datetime_now)
-        datetime_start_epoch = time_utils.get_epoch_from_datetime(datetime_start)
-
-        sites = Sesh_Site.objects.all()
         count = 0
-        for site in sites:
-            v_client = VictronAPI(site.vrm_user_id,site.vrm_password)
-            vh_client = VictronHistoricalAPI(site.vrm_user_id,site.vrm_password)
-            site_id = site.vrm_site_id
-            for site_id in v_client.SYSTEMS_IDS:
-                #site_id is a tuple
-                data = vh_client.get_data(site_id[0],datetime_start_epoch,datetime_now_epoch)
-                for row in data:
-                    data_point = BoM_Data_Point(
-                        site = site,
-                        time = row['Date Time'],
-                        soc = row['Battery State of Charge (System)'],
-                        battery_voltage = row['Battery voltage'],
-                        AC_input = row['Input power 1'],
-                        AC_output =  row['Output power 1'],
-                        AC_Load_in =  row['Input current phase 1'],
-                        AC_Load_out =  row['Output current phase 1'],
-                        inverter_state = row['VE.Bus Error'],
-                        #TODO these need to be activated
-                        genset_state =  "off",
-                        relay_state = "off",
-                        )
-                    data_point.save()
-                    count = count +1
+        site = Sesh_Site.objects.get(pk=sesh_site_id)
+        site_id = site.vrm_site_id
+        vh_client = VictronHistoricalAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
+
+        #site_id is a tuple
+        print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
+        data = vh_client.get_data(site_id,start_at)
+        print "got data %s"%data
+        for row in data:
+            data_point = BoM_Data_Point(
+                site = site,
+                time = row['Date Time'],
+                soc = row['Battery State of Charge (System)'],
+                battery_voltage = row['Battery voltage'],
+                AC_input = row['Input power 1'],
+                AC_output =  row['Output power 1'],
+                AC_Load_in =  row['Input current phase 1'],
+                AC_Load_out =  row['Output current phase 1'],
+                inverter_state = row['VE.Bus Error'],
+                pv_generated = row['L1 Energy'],
+                #TODO these need to be activated
+                genset_state =  "off",
+                relay_state = "off",
+                )
+            print "importing datapoint %s"%row['Date Time']
+            data_point.save()
+            send_to_influx(data_point, site, date, to_exclude=['time'])
+            count = count +1
             print "saved %s BoM data points"%count
 
 

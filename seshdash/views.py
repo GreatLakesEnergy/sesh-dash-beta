@@ -34,6 +34,9 @@ from rest_framework import generics, permissions
 from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
 from seshdash.api.victron import VictronAPI
 
+# celery
+from seshdash.tasks import get_historical_BoM
+
 #generics
 import logging
 
@@ -43,7 +46,7 @@ def index(request,site_id=0):
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-    sites = Sesh_Site.objects.all()
+    #sites = Sesh_Site.objects.all()
     sites = get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
     context_dict = {}
     #Handle fisrt login if user has no site setup:
@@ -159,6 +162,13 @@ def import_site(request):
             else:
                    return _return_error_import(request,context_dict,form,"unknown error")
             return render(request,'seshdash/initial-login.html',context_dict)
+
+def download_data(user):
+    sites = get_objects_for_user(user,'seshdash.view_Sesh_Site')
+    print "found sites %s "%sites
+    for site in sites:
+        get_historical_BoM.delay(site.pk, time_utils.get_epoch_from_datetime(site.comission_date))
+        print "done"
 
 def _validate_form(form,context_dict):
     """
