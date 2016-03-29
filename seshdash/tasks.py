@@ -106,13 +106,13 @@ def get_BOM_data():
             pass
         except Exception ,e:
             message = "error with geting site %s data exception %s"%(site,e)
-            logging.exception("error with geting site %s data exception")
+            logging.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message)
             pass
 
 
 @shared_task
-def get_historical_BoM(sesh_site_id, start_at):
+def get_historical_BoM(sesh_site_id,start_at):
         """
         Get Historical Data from VRM to backfill any days
         """
@@ -127,6 +127,7 @@ def get_historical_BoM(sesh_site_id, start_at):
         data = vh_client.get_data(site_id,start_at)
         print "got data %s"%data
         for row in data:
+            print "saving data point  %s"%row
             data_point = BoM_Data_Point(
                 site = site,
                 time = row['Date Time'],
@@ -137,16 +138,26 @@ def get_historical_BoM(sesh_site_id, start_at):
                 AC_Load_in =  row['Input current phase 1'],
                 AC_Load_out =  row['Output current phase 1'],
                 inverter_state = row['VE.Bus Error'],
-                pv_generated = row['L1 Energy'],
+                pv_production = row['L1 Energy'],
                 #TODO these need to be activated
-                genset_state =  "off",
-                relay_state = "off",
+                genset_state =  0,
+                relay_state = 0,
                 )
-            print "importing datapoint %s"%row['Date Time']
-            data_point.save()
-            send_to_influx(data_point, site, date, to_exclude=['time'])
-            count = count +1
-            print "saved %s BoM data points"%count
+            try:
+                data_point.save()
+                send_to_influx(data_point, site, date, to_exclude=['time'])
+                count = count +1
+                print "saved %s BoM data points"%count
+                logging.debug("saved %s BoM data points"%count)
+            except IntegrityError, e:
+                print "data point already exist %s"%e
+            except Exception,e:
+                message = "error with geting  data exception %s"%(e)
+                logging.exception("error with geting site  data exception")
+                handle_task_failure(message = message)
+                pass
+
+
 
 
 @shared_task

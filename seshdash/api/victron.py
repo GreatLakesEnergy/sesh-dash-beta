@@ -2,7 +2,7 @@
 import requests, json, logging
 import csv
 import urllib2
-from os import path
+from os import path, remove
 from pprint import pprint
 from datetime import datetime,timedelta
 from ..utils import time_utils
@@ -234,6 +234,7 @@ class VictronHistoricalAPI:
     API to get historical data from the VRM
     """
 
+    #TODO make logging activated
     API_HIST_LOGIN_URL = "https://vrm.victronenergy.com/user/login"
     #API_HIST_FETCH_URL = "https://vrm.victronenergy.com/site/download-csv/site/{SITE_ID}/start_time/{START_AT}/end_time/{END_AT}"
     API_HIST_FETCH_URL = "https://vrm.victronenergy.com/site/{SITE_ID}/download-data/log/csv/{START_AT}/{END_AT}"
@@ -288,28 +289,47 @@ class VictronHistoricalAPI:
          self.DOWNLOAD_FOLDER = dl_fldr
          self.TIMEZONE = timezone
          self.SESSION = requests.Session()
+         self.SESSION_COOKIES = {}
          self.initialize()
 
     def initialize(self):
          """
          Login to the portal and save the cookie for later reuse
          """
-         data= {}
+         data = {}
+         first_cookies = {}
+         second_cookies = {}
+         # Setup Headers
          data['password'] = self.PASSWORD
          data['username'] = self.USERNAME
          data['local_timezone'] = self.TIMEZONE
          data['is_dst'] = 0
+
+         # Make Request
          r = self.SESSION.post(self.API_HIST_LOGIN_URL,data=data,verify=False)
-         print r.text
-         self.SESSION_COOKIES = r.cookies.get_dict()
-         print r.cookies.get_dict()
+
+
+         try:
+            # Handle our tricky cookie situation
+             first_cookies = r.history[0].cookies.get_dict()
+             second_cookies  = r.cookies.get_dict()
+         except Exception,e:
+             self.IS_HIST_INITIALIZED = False
+             logging.error("Victron Hist apI error getting cookies "%str(e))
+
+         # Merge our cookie dictionaries
+
+         first_cookies.update(second_cookies)
+         self.SESSION_COOKIES = first_cookies
          #TODO this is border line screan scraping so this error condition will not be caught
          if r.status_code == 200 and self.SESSION_COOKIES.has_key('VRM_session_id'):
                 self.IS_HIST_INITIALIZED = True
                 logging.info("Victron historical API initialized")
          else:
                 self.IS_HIST_INITIALIZED = False
-                print "Victron historical API initialization failed"
+                logging.warning("Problem initializing Victorn Hist API")
+
+
     def get_data(self,site_id,start_at,end_at=None):
         """
         Will download a csv containt all data for provided seconds from epoch time window.
@@ -332,7 +352,6 @@ class VictronHistoricalAPI:
         headers  = {'user-agent':self.USER_AGENT}
         #data = self.SESSION.get(formated_URL,stream=True)
         data = self.SESSION.get(formated_URL,stream=True,verify=False)
-        print data
         with open(full_file, 'wb') as fd:
             logging.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
@@ -346,13 +365,14 @@ class VictronHistoricalAPI:
         return iterable csv reader object
 
         """
-        logging.debug("parsing csv data %s")
+        logging.debug("parsing csv data %s"%csv_data_file)
         data_arr = []
         try:
             csvfile  = open(csv_data_file)
             #need to skip first row
             csvfile.readline()
             csvfile.readline()
+
             reader = csv.DictReader(csvfile,self.CSV_KEYS)
             for row in reader:
                 data_arr.append(row)
@@ -362,3 +382,5 @@ class VictronHistoricalAPI:
             logging.error("unable to find file or key %s"%e)
         finally:
             csvfile.close()
+            remove(csv_data_file)
+

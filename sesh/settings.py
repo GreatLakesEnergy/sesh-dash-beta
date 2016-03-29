@@ -81,7 +81,6 @@ try:
     TEMP_FOLDER = config.get('system','temp_folder')
 except:
     TEMP_FOLDER = "/tmp/"
-print "using %s"%TEMP_FOLDER
 
 DATABASES = {
     'default': {
