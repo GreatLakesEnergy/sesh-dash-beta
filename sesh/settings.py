@@ -55,7 +55,8 @@ config = RawConfigParser(
                'FROM_EMAIL':'some_email@gmail.com',
                'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
-               'TOKEN':''
+               'TOKEN':'',
+               'CLICKATELL_KEY':''
                }
         )
 
@@ -75,6 +76,8 @@ ALLOWED_HOSTS = []
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
 
+# sms API key
+CLICKATELL_KEY = config.get('api','clickatell_key')
 
 DATABASES = {
     'default': {

@@ -37,6 +37,23 @@ class Sesh_RMC_Account(models.Model):
         verbose_name = "RMC API Account"
 
 
+class Sesh_User(models.Model):
+    #TODO each user will have his her own settings / alarms this needs
+    #to be added
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    department = models.CharField(max_length=100)
+    phone_number =  models.CharField(max_length=12)
+    on_call = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
+
+    class Meta:
+         verbose_name = 'User'
+         verbose_name_plural = 'Users'
+
+
+
 
 class Sesh_Site(models.Model):
     """
@@ -79,25 +96,10 @@ class RMC_status(models.Model):
     """
     rmc = models.ForeignKey(Sesh_RMC_Account)
     ip_address = models.GenericIPAddressField(default=None)
-    last_contact = models.DateTimeField(default=None)
+    minutes_last_contact = models.IntegerField(default=None)
     signal_strength = models.IntegerField(default=None)
     data_sent_24h = models.IntegerField(default=None)
 
-
-
-class Sesh_User(models.Model):
-    #TODO each user will have his her own settings / alarms this needs
-    #to be added
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    department = models.CharField(max_length=100)
-    phone_number =  models.IntegerField()
-
-    def __str__(self):
-        return self.user.username
-
-    class Meta:
-         verbose_name = 'User'
-         verbose_name_plural = 'Users'
 
 class Alert_Rule(models.Model):
     """
@@ -115,6 +117,8 @@ class Alert_Rule(models.Model):
                      ('pv_production','Solar Energy Produced'),
                      ('main_on','Grid Availible'),
                      ('genset_state','Generator on'),
+                     ('model#field_name', 'Model FieldName'),
+                     ('RMC_status#minutes_last_contact', 'RMC Last Contact'),
                 )
 
     site = models.ForeignKey(Sesh_Site)
@@ -124,6 +128,8 @@ class Alert_Rule(models.Model):
                                       choices=OPERATOR_CHOICES,
                                       default="lt")
     send_mail = models.BooleanField(default=True)
+    send_sms = models.BooleanField(default=True)
+    #send_slack = models.BooleanField(default=True)
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
@@ -191,8 +197,9 @@ class Sesh_Alert(models.Model):
     point = models.ForeignKey(BoM_Data_Point)
     date = models.DateTimeField()
     isSilence = models.BooleanField()
-    alertSent = models.BooleanField()
-
+    emailSent = models.BooleanField()
+    smsSent = models.BooleanField()
+    slackSent = models.BooleanField()
 
     # def __str__(self):
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )

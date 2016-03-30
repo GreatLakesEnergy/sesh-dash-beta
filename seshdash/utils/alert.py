@@ -1,5 +1,6 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert
+from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status
 from seshdash.utils.send_mail import send_mail
+from seshdash.utils.send_sms import send_sms
 from django.utils import timezone
 from guardian.shortcuts import get_users_with_perms
 import logging
@@ -13,20 +14,30 @@ import logging
 # Alert_Rule.objects.create(site = site, check_field="battery_voltage", value=25, operator="lt")
 
 # Rules are based on sites. So you need to define a rule for each site if you want to check same configurations in several sites.
-# A Sesh_Alert object is created for each alert triggered and an email is send if the rule has send_mail option true
+# A Sesh_Alert object is created for each 'alert triggered and an email is send if the rule has send_mail option true
 def alert_check(data_point):
     ops = {'lt': lambda x,y: x<y,
            'gt': lambda x,y: x>y,
            'eq' : lambda x,y: x==y,
     }
-    recipients = []
+    email_recipients = []
+    sms_recipients = []
     content = {}
 
     rules = Alert_Rule.objects.filter(site = data_point.site)
     for rule in rules:
-        real_value = getattr(data_point,rule.check_field)
+
+        if '#' in rule.check_field:
+            method, field_name = rule.check_field.split('#')
+            method = eval(method)
+            latest_instance = method.objects.all().order_by('-id')[0]
+            real_value = getattr(latest_instance, field_name)
+        else:
+            real_value = getattr(data_point,rule.check_field)
+
         if ops[rule.operator](real_value,rule.value):
             content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(data_point.site.site_name,rule.check_field,rule.operator,rule.value,real_value)
+            print content_str
 
             # Get ready content for email
             content['site'] = data_point.site.site_name
@@ -36,23 +47,38 @@ def alert_check(data_point):
 
             # TODO rule object should have the list of related persons to send alert mail
             users = get_users_with_perms(data_point.site)
+            # TODO to be removed
+            userSms = Sesh_User.objects.all()
             for user in users:
-                recipients.append(user.email)
-            logging.debug("emailing %s" %recipients)
+                email_recipients.append(user.email)
+            
+            for user in userSms:
+                sms_recipients.append(user.phone_number)
+
+            logging.debug("emailing %s" %email_recipients)
             #print "emailing %s"%recipients
             # recipients = ["seshdash@gmail.com",]
             alert_obj = Sesh_Alert.objects.create(
                     site = data_point.site,
                     alert=rule, date=timezone.now(),
                     isSilence=False,
-                    alertSent=rule.send_mail,
-                    point=data_point)
+                    point=data_point,
+                    emailSent=False,
+                    slackSent=False,
+                    smsSent=False, )
 
             if rule.send_mail:
-                mail_sent = alert(data_point,content,recipients)
-                alert_obj.alertSent = mail_sent
-                #print("Sent mail for %s" %content)
+                mail_sent = alertEmail(data_point,content,email_recipients)
+                alert_obj.emailSent = mail_sent
+            
+            if rule.send_sms:
+                response = alertSms(data_point,content,sms_recipients)
+                alert_obj.smsSent = response
+            
             alert_obj.save()
 
-def alert(data_point,content,recipients):
+def alertEmail(data_point,content,recipients):
     return send_mail("Alert email from seshdash",recipients,content)
+
+def alertSms(data_point,content,recipients):
+    return send_sms(recipients, content)

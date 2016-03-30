@@ -12,6 +12,7 @@ import logging
 def send_mail(subject,list_of_recipients,content,email_template='alert'):
     try:
         if not  list_of_recipients:
+            print "No recipients"
             return False
         plaintext = get_template('seshdash/mail/%s_mail.txt'%email_template)
         htmly    = get_template('seshdash/mail/%s_mail.html'%email_template)
@@ -30,6 +31,7 @@ def send_mail(subject,list_of_recipients,content,email_template='alert'):
         return True
 
     except Exception,e:
+        print "Some exception"
         traceback.print_exc()
         import rollbar
         rollbar.report_message("Error sending email with content %s "%content)
