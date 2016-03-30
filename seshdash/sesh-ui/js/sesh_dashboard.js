@@ -33,7 +33,7 @@ Morris.Bar({
 });
 */
 //nano bar
-        var myfunction=function(){
+        var nanoBar=function(){
         var options={
               bg :"#4AA0BD",
                     }
@@ -44,7 +44,7 @@ Morris.Bar({
                           }  
                             
             }
-         $("a").click(myfunction);
+         $("a").click(nanoBar);
          
 
         
