@@ -90,6 +90,6 @@ class AlertTestCase(TestCase):
         response = c.post('/get-latest-bom-data/',{})
         self.assertEqual(response.status_code, 200)
        
-    def test_sent_sms(self)
+    def test_sent_sms(self):
         alert_sms_sent = Sesh_Alert.objects.filter(smsSent=True)
         self.assertEqual(alerts_sms_sent.count(), 1)
