@@ -232,6 +232,7 @@ INSTALLED_APPS = (
     'geoposition',
     'djcelery',
     'django_extensions',
+    
 )
 
 #BOWER
@@ -249,6 +250,7 @@ BOWER_INSTALLED_APPS = (
             'raphael',
             'react',
             'babel',
+            'nanobar',
             )
 
 ANONYMOUS_USER_ID = -1
