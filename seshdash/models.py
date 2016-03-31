@@ -94,7 +94,6 @@ class RMC_status(models.Model):
     """
     Table containing status information for each RMC unit
     """
-    site = models.ForeignKey(Sesh_Site)
     rmc = models.ForeignKey(Sesh_RMC_Account)
     ip_address = models.GenericIPAddressField(default=None)
     minutes_last_contact = models.IntegerField(default=None)
@@ -195,7 +194,7 @@ class BoM_Data_Point(models.Model):
 class Sesh_Alert(models.Model):
     site = models.ForeignKey(Sesh_Site)
     alert = models.ForeignKey(Alert_Rule)
-    model_point_name = models.CharField(max_length=30)
+    model_point_name = models.CharField(max_length=30, default='BoM_Data_Point')
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     emailSent = models.BooleanField()

@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
 from django.conf import settings
+from datetime import datetime
 
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
@@ -42,7 +43,7 @@ class AlertTestCase(TestCase):
 
         #create rmc status 
         self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account, ip_address='127.0.0.1', minutes_last_contact=25,\
-                               signal_strength=27, data_sent_24h=12)     
+                               signal_strength=27, data_sent_24h=12, time=datetime.now())     
 
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
@@ -52,12 +53,12 @@ class AlertTestCase(TestCase):
         
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
-        Alert_Rule.objects.create(site = self.site, check_field="soc", value=30, operator="gt")
-        Alert_Rule.objects.create(site = self.site, check_field="soc", value=35.5, operator="eq")
-        Alert_Rule.objects.create(site = self.site, check_field="battery_voltage", value=25, operator="lt",send_mail=False)
+        Alert_Rule.objects.create(site = self.site, check_field="BoM_Data_Point#soc", value=30, operator="gt")
+        Alert_Rule.objects.create(site = self.site, check_field="BoM_Data_Point#soc", value=35.5, operator="eq")
+        Alert_Rule.objects.create(site = self.site, check_field="BoM_Data_Point#battery_voltage", value=25, operator="lt",send_mail=False)
         Alert_Rule.objects.create(site = self.site, check_field="RMC_status#minutes_last_contact", value=20, operator="gt")
 
-        alert.alert_check(self.data_point)
+        alert.alert_check(self.site)
     
     @override_settings(DEBUG=True)
     def test_alert_fires(self):

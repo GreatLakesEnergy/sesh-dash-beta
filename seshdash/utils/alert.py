@@ -34,19 +34,19 @@ def alert_check(site):
             # Getting the model name and the latest value of the model field
             model = get_model_from_string(model)
             data_point = model.objects.all().order_by('-id')[0]
-            real_value = getattr(latest_instance, field_name)
+            real_value = getattr(data_point, field_name)
 
         if ops[rule.operator](real_value,rule.value):
-            content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(data_point.site.site_name,rule.check_field,rule.operator,rule.value,real_value)
+            content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(site.site_name,rule.check_field,rule.operator,rule.value,real_value)
 
             # Get ready content for email
-            content['site'] = data_point.site.site_name
+            content['site'] = site.site_name
             content['alert'] = content_str
             content['time'] = data_point.time
             content['data_point'] = data_point
 
             # TODO rule object should have the list of related persons to send alert mail
-            users = get_users_with_perms(data_point.site)
+            users = get_users_with_perms(site)
             # TODO to be removed
             userSms = Sesh_User.objects.all()
             for user in users:
@@ -60,10 +60,10 @@ def alert_check(site):
             #print "emailing %s"%recipients
             # recipients = ["seshdash@gmail.com",]
             alert_obj = Sesh_Alert.objects.create(
-                    site = data_point.site,
+                    site = site,
                     alert=rule, date=timezone.now(),
                     isSilence=False,
-                    point=data_point,
+                    model_point_name=type(model).__name__,
                     emailSent=False,
                     slackSent=False,
                     smsSent=False, )
