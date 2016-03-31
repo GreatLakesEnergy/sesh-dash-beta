@@ -1,6 +1,7 @@
 from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
+from seshdash.utils.model_tools import get_model_from_string
 from django.utils import timezone
 from guardian.shortcuts import get_users_with_perms
 import logging
@@ -15,7 +16,7 @@ import logging
 
 # Rules are based on sites. So you need to define a rule for each site if you want to check same configurations in several sites.
 # A Sesh_Alert object is created for each 'alert triggered and an email is send if the rule has send_mail option true
-def alert_check(data_point):
+def alert_check(site):
     ops = {'lt': lambda x,y: x<y,
            'gt': lambda x,y: x>y,
            'eq' : lambda x,y: x==y,
@@ -24,16 +25,16 @@ def alert_check(data_point):
     sms_recipients = []
     content = {}
 
-    rules = Alert_Rule.objects.filter(site = data_point.site)
+    rules = Alert_Rule.objects.filter(site = site)
     for rule in rules:
 
-        if '#' in rule.check_field:
-            method, field_name = rule.check_field.split('#')
-            method = eval(method)
-            latest_instance = method.objects.all().order_by('-id')[0]
+        if '#' in rule.check_field: # If the rule is valid (contains model and field_name)
+            model, field_name = rule.check_field.split('#')
+             
+            # Getting the model name and the latest value of the model field
+            model = get_model_from_string(model)
+            data_point = model.objects.all().order_by('-id')[0]
             real_value = getattr(latest_instance, field_name)
-        else:
-            real_value = getattr(data_point,rule.check_field)
 
         if ops[rule.operator](real_value,rule.value):
             content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(data_point.site.site_name,rule.check_field,rule.operator,rule.value,real_value)
@@ -52,7 +53,8 @@ def alert_check(data_point):
                 email_recipients.append(user.email)
             
             for user in userSms:
-                sms_recipients.append(user.phone_number)
+                if user.phone_number:
+                    sms_recipients.append(user.phone_number)
 
             logging.debug("emailing %s" %email_recipients)
             #print "emailing %s"%recipients

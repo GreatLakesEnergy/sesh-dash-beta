@@ -437,7 +437,6 @@ def alert_engine():
     
     # TODO check for the latest 10 alerts
     for site in sites:
-        latest_point = BoM_Data_Point.objects.filter(site_id=site.id).order_by('time')[0]
-        alert_check(latest_point) 
+        alert_check(site) 
 
             

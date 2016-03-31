@@ -94,11 +94,13 @@ class RMC_status(models.Model):
     """
     Table containing status information for each RMC unit
     """
+    site = models.ForeignKey(Sesh_Site)
     rmc = models.ForeignKey(Sesh_RMC_Account)
     ip_address = models.GenericIPAddressField(default=None)
     minutes_last_contact = models.IntegerField(default=None)
     signal_strength = models.IntegerField(default=None)
     data_sent_24h = models.IntegerField(default=None)
+    time = models.DateTimeField()
 
 
 class Alert_Rule(models.Model):
@@ -111,13 +113,12 @@ class Alert_Rule(models.Model):
         ("lt" , "less than"),
         ("gt" , "greater than"),
         )
-    FIELD_CHOICES = (('battery_voltage','battery voltage'),
-                     ('soc','System State of Charge'),
-                     ('AC_output','AC Loads'),
-                     ('pv_production','Solar Energy Produced'),
-                     ('main_on','Grid Availible'),
-                     ('genset_state','Generator on'),
-                     ('model#field_name', 'Model FieldName'),
+    FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
+                     ('BoM_Data_Point#soc','System State of Charge'),
+                     ('BoM_Data_Point#AC_output','AC Loads'),
+                     ('BoM_Data_Point#pv_production','Solar Energy Produced'),
+                     ('BoM_Data_Point#main_on','Grid Availible'),
+                     ('BoM_Data_Point#genset_state','Generator on'),
                      ('RMC_status#minutes_last_contact', 'RMC Last Contact'),
                 )
 
@@ -194,7 +195,7 @@ class BoM_Data_Point(models.Model):
 class Sesh_Alert(models.Model):
     site = models.ForeignKey(Sesh_Site)
     alert = models.ForeignKey(Alert_Rule)
-    point = models.ForeignKey(BoM_Data_Point)
+    model_point_name = models.CharField(max_length=30)
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     emailSent = models.BooleanField()
