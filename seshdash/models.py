@@ -42,7 +42,7 @@ class Sesh_User(models.Model):
     #to be added
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     department = models.CharField(max_length=100)
-    phone_number =  models.CharField(max_length=12)
+    phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
 
     def __str__(self):
