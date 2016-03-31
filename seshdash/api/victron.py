@@ -267,6 +267,7 @@ class VictronHistoricalAPI:
                 'Temperature alarm',
                 'Low battery alarm',
                 'Overload alarm',
+                'PV-AC',
                 'AC Consumption L1',
                 'Grid L1 Battery Voltage (System)',
                 'Battery Current (System)',

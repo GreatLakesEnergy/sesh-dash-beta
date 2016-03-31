@@ -46,8 +46,18 @@ def index(request,site_id=0):
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-    #sites = Sesh_Site.objects.all()
+    # Get sites for use
     sites = get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
+
+    # If initial login and there are Victron sites we need to import
+    if request.method == 'POST':
+        if request.POST['import_data']:
+            # Download historical data for sites
+            logging.debug("Downloading historical site data")
+            #TODO do this for individual sites and also update status
+            # Provide UI feedback
+            _download_data(sites)
+
     context_dict = {}
     #Handle fisrt login if user has no site setup:
     if not sites:
@@ -124,10 +134,9 @@ def import_site(request):
             form = VRMForm(request.POST)
             if form.is_valid():
                 site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
-                print "###### %s"%site_list
                 if not site_list['sites']:
-                   print 'invalid creds'
                    return _return_error_import(request,context_dict,form,"check credentials")
+
                 context_dict['message'] = "success"
                 #do a psuedo save first we need to modify a field later
                 form.save(commit=False)
@@ -151,6 +160,7 @@ def import_site(request):
                                         'vrm_account': VRM
                                         }
                     pre_pop_data.append(site_model_form)
+
                 site_forms_factory = inlineformset_factory(VRM_Account,
                         Sesh_Site,
                         extra=len(site_list['sites']),
@@ -163,12 +173,12 @@ def import_site(request):
                    return _return_error_import(request,context_dict,form,"unknown error")
             return render(request,'seshdash/initial-login.html',context_dict)
 
-def download_data(user):
-    sites = get_objects_for_user(user,'seshdash.view_Sesh_Site')
-    print "found sites %s "%sites
+def _download_data(sites):
+    """
+    Trigger download of vrm upon loading site data
+    """
     for site in sites:
         get_historical_BoM.delay(site.pk, time_utils.get_epoch_from_datetime(site.comission_date))
-        print "done"
 
 def _validate_form(form,context_dict):
     """
@@ -222,15 +232,8 @@ def create_site(request):
             # Got Error return problem!
             #Delete VRM or RmC Account if this fails
             return render(request,'seshdash/initial-login.html',context_dict)
-        else:
-            # add our foreign key
-            #
-            #form.rmc_account = rmc
-            print "#### attaching RMC to site"
-
         #finally
         form.save()
-
 
     else:
          print "request recieved is rmc request getting form ready"
@@ -247,8 +250,6 @@ def create_site(request):
 
     # Go to normal startup mode
     return index(request)
-
-
 
 
 def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):

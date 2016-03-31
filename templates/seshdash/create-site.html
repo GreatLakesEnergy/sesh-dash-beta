@@ -38,13 +38,14 @@
                                             {{form.media}}
                                             {{ form.as_table }}
 
-                                         {% if form_type != 'vrm' %}
-                                             <input type="checkbox" name="import_data">
-                                         {% endif %}
+
                                         </table>
                                      {% endfor %}
 
                             </div>
+                            {% if form_type == 'vrm' %}
+                                  <input type="checkbox" name="import_data"><span>Import site data</span>
+                            {% endif %}
                             <input type="submit" value="Create Site">
                         </form>
                         <!-- formset for selecting sites-->

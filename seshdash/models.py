@@ -53,7 +53,7 @@ class Sesh_Site(models.Model):
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
-
+    updating = models.BooleanField(default=False)
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField()
     has_grid = models.BooleanField()

@@ -138,7 +138,7 @@ def get_historical_BoM(sesh_site_id,start_at):
                 AC_Load_in =  row['Input current phase 1'],
                 AC_Load_out =  row['Output current phase 1'],
                 inverter_state = row['VE.Bus Error'],
-                pv_production = row['L1 Energy'],
+                pv_production = row['PV-AC'],
                 #TODO these need to be activated
                 genset_state =  0,
                 relay_state = 0,
