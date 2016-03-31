@@ -1,14 +1,18 @@
 from django.test import TestCase, Client
+from django.test.utils import override_settings
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
 from seshdash.utils import alert
 from django.utils import timezone
 from django.contrib.auth.models import User
 from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
+from django.conf import settings
 
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
 class AlertTestCase(TestCase):
+
+    @override_settings(DEBUG=True)
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
@@ -42,7 +46,7 @@ class AlertTestCase(TestCase):
 
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
-        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='0727308405' )
+        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
         #assign a user to the sites
 
         
@@ -54,42 +58,44 @@ class AlertTestCase(TestCase):
         Alert_Rule.objects.create(site = self.site, check_field="RMC_status#minutes_last_contact", value=20, operator="gt")
 
         alert.alert_check(self.data_point)
-
+    
+    @override_settings(DEBUG=True)
     def test_alert_fires(self):
         """ Alert working correctly"""
         # test if necessary alerts has triggered and if alert objects saved
         alerts_created = Sesh_Alert.objects.filter(site=self.site)
         self.assertEqual(alerts_created.count(),4)
         """ Alert mails working correctly"""
-        self.assertEqual(alerts_created.filter(alertSent=True).count(),4)
+        self.assertEqual(alerts_created.filter(emailSent=True).count(),3)
 
     # TODO add negative test cases
 
-    def test_get_alerts(self):
+        # test_get_alerts
         """ Getting alerts correctly """
         alerts = Sesh_Alert.objects.all().count()
         self.assertEqual(alerts, 4)
 
-    def test_display_alert_data(self):
+        # test_display_alert_data
         """Getting the display alert data"""
         c = Client()
         response = c.post('/get-alert-data/',{'alert_id':'1'})
         self.assertEqual(response.status_code, 200)
 
-    def test_silence_alert(self):
-        """Silencing alert """
-        c = Client()
         response = c.post('/silence-alert/',{'alert_id':'1'})
         alerts = Sesh_Alert.objects.filter(isSilence=False).count()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(alerts, 2)
+        self.assertEqual(alerts, 3)
 	
-    def test_get_latest_bom_data(self):
-        """ Getting latest bom data"""
-        c = Client()
+        # test_get_latest_bom_data(self):
         response = c.post('/get-latest-bom-data/',{})
         self.assertEqual(response.status_code, 200)
        
-    def test_sent_sms(self):
+        # test_sent_sms(self):
         alert_sms_sent = Sesh_Alert.objects.filter(smsSent=True)
-        self.assertEqual(alerts_sms_sent.count(), 1)
+
+        if settings.DEBUG:
+            print "Debug is True"
+            self.assertEqual(alert_sms_sent.count(), 0)
+        else:
+            print "Debug is False"
+            self.assertEqual(alert_sms_sent.count(), 1)

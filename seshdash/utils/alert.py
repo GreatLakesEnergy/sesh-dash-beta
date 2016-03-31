@@ -37,7 +37,6 @@ def alert_check(data_point):
 
         if ops[rule.operator](real_value,rule.value):
             content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(data_point.site.site_name,rule.check_field,rule.operator,rule.value,real_value)
-            print content_str
 
             # Get ready content for email
             content['site'] = data_point.site.site_name
@@ -72,8 +71,8 @@ def alert_check(data_point):
                 alert_obj.emailSent = mail_sent
             
             if rule.send_sms:
-                response = alertSms(data_point,content,sms_recipients)
-                alert_obj.smsSent = response
+                sms_response = alertSms(data_point,content,sms_recipients)
+                alert_obj.smsSent = sms_response
             
             alert_obj.save()
 
