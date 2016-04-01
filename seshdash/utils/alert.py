@@ -63,10 +63,20 @@ def alert_check(site):
                     site = site,
                     alert=rule, date=timezone.now(),
                     isSilence=False,
-                    model_point_name=type(model).__name__,
                     emailSent=False,
                     slackSent=False,
-                    smsSent=False, )
+                    smsSent=False,
+                    point_model=type(data_point).__name__ )
+            alert_obj.save()
+            
+            print "The alert points to: ",
+            print alert_obj.point_model
+            
+            # Set data point to point to alert
+            data_point.target_alert = alert_obj
+            data_point.save()
+            alerts = Sesh_Alert.objects.all()
+
 
             if rule.send_mail:
                 mail_sent = alertEmail(data_point,content,email_recipients)

@@ -42,8 +42,9 @@ class AlertTestCase(TestCase):
         self.test_rmc_account.save()
 
         #create rmc status 
-        self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account, ip_address='127.0.0.1', minutes_last_contact=25,\
+        self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account, ip_address='127.0.0.1', minutes_last_contact=10,\
                                signal_strength=27, data_sent_24h=12, time=datetime.now())     
+        self.test_rmc_status.save()
 
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
@@ -65,27 +66,27 @@ class AlertTestCase(TestCase):
         """ Alert working correctly"""
         # test if necessary alerts has triggered and if alert objects saved
         alerts_created = Sesh_Alert.objects.filter(site=self.site)
-        self.assertEqual(alerts_created.count(),4)
+        self.assertEqual(alerts_created.count(),3)
         """ Alert mails working correctly"""
-        self.assertEqual(alerts_created.filter(emailSent=True).count(),3)
+        self.assertEqual(alerts_created.filter(emailSent=True).count(),2)
 
     # TODO add negative test cases
 
         # test_get_alerts
         """ Getting alerts correctly """
         alerts = Sesh_Alert.objects.all().count()
-        self.assertEqual(alerts, 4)
+        self.assertEqual(alerts, 3)
 
         # test_display_alert_data
         """Getting the display alert data"""
         c = Client()
-        response = c.post('/get-alert-data/',{'alert_id':'1'})
+        response = c.post('/get-alert-data/',{'alertId':'3'})
         self.assertEqual(response.status_code, 200)
 
-        response = c.post('/silence-alert/',{'alert_id':'1'})
+        response = c.post('/silence-alert/',{'alertId':'1'})
         alerts = Sesh_Alert.objects.filter(isSilence=False).count()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(alerts, 3)
+        self.assertEqual(alerts, 2)
 	
         # test_get_latest_bom_data(self):
         response = c.post('/get-latest-bom-data/',{})
@@ -95,8 +96,6 @@ class AlertTestCase(TestCase):
         alert_sms_sent = Sesh_Alert.objects.filter(smsSent=True)
 
         if settings.DEBUG:
-            print "Debug is True"
             self.assertEqual(alert_sms_sent.count(), 0)
         else:
-            print "Debug is False"
             self.assertEqual(alert_sms_sent.count(), 1)

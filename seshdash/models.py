@@ -90,17 +90,6 @@ class Sesh_Site(models.Model):
             ('view_Sesh_Site', 'View Sesh Site'),
         )
 
-class RMC_status(models.Model):
-    """
-    Table containing status information for each RMC unit
-    """
-    rmc = models.ForeignKey(Sesh_RMC_Account)
-    ip_address = models.GenericIPAddressField(default=None)
-    minutes_last_contact = models.IntegerField(default=None)
-    signal_strength = models.IntegerField(default=None)
-    data_sent_24h = models.IntegerField(default=None)
-    time = models.DateTimeField()
-
 
 class Alert_Rule(models.Model):
     """
@@ -140,6 +129,58 @@ class Alert_Rule(models.Model):
          verbose_name_plural = 'System Alert Rules'
 
 
+
+#TODO Add alert Object to save alerts
+class Sesh_Alert(models.Model):
+    site = models.ForeignKey(Sesh_Site)
+    alert = models.ForeignKey(Alert_Rule)
+    date = models.DateTimeField()
+    isSilence = models.BooleanField()
+    emailSent = models.BooleanField()
+    smsSent = models.BooleanField()
+    slackSent = models.BooleanField()
+    point_model = models.CharField(max_length=40, default="BoM_Data_Point")
+
+    # def __str__(self):
+    #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
+
+    def __str__(self):
+                
+        # TODO make this print useful information
+        return "At , %s something is wrong " %  (self.site.site_name) # self.alert.get_check_field_display(), \
+                                     # str("FIXME"), \
+                                     #  self.alert.get_operator_display(), \
+                                     #  self.alert.value)
+
+       
+        
+  
+    # class Meta:
+    #    verbose_name = 'System Alert'
+    #    verbose_name_plural = 'System Alerts'
+
+
+
+
+
+
+class RMC_status(models.Model):
+    """
+    Table containing status information for each RMC unit
+    """
+    rmc = models.ForeignKey(Sesh_RMC_Account)
+    ip_address = models.GenericIPAddressField(default=None)
+    minutes_last_contact = models.IntegerField(default=None)
+    signal_strength = models.IntegerField(default=None)
+    data_sent_24h = models.IntegerField(default=None)
+    time = models.DateTimeField()
+    target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
+
+
+
+
+
+
 """
 Data point for PV production at a site from pv panels.
 Currently comes form enphase
@@ -176,6 +217,7 @@ class BoM_Data_Point(models.Model):
     #NEW  victron now tells us pv production
     pv_production = models.FloatField(default=0)
     inverter_state = models.CharField(max_length = 100)
+    target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
     main_on = models.BooleanField(default=False)
     genset_state = models.IntegerField(default=0)
     #TODO relay will likely need to be it's own model
@@ -188,34 +230,6 @@ class BoM_Data_Point(models.Model):
     class Meta:
          verbose_name = 'Data Point'
          unique_together = ('site','time')
-
-
-#TODO Add alert Object to save alerts
-class Sesh_Alert(models.Model):
-    site = models.ForeignKey(Sesh_Site)
-    alert = models.ForeignKey(Alert_Rule)
-    model_point_name = models.CharField(max_length=30, default='BoM_Data_Point')
-    date = models.DateTimeField()
-    isSilence = models.BooleanField()
-    emailSent = models.BooleanField()
-    smsSent = models.BooleanField()
-    slackSent = models.BooleanField()
-
-    # def __str__(self):
-    #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
-
-    def __str__(self):
-        return "At %s, %s is %s which is %s %s " % (self.site.site_name, self.alert.get_check_field_display(), \
-                                      str(getattr(self.point, self.alert.check_field)), \
-                                      self.alert.get_operator_display(), \
-                                      self.alert.value)
-
-
-    class Meta:
-        verbose_name = 'System Alert'
-        verbose_name_plural = 'System Alerts'
-
-
 
 
 class Daily_Data_Point(models.Model):

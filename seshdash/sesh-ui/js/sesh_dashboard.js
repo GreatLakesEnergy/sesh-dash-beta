@@ -158,8 +158,9 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
       $('.modal-toggle').click(function()  {
           // Get necessary data for the get_alert_sort
           alertId = $(this).attr('classid');
+          console.log("alertId is " + alertId)
           // Constructing the json
-          var jsonData = {alert_id : alertId,
+          var jsonData = {"alertId" : alertId,
                           csrfmiddlewaretoken: csrftoken};
 
           $.post('/get-alert-data', jsonData, function(data){
