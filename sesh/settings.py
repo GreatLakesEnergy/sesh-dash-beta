@@ -70,7 +70,8 @@ SECRET_KEY = config.get('system','SECRET_KEY')
 # security warning: don't run with debug turned on in production!
 DEBUG = config.get('system','DEV_MODE')
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
