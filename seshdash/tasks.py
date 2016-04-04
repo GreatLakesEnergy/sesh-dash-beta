@@ -331,7 +331,7 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
     aggr_results = i.get_measurement_bucket(measurement, bucket_size, 'site_name', site.site_name, delta, operator=operator)
 
-    logging.debug("influx results %s "%(aggr_results))
+    # logging.debug("influx results %s "%(aggr_results))
     #print "aggregating for %s %s"%(measurement,aggr_results)
     #we have mean values by the hour now aggregate them
     if aggr_results:

@@ -53,7 +53,7 @@ def alert_check(site):
                 email_recipients.append(user.email)
             
             for user in userSms:
-                if user.phone_number:
+                if user.phone_number and user.on_call:
                     sms_recipients.append(user.phone_number)
 
             logging.debug("emailing %s" %email_recipients)
