@@ -55,7 +55,7 @@ def index(request,site_id=0):
             # Download historical data for sites
             logging.debug("Downloading historical site data")
             #TODO do this for individual sites and also update status
-            # Provide UI feedback
+            # Provide UI feedback while this is happening
             _download_data(sites)
 
     context_dict = {}
@@ -179,6 +179,10 @@ def _download_data(sites):
     """
     for site in sites:
         get_historical_BoM.delay(site.pk, time_utils.get_epoch_from_datetime(site.comission_date))
+
+def _aggregate_imported_data(sites):
+    for site in sites:
+        aggregate_daily_data()
 
 def _validate_form(form,context_dict):
     """

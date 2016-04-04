@@ -17,12 +17,13 @@ def prepare_report(site, duration="week"):
     Get aggregate data points for the given duration
     duration options are "1w","1m"
     TODO make this date parsing part of time utils class
+    Duration: should be "week", "month", "day"
 
     """
     recipients = []
     cash_power_cost = 220
 
-    now = datetime.now()
+    now = datetime.date(datetime.now())
     #TODO  This is terrible make decent date parser!
     if duration == 'week':
         date_range = now - timedelta(days=7)
@@ -35,9 +36,12 @@ def prepare_report(site, duration="week"):
     # Query for Daily data points and aggregate across the given time
 
     print "reports: getting aggregate between  %s and %s" %(date_range,now)
-
-    test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
-    print "test %s"%test
+    if duration == "day":
+        test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
+        print "test %s"%test
+    else:
+        test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
+        print "test %s"%test
 
     aggeragete_data = Daily_Data_Point.objects.filter(site=site,
             date__range= [date_range,now]).aggregate(

@@ -230,6 +230,13 @@ class Daily_Data_Point(models.Model):
          verbose_name = 'Daily Aggregate Data Point'
          unique_together = ('site','date')
 
+    def __str__(self):
+        return " sitename:%s pv_yield:%s power_used:%s ... " % (self.site.site_name,
+                                                            self.daily_pv_yield,
+                                                            self.daily_power_cons_pv
+                                                            )
+
+
 
 
 class Trend_Data_Point(models.Model):

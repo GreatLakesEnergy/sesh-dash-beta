@@ -381,6 +381,7 @@ def get_aggregate_daily_data():
     yesterday = time_utils.get_yesterday()
     for site in sites:
 
+            print "getting aggrage data for %s for %s"%(site,yesterday)
             logging.debug("aggregate data for %s date: %ss"%(site,yesterday))
             aggregate_data_pv = get_aggregate_data (site, 'pv_production')[0]
             aggregate_data_AC = get_aggregate_data (site, 'AC_output_absolute')[0]
@@ -408,6 +409,7 @@ def get_aggregate_daily_data():
                                          daily_no_of_alerts = aggregate_data_alerts.count(),
                                          date = yesterday,
                                             )
+            print "saving daily aggreagete for %s dp:%s"%(yesterday,daily_aggr)
 
             daily_aggr.save()
             #send to influx
@@ -438,7 +440,7 @@ def send_reports(duration="weekly"):
     sites = Sesh_Site.objects.all()
     for site in sites:
         logging.debug("Sending report for site %s"%site)
-        result = prepare_report(duration=duration, site)
+        result = prepare_report(site, duration=duration)
         if not result:
             send_reports.update_state(
                              state = states.FAILURE,

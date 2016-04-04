@@ -68,6 +68,7 @@ class Influx:
         """
         tags['source'] = self._influx_tag
         data_point_list = []
+
         logging.debug("recieved data point %s"%measurement_dict)
         # Create our timestamp if one was not provided.
         if not timestamp:
@@ -76,35 +77,34 @@ class Influx:
             timestamp = timestamp.isoformat()
 
         for key in measurement_dict.keys():
-                # Incoming data is likely to have datetime object. We need to ignore this
-                data_point = {}
-                data_point["measurement"] = key
-                data_point["tags"] = tags
-                # Datetime needs to be converted to epoch
-                data_point["time"] = timestamp
-                #Cast everything not string to Float
-                try:
-                    if isinstance(measurement_dict[key], str) or isinstance(measurement_dict[key],unicode):
-                        data_point["fields"] = {"value" : measurement_dict[key]}
-                    else:
-                        data_point["fields"] = {"value" : float(measurement_dict[key])}
-                except Exception,e:
-                    logging.warning("INFLUX error casting %s key: %s"%(e,key))
-                logging.debug("prepping data point %s"%(data_point))
-                # Get the data point array ready.
-                data_point_list.append(data_point)
+               # Incoming data is likely to have datetime object. We need to ignore this
+               data_point = {}
+
+               try:
+                    data_point["measurement"] = key
+                    data_point["tags"] = tags
+                    # Datetime needs to be converted to epoch
+                    data_point["time"] = timestamp
+                    # Cast everything not string to Float
+                    data_point["fields"] = {"value" : float(measurement_dict[key])}
+               except Exception,e:
+                    logging.warning("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
+                    # Ditch the whole data point if unable to cast
+                    data_point = {}
+
+               logging.debug("INFLUX prepping data point %s"%(data_point))
+               # Get the data point array ready.
+               data_point_list.append(data_point)
         try:
-            #Send the data blob to influx
-            logging.debug("INFLUX sending %s"%data_point_list)
-            self._influx_client.write_points(data_point_list)
+                # Send the data list
+                logging.debug("INFLUX sending %s"%data_point_list)
+                self._influx_client.write_points(data_point_list)
         except InfluxDBServerError,e:
             logging.error("INFLUX Error running query on server %s %s"%(e,data_point_list))
         except InfluxDBClientError,e:
             logging.error("INFLUX Error running  query %s %s"%(e,data_point_list))
         except Exception,e:
             logging.error("INFLUX unkown error %s %s"%(e,data_point))
-        else:
-            return False
 
         return True
 

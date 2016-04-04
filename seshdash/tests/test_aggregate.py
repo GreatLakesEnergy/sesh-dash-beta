@@ -42,7 +42,7 @@ class AggregateTestCase(TestCase):
         self.no_points = 288
         try:
             self.i.create_database(self._influx_db_name)
-            # Generate random data  points for 24h
+            #Generate random data  points for 24h
         except:
             self.i.delete_database(self._influx_db_name)
             sleep(1)
@@ -83,7 +83,8 @@ class AggregateTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
     def tearDown(self):
-        self.i.delete_database(self._influx_db_name)
+        #self.i.delete_database(self._influx_db_name)
+        pass
 
     def test_data_point_creation(self):
         """
@@ -120,12 +121,12 @@ class AggregateTestCase(TestCase):
         Test email reporting for sites
         """
         get_aggregate_daily_data()
-        send_reports()
+        send_reports("day")
         self.assertEqual(len(mail.outbox),1)
 
 
     def create_test_data(self):
-        print "Creating  data points "
+        #TODO test weekly and monthly reports
         data_point_dates = generate_date_array()
         voltage_in = 220
         voltage_out = 220
