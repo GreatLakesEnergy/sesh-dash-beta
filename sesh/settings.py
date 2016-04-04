@@ -129,7 +129,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'get_send_reports': {
         'task': 'seshdash.tasks.send_reports',
-        'schedule': crontab(hour=0, minute=30, day_of_week=7),
+        'schedule': crontab(hour=0, minute=30, day_of_week=6),
         'args': 'week',
     },
     'get_send_reports': {
