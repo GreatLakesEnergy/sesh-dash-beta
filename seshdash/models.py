@@ -40,7 +40,7 @@ class Sesh_RMC_Account(models.Model):
 class Sesh_User(models.Model):
     #TODO each user will have his her own settings / alarms this needs
     #to be added
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="seshuser")
     department = models.CharField(max_length=100)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
@@ -147,13 +147,7 @@ class Sesh_Alert(models.Model):
     def __str__(self):
                 
         # TODO make this print useful information
-        return "At , %s something is wrong " %  (self.site.site_name) # self.alert.get_check_field_display(), \
-                                     # str("FIXME"), \
-                                     #  self.alert.get_operator_display(), \
-                                     #  self.alert.value)
-
-       
-        
+       return str(self.alert)
   
     # class Meta:
     #    verbose_name = 'System Alert'

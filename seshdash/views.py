@@ -26,6 +26,7 @@ from pprint import pprint
 
 #Import utils
 from seshdash.utils.time_utils import get_timesince
+from seshdash.utils.model_tools import get_model_first_reference
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 import json,time,random,datetime
@@ -512,12 +513,13 @@ def get_alerts(request):
 
     alert_data = []
 
+
     # Loop to generate alert data
     for alert in alerts:
         alert_data.append({
             "alertId": alert.id,
             "site":alert.site.site_name,
-            "alert":str("Something is wrong"),
+            "alert":str(alert),
             "date":get_timesince(alert.date),
             })
 
@@ -531,13 +533,7 @@ def display_alert_data(request):
 
     alert_values = {}
     
-    # Adding set to the model name for exammple 'BoM_Data_Point' + 'set'
-    point_model = alert.point_model.lower() + '_set'
-    
-    
-    # Returns the related manager attribute
-    point_ref = getattr(alert, point_model)
-    point = point_ref.first()
+    point = get_model_first_reference(alert.point_model, alert)
 
     alert_values = model_to_dict(point)
 

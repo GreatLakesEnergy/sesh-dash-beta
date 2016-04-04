@@ -24,8 +24,8 @@ def alert_check(site):
     email_recipients = []
     sms_recipients = []
     content = {}
-
     rules = Alert_Rule.objects.filter(site = site)
+
     for rule in rules:
 
         if '#' in rule.check_field: # If the rule is valid (contains model and field_name)
@@ -47,21 +47,21 @@ def alert_check(site):
 
             # TODO rule object should have the list of related persons to send alert mail
             users = get_users_with_perms(site)
+
             # TODO to be removed
-            userSms = Sesh_User.objects.all()
             for user in users:
                 email_recipients.append(user.email)
-            
-            for user in userSms:
-                if user.phone_number and user.on_call:
-                    sms_recipients.append(user.phone_number)
+                if user.seshuser.phone_number and user.seshuser.on_call:
+                    sms_recipients.append(user.seshuser.phone_number)
+
 
             logging.debug("emailing %s" %email_recipients)
             #print "emailing %s"%recipients
             # recipients = ["seshdash@gmail.com",]
             alert_obj = Sesh_Alert.objects.create(
                     site = site,
-                    alert=rule, date=timezone.now(),
+                    alert=rule,
+                    date=timezone.now(),
                     isSilence=False,
                     emailSent=False,
                     slackSent=False,
@@ -69,8 +69,6 @@ def alert_check(site):
                     point_model=type(data_point).__name__ )
             alert_obj.save()
             
-            print "The alert points to: ",
-            print alert_obj.point_model
             
             # Set data point to point to alert
             data_point.target_alert = alert_obj
