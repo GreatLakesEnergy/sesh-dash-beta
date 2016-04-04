@@ -430,7 +430,7 @@ def get_all_data_initial(days):
     get_enphase_daily_summary(days)
 
 @shared_task
-def send_reports():
+def send_reports(duration="weekly"):
     """
     Schedule email report sending
     """
@@ -438,10 +438,10 @@ def send_reports():
     sites = Sesh_Site.objects.all()
     for site in sites:
         logging.debug("Sending report for site %s"%site)
-        result = prepare_report(site)
+        result = prepare_report(duration=duration, site)
         if not result:
             send_reports.update_state(
                              state = states.FAILURE,
-                             meta = 'REASON FOR FAILURE'
+                             meta = 'Something went wrong check logs'
                              )
 

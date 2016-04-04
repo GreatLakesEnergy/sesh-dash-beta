@@ -124,19 +124,23 @@ CELERYBEAT_SCHEDULE = {
     },
     'get_aggregate_daily_data': {
         'task': 'seshdash.tasks.get_aggregate_daily_data',
-        'schedule': timedelta(days=1),
+        'schedule': crontab(hour=0, minute=0),
         'args': None,
     },
     'get_send_reports': {
         'task': 'seshdash.tasks.send_reports',
-        'schedule': timedelta(days=1),
-        'args': None,
+        'schedule': crontab(hour=0, minute=30, day_of_week=7),
+        'args': 'week',
+    },
+    'get_send_reports': {
+        'task': 'seshdash.tasks.send_reports',
+        'schedule': crontab(hour=0, minute=30),
+        'args': 'day',
     },
 }
 #authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
-
 #mail
 EMAIL_USE_TLS = True
 EMAIL_HOST = config.get('mail','EMAIL_HOST')
