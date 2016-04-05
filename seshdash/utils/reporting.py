@@ -36,12 +36,8 @@ def prepare_report(site, duration="week"):
     # Query for Daily data points and aggregate across the given time
 
     print "reports: getting aggregate between  %s and %s" %(date_range,now)
-    if duration == "day":
-        test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
-        print "test %s"%test
-    else:
-        test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
-        print "test %s"%test
+    test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
+    print "test %s"%test
 
     aggeragete_data = Daily_Data_Point.objects.filter(site=site,
             date__range= [date_range,now]).aggregate(

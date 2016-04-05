@@ -123,11 +123,11 @@ def get_historical_BoM(sesh_site_id,start_at):
         vh_client = VictronHistoricalAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
 
         #site_id is a tuple
-        print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
+        #print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
         data = vh_client.get_data(site_id,start_at)
         print "got data %s"%data
         for row in data:
-            print "saving data point  %s"%row
+            #print "saving data point  %s"%row
             data_point = BoM_Data_Point(
                 site = site,
                 time = row['Date Time'],
@@ -147,9 +147,10 @@ def get_historical_BoM(sesh_site_id,start_at):
                 data_point.save()
                 send_to_influx(data_point, site, date, to_exclude=['time'])
                 count = count +1
-                print "saved %s BoM data points"%count
+                #print "saved %s BoM data points"%count
                 logging.debug("saved %s BoM data points"%count)
             except IntegrityError, e:
+                logging.warning("data point already exist %s"%e)
                 print "data point already exist %s"%e
             except Exception,e:
                 message = "error with geting  data exception %s"%(e)
@@ -346,6 +347,7 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
     aggr_results = i.get_measurement_bucket(measurement, bucket_size, 'site_name', site.site_name, delta, operator=operator)
 
     logging.debug("influx results %s "%(aggr_results))
+
     #print "aggregating for %s %s"%(measurement,aggr_results)
     #we have mean values by the hour now aggregate them
     if aggr_results:
@@ -360,7 +362,6 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
             result = agr_value
         else:
             result = aggr_results
-
 
         logging.debug("Aggregating %s %s agr:%s"%(measurement,aggr_results,agr_value))
     else:

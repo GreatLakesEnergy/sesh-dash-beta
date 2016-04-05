@@ -25,14 +25,18 @@ class Influx:
         self._influx_tag = 'sesh_dash'
 
 
-    def get_measurement_bucket(self,measurement,bucket_size,clause,clause_val,time_delta,start="now",operator="mean") :
+    def get_measurement_bucket(self,measurement,bucket_size,clause,clause_val,time_delta,start="now",operator="mean",database=None):
         """
         return the requsted measurement values in given bucket size
         """
+        db =  self.db
+        if database:
+           db = database
+
         start_time = "now()"
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  time  >  now() - {time_delta} GROUP BY time({bucket_size}) fill(0)"
 
-
+        result_set_gen = []
         if not start == "now":
             start_time = start
 
@@ -47,19 +51,23 @@ class Influx:
 
 
         try:
-            result_set = self._influx_client.query(query_string_formatted,database = self.db)
+            result_set = self._influx_client.query(query_string_formatted,database = db)
+            logging.debug("Influx query %s"% query_string_formatted)
             #get values
             result_set_gen = result_set.get_points(measurement=measurement)
             return list(result_set_gen)
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"% str(e))
+            raise Exception
         except InfluxDBClientError,e:
             logging.error("Error running  query %s"%str(e))
+            raise Exception
         except Exception,e:
             logging.error("influxdb unkown error %s" %str(e))
-        return []
+            raise Exception
+        return result_set_gen
 
-    def send_object_measurements(self,measurement_dict, timestamp=None, tags={}):
+    def send_object_measurements(self,measurement_dict, timestamp=None, tags={}, database=None):
         """
         returns True if objects are submitted False otherwise
         send Django object as seperate measurements to influx
@@ -68,6 +76,11 @@ class Influx:
         """
         tags['source'] = self._influx_tag
         data_point_list = []
+
+        #Use Defaul database if None
+        db =  self.db
+        if database:
+           db = database
 
         logging.debug("recieved data point %s"%measurement_dict)
         # Create our timestamp if one was not provided.
@@ -108,9 +121,12 @@ class Influx:
 
         return True
 
-    def query(self,measurement_name):
+    def query(self,measurement_name, database=None):
+        db =  self.db
+        if database:
+           db = database
         query = "select value from %s"%measurement_name
-        return list(self._influx_client.query(query,database=self.db).get_points())
+        return list(self._influx_client.query(query,database=db).get_points())
 
     def create_database(self,name):
         self._influx_client.create_database(name)

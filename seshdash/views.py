@@ -543,12 +543,7 @@ def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alert_id",'')
     alert_id = int(alert_id)
-    alerts = Sesh_Alert.objects.filter(id=alert_id)
-
-    # Getting the first alert ( Converting from QuerySet )
-    if len(alerts) >= 1:
-         alert = alerts[0]
-
+    alert = Sesh_Alert.objects.filter(id=alert_id).first()
 
     alert_values = {}
 

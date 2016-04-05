@@ -44,9 +44,10 @@ class AggregateTestCase(TestCase):
             self.i.create_database(self._influx_db_name)
             #Generate random data  points for 24h
         except:
-            self.i.delete_database(self._influx_db_name)
-            sleep(1)
-            self.i.create_database(self._influx_db_name)
+           self.i.delete_database(self._influx_db_name)
+           sleep(1)
+           self.i.create_database(self._influx_db_name)
+           pass
 
         self.location = Geoposition(52.5,24.3)
 
@@ -64,18 +65,6 @@ class AggregateTestCase(TestCase):
                                              has_genset=True,
                                              has_grid=True)
 
-        """
-        self.data_point = Data_Point.objects.create(
-                site=self.site,
-                soc=35.5,
-                battery_voltage=20,
-                time=timezone.now(),
-                AC_input=0.0,
-                AC_output=15.0,
-                AC_Load_in=0.0,
-                AC_Load_out=0.7)
-        """
-
         self.no_points = self.create_test_data()
         #create test user
         self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
@@ -83,7 +72,7 @@ class AggregateTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
     def tearDown(self):
-        #self.i.delete_database(self._influx_db_name)
+        self.i.delete_database(self._influx_db_name)
         pass
 
     def test_data_point_creation(self):
