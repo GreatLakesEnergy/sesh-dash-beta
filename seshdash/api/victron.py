@@ -357,14 +357,14 @@ class VictronHistoricalAPI:
         headers  = {'user-agent':self.USER_AGENT}
         #data = self.SESSION.get(formated_URL,stream=True)
         data = self.SESSION.get(formated_URL,stream=True,verify=False)
-        print "downloading csv file"
+        logging.debug(" starting downloading csv file")
         with open(full_file, 'wb') as fd:
             logging.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
                 fd.write(chunk)
 
         #DEBUG
-        print "finisehd downloading"
+        logging.debug("finished downloading csv")
         self._csv_file = full_file
         return self._parse_csv_data(full_file)
 
@@ -374,7 +374,6 @@ class VictronHistoricalAPI:
 
         """
         logging.debug("parsing csv data %s"%csv_data_file)
-        print "parsing CSV"
         #data_arr = []
         try:
             self._csv_file = open(csv_data_file)
