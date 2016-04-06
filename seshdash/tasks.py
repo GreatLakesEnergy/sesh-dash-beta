@@ -172,8 +172,12 @@ def get_historical_BoM(site,start_at):
                     logging.exception( message )
                     handle_task_failure(message = message)
                     pass
-
+        # Clean up
+        site.upddating = False
+        site.save()
         vh_client.flush()
+
+        # Return number of items found
         return count
 
 @shared_task
@@ -184,9 +188,8 @@ def run_aggregate_on_historical(site):
     start_date = site.comission_date # TODO this hould porbably be based on range in DB
     end_date =  timezone.now()
     days_to_agr = time_utils.get_time_interval_array(24,'hours',start_date,end_date)
-    print "getting historic aggregates %s"%(days_to_agr)
+    logging.debug( "getting historic aggregates %s"%(days_to_agr))
     for day in days_to_agr:
-        print "starting aggregation for day:%s"%day
         logging.debug("Batch processing aggregates")
         get_aggregate_daily_data(day)
 

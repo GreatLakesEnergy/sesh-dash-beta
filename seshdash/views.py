@@ -176,7 +176,9 @@ def _download_data(sites):
     Trigger download of vrm upon loading site data
     """
     for site in sites:
-        get_historical_BoM.delay(site.pk, time_utils.get_epoch_from_datetime(site.comission_date))
+        get_historical_BoM.delay(site, time_utils.get_epoch_from_datetime(site.comission_date))
+        site.updating = True
+        site.save()
 
 def _aggregate_imported_data(sites):
     for site in sites:
