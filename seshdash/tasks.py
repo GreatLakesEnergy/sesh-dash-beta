@@ -1,39 +1,47 @@
-#needed to import some relative libs
+# Needed to import some relative libs
 from __future__ import absolute_import
 import logging
 import sys
 
 from django.conf import settings
-from django.db import IntegrityError
+from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
 from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert
 
-#from seshdash.api.enphase import EnphaseAPI
+#fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
-from seshdash.utils import time_utils
 from seshdash.utils.alert import alert_check
 from seshdash.utils.reporting import prepare_report
 from seshdash.data.db.influx import Influx
 
+# Time related
 from datetime import datetime, date, timedelta
+from seshdash.utils import time_utils
+from django.utils import timezone
 
 @task_failure.connect
 def handle_task_failure(**kw):
-    import rollbar
-    trace = sys.exc_info()
-    kw['trace'] = trace
-    rollbar.report_message(message='Error occured in task',extra_data=kw)
+    logging.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
+    if not settings.DEBUG:
+        import rollbar
+        trace = sys.exc_info()
+        kw['trace'] = trace
+        rollbar.report_message(message='Error occured in task',extra_data=kw)
 
 
-def send_to_influx(model_data, site, timestamp, to_exclude=[]):
+def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
     """
     Utility function to send data to influx
     """
     try:
-        i = Influx()
+        if client:
+            i = client
+        else:
+            i = Influx()
+
         model_data_dict = model_to_dict(model_data)
 
         if to_exclude:
@@ -43,7 +51,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[]):
                 #if to_exclude  in model_data_dict.keys():
                 model_data_dict.pop(val)
 
-        i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
+        status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
         message = "Error sending to influx with exception %s"%e
         handle_task_failure(message= message,exception=e,data=model_data)
@@ -110,27 +118,29 @@ def get_BOM_data():
             handle_task_failure(message = message)
             pass
 
+def _check_data_pont(data_point_arr):
+    """
+    Check whether our dp is valid return tru if it is false otherwise
+    """
+    # Return False if any of the valuse are empty
+    return filter(lambda x: x==True, map(lambda x: data_point_arr[x].strip()=='',data_point_arr))
 
 @shared_task
-def get_historical_BoM(sesh_site_id,start_at):
+def get_historical_BoM(site,start_at):
         """
         Get Historical Data from VRM to backfill any days
         """
-
+        i = Influx()
         count = 0
-        site = Sesh_Site.objects.get(pk=sesh_site_id)
         site_id = site.vrm_site_id
         vh_client = VictronHistoricalAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
-
         #site_id is a tuple
         #print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
         data = vh_client.get_data(site_id,start_at)
-        print "got data %s"%data
         for row in data:
-            #print "saving data point  %s"%row
-            data_point = BoM_Data_Point(
+                data_point = BoM_Data_Point(
                 site = site,
-                time = row['Date Time'],
+                time = row['Date Time'], #TODO make sure this datetime aware
                 soc = row['Battery State of Charge (System)'],
                 battery_voltage = row['Battery voltage'],
                 AC_input = row['Input power 1'],
@@ -138,28 +148,47 @@ def get_historical_BoM(sesh_site_id,start_at):
                 AC_Load_in =  row['Input current phase 1'],
                 AC_Load_out =  row['Output current phase 1'],
                 inverter_state = row['VE.Bus Error'],
-                pv_production = row['PV-AC'],
+                pv_production = row['PV - AC-coupled on input L1'], # IF null need to put in 0
                 #TODO these need to be activated
                 genset_state =  0,
                 relay_state = 0,
                 )
-            try:
-                data_point.save()
-                send_to_influx(data_point, site, date, to_exclude=['time'])
-                count = count +1
-                #print "saved %s BoM data points"%count
-                logging.debug("saved %s BoM data points"%count)
-            except IntegrityError, e:
-                logging.warning("data point already exist %s"%e)
-                print "data point already exist %s"%e
-            except Exception,e:
-                message = "error with geting  data exception %s"%(e)
-                logging.exception("error with geting site  data exception")
-                handle_task_failure(message = message)
-                pass
+                date =  row['Date Time']
+                try:
+                    with transaction.atomic():
+                        data_point.save()
+                    send_to_influx(data_point, site, date, to_exclude=['time','inverter_state'],client=i)
+                    count = count +1
+                    #print "saved %s BoM data points"%count
+                    logging.debug("saved %s BoM data points"%count)
+                except IntegrityError, e:
+                    logging.warning("data point already exist %s"%e)
+                    pass
+                except ValueError,e:
+                    logging.warning("Invalid values in data point dropping  %s"%(e))
+                    pass
+                except Exception,e:
+                    message = "error with creating data point  data exception %s"%(e)
+                    logging.exception( message )
+                    handle_task_failure(message = message)
+                    pass
 
+        vh_client.flush()
+        return count
 
-
+@shared_task
+def run_aggregate_on_historical(site):
+    """
+    this will run daily aggregation caluclations for each each day
+    """
+    start_date = site.comission_date # TODO this hould porbably be based on range in DB
+    end_date =  timezone.now()
+    days_to_agr = time_utils.get_time_interval_array(24,'hours',start_date,end_date)
+    print "getting historic aggregates %s"%(days_to_agr)
+    for day in days_to_agr:
+        print "starting aggregation for day:%s"%day
+        logging.debug("Batch processing aggregates")
+        get_aggregate_daily_data(day)
 
 @shared_task
 def get_enphase_daily_summary(date=None):
@@ -373,17 +402,20 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
 
 @shared_task
-def get_aggregate_daily_data():
+def get_aggregate_daily_data(date=None):
     """
     Batch job to get daily aggregate data for each site
     """
     sites  = Sesh_Site.objects.all()
     print "Aggregating daily consumption and production stats"
-    yesterday = time_utils.get_yesterday()
+    date_to_fetch = time_utils.get_yesterday()
+    if date:
+        date_to_fetch =  date
+
     for site in sites:
 
-            print "getting aggrage data for %s for %s"%(site,yesterday)
-            logging.debug("aggregate data for %s date: %ss"%(site,yesterday))
+            print "getting aggrage data for %s for %s"%(site,date_to_fetch)
+            logging.debug("aggregate data for %s date: %ss"%(site,date_to_fetch))
             aggregate_data_pv = get_aggregate_data (site, 'pv_production')[0]
             aggregate_data_AC = get_aggregate_data (site, 'AC_output_absolute')[0]
             aggregate_data_batt = get_aggregate_data (site, 'AC_output', clause='negative')[0]
@@ -392,7 +424,7 @@ def get_aggregate_daily_data():
 
             logging.debug("aggregate date for grid %s "%aggregate_data_grid_data)
             aggregate_data_grid_outage_stats = get_grid_stats(aggregate_data_grid_data, 0, 'min',10)
-            aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=yesterday)
+            aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
             sum_power_pv = aggregate_data_AC - aggregate_data_grid
 
 
@@ -408,13 +440,13 @@ def get_aggregate_daily_data():
                                          daily_grid_outage_t = aggregate_data_grid_outage_stats['duration'],
                                          daily_grid_outage_n = aggregate_data_grid_outage_stats['count'],
                                          daily_no_of_alerts = aggregate_data_alerts.count(),
-                                         date = yesterday,
+                                         date = date_to_fetch,
                                             )
-            print "saving daily aggreagete for %s dp:%s"%(yesterday,daily_aggr)
+            print "saving daily aggreagete for %s dp:%s"%(date_to_fetch,daily_aggr)
 
             daily_aggr.save()
             #send to influx
-            send_to_influx(daily_aggr, site, yesterday, to_exclude=['date'])
+            send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
 
 
 

@@ -291,6 +291,9 @@ class VictronHistoricalAPI:
          self.TIMEZONE = timezone
          self.SESSION = requests.Session()
          self.SESSION_COOKIES = {}
+         self._csv_reader = None
+         self._csv_file = None
+         self._csv_file_path = None
          self.initialize()
 
     def initialize(self):
@@ -347,18 +350,22 @@ class VictronHistoricalAPI:
                END_AT = end_at
                 )
         filepath = self.DOWNLOAD_FOLDER
-        filename = "site_id_%s_dump.csv"%(start_at)
+        filename = "%s_%s_dump.csv"%(site_id,start_at)
         full_file = path.join(self.DOWNLOAD_FOLDER,filename)
+        self._csv_file_path = full_file
         #need to trick the VRM
         headers  = {'user-agent':self.USER_AGENT}
         #data = self.SESSION.get(formated_URL,stream=True)
         data = self.SESSION.get(formated_URL,stream=True,verify=False)
+        print "downloading csv file"
         with open(full_file, 'wb') as fd:
             logging.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
                 fd.write(chunk)
 
         #DEBUG
+        print "finisehd downloading"
+        self._csv_file = full_file
         return self._parse_csv_data(full_file)
 
     def _parse_csv_data(self,csv_data_file):
@@ -367,21 +374,28 @@ class VictronHistoricalAPI:
 
         """
         logging.debug("parsing csv data %s"%csv_data_file)
-        data_arr = []
+        print "parsing CSV"
+        #data_arr = []
         try:
-            csvfile  = open(csv_data_file)
+            self._csv_file = open(csv_data_file)
             #need to skip first row
-            csvfile.readline()
-            csvfile.readline()
+            self._csv_file.readline()
+            self.CSV_KEYS = self._csv_file.readline().replace('"','').split(',')
+            # First column should always be date time
+            self.CSV_KEYS[0] = 'Date Time'
+            self._csv_file.readline()
+            self._csv_reader =  csv.DictReader(self._csv_file,self.CSV_KEYS)
+            return self._csv_reader
 
-            reader = csv.DictReader(csvfile,self.CSV_KEYS)
-            for row in reader:
-                data_arr.append(row)
-            csvfile.close()
-            return data_arr
         except Exception,e:
             logging.error("unable to find file or key %s"%e)
-        finally:
-            csvfile.close()
             remove(csv_data_file)
+            self._csv_file.close()
+
+    def flush(self):
+        try:
+            self._csv_file.close()
+            remove(self._csv_file_path)
+        except Exception, e:
+            logging.exception("Unable to flush csv files %s : %s"%(self._csv_file,e))
 

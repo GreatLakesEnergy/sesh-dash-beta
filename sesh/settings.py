@@ -55,7 +55,7 @@ config = RawConfigParser(
                'FROM_EMAIL':'some_email@gmail.com',
                'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
-               'TOKEN':''
+               'TOKEN':'asdasdasd'
                }
         )
 
@@ -217,6 +217,7 @@ LOGGING = {
         '''
 # Error reporting
 if not DEBUG:
+     print "rollbar disabled"
      ROLLBAR = {
              'access_token': config.get('rollbar','token'),
              'environment': 'development' if DEBUG else 'production',
@@ -279,8 +280,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'rollbar.contrib.django.middleware.RollbarNotifierMiddleware'
 )
+
+if not DEBUG:
+    MIDDLEWARE_CLASSES.append('rollbar.contrib.django.middleware.RollbarNotifierMiddleware')
 
 ROOT_URLCONF = 'sesh.urls'
 

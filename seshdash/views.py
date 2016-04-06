@@ -100,10 +100,8 @@ def get_user_sites(vrm_user_id,vrm_password):
     v = VictronAPI(vrm_user_id,vrm_password)
     if v.IS_INITIALIZED:
             logging.debug("victron API is initialized ")
-            print "victron api initialized"
             sites = v.get_site_list()
             logging.info("Found sites %s "%sites)
-            print "found sites  %s"%sites
             site_list.append(sites)
     if site_list:
         #make list of lists flat

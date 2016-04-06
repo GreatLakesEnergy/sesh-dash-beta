@@ -24,7 +24,6 @@ class Influx:
         #TODO draw this from settings
         self._influx_tag = 'sesh_dash'
 
-
     def get_measurement_bucket(self,measurement,bucket_size,clause,clause_val,time_delta,start="now",operator="mean",database=None):
         """
         return the requsted measurement values in given bucket size
@@ -102,6 +101,7 @@ class Influx:
                     data_point["fields"] = {"value" : float(measurement_dict[key])}
                except Exception,e:
                     logging.warning("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
+                    print "skiping point"
                     # Ditch the whole data point if unable to cast
                     data_point = {}
 
@@ -113,11 +113,14 @@ class Influx:
                 logging.debug("INFLUX sending %s"%data_point_list)
                 self._influx_client.write_points(data_point_list)
         except InfluxDBServerError,e:
-            logging.error("INFLUX Error running query on server %s %s"%(e,data_point_list))
+            logging.warning("INFLUX Error running query on server %s %s"%(e,data_point_list))
+            print e
         except InfluxDBClientError,e:
-            logging.error("INFLUX Error running  query %s %s"%(e,data_point_list))
+            logging.warning("INFLUX Error running  query %s %s"%(e,data_point_list))
+            print e
         except Exception,e:
-            logging.error("INFLUX unkown error %s %s"%(e,data_point))
+            logging.warning("INFLUX unkown error %s %s"%(e,data_point))
+            print e
 
         return True
 
