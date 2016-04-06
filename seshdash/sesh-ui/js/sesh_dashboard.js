@@ -208,3 +208,6 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
 
   }
+
+
+

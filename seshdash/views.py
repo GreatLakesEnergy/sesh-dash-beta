@@ -565,3 +565,16 @@ def get_latest_bom_data(request):
     latest_bom_data.append({"item": "Recent Contact", "value": get_timesince(latest_bom.time)})
 
     return HttpResponse(json.dumps(latest_bom_data))
+
+
+
+def historical_data(request):
+    sites = Sesh_Site.objects.all()
+    active_site = sites[0]
+    sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
+    sites = serialize_objects(sites)
+    context_dict = {}
+    context_dict['sites_json'] = sites
+    context_dict['site_id'] = 0
+    context_dict['active_site'] = active_site
+    return render(request, 'seshdash/historical-data.html', context_dict);

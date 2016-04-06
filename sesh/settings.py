@@ -252,6 +252,7 @@ BOWER_INSTALLED_APPS = (
             'raphael',
             'react',
             'babel',
+            'calendar-heatmap',
             )
 
 ANONYMOUS_USER_ID = -1

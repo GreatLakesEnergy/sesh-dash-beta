@@ -36,6 +36,9 @@
     <!-- SESH CSS -->
     <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
 
+    <!-- Calendar heatmap css -->
+    <link href='{% static 'calendar-heatmap/src/calendar-heatmap.css' %}' rel="stylesheet">
+
     <!-- Custom Fonts -->
     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel="stylesheet" type="text/css">
 
@@ -107,6 +110,9 @@
                         </li>
                         <li>
                             <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                        </li>
+                        <li>
+                            <a href='/historical_data'><i class="fa fa-history fa-fw"></i> Historical Data </a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Sites<span class="fa arrow"></span></a>
@@ -191,7 +197,8 @@
     <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
     <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
 
-
+    <!-- Calendar heatmap js -->
+    <script src='{% static 'calendar-heatmap/src/calendar-heatmap.js' %}' > </script>
 
 
    {% endblock %}
