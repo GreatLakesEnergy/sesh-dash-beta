@@ -10,6 +10,7 @@ It also has the capacity to get data from both systems locally through modbus-TC
 **Make sure you have [Vagrant](https://www.vagrantup.com/downloads.html), [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed.**
 
 Follow the steps below to setup a development environment. This will setup a virtual machine with the required dependencies:
+If you wish to not use a virtual-machine you can skip to virtualenvonly section.
  1. Clone this repo:
     `$ git clone https://github.com/GreatLakesEnergy/sesh-dash-beta.git`
  1. CD into the directory:
@@ -30,12 +31,15 @@ Follow the steps below to setup a development environment. This will setup a vir
     `$ python ./manage.py collectstatic`
 
 #### Virtualenv Only ####
-* Make sure system level dependencies are installed first see playbook.yml
-* Create a local virtual-env (install virtualenv if you dont have it already):
+1. Make sure system level dependencies are installed first see playbook.yml
+1. Create a local virtual-env (install virtualenv if you dont have it already):
     `$ virtualenv <sesh-dash-beta>`
-* Install requirements defined in requirements.txt:
+1. Activate your virtual env
+    `$cd <virtual-env-location>/bin`
+    `$source activate` 
+1. Install requirements defined in requirements.txt:
     `$ requirements.txt > pip install -r requirements.txt`
-* Get the UI components with:
+1. Get the UI components with:
    ` $ python ./manage.py bower install`
 
 ### Before you start ###
