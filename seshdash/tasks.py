@@ -468,9 +468,10 @@ def get_all_data_initial(days):
     get_enphase_daily_summary(days)
 
 @shared_task
-def send_reports(duration="weekly"):
+def send_reports(duration="week"):
     """
     Schedule email report sending
+    options: month, week, day
     """
 
     sites = Sesh_Site.objects.all()
@@ -480,6 +481,6 @@ def send_reports(duration="weekly"):
         if not result:
             send_reports.update_state(
                              state = states.FAILURE,
-                             meta = 'Something went wrong check logs'
+                             meta = 'Something went wrong creating report  check logs'
                              )
 
