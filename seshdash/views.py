@@ -17,7 +17,7 @@ from django import forms
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account
 from django.db.models import Avg
 from django.db.models import Sum
-from seshdash.forms import SiteForm, VRMForm, RMCForm
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools
@@ -40,26 +40,14 @@ from seshdash.tasks import get_historical_BoM
 #generics
 import logging
 
+
 @login_required(login_url='/login/')
 def index(request,site_id=0):
     """
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-    # Get sites for use
-    sites = get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
-
-    # If initial login and there are Victron sites we need to import
-    if request.method == 'POST':
-        if request.POST.has_key('import_data'):
-            # Download historical data for sites
-            logging.debug("Downloading historical site data")
-            sites = reques.POST.get('site_to_import',None)
-            print "downloadig data for sites %s"%sites
-            for site in sites:
-                # Provide UI feedback while this is happening
-
-                _download_data(site)
+    sites =  _get_user_sites(request)
 
     context_dict = {}
     # Handle fisrt login if user has no site setup:
@@ -87,7 +75,7 @@ def index(request,site_id=0):
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
-        print "getting vrm form"
+        #print "getting vrm form"
         # Simplt give the option first
         VRM_form = VRMForm()
         return VRMForm
@@ -134,8 +122,8 @@ def import_site(request):
     template = 'seshdash/initial-login.html'
     if request.method == "POST":
             #check if post is VRM Account form
-            print "got post"
-            print request.POST.keys()
+            #print "got post"
+            #print request.POST.keys()
             if request.POST.get('form_type',None) == 'vrm':
                 print "got vrm form"
                 form = VRMForm(request.POST)
@@ -144,7 +132,7 @@ def import_site(request):
                     context_dict['error'] = True
                     context_dict['message'] = 'Unable to add accout'
                 if form.is_valid():
-                    print "form is vald"
+                    #print "form is vald"
                     site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
                     if not site_list['sites']:
                        # Error with credentials
@@ -183,10 +171,13 @@ def import_site(request):
             else:
                 # if RMC site
                 # Handle RMC account info
-                print "request recieved is rmc request getting form ready"
-                rmc = Sesh_RMC_Account(API_KEY=rmc_tools.generate_rmc_api_key())
-                rmc.save()
-                site_forms_factory = modelformset_factory(Sesh_Site,form=SiteForm)
+                #print "rmc request recieved is rmc request getting form ready"
+                site_forms_factory = inlineformset_factory(Sesh_RMC_Account,
+                                                           Sesh_Site,
+                                                           form=SiteRMCForm,
+                                                           extra=1,
+                                                           can_delete=False
+                                                           )
                 form = site_forms_factory()
                 context_dict['site_forms'] = form
                 context_dict['form_type'] = 'rmc'
@@ -195,13 +186,15 @@ def import_site(request):
 
     return render(request,template,context_dict)
 
-def _download_data(site):
+def _download_data(request):
     """
     Trigger download of vrm upon loading site data
     """
-    get_historical_BoM.delay(site, time_utils.get_epoch_from_datetime(site.comission_date))
-    site.updating = True
-    site.save()
+
+    sites = _get_user_sites(request)
+    for site in sites:
+        if site.updating:
+            get_historical_BoM.delay(site, time_utils.get_epoch_from_datetime(site.comission_date))
 
 def _aggregate_imported_data(sites):
     for site in sites:
@@ -212,44 +205,62 @@ def _validate_form(form,context_dict):
     Validate forms basedo no form input
     """
     if form.is_valid():
-        print "FORM is VALID"
         form.save(commit=False)
         context_dict['error'] =  False
 
     else:
-
          context_dict['message'] = "failure creating site"
          context_dict['error'] = True
          context_dict['site_forms'] = form
 
     return context_dict,form
 
+def _get_user_sites(request):
+    """
+    Helper function to get sites for user
+    """
+    # Get sites for use
+    return  get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
+
+
 @login_required
 def handle_create_site(request):
+    """
+    Handle parsing of RMC and VRM form and create models accordingly
+    """
     context_dict = {}
     form = None
     if request.method == 'POST':
         if request.POST.get('form_type',None) == 'rmc':
             # Handle RMC form creation
+            #print "checking rmc form"
             context_dict['form_type'] = 'rmc'
             form = _create_site_rmc(request)
         else:
             # Handle VRM form creation
             context_dict['form_type'] = 'vrm'
-            print "checking vrm form"
+            #print "checking vrm form"
             form = _create_site_vrm(request)
             context_dict['form'] = form
 
     context_dict, form = _validate_form(form,context_dict)
-
     # Handle Form Errors
     if context_dict['error']:
         # Got Error return problem!
-        #Delete VRM or RmC Account if this fails
+        # Delete VRM or RmC Account if this fails
         return render(request,'seshdash/initial-login.html',context_dict)
+
+    # if VRM for data needs to be downloaded handle here
+    else:
+        if context_dict['form_type'] == 'vrm':
+            for f in form:
+                if f.get('import_data'):
+                    f.updating = True
+                    _download_data()
 
     #finally
     form.save()
+
     return index(request)
 
 
@@ -257,6 +268,11 @@ def _create_site_rmc(request):
     """
     Create site for RMC account
     """
+    rmc = Sesh_RMC_Account(API_KEY=rmc_tools.generate_rmc_api_key())
+    rmc.save()
+    site_forms_factory = inlineformset_factory(Sesh_RMC_Account,Sesh_Site,form=SiteForm,exclude=('delete',))
+    # Create RMC account associated with it
+    form = site_forms_factory(request.POST, instance=rmc)
     return form
 
 
@@ -265,28 +281,9 @@ def _create_site_vrm(request):
     Create the sites imported from VRM account
     """
     VRM = VRM_Account.objects.first()
-    site_forms_factory = modelformset_factory(Sesh_Site,form=SiteForm)
+    site_forms_factory = modelformset_factory(Sesh_Site,exclude=('delete',))
     form = site_forms_factory(request.POST)
     return form
-
-"""
-    else:
-         print "request recieved is rmc request getting form ready"
-         site_forms_factory = inlineformset_factory(
-                 Sesh_RMC_Account,
-                 Sesh_Site,
-                 widgets = {'comission_date':forms.DateInput()},
-                 exclude=('vrm_account','vrm_site_id','rmc_account','delete'),
-                 extra=1)
-
-         context_dict['site_forms'] = site_forms_factory
-         context_dict['form_type'] = 'rmc'
-         return render(request,'seshdash/initial-login.html',context_dict)
-
-    # Go to normal startup mode
-    return index(request)
-
-"""
 
 def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):
     """
@@ -397,7 +394,7 @@ def get_user_data(user,site_id,sites):
     context_data = {}
     context_data_json = {}
     if not user.has_perm('seshdash.view_Sesh_Site',site):
-        print "user doesn't have permission to view site %s"%site_id
+        #print "user doesn't have permission to view site %s"%site_id
         #TODO return 403 permission denied
         return context_data,context_data_json
     context_data['sites'] = sites

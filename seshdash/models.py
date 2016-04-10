@@ -32,6 +32,8 @@ class Sesh_RMC_Account(models.Model):
     #site = models.ForeignKey(Sesh_Site)
     API_KEY = models.CharField(max_length=130,default="")
 
+    def __str__(self):
+        return API_KEY
 
     class Meta:
         verbose_name = "RMC API Account"

@@ -8,9 +8,21 @@ class SiteForm(ModelForm):
     import_data = forms.BooleanField(required=False)
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','updating','has_grid')
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','updating')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
+
+class SiteRMCForm(ModelForm):
+    error_css_class = "warning"
+    required_css_class = "info"
+
+
+    class Meta:
+        model = Sesh_Site
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','updating')
+        #DateSelectorWidget
+        widgets = {'comission_date':forms.DateInput()}
+
 
 class RMCForm(ModelForm):
     error_css_class = "warning"
