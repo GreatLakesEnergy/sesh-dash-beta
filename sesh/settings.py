@@ -56,6 +56,7 @@ config = RawConfigParser(
                'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd'
+               'CLICKATELL_KEY':''
                }
         )
 
@@ -82,6 +83,9 @@ try:
     TEMP_FOLDER = config.get('system','temp_folder')
 except:
     TEMP_FOLDER = "/tmp/"
+
+# sms API key
+CLICKATELL_KEY = config.get('api','clickatell_key')
 
 DATABASES = {
     'default': {
@@ -245,6 +249,7 @@ INSTALLED_APPS = (
     'geoposition',
     'djcelery',
     'django_extensions',
+
 )
 
 #BOWER
@@ -262,6 +267,7 @@ BOWER_INSTALLED_APPS = (
             'raphael',
             'react',
             'babel',
+            'nanobar',
             )
 
 ANONYMOUS_USER_ID = -1

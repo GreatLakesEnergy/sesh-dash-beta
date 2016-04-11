@@ -38,7 +38,8 @@
 
     <!-- Custom Fonts -->
     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel="stylesheet" type="text/css">
-
+    
+    
 
   <title>SESH Dashboard (beta)</title>
 
@@ -147,6 +148,8 @@
 
     {% block footer %}
 
+    <!-- nanobar javascript -->
+   <script src = '{% static  'nanobar/nanobar.js' %}' > </script>
 
     <!-- Bootstrap Core JavaScript -TODO switch to min after-->
     <script src='{% static 'bootstrap/dist/js/bootstrap.js' %}' ></script>
@@ -190,9 +193,7 @@
     <!-- mapbox javascript -->
     <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
     <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
-
-
-
+   
 
    {% endblock %}
 

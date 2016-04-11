@@ -10,6 +10,7 @@ from django.core import serializers
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
+from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
 
@@ -25,6 +26,7 @@ from pprint import pprint
 
 #Import utils
 from seshdash.utils.time_utils import get_timesince
+from seshdash.utils.model_tools import get_model_first_reference
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 import json,time,random,datetime
@@ -540,7 +542,6 @@ def display_alerts(site_id):
      alert_list = []
 
      for alert in alerts:
-          print alert.alert
           alert_list.append(alert)
 
      return alert_list
@@ -554,49 +555,37 @@ def get_alerts(request):
 
     alert_data = []
 
+
     # Loop to generate alert data
     for alert in alerts:
         alert_data.append({
             "alertId": alert.id,
             "site":alert.site.site_name,
-            "alert":str(alert.alert),
+            "alert":str(alert),
             "date":get_timesince(alert.date),
             })
 
     return HttpResponse(json.dumps(alert_data))
 
-
 def display_alert_data(request):
     # Getting the clicked alert via ajax
-    alert_id = request.POST.get("alert_id",'')
+    alert_id = request.POST.get("alertId",'')
     alert_id = int(alert_id)
     alert = Sesh_Alert.objects.filter(id=alert_id).first()
 
     alert_values = {}
 
-    # Getting alert BoM_Data_Point Values
-    alert_values ['battery_voltage'] = alert.point.battery_voltage
-    alert_values ['AC_Voltage_in'] = alert.point.AC_Voltage_in
-    alert_values ['AC_Voltage_out'] = alert.point.AC_Voltage_out
-    alert_values ['AC_input'] = alert.point.AC_input
-    alert_values ['AC_output'] = alert.point.AC_output
-    alert_values ['AC_output_absolute'] = alert.point.AC_output_absolute
-    alert_values ['AC_Load_in'] = alert.point.AC_Load_in
-    alert_values ['AC_Load_out'] = alert.point.AC_Load_out
-    alert_values ['pv_production'] = alert.point.pv_production
-    alert_values ['inverter_state'] = alert.point.inverter_state
-    alert_values ['main_on'] = alert.point.main_on
-    alert_values ['genset_state'] = alert.point.genset_state
-    alert_values ['relay_state'] = alert.point.relay_state
-    alert_values ['trans'] = alert.point.trans
-    alert_values ['alert_id'] = alert.id
-    alert_values ['alert_value'] = alert.alert.check_field
+    point = get_model_first_reference(alert.point_model, alert)
 
+    alert_values = model_to_dict(point)
+
+    # Converting time to json serializable value and changing it to timesince
+    alert_values['time'] = get_timesince(alert_values['time'])
 
     return HttpResponse(json.dumps(alert_values))
 
 def silence_alert(request):
-    alert_id = request.POST.get("alert_id", '')
+    alert_id = request.POST.get("alertId", '')
     alerts = Sesh_Alert.objects.filter(id=alert_id)
 
     if len(alerts) >= 1:

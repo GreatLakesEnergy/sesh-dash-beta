@@ -35,3 +35,12 @@ class VRM_AccountAdmin(GuardedModelAdmin):
 class RMC_AccountAdmin(GuardedModelAdmin):
     pass
 
+@admin.register(Sesh_User)
+class SeshUser(GuardedModelAdmin):
+    pass
+
+@admin.register(RMC_status)
+class RMCStatus(GuardedModelAdmin):
+    pass
+
+
