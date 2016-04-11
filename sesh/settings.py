@@ -55,7 +55,7 @@ config = RawConfigParser(
                'FROM_EMAIL':'some_email@gmail.com',
                'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
-               'TOKEN':'asdasdasd'
+               'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':''
                }
         )
