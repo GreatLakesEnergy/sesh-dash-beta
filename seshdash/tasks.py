@@ -57,10 +57,8 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
         handle_task_failure(message= message,exception=e,data=model_data)
 
 
-"""
 @shared_task
 def get_BOM_data():
-
 
     sites = Sesh_Site.objects.all()
     for site in sites:
@@ -118,11 +116,11 @@ def get_BOM_data():
             pass
 
 def _check_data_pont(data_point_arr):
-    """
-    Check whether our dp is valid return tru if it is false otherwise
-    """
-    # Return False if any of the valuse are empty
-    return filter(lambda x: x==True, map(lambda x: data_point_arr[x].strip()=='',data_point_arr))
+        """
+        Check whether our dp is valid return tru if it is false otherwise
+        """
+        # Return False if any of the valuse are empty
+        return filter(lambda x: x==True, map(lambda x: data_point_arr[x].strip()=='',data_point_arr))
 
 @shared_task
 def get_historical_BoM(site_pk,start_at):
