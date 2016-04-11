@@ -26,23 +26,25 @@
                             {{ site_forms.management_form}}
                             <div class="table-responsive">
 
-                                <table class="table table-striped table-bordered table-hover ">
                                     {% if form_type != 'vrm' %}
                                         <!-- RMC FORM -->
                                          <input type="hidden" name="form_type" value="rmc"> 
                                     {% else %}
                                          <input type="hidden" name="form_type" value="vrm"> 
                                     {% endif %}
+
+                                    {{ site_forms.media}}
+
                                     {% for form in site_forms %}
+                                        <table class="table table-striped table-bordered table-hover ">
                                          <!-- Site form  -->
-                                            {{form.media}}
                                             {{ form.as_table }}
 
+                                        </table>
                                      {% endfor %}
-                                </table>
 
                             </div>
-                            <input type="submit" value="Create Site">
+                           <input type="submit" value="Create Site">
                         </form>
                         <!-- formset for selecting sites-->
                 </div>

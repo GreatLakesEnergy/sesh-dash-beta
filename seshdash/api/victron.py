@@ -1,11 +1,14 @@
+# Utility
 import requests, json, logging
 import csv
 import urllib2
-
-from os import path
+from os import path, remove
 from pprint import pprint
 from datetime import datetime,timedelta
 from ..utils import time_utils
+
+# Configuration
+from django.conf import settings
 
 class VictronAPI:
     #API_BASE_URL = "http://juice.m2mobi.com/{call_type}/{function}"
@@ -231,14 +234,16 @@ class VictronHistoricalAPI:
     API to get historical data from the VRM
     """
 
+    #TODO make logging activated
     API_HIST_LOGIN_URL = "https://vrm.victronenergy.com/user/login"
-    API_HIST_FETCH_URL = "https://vrm.victronenergy.com/site/download-csv/site/{SITE_ID}/start_time/{START_AT}/end_time/{END_AT}"
+    #API_HIST_FETCH_URL = "https://vrm.victronenergy.com/site/download-csv/site/{SITE_ID}/start_time/{START_AT}/end_time/{END_AT}"
+    API_HIST_FETCH_URL = "https://vrm.victronenergy.com/site/{SITE_ID}/download-data/log/csv/{START_AT}/{END_AT}"
     USERNAME = ""
     PASSWORD = ""
     SESSION_COOKIES = []
     TIMEZONE = 0
     SESSION = None
-    DOWNLOAD_FOLDER = "/tmp/"
+    DOWNLOAD_FOLDER = settings.TEMP_FOLDER
     USER_AGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
 
     CSV_KEYS = ['Date Time',
@@ -251,15 +256,18 @@ class VictronHistoricalAPI:
                 'Output frequency',
                 'Output power 1',
                 'Battery voltage',
-                'Battery current Phase count',
+                'Battery current',
+                'Phase count',
                 'Active input',
                 'Active input current limit',
-                'VE.Bus state of charge VE.Bus state',
+                'VE.Bus state of charge',
+                'VE.Bus state',
                 'VE.Bus Error',
                 'Switch Position',
                 'Temperature alarm',
                 'Low battery alarm',
                 'Overload alarm',
+                'PV-AC',
                 'AC Consumption L1',
                 'Grid L1 Battery Voltage (System)',
                 'Battery Current (System)',
@@ -267,9 +275,14 @@ class VictronHistoricalAPI:
                 'Battery Power (System)',
                 'VE.Bus charge power (System)',
                 'Battery State of Charge (System)',
-                'Battery state']
+                'Battery staate',
+                'Position',
+                'L1 Voltage',
+                'L1 Current',
+                'L1 Power',
+                'L1 Energy']
 
-    def __init__(self , user_name, user_password, timezone=-4,dl_fldr="/tmp"):
+    def __init__(self , user_name, user_password, timezone=-4, dl_fldr=DOWNLOAD_FOLDER):
          self.IS_HIST_INITIALIZED = False
          requests.packages.urllib3.disable_warnings()
          self.USERNAME = user_name
@@ -277,29 +290,57 @@ class VictronHistoricalAPI:
          self.DOWNLOAD_FOLDER = dl_fldr
          self.TIMEZONE = timezone
          self.SESSION = requests.Session()
+         self.SESSION_COOKIES = {}
+         self._csv_reader = None
+         self._csv_file = None
+         self._csv_file_path = None
          self.initialize()
 
     def initialize(self):
          """
          Login to the portal and save the cookie for later reuse
          """
-         data= {}
+         data = {}
+         first_cookies = {}
+         second_cookies = {}
+         # Setup Headers
          data['password'] = self.PASSWORD
          data['username'] = self.USERNAME
          data['local_timezone'] = self.TIMEZONE
          data['is_dst'] = 0
-         r = self.SESSION.post(self.API_HIST_LOGIN_URL,data=data)
-         self.SESSION_COOKIES = r.cookies.get_dict()
+
+         # Make Request
+         r = self.SESSION.post(self.API_HIST_LOGIN_URL,data=data,verify=False)
+
+
+         try:
+            # Handle our tricky cookie situation
+             first_cookies = r.history[0].cookies.get_dict()
+             second_cookies  = r.cookies.get_dict()
+         except Exception,e:
+             self.IS_HIST_INITIALIZED = False
+             logging.error("Victron Hist apI error getting cookies "%str(e))
+
+         # Merge our cookie dictionaries
+
+         first_cookies.update(second_cookies)
+         self.SESSION_COOKIES = first_cookies
          #TODO this is border line screan scraping so this error condition will not be caught
-         if r.status_code == 200 and self.SESSION_COOKIES:
+         if r.status_code == 200 and self.SESSION_COOKIES.has_key('VRM_session_id'):
                 self.IS_HIST_INITIALIZED = True
                 logging.info("Victron historical API initialized")
+         else:
+                self.IS_HIST_INITIALIZED = False
+                logging.warning("Problem initializing Victorn Hist API")
+
 
     def get_data(self,site_id,start_at,end_at=None):
         """
         Will download a csv containt all data for provided seconds from epoch time window.
         """
 
+        if not self.IS_HIST_INITIALIZED:
+            return None
         if not end_at:
             end_at = time_utils.get_epoch_from_datetime(datetime.now()-timedelta(days=1))
         chunksize = 10
@@ -309,18 +350,22 @@ class VictronHistoricalAPI:
                END_AT = end_at
                 )
         filepath = self.DOWNLOAD_FOLDER
-        filename = "%s.csv"%(start_at)
+        filename = "%s_%s_dump.csv"%(site_id,start_at)
         full_file = path.join(self.DOWNLOAD_FOLDER,filename)
+        self._csv_file_path = full_file
         #need to trick the VRM
         headers  = {'user-agent':self.USER_AGENT}
         #data = self.SESSION.get(formated_URL,stream=True)
-        data = self.SESSION.get(formated_URL,stream=True)
+        data = self.SESSION.get(formated_URL,stream=True,verify=False)
+        logging.debug(" starting downloading csv file")
         with open(full_file, 'wb') as fd:
             logging.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
                 fd.write(chunk)
 
         #DEBUG
+        logging.debug("finished downloading csv")
+        self._csv_file = full_file
         return self._parse_csv_data(full_file)
 
     def _parse_csv_data(self,csv_data_file):
@@ -328,19 +373,28 @@ class VictronHistoricalAPI:
         return iterable csv reader object
 
         """
-        logging.debug("parsing csv data %s")
-        data_arr = []
+        logging.debug("parsing csv data %s"%csv_data_file)
+        #data_arr = []
         try:
-            csvfile  = open(csv_data_file)
+            self._csv_file = open(csv_data_file)
             #need to skip first row
-            csvfile.readline()
-            csvfile.readline()
-            reader = csv.DictReader(csvfile,self.CSV_KEYS)
-            for row in reader:
-                data_arr.append(row)
-            csvfile.close()
-            return data_arr
+            self._csv_file.readline()
+            self.CSV_KEYS = self._csv_file.readline().replace('"','').split(',')
+            # First column should always be date time
+            self.CSV_KEYS[0] = 'Date Time'
+            self._csv_file.readline()
+            self._csv_reader =  csv.DictReader(self._csv_file,self.CSV_KEYS)
+            return self._csv_reader
+
         except Exception,e:
             logging.error("unable to find file or key %s"%e)
-        finally:
-            csvfile.close()
+            remove(csv_data_file)
+            self._csv_file.close()
+
+    def flush(self):
+        try:
+            self._csv_file.close()
+            remove(self._csv_file_path)
+        except Exception, e:
+            logging.exception("Unable to flush csv files %s : %s"%(self._csv_file,e))
+

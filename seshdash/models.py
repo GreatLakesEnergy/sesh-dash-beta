@@ -32,6 +32,8 @@ class Sesh_RMC_Account(models.Model):
     #site = models.ForeignKey(Sesh_Site)
     API_KEY = models.CharField(max_length=130,default="")
 
+    def __str__(self):
+        return self.API_KEY
 
     class Meta:
         verbose_name = "RMC API Account"
@@ -70,10 +72,10 @@ class Sesh_Site(models.Model):
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
-
+    import_data = models.BooleanField(default=False)
     battery_bank_capacity = models.IntegerField()
-    has_genset = models.BooleanField()
-    has_grid = models.BooleanField()
+    has_genset = models.BooleanField(default=False)
+    has_grid = models.BooleanField(default=False)
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
@@ -246,6 +248,13 @@ class Daily_Data_Point(models.Model):
     class Meta:
          verbose_name = 'Daily Aggregate Data Point'
          unique_together = ('site','date')
+
+    def __str__(self):
+        return " sitename:%s pv_yield:%s power_used:%s ... " % (self.site.site_name,
+                                                            self.daily_pv_yield,
+                                                            self.daily_power_cons_pv
+                                                            )
+
 
 
 
