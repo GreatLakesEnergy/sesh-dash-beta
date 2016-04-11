@@ -99,15 +99,12 @@ class Influx:
                     data_point["time"] = timestamp
                     # Cast everything not string to Float
                     data_point["fields"] = {"value" : float(measurement_dict[key])}
+                    logging.debug("INFLUX prepping data point %s"%(data_point))
+                    # Get the data point array ready.
+                    data_point_list.append(data_point)
                except Exception,e:
-                    logging.warning("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
-                    print "skiping point"
-                    # Ditch the whole data point if unable to cast
-                    data_point = {}
+                    logging.debug("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
 
-               logging.debug("INFLUX prepping data point %s"%(data_point))
-               # Get the data point array ready.
-               data_point_list.append(data_point)
         try:
                 # Send the data list
                 logging.debug("INFLUX sending %s"%data_point_list)

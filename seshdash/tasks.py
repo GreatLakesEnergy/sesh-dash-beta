@@ -156,7 +156,7 @@ def get_historical_BoM(site_pk,start_at):
                 try:
                     with transaction.atomic():
                         data_point.save()
-                    send_to_influx(data_point, site, date, to_exclude=['time','inverter_state'],client=i)
+                    send_to_influx(data_point, site, date, to_exclude=['time','inverter_state','id'],client=i)
                     count = count +1
                     #print "saved %s BoM data points"%count
                     logging.debug("saved %s BoM data points"%count)
