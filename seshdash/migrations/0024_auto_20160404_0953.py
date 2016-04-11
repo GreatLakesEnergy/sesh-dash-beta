@@ -17,11 +17,6 @@ class Migration(migrations.Migration):
             name='sesh_rmc_account',
             options={'verbose_name': 'RMC API Account'},
         ),
-        migrations.RenameField(
-            model_name='sesh_site',
-            old_name='Number_of_panels',
-            new_name='number_of_panels',
-        ),
         migrations.AddField(
             model_name='sesh_site',
             name='updating',
