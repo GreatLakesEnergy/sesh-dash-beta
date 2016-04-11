@@ -13,7 +13,7 @@ from django.forms import modelformset_factory, inlineformset_factory, formset_fa
 from django.contrib.auth.models import User
 from django import forms
 
-#Import Models and Forms
+#Import Models import_datas
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account
 from django.db.models import Avg
 from django.db.models import Sum
@@ -57,7 +57,7 @@ def index(request,site_id=0):
 
     if not site_id:
         #return first site user has action
-        print "no side id recieved"
+        print "no site id recieved"
         site_id = sites[0].pk
     #Check if user has any sites under their permission
     context_dict, content_json = get_user_data(request.user,site_id,sites)
@@ -140,7 +140,7 @@ def import_site(request):
 
                     context_dict['message'] = "success"
                     #do a psuedo save first we need to modify a field later
-                    form.save(commit=False)
+                    form = form.save(commit=False)
                     #now get user sites
                     context_dict['form_type'] = "vrm"
                     context_dict['site_list'] = site_list
@@ -162,12 +162,13 @@ def import_site(request):
                                             }
                         pre_pop_data.append(site_model_form)
 
-                    site_forms_factory = modelformset_factory(Sesh_Site,
+                    site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,
                             extra=len(site_list['sites']),form=SiteForm,
-                            exclude=('vrm_account','rmc_account','updating'),
+                            exclude=('vrm_account','rmc_account'),
                             can_delete= False)
 
-                    context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data )
+                    context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data,
+                                                                    instance=VRM)
             else:
                 # if RMC site
                 # Handle RMC account info
@@ -193,8 +194,8 @@ def _download_data(request):
 
     sites = _get_user_sites(request)
     for site in sites:
-        if site.updating:
-            get_historical_BoM.delay(site, time_utils.get_epoch_from_datetime(site.comission_date))
+        if site.import_data:
+            get_historical_BoM.delay(site.pk, time_utils.get_epoch_from_datetime(site.comission_date))
 
 def _aggregate_imported_data(sites):
     for site in sites:
@@ -205,7 +206,7 @@ def _validate_form(form,context_dict):
     Validate forms basedo no form input
     """
     if form.is_valid():
-        form.save(commit=False)
+        form = form.save(commit=False)
         context_dict['error'] =  False
 
     else:
@@ -243,24 +244,17 @@ def handle_create_site(request):
             form = _create_site_vrm(request)
             context_dict['form'] = form
 
-    context_dict, form = _validate_form(form,context_dict)
+    context_dict, valid_form = _validate_form(form,context_dict)
+    print valid_form
     # Handle Form Errors
     if context_dict['error']:
         # Got Error return problem!
         # Delete VRM or RmC Account if this fails
         return render(request,'seshdash/initial-login.html',context_dict)
 
-    # if VRM for data needs to be downloaded handle here
-    else:
-        if context_dict['form_type'] == 'vrm':
-            for f in form:
-                if f.get('import_data'):
-                    f.updating = True
-                    _download_data()
-
-    #finally
-    form.save()
-
+    for site in valid_form:
+        site.save()
+    _download_data(request)
     return index(request)
 
 
@@ -270,7 +264,7 @@ def _create_site_rmc(request):
     """
     rmc = Sesh_RMC_Account(API_KEY=rmc_tools.generate_rmc_api_key())
     rmc.save()
-    site_forms_factory = inlineformset_factory(Sesh_RMC_Account,Sesh_Site,form=SiteForm,exclude=('delete',))
+    site_forms_factory = inlineformset_factory(Sesh_RMC_Account, Sesh_Site, form=SiteRMCForm,exclude=('delete',))
     # Create RMC account associated with it
     form = site_forms_factory(request.POST, instance=rmc)
     return form
@@ -280,9 +274,13 @@ def _create_site_vrm(request):
     """
     Create the sites imported from VRM account
     """
+    #TODO Bug allert!!  more than one VRM account will cause problem
     VRM = VRM_Account.objects.first()
-    site_forms_factory = modelformset_factory(Sesh_Site,exclude=('delete',))
-    form = site_forms_factory(request.POST)
+    site_forms_factory = inlineformset_factory(VRM_Account,
+            Sesh_Site,
+            form=SiteForm,
+            exclude=('delete',))
+    form = site_forms_factory(request.POST, instance=VRM)
     return form
 
 def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):

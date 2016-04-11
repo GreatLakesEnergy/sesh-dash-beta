@@ -33,7 +33,7 @@ class Sesh_RMC_Account(models.Model):
     API_KEY = models.CharField(max_length=130,default="")
 
     def __str__(self):
-        return API_KEY
+        return self.API_KEY
 
     class Meta:
         verbose_name = "RMC API Account"
@@ -55,7 +55,7 @@ class Sesh_Site(models.Model):
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
-    updating = models.BooleanField(default=False)
+    import_data = models.BooleanField(default=False)
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField(default=False)
     has_grid = models.BooleanField(default=False)

@@ -126,17 +126,19 @@ def _check_data_pont(data_point_arr):
     return filter(lambda x: x==True, map(lambda x: data_point_arr[x].strip()=='',data_point_arr))
 
 @shared_task
-def get_historical_BoM(site,start_at):
+def get_historical_BoM(site_pk,start_at):
         """
         Get Historical Data from VRM to backfill any days
         """
         i = Influx()
         count = 0
+        site = Sesh_Site.objects.get(pk=site_pk)
         site_id = site.vrm_site_id
         vh_client = VictronHistoricalAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
         #site_id is a tuple
         #print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
         data = vh_client.get_data(site_id,start_at)
+        logging.debug("Importing data for site:%s"%site)
         for row in data:
                 data_point = BoM_Data_Point(
                 site = site,

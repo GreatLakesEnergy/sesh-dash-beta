@@ -5,10 +5,10 @@ from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account
 class SiteForm(ModelForm):
     error_css_class = "warning"
     required_css_class = "info"
-    import_data = forms.BooleanField(required=False)
+
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','updating')
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
@@ -19,7 +19,7 @@ class SiteRMCForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','updating')
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','import_data')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
