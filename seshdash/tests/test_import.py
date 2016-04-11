@@ -73,7 +73,7 @@ class VRM_Import_TestCase(TestCase):
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
         with transaction.atomic():
-            self.items_recieved = get_historical_BoM(self.site, time_utils.get_epoch_from_datetime(self.site.comission_date))
+            self.items_recieved = get_historical_BoM(self.site.pk, time_utils.get_epoch_from_datetime(self.site.comission_date))
 
 
     def tearDown(self):
