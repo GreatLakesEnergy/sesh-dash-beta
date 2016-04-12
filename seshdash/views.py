@@ -272,7 +272,7 @@ def _create_site_rmc(request):
     """
     Create site for RMC account
     """
-    rmc = Sesh_RMC_Account(API_KEY=rmc_tools.generate_rmc_api_key())
+    rmc = Sesh_RMC_Account(api_key=rmc_tools.generate_rmc_api_key())
     rmc.save()
     site_forms_factory = inlineformset_factory(Sesh_RMC_Account, Sesh_Site, form=SiteRMCForm,exclude=('delete',))
     # Create RMC account associated with it
