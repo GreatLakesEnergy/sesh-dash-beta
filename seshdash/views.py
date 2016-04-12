@@ -36,8 +36,8 @@ from rest_framework import generics, permissions
 from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
 from seshdash.api.victron import VictronAPI
 
-# celery
-from seshdash.tasks import get_historical_BoM
+# celery tasks
+from seshdash.tasks import get_historical_BoM, generate_auto_rules
 
 #generics
 import logging
@@ -255,8 +255,16 @@ def handle_create_site(request):
         return render(request,'seshdash/initial-login.html',context_dict)
 
     for site in valid_form:
+        # Initiate standard alarms
+        generate_auto_rules(site.pk)
+
+        # Finally
         site.save()
+
+    # Initiate download if requred
     _download_data(request)
+
+
     return index(request)
 
 

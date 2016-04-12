@@ -147,10 +147,10 @@ class Sesh_Alert(models.Model):
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
-                
+
         # TODO make this print useful information
        return str(self.alert)
-  
+
     # class Meta:
     #    verbose_name = 'System Alert'
     #    verbose_name_plural = 'System Alerts'
