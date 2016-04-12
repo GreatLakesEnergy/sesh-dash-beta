@@ -36,8 +36,8 @@ from rest_framework import generics, permissions
 from seshdash.serializers import BoM_Data_PointSerializer, UserSerializer
 from seshdash.api.victron import VictronAPI
 
-# celery
-from seshdash.tasks import get_historical_BoM
+# celery tasks
+from seshdash.tasks import get_historical_BoM, generate_auto_rules
 
 #generics
 import logging
@@ -255,8 +255,16 @@ def handle_create_site(request):
         return render(request,'seshdash/initial-login.html',context_dict)
 
     for site in valid_form:
+        # Initiate standard alarms
+        generate_auto_rules(site.pk)
+
+        # Finally
         site.save()
+
+    # Initiate download if requred
     _download_data(request)
+
+
     return index(request)
 
 
@@ -264,7 +272,7 @@ def _create_site_rmc(request):
     """
     Create site for RMC account
     """
-    rmc = Sesh_RMC_Account(API_KEY=rmc_tools.generate_rmc_api_key())
+    rmc = Sesh_RMC_Account(api_key=rmc_tools.generate_rmc_api_key())
     rmc.save()
     site_forms_factory = inlineformset_factory(Sesh_RMC_Account, Sesh_Site, form=SiteRMCForm,exclude=('delete',))
     # Create RMC account associated with it

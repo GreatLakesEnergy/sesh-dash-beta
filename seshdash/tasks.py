@@ -56,6 +56,47 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
         message = "Error sending to influx with exception %s"%e
         handle_task_failure(message= message,exception=e,data=model_data)
 
+def generate_auto_rules(site_id):
+    """
+    Generate standard rules when a siteis created
+    """
+    site = Sesh_Site.objects.get(pk=site_id)
+
+    send_sms = False
+    send_mail = True
+
+    # Create battery low voltage alarm
+    lv_alarm = Alert_Rule(site =site,
+                        check_field = 'BoM_Data_Point#battery_voltage',
+                        value = site.system_voltage,
+                        operator = 'lt',
+                        send_sms = send_sms,
+                        send_mail = send_mail
+            )
+
+    # Create battery low voltage alarm
+    soc_alarm = Alert_Rule(site =site,
+                        check_field = 'BoM_Data_Point#soc',
+                        value = 20,
+                        operator = 'lt',
+                        send_sms = send_sms,
+                        send_mail = send_mail
+            )
+    # Create communication alarm
+    com_alarm = Alert_Rule(site =site,
+                        check_field = 'RMC_status#minutes_last_contact',
+                        value = 60,
+                        operator = 'gt',
+                        send_sms = send_sms,
+                        send_mail = send_mail
+            )
+
+    lv_alarm.save()
+    com_alarm.save()
+    soc_alarm.save()
+
+    logging.debug("Added low voltage, soc, and comm alert for site %s"%site)
+
 
 @shared_task
 def get_BOM_data():

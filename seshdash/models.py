@@ -30,10 +30,22 @@ class Sesh_RMC_Account(models.Model):
     API key used by SESH EMON node to communicate
     """
     #site = models.ForeignKey(Sesh_Site)
-    API_KEY = models.CharField(max_length=130,default="")
+    api_key = models.CharField(max_length=130,default="")
+    api_key_numeric = models.CharField(max_length=130, default="")
 
     def __str__(self):
-        return self.API_KEY
+        return "alphanum:%s numeric:%s "%(self.api_key,self.api_key_numeric)
+
+    def save(self, **kwargs):
+        """
+        Generate numeric version of api key
+        """
+        numeric_key = ""
+        for l in self.api_key:
+            numeric_key = numeric_key + str(ord(l));
+        self.api_key_numeric = numeric_key[:len(self.api_key)]
+
+        super(Sesh_RMC_Account,self).save(**kwargs)
 
     class Meta:
         verbose_name = "RMC API Account"
@@ -147,10 +159,10 @@ class Sesh_Alert(models.Model):
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
-                
+
         # TODO make this print useful information
        return str(self.alert)
-  
+
     # class Meta:
     #    verbose_name = 'System Alert'
     #    verbose_name_plural = 'System Alerts'
