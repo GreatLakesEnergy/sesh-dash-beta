@@ -30,8 +30,22 @@ class Sesh_RMC_Account(models.Model):
     API key used by SESH EMON node to communicate
     """
     #site = models.ForeignKey(Sesh_Site)
-    API_KEY = models.CharField(max_length=130,default="")
+    api_key = models.CharField(max_length=130,default="")
+    api_key_numeric = models.CharField(max_length=130, default="")
 
+    def __str__(self):
+        return "alphanum:%s numeric:%s "%(self.api_key,self.api_key_numeric)
+
+    def save(self, **kwargs):
+        """
+        Generate numeric version of api key
+        """
+        numeric_key = ""
+        for l in self.api_key:
+            numeric_key = numeric_key + str(ord(l));
+        self.api_key_numeric = numeric_key[:len(self.api_key)]
+
+        super(Sesh_RMC_Account,self).save(**kwargs)
 
     class Meta:
         verbose_name = "RMC API Account"
@@ -70,10 +84,10 @@ class Sesh_Site(models.Model):
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
-
+    import_data = models.BooleanField(default=False)
     battery_bank_capacity = models.IntegerField()
-    has_genset = models.BooleanField()
-    has_grid = models.BooleanField()
+    has_genset = models.BooleanField(default=False)
+    has_grid = models.BooleanField(default=False)
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
@@ -145,10 +159,10 @@ class Sesh_Alert(models.Model):
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
-                
+
         # TODO make this print useful information
        return str(self.alert)
-  
+
     # class Meta:
     #    verbose_name = 'System Alert'
     #    verbose_name_plural = 'System Alerts'
@@ -246,6 +260,13 @@ class Daily_Data_Point(models.Model):
     class Meta:
          verbose_name = 'Daily Aggregate Data Point'
          unique_together = ('site','date')
+
+    def __str__(self):
+        return " sitename:%s pv_yield:%s power_used:%s ... " % (self.site.site_name,
+                                                            self.daily_pv_yield,
+                                                            self.daily_power_cons_pv
+                                                            )
+
 
 
 

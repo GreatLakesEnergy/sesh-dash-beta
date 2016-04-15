@@ -15,9 +15,9 @@ def get_epoch():
     return diff_int
 
 def get_yesterday():
-    now = datetime.now()
+    now = datetime.date(datetime.now())
     one_day = timedelta(days=1)
-    return now-one_day
+    return now - one_day
 
 
 def get_time_interval_array(interval,interval_type,start,end,tz=None):

@@ -55,7 +55,7 @@ config = RawConfigParser(
                'FROM_EMAIL':'some_email@gmail.com',
                'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
-               'TOKEN':'',
+               'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':''
                }
         )
@@ -71,10 +71,18 @@ SECRET_KEY = config.get('system','SECRET_KEY')
 # security warning: don't run with debug turned on in production!
 DEBUG = config.get('system','DEV_MODE')
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
+
+# Temp folder for misc files
+
+try:
+    TEMP_FOLDER = config.get('system','temp_folder')
+except:
+    TEMP_FOLDER = "/tmp/"
 
 # sms API key
 CLICKATELL_KEY = config.get('api','clickatell_key')
@@ -120,19 +128,23 @@ CELERYBEAT_SCHEDULE = {
     },
     'get_aggregate_daily_data': {
         'task': 'seshdash.tasks.get_aggregate_daily_data',
-        'schedule': timedelta(days=1),
+        'schedule': crontab(hour=0, minute=0),
         'args': None,
     },
     'get_send_reports': {
         'task': 'seshdash.tasks.send_reports',
-        'schedule': timedelta(days=1),
-        'args': None,
+        'schedule': crontab(hour=0, minute=30, day_of_week=6),
+        'args': 'week',
+    },
+    'get_send_reports': {
+        'task': 'seshdash.tasks.send_reports',
+        'schedule': crontab(hour=0, minute=30),
+        'args': 'day',
     },
 }
 #authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
-
 #mail
 EMAIL_USE_TLS = True
 EMAIL_HOST = config.get('mail','EMAIL_HOST')
@@ -142,6 +154,7 @@ EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #email_templates_dir = os.path.join(template_dir,'email')
 FROM_EMAIL = config.get('mail','FROM_EMAIL')
+
 
 LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
 
@@ -208,6 +221,7 @@ LOGGING = {
         '''
 # Error reporting
 if not DEBUG:
+     print "rollbar disabled"
      ROLLBAR = {
              'access_token': config.get('rollbar','token'),
              'environment': 'development' if DEBUG else 'production',
@@ -235,6 +249,7 @@ INSTALLED_APPS = (
     'geoposition',
     'djcelery',
     'django_extensions',
+
 )
 
 #BOWER
@@ -253,6 +268,7 @@ BOWER_INSTALLED_APPS = (
             'react',
             'babel',
             'calendar-heatmap',
+            'nanobar',
             )
 
 ANONYMOUS_USER_ID = -1
@@ -271,8 +287,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'rollbar.contrib.django.middleware.RollbarNotifierMiddleware'
 )
+
+if not DEBUG:
+    MIDDLEWARE_CLASSES.append('rollbar.contrib.django.middleware.RollbarNotifierMiddleware')
 
 ROOT_URLCONF = 'sesh.urls'
 
