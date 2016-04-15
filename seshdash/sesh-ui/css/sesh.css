@@ -21,3 +21,33 @@ tr.modal-toggle {
 .alert-data-point-info h1,h2,h3,h4,h5,h6 {
  text-align: center;
 }
+
+
+.chart-data-container {
+ width: 85%;
+ margin: auto;
+}
+
+.chart-container {
+ text-align: center;
+}
+
+.chart-container svg {
+ height: 200px;
+}
+
+
+.chart-data-container .panel-footer {
+ padding: 0;
+}
+
+.hist-extra-info {
+ text-align: center;
+ 
+}
+
+
+.hist-extra-info .extra-info-entity {
+ border-right: 1px solid #e3e3e3;
+ padding: 20px 0;
+}

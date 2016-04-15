@@ -55,8 +55,6 @@ var alertsJsonData = {csrfmiddlewaretoken: csrftoken,
                       site_id: active_site_id,
                      };
 
-getLatestAlerts();
-
 function getLatestAlerts () {
     $.post('/get-alerts', alertsJsonData,function(data) {
         console.log(data);
@@ -135,4 +133,3 @@ function getLatestBoMData(){
     setTimeout(getLatestBoMData, REFRESH_TIME);
 };
 
-getLatestBoMData();
