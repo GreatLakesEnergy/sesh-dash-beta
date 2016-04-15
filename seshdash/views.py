@@ -255,15 +255,14 @@ def handle_create_site(request):
         return render(request,'seshdash/initial-login.html',context_dict)
 
     for site in valid_form:
-        # Initiate standard alarms
-        generate_auto_rules(site.pk)
-
         # Finally
         site.save()
 
+        # Initiate standard alarms
+        generate_auto_rules(site.pk)
+
     # Initiate download if requred
     _download_data(request)
-
 
     return index(request)
 
