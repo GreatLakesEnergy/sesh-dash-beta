@@ -178,42 +178,48 @@ def get_historical_BoM(site_pk,start_at):
         data = vh_client.get_data(site_id,start_at)
         logging.debug("Importing data for site:%s"%site)
         for row in data:
+            try:
                 data_point = BoM_Data_Point(
-                site = site,
-                time = row['Date Time'], #TODO make sure this datetime aware
-                soc = row['Battery State of Charge (System)'],
-                battery_voltage = row['Battery voltage'],
-                AC_input = row['Input power 1'],
-                AC_output =  row['Output power 1'],
-                AC_Load_in =  row['Input current phase 1'],
-                AC_Load_out =  row['Output current phase 1'],
-                inverter_state = row['VE.Bus Error'],
-                pv_production = row['PV - AC-coupled on input L1'], # IF null need to put in 0
-                #TODO these need to be activated
-                genset_state =  0,
-                relay_state = 0,
-                )
+                    site = site,
+                    time = row['Date Time'], #TODO make sure this datetime aware
+                    soc = row['Battery State of Charge (System)'],
+                    battery_voltage = row['Battery voltage'],
+                    AC_input = row['Input power 1'],
+                    AC_output =  row['Output power 1'],
+                    AC_Load_in =  row['Input current phase 1'],
+                    AC_Load_out =  row['Output current phase 1'],
+                    inverter_state = row['VE.Bus Error'],
+                    pv_production = row['PV - AC-coupled on input L1'], # IF null need to put in 0
+                    #TODO these need to be activated
+                    genset_state =  0,
+                    relay_state = 0,
+                    )
                 date =  row['Date Time']
-                try:
-                    with transaction.atomic():
-                        data_point.save()
-                    send_to_influx(data_point, site, date, to_exclude=['time','inverter_state','id'],client=i)
-                    count = count +1
-                    #print "saved %s BoM data points"%count
-                    logging.debug("saved %s BoM data points"%count)
-                except IntegrityError, e:
+
+                with transaction.atomic():
+                    data_point.save()
+                send_to_influx(data_point, site, date, to_exclude=['time','inverter_state','id'],client=i)
+
+                count = count +1
+                if count % 100:
+                    logging.debug("imported  %s points"%count)
+                #print "saved %s BoM data points"%count
+            except IntegrityError, e:
                     logging.warning("data point already exist %s"%e)
                     pass
-                except ValueError,e:
+            except ValueError,e:
                     logging.warning("Invalid values in data point dropping  %s"%(e))
                     pass
-                except Exception,e:
+            except Exception,e:
                     message = "error with creating data point  data exception %s"%(e)
+                    logging.debug(message)
                     logging.exception( message )
                     handle_task_failure(message = message)
                     pass
+
+        logging.debug("saved %s BoM data points"%count)
         # Clean up
-        site.upddating = False
+        site.import_data  = False
         site.save()
         vh_client.flush()
 

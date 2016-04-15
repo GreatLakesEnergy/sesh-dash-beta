@@ -186,9 +186,6 @@ class RMC_status(models.Model):
 
 
 
-
-
-
 """
 Data point for PV production at a site from pv panels.
 Currently comes form enphase
