@@ -18,11 +18,14 @@ def get_random_binary():
 def get_random_interval(cieling,floor):
     return uniform(cieling,floor)
 
-def generate_date_array(naive=False):
+def generate_date_array(start=None,naive=False):
     now = timezone.now()
     if naive:
         now = datetime.now()
-    start = now - timedelta(hours=24)
+    
+    if not start:
+        start = now - timedelta(hours=24)
+
     time_arr = get_time_interval_array(5,"minutes",start,now)
     return time_arr
 

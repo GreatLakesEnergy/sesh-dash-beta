@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django import forms
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point
 from django.db.models import Avg
 from django.db.models import Sum
 from seshdash.forms import SiteForm, VRMForm, RMCForm
@@ -569,12 +569,38 @@ def get_latest_bom_data(request):
 
 
 def historical_data(request):
-    sites = Sesh_Site.objects.all()
-    active_site = sites[0]
-    sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
-    sites = serialize_objects(sites)
-    context_dict = {}
-    context_dict['sites_json'] = sites
-    context_dict['site_id'] = 0
-    context_dict['active_site'] = active_site
-    return render(request, 'seshdash/historical-data.html', context_dict);
+    
+    # If ajax request
+    if request.method == 'POST':
+        sites = Sesh_Site.objects.all();
+        historical_points = Daily_Data_Point.objects.all()
+  
+        historical_data = [];
+        
+        # For each site get Points
+        for site in sites:
+            historical_points = Daily_Data_Point.objects.filter(site=site.id)
+            site_historical_data = []   
+           
+            # For point get neccessary Data
+            for point in historical_points:
+                site_historical_data.append({
+                "date": time_utils.get_date_dashed(point.date),
+                "count": point.daily_pv_yield
+            })
+          
+            historical_data.append({"site_id":site.id, "site_name":site.site_name, "site_historical_data": site_historical_data})
+            
+        return HttpResponse(json.dumps(historical_data))
+   
+    # On page load
+    else:
+        sites = Sesh_Site.objects.all()
+        active_site = sites[0]
+        sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
+        sites = serialize_objects(sites)
+        context_dict = {}
+        context_dict['sites_json'] = sites
+        context_dict['site_id'] = 0
+        context_dict['active_site'] = active_site
+        return render(request, 'seshdash/historical-data.html', context_dict);
