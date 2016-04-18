@@ -141,6 +141,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=30),
         'args': 'day',
     },
+    'alert_checker': {
+        'task': 'seshdash.tasks.send_reports',
+        'schedule': timedelta(minutes=5),
+        'args': 'day',
+    },
 }
 #authentication
 LOGIN_REDIRECT_URL = '/'
