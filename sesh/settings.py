@@ -142,10 +142,14 @@ CELERYBEAT_SCHEDULE = {
         'args': 'day',
     },
     'alert_checker': {
-        'task': 'seshdash.tasks.send_reports',
+        'task': 'seshdash.tasks.alert_engine',
         'schedule': timedelta(minutes=5),
-        'args': 'day',
-    },
+        'args': '',
+     'alert_checker': {
+        'task': 'seshdash.tasks.rmc_status_update',
+        'schedule': timedelta(minutes=5),
+        'args': '',
+    },   },
 }
 #authentication
 LOGIN_REDIRECT_URL = '/'

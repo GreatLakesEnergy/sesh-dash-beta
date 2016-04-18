@@ -7,7 +7,7 @@ from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_D
 from django.contrib.auth.models import User
 
 # Tasks
-from seshdash.tasks import generate_auto_rules
+from seshdash.tasks import generate_auto_rules, rmc_status_update
 
 # Django
 from guardian.shortcuts import assign_perm
@@ -15,7 +15,7 @@ from geoposition import Geoposition
 from django.conf import settings
 
 # Utils
-from datetime import datetime
+from datetime import datetimea,timedelta
 from seshdash.utils import alert
 from django.utils import timezone
 
@@ -42,12 +42,25 @@ class RMCTestCase(TestCase):
         #create sesh rmc account
         self.test_rmc_account = Sesh_RMC_Account.objects.create(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
 
-    @override_settings(DEBUG=True)
-    def test_api_key_generation(self):
-        """ test api key generation  working correctly"""
-        rmc_acc = Sesh_RMC_Account.objects.first()
+        self.data_point = Data_Point.objects.create(site=self.site,
+                                                    soc=10,
+                                                    battery_voltage=20,
+                                                    time=timezone.now()-timdelta(minutes=10),
+                                                    AC_input=0.0,
+                                                    AC_output=15.0,
+                                                    AC_Load_in=0.0,
+                                                    AC_Load_out=-0.7)
 
-        self.assertNotEqual(rmc_acc.api_key_numeric, None)
-        print rmc_acc
+    def test_status_generation(self):
+        """ test api key generation  working correctly"""
+        rmc_status_update()
+        rmc_stats = RMC_status.objects.all()
+        # Check taht an RMC status was created
+        self.assertEqual(len(RMC_status), 1)
+        # Check that is has a None NULL value for minutes_last_contact
+        rmc_stat = rmc_stats.pop()
+        self.assertEqual(rmc_stat.minutes_last_contact, 10)
+
+
 
 

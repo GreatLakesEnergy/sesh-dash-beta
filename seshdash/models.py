@@ -8,7 +8,6 @@ from rest_framework.authtoken.models import Token
 from django.contrib import admin
 from geoposition.fields import GeopositionField
 from django.utils import timezone
-from django.utils import timedelta
 
 from django.core.exceptions import ValidationError
 
@@ -165,7 +164,7 @@ class Sesh_Alert(models.Model):
         # TODO make this print useful information
        return str(self.alert)
 
-     class Meta:
+    class Meta:
         verbose_name = 'System Alert'
         verbose_name_plural = 'System Alerts'
 
@@ -176,10 +175,10 @@ class RMC_status(models.Model):
     """
     rmc = models.ForeignKey(Sesh_RMC_Account, blank=True, null=True)
     site = models.ForeignKey(Sesh_Site, blank=True, null=True)
-    ip_address = models.GenericIPAddressField(default=None)
+    ip_address = models.GenericIPAddressField(default=None, null=True)
     minutes_last_contact = models.IntegerField(default=None)
-    signal_strength = models.IntegerField(default=None)
-    data_sent_24h = models.IntegerField(default=None)
+    signal_strength = models.IntegerField(default=None, null=True)
+    data_sent_24h = models.IntegerField(default=None, null=True)
     time = models.DateTimeField()
     target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
 
