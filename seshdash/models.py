@@ -77,7 +77,7 @@ class Sesh_Site(models.Model):
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
-    position = GeopositionField(blank=True)
+    position = GeopositionField()
     installed_kw = models.FloatField()
     system_voltage = models.IntegerField()
     number_of_panels = models.IntegerField()
