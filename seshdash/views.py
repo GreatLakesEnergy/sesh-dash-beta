@@ -619,28 +619,27 @@ def get_latest_bom_data(request):
 
 
 def historical_data(request):
-    
-    # If ajax request
-    if request.method == 'POST':
-        sites = Sesh_Site.objects.all();
-        historical_points = Daily_Data_Point.objects.all()
-  
-        historical_data = [];
-        
-        # For each site get Points
-        for site in sites:
-            historical_points = Daily_Data_Point.objects.filter(site=site.id)
-            site_historical_data = []   
-           
-            # For point get neccessary Data
-            for point in historical_points:
-                site_historical_data.append({
-                "date": time_utils.get_date_dashed(point.date),
-                "count": point.daily_pv_yield
-            })
+    sites = Sesh_Site.objects.all();
+    historical_points = Daily_Data_Point.objects.all()
+       
+    historical_data = [];
+       
+    # For each site get Points
+    for site in sites:
+       historical_points = Daily_Data_Point.objects.filter(site=site.id)
+       site_historical_data = []   
           
-            historical_data.append({"site_id":site.id, "site_name":site.site_name, "site_historical_data": site_historical_data})
-            
+        # For point get neccessary Data
+       for point in historical_points:
+           site_historical_data.append({
+               "date": time_utils.get_date_dashed(point.date),
+               "count": point.daily_pv_yield
+           })
+          
+       historical_data.append({"site_id":site.id, "site_name":site.site_name, "site_historical_data": site_historical_data}) 
+   
+    # If ajax request
+    if request.method == 'POST':       
         return HttpResponse(json.dumps(historical_data))
    
     # On page load
@@ -653,4 +652,5 @@ def historical_data(request):
         context_dict['sites_json'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
+        context_dict['historical_data'] = historical_data
         return render(request, 'seshdash/historical-data.html', context_dict);

@@ -4,6 +4,7 @@
 
 
 {% block main_content %}
+     
     <div id="page-wrapper">
         <div class="row">
             <div class="col-lg-12">
@@ -20,6 +21,12 @@
    
 
        <div class="chart-data-container">
+           <div class="historical-loader"> 
+               <div class="spinner">
+                   <div class="double-bounce1"></div>
+                   <div class="double-bounce2"></div>
+               </div>
+           </div>
            
            <!--
            <div class="panel panel-default ">
@@ -55,7 +62,7 @@
 {# Preventing sesh main dash js from running #}
 {% block seshjs %}
 
-    <script src='{% static 'sesh-ui/js/historical.js' %}'> </script>
+     <script src='{% static 'sesh-ui/js/historical.js' %}'> </script>
 
 {% endblock %}
 

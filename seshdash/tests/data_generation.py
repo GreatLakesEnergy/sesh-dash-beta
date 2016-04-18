@@ -7,6 +7,10 @@ from seshdash.utils.time_utils import get_time_interval_array
 
 def get_random_int():
     val =  random() * 100
+    return int(val)
+
+def get_random_float():
+    val = random() * 100
     return val
 
 def get_random_binary():
@@ -18,7 +22,7 @@ def get_random_binary():
 def get_random_interval(cieling,floor):
     return uniform(cieling,floor)
 
-def generate_date_array(start=None,naive=False):
+def generate_date_array(start=None,naive=False,interval=5, units='minutes'):
     now = timezone.now()
     if naive:
         now = datetime.now()
@@ -26,7 +30,7 @@ def generate_date_array(start=None,naive=False):
     if not start:
         start = now - timedelta(hours=24)
 
-    time_arr = get_time_interval_array(5,"minutes",start,now)
+    time_arr = get_time_interval_array(interval, units,start,now)
     return time_arr
 
 
