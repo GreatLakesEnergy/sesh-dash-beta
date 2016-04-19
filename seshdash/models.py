@@ -242,8 +242,20 @@ class BoM_Data_Point(models.Model):
 
 class Daily_Data_Point(models.Model):
     """
-    Daily aggregate of data points
+    Daily aggregate of data points    
     """
+
+    UNITS_DICTIONARY = {
+        "daily_battery_charge": "",
+        "daily_grid_outage_n": "minute",
+        "daily_grid_outage_t": "",
+        "daily_grid_usage": "",
+        "daily_no_of_alerts": "alert",
+        "daily_power_cons_pv": "",
+        "daily_power_consumption_total": "",
+        "daily_pv_yield": "Sample Unit",
+    }
+
 
     site = models.ForeignKey(Sesh_Site)
     daily_pv_yield = models.FloatField(default=0) # Aggregate pv produced that day Kwh

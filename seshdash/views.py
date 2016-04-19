@@ -618,7 +618,7 @@ def get_latest_bom_data(request):
     return HttpResponse(json.dumps(latest_bom_data))
 
 
-
+@login_required
 def historical_data(request):
     
     # If ajax request
@@ -629,12 +629,10 @@ def historical_data(request):
    
     # On page load
     else:
-        sites = Sesh_Site.objects.all()
-        active_site = sites[0]
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
-        sites = serialize_objects(sites)
+        active_site = sites[0]
         context_dict = {}
-        context_dict['sites_json'] = sites
+        context_dict['sites'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
         return render(request, 'seshdash/historical-data.html', context_dict);
@@ -657,11 +655,12 @@ def get_alerts_for_year(site):
 def get_avg_field_year(site, field):
     """ Returns the average of a field for a year range in Daily Data Point"""
     avg_field_yield = Daily_Data_Point.objects.filter(site=site)[:365].aggregate(Avg(field)).values()[0]
-    print "The average pv yield is: ",
-    print avg_field_yield
     return avg_field_yield
 
 def get_historical_dict(column='daily_pv_yield'):
+    unit = Daily_Data_Point.UNITS_DICTIONARY[column]
+    print "The unit is: ",
+    print unit
     sites = Sesh_Site.objects.all();
     historical_points = Daily_Data_Point.objects.all()
        
@@ -684,12 +683,10 @@ def get_historical_dict(column='daily_pv_yield'):
                                "site_id":site.id,
                                "site_name":site.site_name,
                                "site_historical_data": site_historical_data,
+                               "data_unit": unit,
                                "number_of_alerts": get_alerts_for_year(site),
                                "average_pv_yield": get_avg_field_year(site, 'daily_pv_yield'),
                                "average_power_consumption_total": get_avg_field_year(site, 'daily_power_consumption_total')
                     })
-    print "Using column " + column
-    print "values ",
-    print historical_data[0]['site_historical_data'][0]['count']
     return historical_data
 
