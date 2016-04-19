@@ -50,4 +50,3 @@ class RMCTestCase(TestCase):
         self.assertNotEqual(rmc_acc.api_key_numeric, None)
         print rmc_acc
 
-

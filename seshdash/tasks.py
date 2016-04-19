@@ -8,7 +8,7 @@ from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status
 
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
@@ -529,6 +529,22 @@ def send_reports(duration="week"):
                              state = states.FAILURE,
                              meta = 'Something went wrong creating report  check logs'
                              )
+@shared_task
+def rmc_status_update():
+    """
+    Calculate BoM_Data_Point related RMC Status. RMC based status are calculated by kraken
+    """
+    sites = Sesh_Site.objects.all()
+    for site in sites:
+        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('time').first()
+        last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+        tn = timezone.now()
+        last_contact_min = last_contact / 60
+        rmc_status = RMC_status(site = site,
+                                minutes_last_contact = last_contact_min,
+                                time = tn)
+        rmc_status.save()
+
 
 @shared_task
 def alert_engine():
@@ -537,5 +553,8 @@ def alert_engine():
     # TODO check for the latest 10 alerts
     for site in sites:
         alert_check(site)
+
+
+
 
 
