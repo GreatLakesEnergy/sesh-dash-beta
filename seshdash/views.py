@@ -29,6 +29,7 @@ from seshdash.utils.time_utils import get_timesince
 from seshdash.utils.model_tools import get_model_first_reference
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
+from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
 
 # Import for API
@@ -619,27 +620,11 @@ def get_latest_bom_data(request):
 
 
 def historical_data(request):
-    sites = Sesh_Site.objects.all();
-    historical_points = Daily_Data_Point.objects.all()
-       
-    historical_data = [];
-       
-    # For each site get Points
-    for site in sites:
-       historical_points = Daily_Data_Point.objects.filter(site=site.id)
-       site_historical_data = []   
-          
-        # For point get neccessary Data
-       for point in historical_points:
-           site_historical_data.append({
-               "date": time_utils.get_date_dashed(point.date),
-               "count": point.daily_pv_yield
-           })
-          
-       historical_data.append({"site_id":site.id, "site_name":site.site_name, "site_historical_data": site_historical_data}) 
-   
+    
     # If ajax request
-    if request.method == 'POST':       
+    if request.method == 'POST': 
+        sort_value = request.POST.get('sort_value', '')
+        historical_data = get_historical_dict(column=sort_value)
         return HttpResponse(json.dumps(historical_data))
    
     # On page load
@@ -652,5 +637,59 @@ def historical_data(request):
         context_dict['sites_json'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
-        context_dict['historical_data'] = historical_data
         return render(request, 'seshdash/historical-data.html', context_dict);
+
+
+def get_alerts_for_year(site):
+    """ Returns a json object containing the number of alerts for a year range """
+ 
+    # NOTE: When using datetime object date_range does not include the last date
+    now = datetime.datetime.now()
+    year_before = now - relativedelta(years=1)
+    number_of_alerts = Sesh_Alert.objects.filter(date__range=[
+                                                             time_utils.get_date_dashed(year_before),\
+							     time_utils.get_date_dashed(now)], site=site ).count()
+
+
+    
+    return number_of_alerts;
+ 
+def get_avg_field_year(site, field):
+    """ Returns the average of a field for a year range in Daily Data Point"""
+    avg_field_yield = Daily_Data_Point.objects.filter(site=site)[:365].aggregate(Avg(field)).values()[0]
+    print "The average pv yield is: ",
+    print avg_field_yield
+    return avg_field_yield
+
+def get_historical_dict(column='daily_pv_yield'):
+    sites = Sesh_Site.objects.all();
+    historical_points = Daily_Data_Point.objects.all()
+       
+    historical_data = [];
+    
+      
+    # For each site get Points
+    for site in sites:
+       historical_points = Daily_Data_Point.objects.filter(site=site.id)
+       site_historical_data = []   
+          
+        # For point get neccessary Data
+       for point in historical_points:
+           site_historical_data.append({
+               "date": time_utils.get_date_dashed(point.date),
+               "count": getattr(point, column)
+           })
+          
+       historical_data.append({
+                               "site_id":site.id,
+                               "site_name":site.site_name,
+                               "site_historical_data": site_historical_data,
+                               "number_of_alerts": get_alerts_for_year(site),
+                               "average_pv_yield": get_avg_field_year(site, 'daily_pv_yield'),
+                               "average_power_consumption_total": get_avg_field_year(site, 'daily_power_consumption_total')
+                    })
+    print "Using column " + column
+    print "values ",
+    print historical_data[0]['site_historical_data'][0]['count']
+    return historical_data
+

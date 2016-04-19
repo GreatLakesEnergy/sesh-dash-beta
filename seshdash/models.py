@@ -253,7 +253,7 @@ class Daily_Data_Point(models.Model):
     daily_grid_outage_t = models.FloatField(default=0) # Amount of time the grid was off
     daily_grid_outage_n = models.FloatField(default=0) # Aggregate amount times  grid was off
     daily_grid_usage = models.FloatField(default=0) # Aggregate amount of grid used
-    daily_no_of_alerts = models.FloatField(default=0) # Amount of charge put in battery
+    daily_no_of_alerts = models.IntegerField(default=0)
     date = models.DateTimeField()
 
 
