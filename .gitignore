@@ -82,3 +82,5 @@ target/
 
 #Project static files
 seshdash/static/
+!seshdash/static/sesh-ui/
+
