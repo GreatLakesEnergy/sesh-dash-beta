@@ -67,6 +67,7 @@ function getLatestAlerts () {
    setTimeout(getLatestAlerts, REFRESH_TIME) // Get alerts for every five minutes
 }
 
+getLatestAlerts();
 
 $('.silence-alert').click(function(){
    setTimeout(getLatestAlerts, 1000);
@@ -133,3 +134,4 @@ function getLatestBoMData(){
     setTimeout(getLatestBoMData, REFRESH_TIME);
 };
 
+getLatestBoMData();

@@ -19,12 +19,13 @@ from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
 
 #Data generations
-from data_generation import get_random_int, get_random_binary, get_random_interval, generate_date_array
+from data_generation import get_random_int, get_random_binary, get_random_interval, generate_date_array, get_random_float
 
 # Debug
 from django.forms.models import model_to_dict
 
 # To Test
+from seshdash.utils.time_utils import get_time_interval_array
 from seshdash.data.db.influx import Influx
 from django.conf import settings
 from seshdash.tasks import get_aggregate_daily_data, send_reports
@@ -141,6 +142,4 @@ class AggregateTestCase(TestCase):
                 dp_dict.pop('id')
                 self.i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),tags={"site_name":self.site.site_name})
         return len(data_point_dates)
-
-
 
