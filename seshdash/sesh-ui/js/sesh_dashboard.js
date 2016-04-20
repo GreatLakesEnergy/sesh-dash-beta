@@ -150,6 +150,16 @@ function getCookie(name) {
 
 var csrftoken = getCookie('csrftoken');
 
+//nano bar
+   // var options = {
+        //            bg :' #4686A1',
+      //        }
+    //var nanobar = new Nanobar(options);
+    //var i = 1;
+    // for(i=1;i<=100;i++){
+			//nanobar.go(i);
+                       // }
+// Get high chart data here
 
 get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
@@ -161,8 +171,9 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
        alertDataPointInfo = $('.alert-data-point-info'),
        silenceAlert = $('.silence-alert'),
        initiatingModalTime = 5000;
+
   setTimeout(setModalLoad, initiatingModalTime);
-    
+
   function setModalLoad() {
 
       $('.modal-toggle').click(function()  {
@@ -215,4 +226,7 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
                modal.modal('hide');
           });
       });
-    }
+     
+
+     
+                  }
