@@ -12,6 +12,18 @@ class SiteForm(ModelForm):
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
+class SiteRMCForm(ModelForm):
+    error_css_class = "warning"
+    required_css_class = "info"
+
+
+    class Meta:
+        model = Sesh_Site
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','import_data')
+        #DateSelectorWidget
+        widgets = {'comission_date':forms.DateInput()}
+
+
 class RMCForm(ModelForm):
     error_css_class = "warning"
     required_css_class = "info"
@@ -19,7 +31,6 @@ class RMCForm(ModelForm):
     class Meta:
         model = Sesh_RMC_Account
         exclude = ('Delete',)
-
 
 
 class VRMForm(ModelForm):
