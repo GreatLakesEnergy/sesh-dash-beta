@@ -527,7 +527,6 @@ def get_alerts(request):
 #all alerts counter
 
 def get_alerts_count(request):
-    site_id = request.POST.get('site_name','')
     
     alerts=Sesh_Alert.objects.filter(isSilence=False)
 
@@ -543,8 +542,7 @@ def get_alerts_count(request):
 #Alerts Notification Box
 
 def get_notifications_alerts(request):
-    site_id = request.POST.get('site_name','')
-
+    
     sites = Sesh_Site.objects.all()
    
     arr=[]

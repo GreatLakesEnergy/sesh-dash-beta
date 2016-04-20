@@ -99,3 +99,16 @@ class AlertTestCase(TestCase):
             self.assertEqual(alert_sms_sent.count(), 0)
         else:
             self.assertEqual(alert_sms_sent.count(), 1)
+
+
+
+        #test_get_alerts_count
+       
+        response = c.post('/alert-counter/' ,{})
+        self.asserEqual(response.status_code, 200)
+
+
+        #test_get_notifications_alerts
+
+        response = c.post('/notifications/' ,{})
+        self.assertEqual(response.status_code, 200)
