@@ -105,7 +105,7 @@ class AlertTestCase(TestCase):
         #test_get_alerts_count
        
         response = c.post('/alert-counter/' ,{})
-        self.asserEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
         #test_get_notifications_alerts
