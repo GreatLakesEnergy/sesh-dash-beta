@@ -87,7 +87,7 @@ $('#containerhigh').highcharts({
                 }
             },
             labels: {
-                format: '{value} HW',
+                format: '{value} Wh',
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }

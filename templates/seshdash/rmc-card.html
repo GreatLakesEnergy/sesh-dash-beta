@@ -13,10 +13,9 @@
                          
                    </div>
                         <div class="panel-footer">
-                              <form action="/create-site/" method="get">
-                                  <!--    {% csrf_token %} -->
-
-                                  <!-- <input type="hidden" name="form_type" value="rmc"> -->
+                              <form action="/import-site/" method="post">
+                                     {% csrf_token %}
+                                 <input type="hidden" name="form_type" value="rmc">
                                 <input class="btn" type="submit" value="ADD RMC Account">
                              </form>
                          </div>
