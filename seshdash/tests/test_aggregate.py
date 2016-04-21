@@ -1,5 +1,6 @@
 # Testing
 from django.test import TestCase, Client
+from django.test.utils import override_settings
 
 # APP Models
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
@@ -34,6 +35,7 @@ from seshdash.tasks import get_aggregate_daily_data, send_reports
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
 class AggregateTestCase(TestCase):
+
     def setUp(self):
 
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
@@ -73,9 +75,10 @@ class AggregateTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
     def tearDown(self):
-        # self.i.delete_database(self._influx_db_name)
+        self.i.delete_database(self._influx_db_name)
         pass
 
+    @override_settings(INFLUX_DB='test_db')
     def test_data_point_creation(self):
         """
         Test all the DP were created in MYSQL and INFLUX
@@ -88,7 +91,8 @@ class AggregateTestCase(TestCase):
 
         #get aggregate daily data
         get_aggregate_daily_data()
-
+ 
+    @override_settings(INFLUX_DB='test_db')
     def test_data_aggregation(self):
         """
         Test data aggregation and daily_data_point creations
@@ -105,11 +109,13 @@ class AggregateTestCase(TestCase):
         self.assertNotEqual(ddp.daily_grid_outage_n,0)
         self.assertNotEqual(ddp.daily_grid_outage_t,0)
         self.assertNotEqual(ddp.daily_grid_usage,0)
-
+    
+    @override_settings(INFLUX_DB='test_db')
     def test_reporting(self):
         """
         Test email reporting for sites
         """
+        settings.INFLUX_DB = self._influx_db_name
         get_aggregate_daily_data()
         send_reports("day")
         self.assertEqual(len(mail.outbox),1)

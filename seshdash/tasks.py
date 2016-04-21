@@ -427,7 +427,6 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
     logging.debug("influx results %s "%(aggr_results))
 
-    print "aggregating for %s %s"%(measurement,aggr_results)
     #we have mean values by the hour now aggregate them
     if aggr_results:
         agr_value = []
