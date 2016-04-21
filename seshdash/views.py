@@ -134,7 +134,7 @@ def import_site(request):
                 if not form.is_valid():
                     context_dict['VRM_form'] = form
                     context_dict['error'] = True
-                    context_dict['message'] = 'Unable to add accout'
+                    context_dict['message'] = 'Unable to add account'
                 if form.is_valid():
                     #print "form is vald"
                     site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
@@ -199,7 +199,8 @@ def _download_data(request):
     sites = _get_user_sites(request)
     for site in sites:
         if site.import_data:
-            get_historical_BoM.delay(site.pk, time_utils.get_epoch_from_datetime(site.comission_date))
+            site_id = site.pk
+            get_historical_BoM.delay(site_id, time_utils.get_epoch_from_datetime(site.comission_date))
 
 def _aggregate_imported_data(sites):
     for site in sites:
@@ -257,15 +258,14 @@ def handle_create_site(request):
         return render(request,'seshdash/initial-login.html',context_dict)
 
     for site in valid_form:
-        # Initiate standard alarms
-        generate_auto_rules(site.pk)
-
         # Finally
         site.save()
 
+        # Initiate standard alarms
+        generate_auto_rules(site.pk)
+
     # Initiate download if requred
     _download_data(request)
-
 
     return index(request)
 

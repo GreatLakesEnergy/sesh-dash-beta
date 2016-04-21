@@ -8,7 +8,7 @@ from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status
 
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
@@ -178,42 +178,48 @@ def get_historical_BoM(site_pk,start_at):
         data = vh_client.get_data(site_id,start_at)
         logging.debug("Importing data for site:%s"%site)
         for row in data:
+            try:
                 data_point = BoM_Data_Point(
-                site = site,
-                time = row['Date Time'], #TODO make sure this datetime aware
-                soc = row['Battery State of Charge (System)'],
-                battery_voltage = row['Battery voltage'],
-                AC_input = row['Input power 1'],
-                AC_output =  row['Output power 1'],
-                AC_Load_in =  row['Input current phase 1'],
-                AC_Load_out =  row['Output current phase 1'],
-                inverter_state = row['VE.Bus Error'],
-                pv_production = row['PV - AC-coupled on input L1'], # IF null need to put in 0
-                #TODO these need to be activated
-                genset_state =  0,
-                relay_state = 0,
-                )
+                    site = site,
+                    time = row['Date Time'], #TODO make sure this datetime aware
+                    soc = row['Battery State of Charge (System)'],
+                    battery_voltage = row['Battery voltage'],
+                    AC_input = row['Input power 1'],
+                    AC_output =  row['Output power 1'],
+                    AC_Load_in =  row['Input current phase 1'],
+                    AC_Load_out =  row['Output current phase 1'],
+                    inverter_state = row['VE.Bus Error'],
+                    pv_production = row['PV - AC-coupled on input L1'], # IF null need to put in 0
+                    #TODO these need to be activated
+                    genset_state =  0,
+                    relay_state = 0,
+                    )
                 date =  row['Date Time']
-                try:
-                    with transaction.atomic():
-                        data_point.save()
-                    send_to_influx(data_point, site, date, to_exclude=['time','inverter_state','id'],client=i)
-                    count = count +1
-                    #print "saved %s BoM data points"%count
-                    logging.debug("saved %s BoM data points"%count)
-                except IntegrityError, e:
+
+                with transaction.atomic():
+                    data_point.save()
+                send_to_influx(data_point, site, date, to_exclude=['time','inverter_state','id'],client=i)
+
+                count = count +1
+                if count % 100:
+                    logging.debug("imported  %s points"%count)
+                #print "saved %s BoM data points"%count
+            except IntegrityError, e:
                     logging.warning("data point already exist %s"%e)
                     pass
-                except ValueError,e:
+            except ValueError,e:
                     logging.warning("Invalid values in data point dropping  %s"%(e))
                     pass
-                except Exception,e:
+            except Exception,e:
                     message = "error with creating data point  data exception %s"%(e)
+                    logging.debug(message)
                     logging.exception( message )
                     handle_task_failure(message = message)
                     pass
+
+        logging.debug("saved %s BoM data points"%count)
         # Clean up
-        site.upddating = False
+        site.import_data  = False
         site.save()
         vh_client.flush()
 
@@ -530,6 +536,22 @@ def send_reports(duration="week"):
                              state = states.FAILURE,
                              meta = 'Something went wrong creating report  check logs'
                              )
+@shared_task
+def rmc_status_update():
+    """
+    Calculate BoM_Data_Point related RMC Status. RMC based status are calculated by kraken
+    """
+    sites = Sesh_Site.objects.all()
+    for site in sites:
+        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('time').first()
+        last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+        tn = timezone.now()
+        last_contact_min = last_contact / 60
+        rmc_status = RMC_status(site = site,
+                                minutes_last_contact = last_contact_min,
+                                time = tn)
+        rmc_status.save()
+
 
 @shared_task
 def alert_engine():
@@ -538,5 +560,8 @@ def alert_engine():
     # TODO check for the latest 10 alerts
     for site in sites:
         alert_check(site)
+
+
+
 
 
