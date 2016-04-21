@@ -1,4 +1,11 @@
+body {
+ font-family: "Roboto", sans-serif;
+}
 
+
+#page-wrapper {
+ padding-bottom: 30px;
+}
 
 #map {
  width: 100%;
@@ -24,7 +31,7 @@ tr.modal-toggle {
 
 
 .chart-data-container {
- width: 75%;
+ width: 76%;
  margin: auto;
 }
 
@@ -50,7 +57,7 @@ tr.modal-toggle {
 
 .hist-extra-info .extra-info-entity {
  border-right: 1px solid #e3e3e3;
- padding: 20px 0;
+ padding: 10px 0;
 }
 
  
@@ -58,48 +65,118 @@ tr.modal-toggle {
  border-right: 0;
 }
 
+.hist-extra-info .extra-info-entity h4 {
+  padding: 0 20px;
+  margin: 0;
+  font-size: 16px;
+}
 
 /* Historical Data */
 
 /* Loader */
 
 .spinner {
-  width: 40px;
-  height: 40px;
-
-  position: relative;
   margin: 100px auto;
+  width: 50px;
+  height: 40px;
+  text-align: center;
+  font-size: 10px;
 }
 
-.double-bounce1, .double-bounce2 {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background-color: #337AB7;
-  opacity: 0.6;
-  position: absolute;
-  top: 0;
-  left: 0; 
-  -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
-  animation: sk-bounce 2.0s infinite ease-in-out;
+.spinner > div {
+  background-color: #aaa;
+  height: 170%;
+  width: 6px;
+  display: inline-block;
+  
+  -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+  animation: sk-stretchdelay 1.2s infinite ease-in-out;
 }
 
-.double-bounce2 {
+.spinner .rect2 {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
+}
+
+.spinner .rect3 {
   -webkit-animation-delay: -1.0s;
   animation-delay: -1.0s;
 }
 
-@-webkit-keyframes sk-bounce {
-  0%, 100% { -webkit-transform: scale(0.0) }
-  50% { -webkit-transform: scale(1.0) }
+.spinner .rect4 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
 }
 
-@keyframes sk-bounce {
-  0%, 100% { 
-    transform: scale(0.0);
-    -webkit-transform: scale(0.0);
-  } 50% { 
-    transform: scale(1.0);
-    -webkit-transform: scale(1.0);
+.spinner .rect5 {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+
+@-webkit-keyframes sk-stretchdelay {
+  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
+  20% { -webkit-transform: scaleY(1.0) }
+}
+
+@keyframes sk-stretchdelay {
+  0%, 40%, 100% { 
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }  20% { 
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
   }
+}
+
+
+
+.historicalLoader {
+  display: none;
+}
+
+/* Overiding calendar-heatmap */
+.day-cell-tooltip {
+  position: fixed!important;
+  right: 0;
+  bottom: 5px;
+}
+
+
+
+.day-cell {
+  cursor: pointer;
+}
+
+
+.data-sort-container {
+  margin: auto;
+  margin-bottom: 40px;
+  width: 270px;
+  max-width: 90%;;
+}
+
+.historical-header {
+  text-align: center;
+  font-size: 34px;
+  margin-top: 46px;
+  margin-bottom: 14px;
+  font-weight: 300;
+}
+
+.sort-help-text {
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+#data-sort {
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.chart-data-container .panel {
+  border-color: #ddd;
+  margin: 71px 0;
+  box-shadow: 0 0 90px 0 #f7f7f7;
 }
