@@ -23,4 +23,4 @@ install:
 before_script:
       - python manage.py migrate --noinput
 script: 
-    - python -W ignore manage.py -v 2 test
+    - python -W ignore manage.py  test -v 2
