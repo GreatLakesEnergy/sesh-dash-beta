@@ -70,7 +70,8 @@ def get_historical_dict(column='daily_pv_yield'):
        for point in historical_points:
            site_historical_data.append({
                "date": get_date_dashed(point.date),
-               "count": getattr(point, column)
+               "count": getattr(point, column),
+               "point_id":point.id,
            })
           
        historical_data.append({

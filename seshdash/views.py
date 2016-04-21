@@ -621,7 +621,6 @@ def get_latest_bom_data(request):
 
 @login_required
 def historical_data(request):
-    
     # If ajax request
     if request.method == 'POST': 
         sort_value = request.POST.get('sort_value', '')

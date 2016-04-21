@@ -60,7 +60,10 @@ $(function(){
             
             var chart = calendarHeatmap()
                         .data(siteData)
-                        .selector('#' + chartId);
+                        .selector('#' + chartId)
+                        .onClick(function(data){
+                           alert(data)
+                        });
                
             chart(); 
             

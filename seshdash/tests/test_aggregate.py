@@ -1,5 +1,5 @@
 # Testing
-from django.test import TestCase
+from django.test import TestCase, Client
 
 # APP Models
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
@@ -73,7 +73,7 @@ class AggregateTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
     def tearDown(self):
-        self.i.delete_database(self._influx_db_name)
+        # self.i.delete_database(self._influx_db_name)
         pass
 
     def test_data_point_creation(self):
@@ -115,6 +115,17 @@ class AggregateTestCase(TestCase):
         self.assertEqual(len(mail.outbox),1)
 
 
+    def test_historical_data_display(self):
+        c = Client()
+        c.login(username='john doe', password='asdasd12345')
+        data_dict = Daily_Data_Point.UNITS_DICTIONARY
+        data_keys = data_dict.keys()
+        
+        for key in data_keys:
+            response = c.post('/historical_data', {"sort_value": key})
+            self.assertEqual(response.status_code, 200)
+
+
     def create_test_data(self):
         #TODO test weekly and monthly reports
         data_point_dates = generate_date_array()
@@ -142,4 +153,3 @@ class AggregateTestCase(TestCase):
                 dp_dict.pop('id')
                 self.i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),tags={"site_name":self.site.site_name})
         return len(data_point_dates)
-
