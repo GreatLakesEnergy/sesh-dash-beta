@@ -187,8 +187,8 @@ class RMC_status(models.Model):
             raise ValidationError("RMC status object requires either rmc account or sesh site reference")
 
     class Meta:
-        verbose_name = 'System Alert'
-        verbose_name_plural = 'System Alerts'
+        verbose_name = 'RMC Status'
+        verbose_name_plural = 'RMC Status\'s'
 
 
 
@@ -245,7 +245,7 @@ class BoM_Data_Point(models.Model):
 
 class Daily_Data_Point(models.Model):
     """
-    Daily aggregate of data points    
+    Daily aggregate of data points
     """
 
     UNITS_DICTIONARY = {

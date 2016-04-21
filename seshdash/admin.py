@@ -33,14 +33,19 @@ class VRM_AccountAdmin(GuardedModelAdmin):
 
 @admin.register(Sesh_RMC_Account)
 class RMC_AccountAdmin(GuardedModelAdmin):
+    list_display = ('api_key','api_key_numeric')
     pass
 
 @admin.register(Sesh_User)
 class SeshUser(GuardedModelAdmin):
+    list_display = ('user','phone_number','on_call')
+    list_filter = ('on_call',)
     pass
 
 @admin.register(RMC_status)
 class RMCStatus(GuardedModelAdmin):
+    list_display = ('site','ip_address','time')
+    list_filter = ('site',)
     pass
 
 
