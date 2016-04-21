@@ -15,9 +15,9 @@ def get_epoch():
     return diff_int
 
 def get_yesterday():
-    now = datetime.now()
+    now = datetime.date(datetime.now())
     one_day = timedelta(days=1)
-    return now-one_day
+    return now - one_day
 
 
 def get_time_interval_array(interval,interval_type,start,end,tz=None):
@@ -123,6 +123,13 @@ def get_start_end_date(days_ago, start_day):
     """
     delta = start_day - timedelta(days=days_ago)
     return delta
+
+def get_timesince_seconds(time):
+    now = datetime.now()
+    loc = timezone(settings.TIME_ZONE)
+    now = loc.localize(now)
+    diff =  now - time
+    return int(diff.total_seconds())
 
 def get_timesince(time):
     now = datetime.now()

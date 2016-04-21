@@ -5,11 +5,12 @@ SESH Dashboard beta. Working dev code.
 Sesh-dashboard is a dasboard that's designed to display data from you Solar Energy system. It's built on top of python django. Data coming into the system can come form Victron QUattro inverters- Via CCGX/ Enphase micro inverters via Envoy.
 It also has the capacity to get data from both systems locally through modbus-TCP(CCGX) or scraping of the envoy(web scraping)
 
-### How do I get set up? ###
+### How do I get set up using a dev VM? ###
 
 **Make sure you have [Vagrant](https://www.vagrantup.com/downloads.html), [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed.**
 
 Follow the steps below to setup a development environment. This will setup a virtual machine with the required dependencies:
+If you wish to not use a virtual-machine you can skip to virtualenvonly section.
  1. Clone this repo:
     `$ git clone https://github.com/GreatLakesEnergy/sesh-dash-beta.git`
  1. CD into the directory:
@@ -29,20 +30,29 @@ Follow the steps below to setup a development environment. This will setup a vir
  1. Collect Static files in one place:
     `$ python ./manage.py collectstatic`
 
-#### Virtualenv Only ####
-* Make sure system level dependencies are installed first see playbook.yml
-* Create a local virtual-env (install virtualenv if you dont have it already):
+#### How do I get setup with a Virtualenv only? ####
+1. Make sure system level dependencies are installed first see playbook.yml
+1. Create a local virtual-env (install virtualenv if you dont have it already):
     `$ virtualenv <sesh-dash-beta>`
-* Install requirements defined in requirements.txt:
+1. Activate your virtual env
+    `$cd <virtual-env-location>/bin`
+    `$source activate` 
+1. Install requirements defined in requirements.txt:
     `$ requirements.txt > pip install -r requirements.txt`
-* Get the UI components with:
-   ` $ python ./manage.py bower install`
+1. Install bower
+   ` $ sudo npm install -g bower`
+1. Get the UI components:
+    `$ python ./manage.py bower_install`
 
 ### Before you start ###
 You'll need to configure parameters for the APIs. Modify copy sample_settings.ini.txt.txt to  settings_local.ini to put in your api keys and database settings.(contact repo owner for keys). Also setup database parameters
  1. Sync up local DB if using a local database:
     `$ python manage.py makemigrations`
     `$ python manage.py migrate`
+ 1. Collect Static files in one place:
+    `$ python ./manage.py collectstatic`
+ 1. Move ui custom ui components into place:
+    `$ cp -r ./seshdash/sesh-ui ./seshdash/static/`
  1. Create super user:
     `$ python manage.py createsuperuser`
  1. Run dev server:
