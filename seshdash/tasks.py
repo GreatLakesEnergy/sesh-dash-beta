@@ -179,6 +179,7 @@ def get_historical_BoM(site_pk,start_at):
         logging.debug("Importing data for site:%s"%site)
         for row in data:
             try:
+                print "got keys %s"%row.keys()
                 data_point = BoM_Data_Point(
                     site = site,
                     time = row['Date Time'], #TODO make sure this datetime aware
