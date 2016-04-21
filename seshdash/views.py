@@ -76,7 +76,6 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
-
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def get_user_sites(vrm_user_id,vrm_password):
@@ -524,6 +523,28 @@ def get_alerts(request):
             })
 
     return HttpResponse(json.dumps(alert_data))
+
+    
+
+
+def get_notifications_alerts(request):
+    
+    sites = Sesh_Site.objects.all()
+
+    arr = []
+
+
+    for site in sites:
+          arr.append({
+            "site":site.site_name,
+            "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
+            "alerts_counter":Sesh_Alert.objects.filter(isSilence=False).count(),
+            "site_id":site.id,
+            })
+
+    return HttpResponse(json.dumps(arr))
+
+
 
 def display_alert_data(request):
     # Getting the clicked alert via ajax
