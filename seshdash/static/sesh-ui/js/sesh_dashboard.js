@@ -33,19 +33,7 @@ Morris.Bar({
 });
 */
 //nano bar
-        var nanoBar=function(){
-        var options={
-              bg :"#4AA0BD",
-                    }
-        var nanobar =new Nanobar(options);
-        var i=1;
-        for(i=1;i<=99;i++){
-			   nanobar.go(i);
-                          }  
-                            
-            }
-         $("a").click(nanoBar);
-         
+        
 
         
 
@@ -150,15 +138,6 @@ function getCookie(name) {
 
 var csrftoken = getCookie('csrftoken');
 
-//nano bar
-   // var options = {
-        //            bg :' #4686A1',
-      //        }
-    //var nanobar = new Nanobar(options);
-    //var i = 1;
-    // for(i=1;i<=100;i++){
-			//nanobar.go(i);
-                       // }
 // Get high chart data here
 
 get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
