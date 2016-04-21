@@ -32,19 +32,7 @@ Morris.Bar({
   labels: ['Cloud Cover %']
 });
 */
-//nano bar
-        var nanoBar=function(){
-        var options={
-              bg :"#4AA0BD",
-                    }
-        var nanobar =new Nanobar(options);
-        var i=1;
-        for(i=1;i<=99;i++){
-			   nanobar.go(i);
-                          }  
-        nanobar.go(0);                    
-            }
-         $("a").click(nanoBar);
+
          
 
         
@@ -112,7 +100,7 @@ $('#containerhigh').highcharts({
             yAxis: 1,
             data:pv,
             tooltip: {
-                valueSuffix: ' Wh'
+                valueSuffix: 'wh'
             }
 
         }, {
@@ -166,11 +154,13 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
 
 
+/*ALerts Notifoication modal */
+
 
     $(document).ready(function(){
     alertId = $(this).attr('classid');
-    console.log("alertId is " + alertId)
-     var jsonData = {"alertId" : alertId,
+    
+    var jsonData = {"alertId" : alertId,
                       csrfmiddlewaretoken: csrftoken};
      $.post('/notifications',jsonData, function(data){
 

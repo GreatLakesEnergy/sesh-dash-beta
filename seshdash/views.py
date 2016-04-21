@@ -543,6 +543,7 @@ def get_high_chart_data(user,site_id,sites):
      print (context_high_data['high_pv_production'])
      return context_high_data
 
+
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
 
@@ -576,10 +577,10 @@ def get_alerts(request):
 
     
 
-
+@login_required
 def get_notifications_alerts(request):
     
-    sites = Sesh_Site.objects.all()
+    sites =_get_user_sites(request)
 
     arr = []
 
@@ -595,7 +596,7 @@ def get_notifications_alerts(request):
     return HttpResponse(json.dumps(arr))
 
 
-
+@login_required
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
@@ -613,6 +614,7 @@ def display_alert_data(request):
 
     return HttpResponse(json.dumps(alert_values))
 
+@login_required
 def silence_alert(request):
     alert_id = request.POST.get("alertId", '')
     alerts = Sesh_Alert.objects.filter(id=alert_id)
@@ -625,7 +627,7 @@ def silence_alert(request):
     else:
        return HttpResponse(False);
 
-
+@login_required
 def get_latest_bom_data(request):
     latest_bom = BoM_Data_Point.objects.order_by('-time')[0]
 
