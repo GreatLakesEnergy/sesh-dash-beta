@@ -42,7 +42,7 @@ Morris.Bar({
         for(i=1;i<=99;i++){
 			   nanobar.go(i);
                           }  
-                            
+        nanobar.go(0);                    
             }
          $("a").click(nanoBar);
          
@@ -87,7 +87,7 @@ $('#containerhigh').highcharts({
                 }
             },
             labels: {
-                format: '{value} Wh',
+                format: '{value} HW',
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -150,16 +150,6 @@ function getCookie(name) {
 
 var csrftoken = getCookie('csrftoken');
 
-//nano bar
-   // var options = {
-        //            bg :' #4686A1',
-      //        }
-    //var nanobar = new Nanobar(options);
-    //var i = 1;
-    // for(i=1;i<=100;i++){
-			//nanobar.go(i);
-                       // }
-// Get high chart data here
 
 get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
@@ -173,6 +163,38 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
        initiatingModalTime = 5000;
 
   setTimeout(setModalLoad, initiatingModalTime);
+
+
+
+
+    $(document).ready(function(){
+    alertId = $(this).attr('classid');
+    console.log("alertId is " + alertId)
+     var jsonData = {"alertId" : alertId,
+                      csrfmiddlewaretoken: csrftoken};
+     $.post('/notifications',jsonData, function(data){
+
+          var alertData = JSON.parse(data);
+          $('#pop').html(alertData[0].alerts_counter);
+          var out= $("#alert-notification-table");
+          var element = '';
+          var i;
+
+          for(i=0 ; i<alertData.length ; i++){
+             element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
+                            '<td>'+ alertData[i].site +  '</td>' +
+                            '<td id="site-counter">'+ alertData[i].counter + '</td>' +
+                       '</tr>';
+             }
+
+           out.append(element);
+         $('.clickable-row').click(function(){
+         window.location.href =$(this).data("href");  }); });
+        });
+
+
+
+
 
   function setModalLoad() {
 
@@ -230,3 +252,4 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
      
                   }
+      
