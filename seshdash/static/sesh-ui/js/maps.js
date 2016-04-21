@@ -15,4 +15,3 @@ L.marker([lat, lon], {
 }).addTo(map);
 
 map.scrollWheelZoom.disable();
-

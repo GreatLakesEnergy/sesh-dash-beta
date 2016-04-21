@@ -42,7 +42,7 @@ Morris.Bar({
         for(i=1;i<=99;i++){
 			   nanobar.go(i);
                           }  
-                            
+        nanobar.go(0);                    
             }
          $("a").click(nanoBar);
          
@@ -87,7 +87,7 @@ $('#containerhigh').highcharts({
                 }
             },
             labels: {
-                format: '{value} Wh',
+                format: '{value} HW',
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -163,22 +163,39 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
        initiatingModalTime = 5000;
 
   setTimeout(setModalLoad, initiatingModalTime);
-   var info = $('.dropdown-menu.dropdown-alerts');
-  $('.dropdown-menu').click(function(){
-      alertId = $(this).attr('classid');
-      console.log("alertId is " + alertId);
-      var jsonData = {"alertId" + alertId,
-                       csrfmiddlewaretoken: csrftoken};
+
+
+
+
+    $(document).ready(function(){
+    alertId = $(this).attr('classid');
+    console.log("alertId is " + alertId)
+     var jsonData = {"alertId" : alertId,
+                      csrfmiddlewaretoken: csrftoken};
      $.post('/notifications',jsonData, function(data){
-         var alertData = JSON.parse(data);
-         document.getElementById("play").innerHTML=
-         alertData.site
-    
-        
-     
-}});
-           
-     
+
+          var alertData = JSON.parse(data);
+          $('#pop').html(alertData[0].alerts_counter);
+          var out= $("#alert-notification-table");
+          var element = '';
+          var i;
+
+          for(i=0 ; i<alertData.length ; i++){
+             element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
+                            '<td>'+ alertData[i].site +  '</td>' +
+                            '<td id="site-counter">'+ alertData[i].counter + '</td>' +
+                       '</tr>';
+             }
+
+           out.append(element);
+         $('.clickable-row').click(function(){
+         window.location.href =$(this).data("href");  }); });
+        });
+
+
+
+
+
   function setModalLoad() {
 
       $('.modal-toggle').click(function()  {
@@ -231,4 +248,8 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
                modal.modal('hide');
           });
       });
-    }
+     
+
+     
+                  }
+      
