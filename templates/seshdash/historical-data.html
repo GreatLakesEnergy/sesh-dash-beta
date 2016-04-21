@@ -1,0 +1,90 @@
+{% extends 'seshdash/base.html' %}
+
+{% load staticfiles %}
+
+
+{% block main_content %}
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+            {% block header %}
+ 
+                <h2 class="historical-header"> Historical Data </h2>
+
+            {% endblock %}
+            </div>
+        </div>
+
+       <div class="filter-form">
+         <div class="data-sort-container">
+            <p class="sort-help-text"> Select an option to sort by </p>
+            <select class="form-control" id="data-sort">
+                 <option value="daily_battery_charge">Battery Charge</option>
+                 <option value="daily_grid_outage_n">Grid outage N</option>
+                 <option value="daily_grid_outage_t">Grid outage T</option>
+                 <option value="daily_grid_usage">Grid usage</option>
+                 <option value="daily_no_of_alerts">Number of alerts</option>
+                 <option value="daily_power_cons_pv">Power consumption pv</option>
+                 <option value="daily_pv_yield">Pv yield</option>
+                 <option value="daily_power_consumption_total">Power Consumption total</option>
+            </select>
+        </div>
+       </div>
+   
+       <!-- Loader -->
+       <div class="historical-loader"> 
+             <div class="spinner">
+                 <div class="rect1"></div>
+                 <div class="rect2"></div>
+                 <div class="rect3"></div>
+                 <div class="rect4"></div>
+                 <div class="rect5"></div>
+            </div>
+        </div>
+
+
+       <div class="chart-data-container">
+           
+           
+           <!--
+           <div class="panel panel-default ">
+               <div class="panel-heading"> <strong> Site One </strong> </div>
+
+
+               <div class="panel-body">
+                   <div class="chart-container">
+                   </div>
+               </div>
+
+               <div class="panel-footer">
+                   <div class="row hist-extra-info">
+                   <div class="col-sm-4 extra-info-entity">
+                      <h4>Extra Info One</h4>
+                   </div>
+                   <div class="col-sm-4 extra-info-entity">
+                      <h4>Extra Info Two</h4>
+                   </div>
+                   <div class="col-sm-4 extra-info-entity">
+                      <h4>Extra Info Three</h4>
+                   </div>          
+               </div>
+           </div>   
+          </div>
+          -->
+       </div>
+    </div>
+
+{% endblock %}
+
+
+{# Preventing sesh main dash js from running #}
+{% block seshjs %}
+
+     <script src='{% static 'sesh-ui/js/historical.js' %}'> </script>
+
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}

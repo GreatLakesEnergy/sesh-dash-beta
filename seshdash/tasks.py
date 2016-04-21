@@ -227,10 +227,11 @@ def get_historical_BoM(site_pk,start_at):
         return count
 
 @shared_task
-def run_aggregate_on_historical(site):
+def run_aggregate_on_historical(site_id):
     """
     this will run daily aggregation caluclations for each each day
     """
+    site = Sesh_Site.objects.get(pk=site_id)
     start_date = site.comission_date # TODO this hould porbably be based on range in DB
     end_date =  timezone.now()
     days_to_agr = time_utils.get_time_interval_array(24,'hours',start_date,end_date)
@@ -426,7 +427,6 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
     logging.debug("influx results %s "%(aggr_results))
 
-    #print "aggregating for %s %s"%(measurement,aggr_results)
     #we have mean values by the hour now aggregate them
     if aggr_results:
         agr_value = []
@@ -492,8 +492,14 @@ def get_aggregate_daily_data(date=None):
                                          date = date_to_fetch,
                                             )
             print "saving daily aggreagete for %s dp:%s"%(date_to_fetch,daily_aggr)
-
-            daily_aggr.save()
+            try:
+		daily_aggr.save()
+            except IntegrityError,e:
+		logging.debug('aggregate data point not unique skipping')
+		pass
+	    except Exception,e:
+		logging.exception('Unkown error occured aggregatin data')
+		pass
             #send to influx
             send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
 

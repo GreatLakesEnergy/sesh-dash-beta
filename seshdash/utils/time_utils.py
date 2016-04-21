@@ -162,3 +162,9 @@ def format_timesince_seconds(seconds):
             return seconds/86400, " day ago"
         else:
             return seconds/86400, " days ago"
+
+def get_date_dashed(date):
+    date_string = str(date.year) + '-' + str(date.month) +  '-' + str(date.day)
+    return date_string
+
+

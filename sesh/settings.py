@@ -276,6 +276,7 @@ BOWER_INSTALLED_APPS = (
             'raphael',
             'react',
             'babel',
+            'calendar-heatmap',
             'nanobar',
             )
 

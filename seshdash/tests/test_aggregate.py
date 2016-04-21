@@ -1,5 +1,6 @@
 # Testing
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.test.utils import override_settings
 
 # APP Models
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
@@ -19,12 +20,13 @@ from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
 
 #Data generations
-from data_generation import get_random_int, get_random_binary, get_random_interval, generate_date_array
+from data_generation import get_random_int, get_random_binary, get_random_interval, generate_date_array, get_random_float
 
 # Debug
 from django.forms.models import model_to_dict
 
 # To Test
+from seshdash.utils.time_utils import get_time_interval_array
 from seshdash.data.db.influx import Influx
 from django.conf import settings
 from seshdash.tasks import get_aggregate_daily_data, send_reports
@@ -33,6 +35,7 @@ from seshdash.tasks import get_aggregate_daily_data, send_reports
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
 class AggregateTestCase(TestCase):
+
     def setUp(self):
 
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
@@ -75,6 +78,7 @@ class AggregateTestCase(TestCase):
         self.i.delete_database(self._influx_db_name)
         pass
 
+    @override_settings(INFLUX_DB='test_db')
     def test_data_point_creation(self):
         """
         Test all the DP were created in MYSQL and INFLUX
@@ -87,7 +91,8 @@ class AggregateTestCase(TestCase):
 
         #get aggregate daily data
         get_aggregate_daily_data()
-
+ 
+    @override_settings(INFLUX_DB='test_db')
     def test_data_aggregation(self):
         """
         Test data aggregation and daily_data_point creations
@@ -104,14 +109,27 @@ class AggregateTestCase(TestCase):
         self.assertNotEqual(ddp.daily_grid_outage_n,0)
         self.assertNotEqual(ddp.daily_grid_outage_t,0)
         self.assertNotEqual(ddp.daily_grid_usage,0)
-
+    
+    @override_settings(INFLUX_DB='test_db')
     def test_reporting(self):
         """
         Test email reporting for sites
         """
+        settings.INFLUX_DB = self._influx_db_name
         get_aggregate_daily_data()
         send_reports("day")
         self.assertEqual(len(mail.outbox),1)
+
+
+    def test_historical_data_display(self):
+        c = Client()
+        c.login(username='john doe', password='asdasd12345')
+        data_dict = Daily_Data_Point.UNITS_DICTIONARY
+        data_keys = data_dict.keys()
+        
+        for key in data_keys:
+            response = c.post('/historical_data', {"sort_value": key})
+            self.assertEqual(response.status_code, 200)
 
 
     def create_test_data(self):
@@ -141,6 +159,3 @@ class AggregateTestCase(TestCase):
                 dp_dict.pop('id')
                 self.i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),tags={"site_name":self.site.site_name})
         return len(data_point_dates)
-
-
-

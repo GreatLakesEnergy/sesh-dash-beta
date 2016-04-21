@@ -9,6 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,500,700,300,300italic' rel='stylesheet' type='text/css'>
 
     {% load nvd3_tags %}
 
@@ -35,6 +36,9 @@
     <link href='{% static 'sesh-ui/css/sb-admin-2.css' %}' rel="stylesheet">
     <!-- SESH CSS -->
     <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
+
+    <!-- Calendar heatmap css -->
+    <link href='{% static 'calendar-heatmap/src/calendar-heatmap.css' %}' rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel="stylesheet" type="text/css">
@@ -110,6 +114,9 @@
                             <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <li>
+                            <a href='/historical_data'><i class="fa fa-history fa-fw"></i> Historical Data </a>
+                        </li>
+                        <li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Sites<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 {% for site in sites %}
@@ -174,25 +181,48 @@
     <!-- Babel txt intrepreter -->
     <script src='{%static 'babel/browser.js' %}'></script>
 
-    <!-- Sesh React -->
-    <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
+   
 
     <!-- high charts -->
     <script src='{% static  'highcharts/highcharts.js' %}'  > </script>
 
 
-    <!-- sesh javascript -->
-    <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
+    
+    <!-- mapbox javascript -->
+    <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
 
+    <!-- d3js -->
+    <script src='{% static 'd3/d3.min.js' %}'> </script>   
+
+    <!-- momentjs -->
+    <script src='{% static 'moment/min/moment.min.js' %}'> </script>
+     
     <script type="text/javascript">
     {% block javascript %}
 
     {% endblock %}
     </script>
 
+     
+    {% block seshjs %}
+        <!-- sesh javascript -->
+        <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
+
+        <!-- Sesh React -->
+        <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
+         
+        <!-- Maps configuration -->
+        <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
+
+
+
+    {% endblock %}
+    <!-- Calendar heatmap js -->
+    <script src='{% static 'calendar-heatmap/src/calendar-heatmap.js' %}' > </script>
+    
+
     <!-- mapbox javascript -->
     <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
-    <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
    
 
    {% endblock %}
