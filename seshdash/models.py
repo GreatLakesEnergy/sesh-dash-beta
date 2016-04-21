@@ -245,7 +245,7 @@ class BoM_Data_Point(models.Model):
 
 class Daily_Data_Point(models.Model):
     """
-    Daily aggregate of data points    
+    Daily aggregate of data points
     """
 
     UNITS_DICTIONARY = {

@@ -547,6 +547,7 @@ def rmc_status_update():
         tn = timezone.now()
         last_contact_min = last_contact / 60
         rmc_status = RMC_status(site = site,
+                                rmc = site.rmc_account,
                                 minutes_last_contact = last_contact_min,
                                 time = tn)
         rmc_status.save()

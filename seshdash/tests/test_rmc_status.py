@@ -2,7 +2,7 @@
 from django.test import TestCase
 
 # APP Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point, RMC_status
+from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point, RMC_status, Sesh_RMC_Account
 
 # django Time related
 from django.utils import timezone
@@ -31,6 +31,8 @@ class RMCTestCase(TestCase):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
         self.location = Geoposition(52.5,24.3)
 
+        self.test_rmc_account = Sesh_RMC_Account.objects.create(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+
         self.site = Sesh_Site.objects.create(site_name=u"Test_aggregate",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
                                              location_city=u"kigali",
@@ -41,6 +43,7 @@ class RMCTestCase(TestCase):
                                              system_voltage=12,
                                              number_of_panels=12,
                                              vrm_site_id=213,
+                                             rmc_account=self.test_rmc_account,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
                                              has_grid=True)
@@ -53,7 +56,6 @@ class RMCTestCase(TestCase):
                                                 AC_output=15.0,
                                                 AC_Load_in=0.0,
                                                 AC_Load_out=-0.7)
-
 
         self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
         #assign a user to the sites
