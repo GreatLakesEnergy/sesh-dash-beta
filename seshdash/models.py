@@ -249,14 +249,14 @@ class Daily_Data_Point(models.Model):
     """
 
     UNITS_DICTIONARY = {
-        "daily_battery_charge": "",
+        "daily_battery_charge": "W",
         "daily_grid_outage_n": "minute",
         "daily_grid_outage_t": "",
-        "daily_grid_usage": "",
+        "daily_grid_usage": "W",
         "daily_no_of_alerts": "alert",
-        "daily_power_cons_pv": "",
-        "daily_power_consumption_total": "",
-        "daily_pv_yield": "Sample Unit",
+        "daily_power_cons_pv": "W",
+        "daily_power_consumption_total": "W",
+        "daily_pv_yield": "W",
     }
 
 
