@@ -187,8 +187,8 @@ class RMC_status(models.Model):
             raise ValidationError("RMC status object requires either rmc account or sesh site reference")
 
     class Meta:
-        verbose_name = 'System Alert'
-        verbose_name_plural = 'System Alerts'
+        verbose_name = 'RMC Status'
+        verbose_name_plural = 'RMC Status\'s'
 
 
 
