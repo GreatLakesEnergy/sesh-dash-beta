@@ -94,7 +94,13 @@ class AlertTestCase(TestCase):
         # test_display_alert_data
         """Getting the display alert data"""
         c = Client()
-        c.login(username = "patrick",password = "cdakcjocajica")
+        c.login(username = "patrick",password = "cdakcjocajica") 
+
+
+        response=c.post('/get-alert-data/',{'alertId':'1'})
+        self.assertEqual(response.status_code, 200)
+
+
         response = c.post('/silence-alert/',{'alertId':'1'})
         alerts = Sesh_Alert.objects.filter(isSilence=False).count()
         self.assertEqual(response.status_code, 200)

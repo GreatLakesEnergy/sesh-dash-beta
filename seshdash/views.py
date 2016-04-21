@@ -607,12 +607,15 @@ def display_alert_data(request):
 
     point = get_model_first_reference(alert.point_model, alert)
 
-    alert_values = model_to_dict(point)
+    if point is not None:
+        alert_values = model_to_dict(point)
+        # Converting time to json serializable value and changing it to timesince
+        alert_values['time'] = get_timesince(alert_values['time'])
+        return HttpResponse(json.dumps(alert_values))
 
-    # Converting time to json serializable value and changing it to timesince
-    alert_values['time'] = get_timesince(alert_values['time'])
-
-    return HttpResponse(json.dumps(alert_values))
+    else:
+        # Handling unecpexted data failure
+        return HttpResponse("Server Error")
 
 @login_required
 def silence_alert(request):

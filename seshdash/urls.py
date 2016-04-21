@@ -18,6 +18,7 @@ urlpatterns = [
             url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
             url(r'^silence-alert', views.silence_alert),
             url(r'^get-alerts', views.get_alerts),
+            url(r'^get-alert-data', views.display_alert_data),
             url(r'^notifications',views.get_notifications_alerts),
             url(r'^get-latest-bom-data', views.get_latest_bom_data),
             ]
