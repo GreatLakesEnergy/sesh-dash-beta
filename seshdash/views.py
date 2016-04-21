@@ -73,7 +73,6 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
-
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -544,6 +543,7 @@ def get_high_chart_data(user,site_id,sites):
      print (context_high_data['high_pv_production'])
      return context_high_data
 
+
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
 
@@ -575,6 +575,28 @@ def get_alerts(request):
 
     return HttpResponse(json.dumps(alert_data))
 
+    
+
+@login_required
+def get_notifications_alerts(request):
+    
+    sites =_get_user_sites(request)
+
+    arr = []
+
+
+    for site in sites:
+          arr.append({
+            "site":site.site_name,
+            "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
+            "alerts_counter":Sesh_Alert.objects.filter(isSilence=False).count(),
+            "site_id":site.id,
+            })
+
+    return HttpResponse(json.dumps(arr))
+
+
+@login_required
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
@@ -585,13 +607,17 @@ def display_alert_data(request):
 
     point = get_model_first_reference(alert.point_model, alert)
 
-    alert_values = model_to_dict(point)
+    if point is not None:
+        alert_values = model_to_dict(point)
+        # Converting time to json serializable value and changing it to timesince
+        alert_values['time'] = get_timesince(alert_values['time'])
+        return HttpResponse(json.dumps(alert_values))
 
-    # Converting time to json serializable value and changing it to timesince
-    alert_values['time'] = get_timesince(alert_values['time'])
+    else:
+        # Handling unecpexted data failure
+        return HttpResponse("Server Error")
 
-    return HttpResponse(json.dumps(alert_values))
-
+@login_required
 def silence_alert(request):
     alert_id = request.POST.get("alertId", '')
     alerts = Sesh_Alert.objects.filter(id=alert_id)
@@ -604,7 +630,7 @@ def silence_alert(request):
     else:
        return HttpResponse(False);
 
-
+@login_required
 def get_latest_bom_data(request):
     latest_bom = BoM_Data_Point.objects.order_by('-time')[0]
 
