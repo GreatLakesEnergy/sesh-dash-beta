@@ -575,6 +575,40 @@ def get_alerts(request):
 
     return HttpResponse(json.dumps(alert_data))
 
+#all alerts counter
+
+def get_alerts_count(request):
+    
+    alerts=Sesh_Alert.objects.filter(isSilence=False)
+
+    counter_data = []
+
+    for alert in alerts:
+        counter_data.append({
+            "site":alert.site.site_name,
+            })
+
+    return HttpResponse(json.dumps(counter_data))
+
+#Alerts Notification Box
+
+def get_notifications_alerts(request):
+    
+    sites = Sesh_Site.objects.all()
+   
+    arr=[]
+    
+    for site in sites :
+        arr.append({
+                 "site":site.site_name,
+                 "counter":Sesh_Alert.objects.filter(isSilence=False,site = site).count(),
+                 "site_id":site.id
+                 })       
+    return HttpResponse(json.dumps(arr))
+    
+
+
+
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')

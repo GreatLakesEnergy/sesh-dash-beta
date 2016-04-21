@@ -21,3 +21,38 @@ tr.modal-toggle {
 .alert-data-point-info h1,h2,h3,h4,h5,h6 {
  text-align: center;
 }
+#cont{
+   position :relative;
+     }
+
+#pop{
+    position:absolute;
+    top: -12px;
+    right:7px;
+    padding-right:5px;
+    padding-left : 3px;
+    background-color:red;
+    color:white;
+    font-weight:bold;
+    font-size:11px;;
+   border-radius:50%;
+   box-shadow:1px 1px 1px blue;
+}
+.dropdown-menu.dropdown-alerts{
+        padding : 0;
+        width:335px;
+        height : 175px;
+          }
+
+
+.form-top {
+        overflow: hidden;
+        padding: 0 5px 2px 5px;
+        background: #4AA0BD;
+        border-radius: 4px 4px 0 0;
+        text-align: left;
+        font-size:20px;
+            }
+#site-counter {
+        padding-left : 107px;
+           }
