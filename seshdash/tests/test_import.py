@@ -93,7 +93,7 @@ class VRM_Import_TestCase(TestCase):
 
         #run historical aggregates
         print "running historical aggregate"
-        run_aggregate_on_historical(self.site)
+        run_aggregate_on_historical(self.site.id)
         aggregates = ddp.objects.filter(site=self.site,date__range=[self.start_date,self.now])
         self.assertNotEqual(aggregates.count(),0)
 

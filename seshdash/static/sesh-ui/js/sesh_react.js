@@ -55,7 +55,6 @@ var alertsJsonData = {csrfmiddlewaretoken: csrftoken,
                       site_id: active_site_id,
                      };
 
-getLatestAlerts();
 
 function getLatestAlerts () {
     $.post('/get-alerts', alertsJsonData,function(data) {
@@ -68,6 +67,8 @@ function getLatestAlerts () {
     });
    setTimeout(getLatestAlerts, REFRESH_TIME) // Get alerts for every five minutes
 }
+
+getLatestAlerts();
 
 
 $('.silence-alert').click(function(){

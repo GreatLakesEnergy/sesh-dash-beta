@@ -48,7 +48,6 @@ class Influx:
                                                     operator = operator
                                                     )
 
-
         try:
             result_set = self._influx_client.query(query_string_formatted,database = db)
             logging.debug("Influx query %s"% query_string_formatted)

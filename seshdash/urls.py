@@ -22,5 +22,6 @@ urlpatterns = [
             url(r'^notifications',views.get_notifications_alerts),
             url(r'^get-latest-bom-data', views.get_latest_bom_data),
             url(r'^search', views.search),
+            url(r'^historical_data', views.historical_data),
             ]
 
