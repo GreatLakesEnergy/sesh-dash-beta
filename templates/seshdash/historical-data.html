@@ -20,9 +20,11 @@
          <div class="data-sort-container">
             <p class="sort-help-text"> Select an option to sort by </p>
             <select class="form-control" id="data-sort">
-                 {% for sort_key in sort_keys %}
-                      <option value={{sort_key}}>{{sort_values}}</option>
+                 {{ sort_dict }}
+                 {% for key, value in sort_dict.items %}	
+                      <option value="{{key}}">{{value}}</option>
                  {% endfor %}
+                 <!--
                  <option value="daily_battery_charge">Battery Charge</option>
                  <option value="daily_grid_outage_n">Grid outage N</option>
                  <option value="daily_grid_outage_t">Grid outage T</option>
@@ -31,6 +33,7 @@
                  <option value="daily_power_cons_pv">Power consumption pv</option>
                  <option value="daily_pv_yield">Pv yield</option>
                  <option value="daily_power_consumption_total">Power Consumption total</option>
+                 --->
             </select>
         </div>
        </div>

@@ -1,9 +1,11 @@
 $(function(){ 
 
     // Change dates Properties to native javascript date objects
-    function convertDateStringProperty(data) {
+    function formatData(data) {
+        /* Formats the data to be passed to presentation */
         for(i = 0; i < data.length; i++) {
             data[i].date = new Date(Date.parse(data[i].date));
+            data[i].count = Math.round(data[i].count * 10) / 10;
         }
         return data;
     }
@@ -27,7 +29,8 @@ $(function(){
                 numberOfAlerts = chartData[i].number_of_alerts,
                 avgPvYield = chartData[i].average_pv_yield,
                 avgPowerConsumptionTotal = chartData[i].average_power_consumption_total
-                chartId = 'chart' + chartData[i].site_id,
+                chartId = 'chart' + chartData[i].site_id;
+
                 
 
             elementChart = '<div class="panel panel-default">'
@@ -62,9 +65,9 @@ $(function(){
             var siteData = chartData[i].site_historical_data,
                 chartId = 'chart' + chartData[i].site_id;
             
-            siteData = convertDateStringProperty(siteData);
+            siteData = formatData(siteData);
 
-            
+
             var chart = calendarHeatmap()
                         .data(siteData)
                         .tooltipUnit(chartData[0].data_unit)
