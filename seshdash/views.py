@@ -27,7 +27,7 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince
-from seshdash.utils.model_tools import get_model_first_reference
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil.relativedelta import relativedelta
@@ -655,12 +655,21 @@ def historical_data(request):
    
     # On page load
     else:
+        sort_data_dict = get_model_verbose(Daily_Data_Point)
+        # Removing values that are not data historical values
+        sort_data_dict.pop('id')
+        sort_data_dict.pop('site')
+        sort_data_dict.pop('date')
+
+ 
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
         active_site = sites[0]
         context_dict = {}
         context_dict['sites'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
+        context_dict['sort_keys'] = sort_data_dict.keys()
+        context_dict['sort_values'] = sort_data_dict.values()
         return render(request, 'seshdash/historical-data.html', context_dict);
 
 

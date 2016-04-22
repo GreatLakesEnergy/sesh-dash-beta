@@ -14,4 +14,26 @@ def get_model_first_reference(model_name, instance):
     ref = getattr(instance, model_set_attr)
     first_ref = ref.first()
     return first_ref
+ 
+def get_model_fields_names(model):
+    """ Returns a list of field names """
+    fields = model._meta.fields
+    field_names = []
+
+    for field in fields:
+        field_names.append(field.name)
+
+    return field_names
+
+def get_model_verbose(model):
+    """ Returns a dictionary where keys are columns and values are verbose name """
+    fields = model._meta.fields
     
+    verbose_dict = {}
+
+    for field in fields:
+        verbose_dict[field.name] = field.verbose_name
+    
+    return verbose_dict
+
+

@@ -261,14 +261,14 @@ class Daily_Data_Point(models.Model):
 
 
     site = models.ForeignKey(Sesh_Site)
-    daily_pv_yield = models.FloatField(default=0) # Aggregate pv produced that day Kwh
-    daily_power_consumption_total = models.FloatField(default=0) # Aggreagate power used that day Kwh
-    daily_power_cons_pv = models.FloatField(default=0)
-    daily_battery_charge = models.FloatField(default=0) # Amount of charge put in battery
-    daily_grid_outage_t = models.FloatField(default=0) # Amount of time the grid was off
-    daily_grid_outage_n = models.FloatField(default=0) # Aggregate amount times  grid was off
-    daily_grid_usage = models.FloatField(default=0) # Aggregate amount of grid used
-    daily_no_of_alerts = models.IntegerField(default=0)
+    daily_pv_yield = models.FloatField(default=0, verbose_name="Battery Voltage") # Aggregate pv produced that day Kwh
+    daily_power_consumption_total = models.FloatField(default=0, verbose_name="Daily Power Consumption")
+    daily_power_cons_pv = models.FloatField(default=0, verbose_name="Power consumption pv" )
+    daily_battery_charge = models.FloatField(default=0, verbose_name="Battery Charge") # Amount of charge put in battery
+    daily_grid_outage_t = models.FloatField(default=0, verbose_name="Grid outage t") # Amount of time the grid was off
+    daily_grid_outage_n = models.FloatField(default=0, verbose_name="Grid outagen n") # Aggregate amount times  grid was off
+    daily_grid_usage = models.FloatField(default=0, verbose_name="Grid usage" ) # Aggregate amount of grid used
+    daily_no_of_alerts = models.IntegerField(default=0, verbose_name="Number of alerts")
     date = models.DateTimeField()
 
 
