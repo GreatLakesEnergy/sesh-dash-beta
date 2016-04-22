@@ -248,29 +248,36 @@ var option;
 var matched;
 var siteid = [];
 var sitename = [];
+/* post request to retrieve all sitename and site id */
 $.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
     option = JSON.parse(data);
+    /* extracting site name array from response dict */
    for (i=0;i < option.length;i++){
     sitename.push(option[i].value)
    }
+   /* extracting site id array from response dict */
    for (i=0; i< option.length; i++){
     siteid.push(option[i].key)
    }
    var input = document.getElementById('search');
+   /* proving an array of options to be suggested when a user types using awesomplete plugin */
    new Awesomplete(input,{list:sitename});
 });
-
+/* checking if ENTER button is pressed */
 $('.form-control').keypress(function(event){
     var keycode = (event.keyCode ? event.keyCode : event.which);
     var matched = false;
     if(keycode == '13'){
         textinput = $(".form-control").val();
         for (i=0;i<sitename.length;i++){
+            /* checking if entered value exists in a sitename array */
              if (sitename[i] == textinput){
                   matched = true;
                   for (i=0 ;i < option.length; i++){
+                    /* finding the id of the entered sitename */
                        if (option[i].value == textinput){
                              textid = option[i].key;
+                             /* Linking to the asked sitename`s page */
                              window.location.replace("/dash/" + textid);
                         }
                   }
@@ -282,14 +289,18 @@ $('.form-control').keypress(function(event){
         }
     }
 });
+/* search button */
 $(".btn-default").click(function(){
         textinput = $(".form-control").val();
         for (i=0;i<sitename.length;i++){
+            /* checking if entered value exists in a sitename array */
              if (sitename[i] == textinput){
                   matched = true;
                   for (i=0 ;i < option.length; i++){
+                    /* finding the id of the entered sitename */
                        if (option[i].value == textinput){
                              textid = option[i].key;
+                             /* Linking to the asked sitename`s page */
                              window.location.replace("/dash/" + textid);
                         }
                   }
