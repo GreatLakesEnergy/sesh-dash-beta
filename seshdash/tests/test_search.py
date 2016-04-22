@@ -21,7 +21,7 @@ from django.utils import timezone
 
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
-class AlertTestCase(TestCase):
+class SearchTestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -75,50 +75,12 @@ class AlertTestCase(TestCase):
         generate_auto_rules(self.site.pk)
         alert.alert_check(self.site)
 
-    @override_settings(DEBUG=True)
-    def test_alert_fires(self):
-        """ Alert working correctly"""
-        # test if necessary alerts has triggered and if alert objects saved
-        alerts_created = Sesh_Alert.objects.filter(site=self.site)
-        self.assertEqual(alerts_created.count(),3)
-        """ Alert mails working correctly"""
-        self.assertEqual(alerts_created.filter(emailSent=True).count(),3)
 
-    # TODO add negative test cases
+    # Testing search
+    def test_search(self):
+        f = Client()
+        f.login(username = "patrick",password = "cdakcjocajica")
 
-        # test_get_alerts
-        """ Getting alerts correctly """
-        alerts = Sesh_Alert.objects.all().count()
-        self.assertEqual(alerts, 3)
-
-        # test_display_alert_data
-        """Getting the display alert data"""
-        c = Client()
-        c.login(username = "patrick",password = "cdakcjocajica")
-
-
-        response=c.post('/get-alert-data/',{'alertId':'1'})
-        self.assertEqual(response.status_code, 200)
-
-
-        response = c.post('/silence-alert/',{'alertId':'1'})
-        alerts = Sesh_Alert.objects.filter(isSilence=False).count()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(alerts, 2)
-
-        # test_get_latest_bom_data(self):
-        response = c.post('/get-latest-bom-data/',{})
-        self.assertEqual(response.status_code, 200)
-
-        # test_sent_sms(self):
-        alert_sms_sent = Sesh_Alert.objects.filter(smsSent=True)
-
-        if settings.DEBUG:
-            self.assertEqual(alert_sms_sent.count(), 0)
-        else:
-            self.assertEqual(alert_sms_sent.count(), 1)
-
-        #test_get_alerts_notifications
-        response = c.post('/notifications/',{})
+        response = f.post('/search',{})
         self.assertEqual(response.status_code, 200)
 
