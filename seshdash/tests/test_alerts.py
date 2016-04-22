@@ -94,8 +94,12 @@ class AlertTestCase(TestCase):
         # test_display_alert_data
         """Getting the display alert data"""
         c = Client()
-        response = c.post('/get-alert-data/',{'alertId':'3'})
+        c.login(username = "patrick",password = "cdakcjocajica") 
+
+
+        response=c.post('/get-alert-data/',{'alertId':'1'})
         self.assertEqual(response.status_code, 200)
+
 
         response = c.post('/silence-alert/',{'alertId':'1'})
         alerts = Sesh_Alert.objects.filter(isSilence=False).count()
@@ -114,12 +118,13 @@ class AlertTestCase(TestCase):
         else:
             self.assertEqual(alert_sms_sent.count(), 1)
 
+        #test_get_alerts_notifications
+        response = c.post('/notifications/',{})
+        self.assertEqual(response.status_code, 200)
+    
     # Testing search
     def test_search(self):
         f = Client()
         response = f.post('/search',{})
         self.assertEqual(response.status_code, 200)
-
-	
-
 

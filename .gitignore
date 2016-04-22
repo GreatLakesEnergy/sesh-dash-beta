@@ -81,4 +81,6 @@ target/
 .idea
 
 #Project static files
-seshdash/static/
+seshdash/static/*
+!seshdash/static/sesh-ui/
+

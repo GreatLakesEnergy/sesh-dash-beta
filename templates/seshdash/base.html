@@ -25,6 +25,10 @@
     <link href='{% static 'awesomplete/awesomplete.css' %}' rel="stylesheet">
     <!-- bootstrap   -->
     <link href='{% static 'bootstrap/dist/css/bootstrap.css' %}' rel="stylesheet">
+   
+    <!--PACE -->
+    <link href ='{% static 'PACE/themes/blue/pace-theme-minimal.css' %}' rel="stylesheet">
+
 
     <!-- MetisMenu CSS -->
     <link href='{% static 'metisMenu/dist/metisMenu.css' %}' rel="stylesheet">
@@ -61,19 +65,33 @@
             </div>
             <ul class="nav navbar-top-links navbar-right">
                 <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <a class="dropdown-toggle" id ="cont" data-toggle="dropdown" href="#" >
+                         <div id ="pop"></div>
                         <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
                     </a>
-                    <ul class="dropdown-menu dropdown-alerts">
+                    <ul class="dropdown-menu dropdown-alerts" id ="play">
                         <li>
-                            <a href="#">
-                                <div>
-                                    <i class="fa fa-comment fa-fw"></i> New Comment
-                                    <span class="pull-right text-muted small">4 minutes ago</span>
-                                </div>
-                            </a>
+                       <div class = "form-box">
+                        <div class ="form-top">
+                          Alerts 
+                          </div>
+                        <div class="form-bottom">
+                        <div class ="table-responsive">
+                          <table class = "table table-stiped">
+                           <thead>
+                             <tr>
+                               <th>Site Name </th>
+                               <th>Number of alerts </th>
+                             </tr>
+                           </thead>
+
+                           <tbody id ="alert-notification-table">
+                           </tbody>  
+                          </table>
+                         </div>
+                         </div>
+                        </div>
                         </li>
-                       <li class="divider"></li>
                    </ul>
                </li>
                 <li class="dropdown">
@@ -149,8 +167,8 @@
 
     {% block footer %}
 
-    <!-- nanobar javascript -->
-   <script src = '{% static  'nanobar/nanobar.js' %}' > </script>
+    <!-- PACE javascript -->
+   <script src = '{% static  'PACE/pace.min.js' %}' > </script>
 
     <!-- Bootstrap Core JavaScript -TODO switch to min after-->
     <script src='{% static 'bootstrap/dist/js/bootstrap.js' %}' ></script>

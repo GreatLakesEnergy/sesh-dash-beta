@@ -7,6 +7,9 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.contrib import admin
 from geoposition.fields import GeopositionField
+from django.utils import timezone
+
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class VRM_Account(models.Model):
@@ -67,8 +70,6 @@ class Sesh_User(models.Model):
          verbose_name_plural = 'Users'
 
 
-
-
 class Sesh_Site(models.Model):
     """
     Model for each PV SESH installed site
@@ -77,7 +78,7 @@ class Sesh_Site(models.Model):
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
-    position = GeopositionField(blank=True)
+    position = GeopositionField()
     installed_kw = models.FloatField()
     system_voltage = models.IntegerField()
     number_of_panels = models.IntegerField()
@@ -155,7 +156,7 @@ class Sesh_Alert(models.Model):
     slackSent = models.BooleanField()
     point_model = models.CharField(max_length=40, default="BoM_Data_Point")
 
-    # def __str__(self):
+    # def __str__(self):  # Patrick: Commenting out due to errors with FK
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
@@ -163,29 +164,31 @@ class Sesh_Alert(models.Model):
         # TODO make this print useful information
        return str(self.alert)
 
-    # class Meta:
-    #    verbose_name = 'System Alert'
-    #    verbose_name_plural = 'System Alerts'
-
-
-
-
+    class Meta:
+        verbose_name = 'System Alert'
+        verbose_name_plural = 'System Alerts'
 
 
 class RMC_status(models.Model):
     """
     Table containing status information for each RMC unit
     """
-    rmc = models.ForeignKey(Sesh_RMC_Account)
-    ip_address = models.GenericIPAddressField(default=None)
+    rmc = models.ForeignKey(Sesh_RMC_Account, blank=True, null=True)
+    site = models.ForeignKey(Sesh_Site, blank=True, null=True)
+    ip_address = models.GenericIPAddressField(default=None, null=True)
     minutes_last_contact = models.IntegerField(default=None)
-    signal_strength = models.IntegerField(default=None)
-    data_sent_24h = models.IntegerField(default=None)
+    signal_strength = models.IntegerField(default=None, null=True)
+    data_sent_24h = models.IntegerField(default=None, null=True)
     time = models.DateTimeField()
     target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
 
+    def clean(self):
+        if not self.rmc and not self.site:
+            raise ValidationError("RMC status object requires either rmc account or sesh site reference")
 
-
+    class Meta:
+        verbose_name = 'RMC Status'
+        verbose_name_plural = 'RMC Status\'s'
 
 
 
