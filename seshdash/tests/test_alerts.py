@@ -94,7 +94,7 @@ class AlertTestCase(TestCase):
         # test_display_alert_data
         """Getting the display alert data"""
         c = Client()
-        c.login(username = "patrick",password = "cdakcjocajica") 
+        c.login(username = "patrick",password = "cdakcjocajica")
 
 
         response=c.post('/get-alert-data/',{'alertId':'1'})
@@ -120,11 +120,5 @@ class AlertTestCase(TestCase):
 
         #test_get_alerts_notifications
         response = c.post('/notifications/',{})
-        self.assertEqual(response.status_code, 200)
-    
-    # Testing search
-    def test_search(self):
-        f = Client()
-        response = f.post('/search',{})
         self.assertEqual(response.status_code, 200)
 
