@@ -32,9 +32,10 @@ Morris.Bar({
   labels: ['Cloud Cover %']
 });
 */
+//nano bar
+        
 
          
-
         
 
 /*
@@ -75,7 +76,7 @@ $('#containerhigh').highcharts({
                 }
             },
             labels: {
-                format: '{value} HW',
+                format: '{value} Wh',
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -100,7 +101,7 @@ $('#containerhigh').highcharts({
             yAxis: 1,
             data:pv,
             tooltip: {
-                valueSuffix: 'wh'
+                valueSuffix: ' Wh'
             }
 
         }, {
@@ -138,6 +139,7 @@ function getCookie(name) {
 
 var csrftoken = getCookie('csrftoken');
 
+// Get high chart data here
 
 get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
@@ -181,7 +183,6 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
          $('.clickable-row').click(function(){
          window.location.href =$(this).data("href");  }); });
         });
-
 
 
 
