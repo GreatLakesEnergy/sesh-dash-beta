@@ -640,6 +640,10 @@ def silence_alert(request):
 @login_required
 def get_latest_bom_data(request):
     latest_bom = BoM_Data_Point.objects.order_by('-time')[0]
+    
+    if not latest_bom:
+        return HttpResponse([])
+
     latest_bom_data = []
     latest_bom_data.append({"item": "State of Charge", "value":str(latest_bom.soc) + '%' })
     latest_bom_data.append({"item": "Battery Voltage", "value":latest_bom.battery_voltage})
