@@ -619,6 +619,9 @@ def get_latest_bom_data(request):
     latest_bom_data.append({"item": "Recent Contact", "value": get_timesince(latest_bom.time)})
 
     return HttpResponse(json.dumps(latest_bom_data))
+
+   # Requesting all site names and site id from the database
+@login_required
 def search(request):
     data=[]
     sites = Sesh_Site.objects.all()
