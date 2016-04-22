@@ -268,6 +268,7 @@ BOWER_INSTALLED_APPS = (
             'react',
             'babel',
             'nanobar',
+            'awesomplete',
             )
 
 ANONYMOUS_USER_ID = -1

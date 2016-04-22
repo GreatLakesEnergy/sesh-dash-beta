@@ -114,6 +114,12 @@ class AlertTestCase(TestCase):
         else:
             self.assertEqual(alert_sms_sent.count(), 1)
 
+    # Testing search
+    def test_search(self):
+        f = Client()
+        response = f.post('/search',{})
+        self.assertEqual(response.status_code, 200)
 
+	
 
 

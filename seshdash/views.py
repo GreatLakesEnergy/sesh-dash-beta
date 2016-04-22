@@ -42,6 +42,11 @@ from seshdash.tasks import get_historical_BoM, generate_auto_rules
 #generics
 import logging
 
+#Autocomplete
+from seshdash.models import *
+from django.forms import model_to_dict
+import json
+
 
 @login_required(login_url='/login/')
 def index(request,site_id=0):
@@ -607,7 +612,6 @@ def silence_alert(request):
 
 def get_latest_bom_data(request):
     latest_bom = BoM_Data_Point.objects.order_by('-time')[0]
-
     latest_bom_data = []
     latest_bom_data.append({"item": "State of Charge", "value":str(latest_bom.soc) + '%' })
     latest_bom_data.append({"item": "Battery Voltage", "value":latest_bom.battery_voltage})
@@ -615,3 +619,18 @@ def get_latest_bom_data(request):
     latest_bom_data.append({"item": "Recent Contact", "value": get_timesince(latest_bom.time)})
 
     return HttpResponse(json.dumps(latest_bom_data))
+def search(request):
+    data=[]
+    sites = Sesh_Site.objects.all()
+    site = sites[0]
+    site.site_name
+    for site in sites:
+        data.append({"key":site.id,"value":site.site_name})
+    return HttpResponse(json.dumps(data))
+
+
+
+
+
+
+    

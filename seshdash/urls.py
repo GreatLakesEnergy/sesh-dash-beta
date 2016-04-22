@@ -20,5 +20,6 @@ urlpatterns = [
             url(r'^silence-alert', views.silence_alert),
             url(r'^get-alerts', views.get_alerts),
             url(r'^get-latest-bom-data', views.get_latest_bom_data),
+            url(r'^search', views.search),
             ]
 
