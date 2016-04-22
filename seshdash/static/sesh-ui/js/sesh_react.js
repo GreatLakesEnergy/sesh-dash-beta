@@ -126,8 +126,8 @@ function getLatestBoMData(){
         };
 
     $.post('/get-latest-bom-data', bomJsonData, function(data){
-        data = JSON.parse(data);
-        console.log(data);
+        console.log(data)
+        data = JSON.parse(data)
         ReactDOM.render(
            <LatestBoMData data={data} />,
            document.getElementById('latest-bom-data')

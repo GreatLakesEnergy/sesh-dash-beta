@@ -51,7 +51,7 @@ tr.modal-toggle {
 
 .hist-extra-info {
  text-align: center;
- 
+
 }
 
 
@@ -60,7 +60,7 @@ tr.modal-toggle {
  padding: 10px 0;
 }
 
- 
+
 .hist-extra-info .extra-info-entity:last-child {
  border-right: 0;
 }
@@ -88,7 +88,7 @@ tr.modal-toggle {
   height: 170%;
   width: 6px;
   display: inline-block;
-  
+
   -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
   animation: sk-stretchdelay 1.2s infinite ease-in-out;
 }
@@ -114,15 +114,15 @@ tr.modal-toggle {
 }
 
 @-webkit-keyframes sk-stretchdelay {
-  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
+  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
   20% { -webkit-transform: scaleY(1.0) }
 }
 
 @keyframes sk-stretchdelay {
-  0%, 40%, 100% { 
+  0%, 40%, 100% {
     transform: scaleY(0.4);
     -webkit-transform: scaleY(0.4);
-  }  20% { 
+  }  20% {
     transform: scaleY(1.0);
     -webkit-transform: scaleY(1.0);
   }
@@ -224,9 +224,20 @@ padding : 0px;
   background:#337ab7;
   padding : 5px 5px 6px 5px;
   border-radius: 4px 4px 0 0;
-  font-size: 19px; 
+  font-size: 19px;
          }
 
 #site-counter{
    padding-left: 100px;
        }
+
+div.awesomplete > ul {
+    margin: 42px 0px;
+}
+.btn-default{
+    margin-bottom: 5px;
+}
+.error {
+  border:2px solid #CA2F2F;
+  box-shadow: 10px red;
+}

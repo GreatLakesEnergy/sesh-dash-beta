@@ -94,7 +94,7 @@ class AlertTestCase(TestCase):
         # test_display_alert_data
         """Getting the display alert data"""
         c = Client()
-        c.login(username = "patrick",password = "cdakcjocajica") 
+        c.login(username = "patrick",password = "cdakcjocajica")
 
 
         response=c.post('/get-alert-data/',{'alertId':'1'})
@@ -118,9 +118,7 @@ class AlertTestCase(TestCase):
         else:
             self.assertEqual(alert_sms_sent.count(), 1)
 
-
         #test_get_alerts_notifications
         response = c.post('/notifications/',{})
         self.assertEqual(response.status_code, 200)
-
 
