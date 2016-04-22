@@ -261,7 +261,8 @@ $.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
    }
    var input = document.getElementById('search');
    /* proving an array of options to be suggested when a user types using awesomplete plugin */
-   new Awesomplete(input,{list:sitename});
+   new Awesomplete(input,{list: sitename});
+   console.log("running");
 });
 /* checking if ENTER button is pressed */
 $('.form-control').keypress(function(event){
