@@ -644,7 +644,7 @@ def get_latest_bom_data(request):
     if latest_bom:
         latest_bom = latest_bom.first()
     else:
-        return HttpResponse({})
+        return HttpResponse(json.dumps({}))
 
     latest_bom_data = []
     latest_bom_data.append({"item": "State of Charge", "value":str(latest_bom.soc) + '%' })
