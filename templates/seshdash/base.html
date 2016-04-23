@@ -174,6 +174,11 @@
 
     {% block footer %}
 
+    <script type="text/javascript">
+    {% block javascript %}
+    {% endblock %}
+    </script>
+ 
     <!-- PACE javascript -->
    <script src = '{% static  'PACE/pace.min.js' %}' > </script>
 
@@ -204,22 +209,21 @@
     <!-- momentjs -->
     <script src='{% static 'moment/min/moment.min.js' %}'> </script>
 
-    <script type="text/javascript">
-    {% block javascript %}
-    {% endblock %}
-    </script>
-    {% block seshjs %}
+    <!-- Calendar heatmap js -->
+    <script src='{% static 'calendar-heatmap/src/calendar-heatmap.js' %}' > </script>
+    <!-- mapbox javascript -->
+    <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
+
+   {% block seshjs %}
         <!-- sesh javascript -->
         <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
         <!-- Sesh React -->
         <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
         <!-- Maps configuration -->
         <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
+    
     {% endblock %}
-    <!-- Calendar heatmap js -->
-    <script src='{% static 'calendar-heatmap/src/calendar-heatmap.js' %}' > </script>
-    <!-- mapbox javascript -->
-    <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
+
    {% endblock %}
   </body>
 </html>
