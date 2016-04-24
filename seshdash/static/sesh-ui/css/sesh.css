@@ -241,3 +241,6 @@ div.awesomplete > ul {
   border:2px solid #CA2F2F;
   box-shadow: 10px red;
 }
+.page-header{
+  font-weight: 300;
+}
