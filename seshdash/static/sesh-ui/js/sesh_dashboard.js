@@ -190,7 +190,6 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
       $('.modal-toggle').click(function()  {
           // Get necessary data for the get_alert_sort
           alertId = $(this).attr('classid');
-          console.log("alertId is " + alertId)
           // Constructing the json
           var jsonData = {"alertId" : alertId,
                           csrfmiddlewaretoken: csrftoken};
@@ -262,7 +261,6 @@ $.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
    var input = document.getElementById('search');
    /* proving an array of options to be suggested when a user types using awesomplete plugin */
    new Awesomplete(input,{list: sitename});
-   console.log("running");
 });
 /* checking if ENTER button is pressed */
 $('.form-control').keypress(function(event){

@@ -265,20 +265,19 @@ INSTALLED_APPS = (
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
             'jquery#2.2.1',
-            'mapbox.js',
-            'd3#3.3.13',
+            'mapbox.js#2.4.0',
+            'd3#3.5.16',
             'nvd3#1.7.1',
-            'highcharts-release',
-            'bootstrap',
-            'font-awesome',
-            'metisMenu',
-            'morrisjs',
-            'raphael',
-            'react',
-            'babel',
-            'awesomplete',
-            'calendar-heatmap',
-            'pace',
+            'highcharts-release#4.2.4',
+            'bootstrap#3.3.6',
+            'font-awesome#4.6.1',
+            'metisMenu#2.5.0',
+            'morrisjs#0.5.1',
+            'raphael#2.2.0',
+            'react#0.14.8',
+            'babel#d54d59ff74',
+            'awesomplete#1.1.0',
+            'pace#1.0.2',
             )
 
 ANONYMOUS_USER_ID = -1

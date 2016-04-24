@@ -58,7 +58,6 @@ var alertsJsonData = {csrfmiddlewaretoken: csrftoken,
 
 function getLatestAlerts () {
     $.post('/get-alerts', alertsJsonData,function(data) {
-        console.log(data);
         var jsonData = JSON.parse(data);
         ReactDOM.render(
             <AlertList data={jsonData} />,
@@ -126,7 +125,6 @@ function getLatestBoMData(){
         };
 
     $.post('/get-latest-bom-data', bomJsonData, function(data){
-        console.log(data)
         data = JSON.parse(data)
         ReactDOM.render(
            <LatestBoMData data={data} />,
