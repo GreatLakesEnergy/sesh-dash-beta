@@ -634,9 +634,11 @@ def silence_alert(request):
 
 @login_required
 def get_latest_bom_data(request):
-    latest_bom = BoM_Data_Point.objects.order_by('-time')[0]
+    latest_bom = BoM_Data_Point.objects.order_by('-time')
     
     if not latest_bom:
+        latest_bom = latest_bom.first()
+    else:
         return HttpResponse([])
 
     latest_bom_data = []
@@ -674,6 +676,5 @@ def historical_data(request):
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
-
 
 
