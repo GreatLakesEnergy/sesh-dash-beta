@@ -691,8 +691,3 @@ def historical_data(request):
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 80ddd566db0347596a2aa7bf938624dae6d8542a
