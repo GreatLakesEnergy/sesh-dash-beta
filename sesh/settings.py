@@ -277,7 +277,6 @@ BOWER_INSTALLED_APPS = (
             'react#0.14.8',
             'babel#d54d59ff74',
             'awesomplete#1.1.0',
-            'calendar-heatmap#0.3.0',
             'pace#1.0.2',
             )
 
