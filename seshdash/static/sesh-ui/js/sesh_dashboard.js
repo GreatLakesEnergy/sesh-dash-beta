@@ -165,23 +165,21 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
      $.post('/notifications',jsonData, function(data){
 
           var alertData = JSON.parse(data);
-          if(alertData[0].alerts_counter !==0){
-             $('#pop').html(alertData[0].alerts_counter);
-              }
+          $('#pop').html(alertData[0].alerts_counter);
+             
 
           var out= $("#alert-notification-table");
           var element = '';
           var i;
 
           for(i=0 ; i<alertData.length ; i++){
-                if(alertData[i].counter !== 0 ) {       
                     element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
                                '<td>'+ alertData[i].site +  '</td>' +
                                '<td id="site-counter">'+ alertData[i].counter + '</td>' +
                                '</tr>';
                     
                    out.append(element);
-                   }}
+                   }
                 
                 $('.clickable-row').click(function(){
                    window.location.href =$(this).data("href");
