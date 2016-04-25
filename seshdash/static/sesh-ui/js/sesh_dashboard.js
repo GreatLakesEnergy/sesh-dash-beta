@@ -165,12 +165,19 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
      $.post('/notifications',jsonData, function(data){
 
           var alertData = JSON.parse(data);
-          $('#pop').html(alertData[0].alerts_counter);
-             
-
+ 
           var out= $("#alert-notification-table");
           var element = '';
           var i;
+ 
+
+
+         for (i=0 ; i<alertData.length ;i++){
+               sum_of_counters = 0;
+               sum_of_counters += alertData[i].counter;
+               $('#pop').html(sum_of_counters);
+              }
+
 
           for(i=0 ; i<alertData.length ; i++){
                     element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +

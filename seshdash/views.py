@@ -590,7 +590,6 @@ def get_notifications_alerts(request):
               arr.append({
                 "site":site.site_name,
                 "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
-                "alerts_counter":Sesh_Alert.objects.filter(isSilence=False).count(),
                 "site_id":site.id,
                 })
  
