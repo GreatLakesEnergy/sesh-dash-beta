@@ -172,6 +172,9 @@ def get_historical_BoM(site_pk,start_at):
         count = 0
         site = Sesh_Site.objects.get(pk=site_pk)
         site_id = site.vrm_site_id
+        if not site_id:
+            logging.info("skipping site %s has not vrm_site_id"%site)
+            return 0
         vh_client = VictronHistoricalAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
         #site_id is a tuple
         #print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
@@ -561,7 +564,10 @@ def alert_engine():
     for site in sites:
         alert_check(site)
 
-
+def download_vrm_historical_data():
+    for site in Sesh_Site.objects.all():
+        if site.vrm_site_id:
+            get_historical_BoM.delay(site.pk,get_epoch_from_datetime(site.comission_date))
 
 
 
