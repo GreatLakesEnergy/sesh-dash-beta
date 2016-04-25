@@ -173,20 +173,20 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
           for(i=0 ; i<alertData.length ; i++){
 
-                 sum_of_counters += alertData[i].counter;
-                 $('#pop').html(sum_of_counters);
-                 if (sum_of_counters > 0){
-                     $('#pop').show();
-                  }
-
-                   element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
+              sum_of_counters += alertData[i].counter;                                                                                      element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
                                '<td>'+ alertData[i].site +  '</td>' +
                                '<td id="site-counter">'+ alertData[i].counter + '</td>' +
                                '</tr>';
                     
                    out.append(element);
                    }
-                
+
+                 $('#pop').html(sum_of_counters);
+                 if (sum_of_counters > 0){
+                     $('#pop').show();
+                  }
+
+
                 $('.clickable-row').click(function(){
                    window.location.href =$(this).data("href");
                  });
