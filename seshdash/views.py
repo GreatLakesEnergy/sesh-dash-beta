@@ -14,8 +14,8 @@ from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
 
-#Import Models import_datas
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account
+#Import Models and Forms
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point
 from django.db.models import Avg
 from django.db.models import Sum
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
@@ -25,10 +25,12 @@ from seshdash.utils import time_utils, rmc_tools
 from pprint import pprint
 
 #Import utils
+from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince
-from seshdash.utils.model_tools import get_model_first_reference
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
+from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
 
 # Import for API
@@ -41,6 +43,11 @@ from seshdash.tasks import get_historical_BoM, generate_auto_rules
 
 #generics
 import logging
+
+#Autocomplete
+from seshdash.models import *
+from django.forms import model_to_dict
+import json
 
 
 @login_required(login_url='/login/')
@@ -632,7 +639,12 @@ def silence_alert(request):
 
 @login_required
 def get_latest_bom_data(request):
-    latest_bom = BoM_Data_Point.objects.order_by('-time')[0]
+    latest_bom = BoM_Data_Point.objects.order_by('-time')
+    
+    if latest_bom:
+        latest_bom = latest_bom.first()
+    else:
+        return HttpResponse(json.dumps({}))
 
     latest_bom_data = []
     latest_bom_data.append({"item": "State of Charge", "value":str(latest_bom.soc) + '%' })
@@ -641,3 +653,41 @@ def get_latest_bom_data(request):
     latest_bom_data.append({"item": "Recent Contact", "value": get_timesince(latest_bom.time)})
 
     return HttpResponse(json.dumps(latest_bom_data))
+
+   # Requesting all site names and site id from the database
+@login_required
+def search(request):
+    data=[]
+    sites = Sesh_Site.objects.all()
+    site = sites[0]
+    site.site_name
+    for site in sites:
+        data.append({"key":site.id,"value":site.site_name})
+    return HttpResponse(json.dumps(data))
+
+@login_required
+def historical_data(request):
+    # If ajax request
+    if request.method == 'POST': 
+        sort_value = request.POST.get('sort_value', '')
+        historical_data = get_historical_dict(column=sort_value)
+        return HttpResponse(json.dumps(historical_data))
+   
+    # On page load
+    else:
+        sort_data_dict = get_model_verbose(Daily_Data_Point)
+        # Removing values that are not data historical values
+        sort_data_dict.pop('id')
+        sort_data_dict.pop('site')
+        sort_data_dict.pop('date')
+
+ 
+        sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
+        active_site = sites[0]
+        context_dict = {}
+        context_dict['sites'] = sites
+        context_dict['site_id'] = 0
+        context_dict['active_site'] = active_site
+        context_dict['sort_keys'] = sort_data_dict.keys()
+        context_dict['sort_dict'] = sort_data_dict
+        return render(request, 'seshdash/historical-data.html', context_dict);

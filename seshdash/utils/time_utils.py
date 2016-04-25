@@ -2,6 +2,8 @@ from datetime import datetime,timedelta
 from time import localtime,strftime
 from django.conf import settings
 from  pytz import timezone
+
+
 def get_epoch():
     """
     Return number of seconds since 1970-01-01- epoch
@@ -162,3 +164,9 @@ def format_timesince_seconds(seconds):
             return seconds/86400, " day ago"
         else:
             return seconds/86400, " days ago"
+
+def get_date_dashed(date):
+    date_string = str(date.year) + '-' + str(date.month) +  '-' + str(date.day)
+    return date_string
+
+

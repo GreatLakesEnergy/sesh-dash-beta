@@ -9,6 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,500,700,300,300italic' rel='stylesheet' type='text/css'>
 
     {% load nvd3_tags %}
 
@@ -17,14 +18,15 @@
 
     <!-- jQuery TODO moving this here for debugging needs to be here for nvd3 to work -->
     <script src='{% static 'jquery/dist/jquery.js' %}'></script>
-
-
+    <!--Auto complete plugins -->
+    <script src='{% static 'awesomplete/awesomplete.js'%}'></script>
     <!-- mapbox-->
     <link href='{% static 'mapbox.js/mapbox.css' %}' rel='stylesheet' />
-
+    <!-- Autocomplete css -->
+    <link href='{% static 'awesomplete/awesomplete.css' %}' rel="stylesheet">
     <!-- bootstrap   -->
     <link href='{% static 'bootstrap/dist/css/bootstrap.css' %}' rel="stylesheet">
-   
+
     <!--PACE -->
     <link href ='{% static 'PACE/themes/blue/pace-theme-minimal.css' %}' rel="stylesheet">
 
@@ -40,10 +42,13 @@
     <!-- SESH CSS -->
     <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
 
+    <!-- Calendar heatmap css -->
+    <link href='{% static 'sesh-ui/css/calendar-heatmap.css' %}' rel="stylesheet">
+
     <!-- Custom Fonts -->
     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel="stylesheet" type="text/css">
-    
-    
+
+
 
   <title>SESH Dashboard (beta)</title>
 
@@ -72,7 +77,7 @@
                         <li>
                        <div class = "form-box">
                         <div class ="form-top">
-                          Alerts 
+                          Alerts
                           </div>
                         <div class="form-bottom">
                         <div class ="table-responsive">
@@ -85,7 +90,7 @@
                            </thead>
 
                            <tbody id ="alert-notification-table">
-                           </tbody>  
+                           </tbody>
                           </table>
                          </div>
                          </div>
@@ -114,8 +119,8 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li class="sidebar-search">
-                            <div class="input-group custom-search-form">
-                                <input type="text" class="form-control" placeholder="Search...">
+                            <div class="input-group custom-search-form" id="form-searching">
+                                <input type="text" id="search" class="form-control" placeholder="Search...">
                                 <span class="input-group-btn">
                                 <button class="btn btn-default" type="button">
                                     <i class="fa fa-search"></i>
@@ -126,6 +131,9 @@
                         </li>
                         <li>
                             <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                        </li>
+                        <li>
+                            <a href='/historical_data'><i class="fa fa-history fa-fw"></i> Historical Data </a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Sites<span class="fa arrow"></span></a>
@@ -166,6 +174,11 @@
 
     {% block footer %}
 
+    <script type="text/javascript">
+    {% block javascript %}
+    {% endblock %}
+    </script>
+ 
     <!-- PACE javascript -->
    <script src = '{% static  'PACE/pace.min.js' %}' > </script>
 
@@ -176,46 +189,41 @@
     <script src='{% static 'metisMenu/dist/metisMenu.min.js' %}' ></script>
 
     <!-- Morris Charts JavaScript -->
-    <script src='{% static 'raphael/raphael-min.js' %}' ></script>
+    <script src='{% static 'raphael/raphael.min.js' %}' ></script>
 
     <script src='{% static 'morris.js/morris.min.js' %}' ></script>
 
     <!-- Custom Theme JavaScript -->
     <script src='{% static  'sesh-ui/js/sb-admin-2.js' %}'  > </script>
-
     <!-- ReactJS -->
-    <script src='{%static 'react/react.js' %}' ></script>
-
+    <script src='{%static 'react/react.min.js' %}' ></script>
     <!-- ReactDOM -->
-    <script src='{%static 'react/react-dom.js' %}'></script>
+    <script src='{%static 'react/react-dom.min.js' %}'></script>
 
     <!-- Babel txt intrepreter -->
     <script src='{%static 'babel/browser.js' %}'></script>
-
-    <!-- Sesh React -->
-    <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
-
     <!-- high charts -->
     <script src='{% static  'highcharts/highcharts.js' %}'  > </script>
+    <!-- d3js -->
+    <script src='{% static 'd3/d3.min.js' %}'> </script>
+    <!-- momentjs -->
+    <script src='{% static 'moment/min/moment.min.js' %}'> </script>
 
-
-    <!-- sesh javascript -->
-    <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
-
-    <script type="text/javascript">
-    {% block javascript %}
-
-    {% endblock %}
-    </script>
-
+    <!-- Calendar heatmap js -->
+    <script src='{% static 'sesh-ui/js/calendar-heatmap.js' %}' > </script>
     <!-- mapbox javascript -->
     <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
-    <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
-   
+
+   {% block seshjs %}
+        <!-- sesh javascript -->
+        <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
+        <!-- Sesh React -->
+        <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
+        <!-- Maps configuration -->
+        <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
+    
+    {% endblock %}
 
    {% endblock %}
-
   </body>
-
-
 </html>

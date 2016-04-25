@@ -55,11 +55,9 @@ var alertsJsonData = {csrfmiddlewaretoken: csrftoken,
                       site_id: active_site_id,
                      };
 
-getLatestAlerts();
 
 function getLatestAlerts () {
     $.post('/get-alerts', alertsJsonData,function(data) {
-        console.log(data);
         var jsonData = JSON.parse(data);
         ReactDOM.render(
             <AlertList data={jsonData} />,
@@ -68,6 +66,8 @@ function getLatestAlerts () {
     });
    setTimeout(getLatestAlerts, REFRESH_TIME) // Get alerts for every five minutes
 }
+
+getLatestAlerts();
 
 
 $('.silence-alert').click(function(){
@@ -125,8 +125,7 @@ function getLatestBoMData(){
         };
 
     $.post('/get-latest-bom-data', bomJsonData, function(data){
-        data = JSON.parse(data);
-        console.log(data);
+        data = JSON.parse(data)
         ReactDOM.render(
            <LatestBoMData data={data} />,
            document.getElementById('latest-bom-data')

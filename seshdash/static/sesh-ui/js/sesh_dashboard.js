@@ -1,3 +1,4 @@
+
 /*
  * Barchart for energy production
 */
@@ -32,10 +33,8 @@ Morris.Bar({
   labels: ['Cloud Cover %']
 });
 */
+//nano bar
 
-         
-
-        
 
 /*
  High Chart Draw Function
@@ -75,7 +74,7 @@ $('#containerhigh').highcharts({
                 }
             },
             labels: {
-                format: '{value} HW',
+                format: '{value} Wh',
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -100,7 +99,7 @@ $('#containerhigh').highcharts({
             yAxis: 1,
             data:pv,
             tooltip: {
-                valueSuffix: 'wh'
+                valueSuffix: ' Wh'
             }
 
         }, {
@@ -138,6 +137,7 @@ function getCookie(name) {
 
 var csrftoken = getCookie('csrftoken');
 
+// Get high chart data here
 
 get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
@@ -159,7 +159,7 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
     $(document).ready(function(){
     alertId = $(this).attr('classid');
-    
+
     var jsonData = {"alertId" : alertId,
                       csrfmiddlewaretoken: csrftoken};
      $.post('/notifications',jsonData, function(data){
@@ -196,13 +196,11 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
 
 
-
   function setModalLoad() {
 
       $('.modal-toggle').click(function()  {
           // Get necessary data for the get_alert_sort
           alertId = $(this).attr('classid');
-          console.log("alertId is " + alertId)
           // Constructing the json
           var jsonData = {"alertId" : alertId,
                           csrfmiddlewaretoken: csrftoken};
@@ -249,8 +247,79 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
                modal.modal('hide');
           });
       });
-     
 
-     
                   }
-      
+
+      /* Auto compete on search*/
+var i;
+var textid;
+var textinput;
+var option;
+var matched;
+var siteid = [];
+var sitename = [];
+/* post request to retrieve all sitename and site id */
+$.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
+    option = JSON.parse(data);
+    /* extracting site name array from response dict */
+   for (i=0;i < option.length;i++){
+    sitename.push(option[i].value)
+   }
+   /* extracting site id array from response dict */
+   for (i=0; i< option.length; i++){
+    siteid.push(option[i].key)
+   }
+   var input = document.getElementById('search');
+   /* proving an array of options to be suggested when a user types using awesomplete plugin */
+   new Awesomplete(input,{list: sitename});
+});
+/* checking if ENTER button is pressed */
+$('.form-control').keypress(function(event){
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    var matched = false;
+    if(keycode == '13'){
+        textinput = $(".form-control").val();
+        for (i=0;i<sitename.length;i++){
+            /* checking if entered value exists in a sitename array */
+             if (sitename[i] == textinput){
+                  matched = true;
+                  for (i=0 ;i < option.length; i++){
+                    /* finding the id of the entered sitename */
+                       if (option[i].value == textinput){
+                             textid = option[i].key;
+                             /* Linking to the asked sitename`s page */
+                             window.location.replace("/dash/" + textid);
+                        }
+                  }
+             { break; }
+             }
+        }
+        if (!matched){
+          document.getElementById("search").className = document.getElementById("search").className + " error";
+        }
+    }
+});
+/* search button */
+$(".btn-default").click(function(){
+        textinput = $(".form-control").val();
+        for (i=0;i<sitename.length;i++){
+            /* checking if entered value exists in a sitename array */
+             if (sitename[i] == textinput){
+                  matched = true;
+                  for (i=0 ;i < option.length; i++){
+                    /* finding the id of the entered sitename */
+                       if (option[i].value == textinput){
+                             textid = option[i].key;
+                             /* Linking to the asked sitename`s page */
+                             window.location.replace("/dash/" + textid);
+                        }
+                  }
+             { break; }
+
+             }
+        }
+        if (!matched){
+          document.getElementById("search").className = document.getElementById("search").className + " error";
+        }
+});
+

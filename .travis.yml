@@ -1,6 +1,7 @@
 language: python
 python:
     - "2.7"
+
 addons:
     apt:
         packages:
@@ -11,11 +12,15 @@ addons:
             - nodejs-legacy
             - redis-server
             - redis-client
+
 before_install:
       - wget https://s3.amazonaws.com/influxdb/influxdb_0.10.1-1_amd64.deb
       - sudo dpkg -i influxdb_0.10.1-1_amd64.deb
       - sudo /etc/init.d/influxdb start
       - sleep 8
+
+notifications:
+      slack: gledev:BDwNaKy9PDs7g7zSd5c3cMx
 
 install:
     - pip install -r requirements.txt
@@ -23,4 +28,4 @@ install:
 before_script:
       - python manage.py migrate --noinput
 script: 
-    - python -W ignore manage.py test
+    - python -W ignore manage.py  test -v 2
