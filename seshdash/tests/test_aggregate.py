@@ -30,6 +30,7 @@ from seshdash.utils.time_utils import get_time_interval_array
 from seshdash.data.db.influx import Influx
 from django.conf import settings
 from seshdash.tasks import get_aggregate_daily_data, send_reports
+from seshdash.tests.data_generation import create_test_data
 
 
 # This test case written to test alerting module.
@@ -68,7 +69,7 @@ class AggregateTestCase(TestCase):
                                              has_genset=True,
                                              has_grid=True)
 
-        self.no_points = self.create_test_data()
+        self.no_points = create_test_data(self.site)
         #create test user
         self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
         #assign a user to the sites
@@ -132,30 +133,3 @@ class AggregateTestCase(TestCase):
             self.assertEqual(response.status_code, 200)
 
 
-    def create_test_data(self):
-        #TODO test weekly and monthly reports
-        data_point_dates = generate_date_array()
-        voltage_in = 220
-        voltage_out = 220
-        # Simulate Grid outage
-        for time_val in data_point_dates:
-                dp = Data_Point.objects.create(
-                                            site=self.site,
-                                            soc=get_random_int(),
-                                            battery_voltage=get_random_interval(22,28),
-                                            time=time_val,
-                                            AC_Voltage_in=voltage_in * get_random_binary(),
-                                            AC_Voltage_out=voltage_out,
-                                            AC_input=get_random_interval(100,500),
-                                            AC_output=get_random_interval(-500,500),
-                                            AC_output_absolute=get_random_interval(100,500),
-                                            AC_Load_in=get_random_interval(100,500),
-                                            AC_Load_out=get_random_interval(100,500),
-                                            pv_production=get_random_interval(100,500))
-                # Also send ton influx
-                dp_dict = model_to_dict(dp)
-                dp_dict.pop('time')
-                dp_dict.pop('inverter_state')
-                dp_dict.pop('id')
-                self.i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),tags={"site_name":self.site.site_name})
-        return len(data_point_dates)
