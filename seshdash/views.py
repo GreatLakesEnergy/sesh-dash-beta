@@ -591,15 +591,15 @@ def get_notifications_alerts(request):
 
     arr = []
 
-
+    
     for site in sites:
-          arr.append({
-            "site":site.site_name,
-            "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
-            "alerts_counter":Sesh_Alert.objects.filter(isSilence=False).count(),
-            "site_id":site.id,
-            })
-
+        if(Sesh_Alert.objects.filter(isSilence=False ,site=site).count() != 0):
+              arr.append({
+                "site":site.site_name,
+                "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
+                "site_id":site.id,
+                })
+ 
     return HttpResponse(json.dumps(arr))
 
 
