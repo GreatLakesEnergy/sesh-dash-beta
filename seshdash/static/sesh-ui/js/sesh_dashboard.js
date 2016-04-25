@@ -169,10 +169,10 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
           var out= $("#alert-notification-table");
           var element = '';
           var i;
+          var sum_of_counters = 0;
+
           for(i=0 ; i<alertData.length ; i++){
 
-
-                 sum_of_counters = 0;
                  sum_of_counters += alertData[i].counter;
                  $('#pop').html(sum_of_counters);
                  if (sum_of_counters > 0){
