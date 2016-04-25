@@ -27,8 +27,9 @@ def alert_check(site):
     rules = Alert_Rule.objects.filter(site = site)
 
     for rule in rules:
-
-        if '#' in rule.check_field: # If the rule is valid (contains model and field_name)
+         
+        """ If the rule contains a model and a field, valid for  using model#checkfield """
+        if '#' in rule.check_field: 
             model, field_name = rule.check_field.split('#')
              
             # Getting the model name and the latest value of the model field
@@ -36,6 +37,8 @@ def alert_check(site):
             data_point = model.objects.all().order_by('-id')[0]
             real_value = getattr(data_point, field_name)
 
+
+        """ If there is an alert """
         if ops[rule.operator](real_value,rule.value):
             content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(site.site_name,rule.check_field,rule.operator,rule.value,real_value)
 
@@ -58,6 +61,8 @@ def alert_check(site):
             logging.debug("emailing %s" %email_recipients)
             #print "emailing %s"%recipients
             # recipients = ["seshdash@gmail.com",]
+            
+            """ Creating an alert object """
             alert_obj = Sesh_Alert.objects.create(
                     site = site,
                     alert=rule,
@@ -91,3 +96,12 @@ def alertEmail(data_point,content,recipients):
 
 def alertSms(data_point,content,recipients):
     return send_sms(recipients, content)
+
+def unsilenced_alerts(site):
+    """ Return the unsilenced alerts of a site if any, otherwiser returns false """
+    unsilenced_alerts = Sesh_Alert.objects.filter(site=site, isSilence=True)
+
+    if unsilenced_alerts:
+        return unsilenced_alerts
+    else:
+        return False
