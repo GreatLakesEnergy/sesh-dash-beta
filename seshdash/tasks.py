@@ -184,20 +184,20 @@ def get_historical_BoM(site_pk,start_at):
             try:
                 data_point = BoM_Data_Point(
                     site = site,
-                    time = row['Date Time'], #TODO make sure this datetime aware
-                    soc = row['Battery State of Charge (System)'],
-                    battery_voltage = row['Battery voltage'],
-                    AC_input = row['Input power 1'],
-                    AC_output =  row['Output power 1'],
-                    AC_Load_in =  row['Input current phase 1'],
-                    AC_Load_out =  row['Output current phase 1'],
-                    inverter_state = row['VE.Bus Error'],
-                    pv_production = row['PV - AC-coupled on input L1'], # IF null need to put in 0
+                    time = row.get('Date Time'), #TODO make sure this datetime aware
+                    soc = row.get('Battery State of Charge (System)'),
+                    battery_voltage = row.get('Battery voltage'),
+                    AC_input = row.get('Input power 1'),
+                    AC_output =  row.get('Output power 1'),
+                    AC_Load_in =  row.get('Input current phase 1'),
+                    AC_Load_out =  row.get('Output current phase 1'),
+                    inverter_state = row.get('VE.Bus Error'),
+                    pv_production = row.get('PV - AC-coupled on input L1'), # IF null need to put in 0
                     #TODO these need to be activated
                     genset_state =  0,
                     relay_state = 0,
                     )
-                date =  row['Date Time']
+                date =  row.get('Date Time')
 
                 with transaction.atomic():
                     data_point.save()
