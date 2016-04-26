@@ -13,7 +13,7 @@ from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
-from seshdash.utils.alert import alert_generator
+from seshdash.utils.alert import alert_generator, alert_status_check
 from seshdash.utils.reporting import prepare_report
 from seshdash.data.db.influx import Influx
 
@@ -74,7 +74,7 @@ def generate_auto_rules(site_id):
                         send_mail = send_mail
             )
 
-    # Create battery low voltage alarm
+    # Create soc low voltage alarm
     soc_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#soc',
                         value = 20,
@@ -146,8 +146,7 @@ def get_BOM_data():
 
                         print "BoM Data saved"
                         # Alert if check(data_point) fails
-                        alert_generator(data_point)
-                        # alert_status_check(data_point, site)
+
         except IntegrityError, e:
             logging.debug("Duplicate entry skipping data point")
             pass
@@ -561,7 +560,8 @@ def alert_engine():
     # TODO check for the latest 10 alerts
     for site in sites:
         alert_generator(site)
-
+        alert_status_check()
+     
 
 
 
