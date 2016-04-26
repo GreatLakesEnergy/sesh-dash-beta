@@ -1,7 +1,7 @@
 from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
-from seshdash.utils.model_tools import get_model_from_string
+from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
 from django.utils import timezone
 from guardian.shortcuts import get_users_with_perms
 import logging
@@ -16,90 +16,153 @@ import logging
 
 # Rules are based on sites. So you need to define a rule for each site if you want to check same configurations in several sites.
 # A Sesh_Alert object is created for each 'alert triggered and an email is send if the rule has send_mail option true
-def alert_check(site):
-    ops = {'lt': lambda x,y: x<y,
-           'gt': lambda x,y: x>y,
-           'eq' : lambda x,y: x==y,
-    }
-    email_recipients = []
-    sms_recipients = []
-    content = {}
+
+
+def alert_generator(site):
+    
+    mails = []
+    sms_numbers = []
     rules = Alert_Rule.objects.filter(site = site)
 
     for rule in rules:
-         
-        """ If the rule contains a model and a field, valid for  using model#checkfield """
-        if '#' in rule.check_field: 
-            model, field_name = rule.check_field.split('#')
-             
-            # Getting the model name and the latest value of the model field
-            model = get_model_from_string(model)
-            data_point = model.objects.all().order_by('-id')[0]
-            real_value = getattr(data_point, field_name)
+        # Get datapoint and value
+        data_point, real_value = get_alert_check_value(rule)
 
+        if data_point is not None and real_value is not None:
 
-        """ If there is an alert """
-        if ops[rule.operator](real_value,rule.value):
-            content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(site.site_name,rule.check_field,rule.operator,rule.value,real_value)
+            if check_alert(rule, real_value):
+                content = get_alert_content(site, rule, data_point, real_value)
+                mails, sms_numbers = get_recipients_for_site(site)
+          
+                alert_obj = alert_factory(site, rule, data_point)
 
-            # Get ready content for email
-            content['site'] = site.site_name
-            content['alert'] = content_str
-            content['time'] = data_point.time
-            content['data_point'] = data_point
-
-            # TODO rule object should have the list of related persons to send alert mail
-            users = get_users_with_perms(site)
-
-            # TODO to be removed
-            for user in users:
-                email_recipients.append(user.email)
-                if user.seshuser.phone_number and user.seshuser.on_call:
-                    sms_recipients.append(user.seshuser.phone_number)
-
-
-            logging.debug("emailing %s" %email_recipients)
-            #print "emailing %s"%recipients
-            # recipients = ["seshdash@gmail.com",]
+                if rule.send_mail:
+                     alert_obj.emailSent = alertEmail(data_point,content,mails)
             
-            """ Creating an alert object """
-            alert_obj = Sesh_Alert.objects.create(
-                    site = site,
-                    alert=rule,
-                    date=timezone.now(),
-                    isSilence=False,
-                    emailSent=False,
-                    slackSent=False,
-                    smsSent=False,
-                    point_model=type(data_point).__name__ )
-            alert_obj.save()
+                if rule.send_sms:
+                     alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
             
-            
-            # Set data point to point to alert
-            data_point.target_alert = alert_obj
-            data_point.save()
-            alerts = Sesh_Alert.objects.all()
+                alert_obj.save()
 
 
-            if rule.send_mail:
-                mail_sent = alertEmail(data_point,content,email_recipients)
-                alert_obj.emailSent = mail_sent
-            
-            if rule.send_sms:
-                sms_response = alertSms(data_point,content,sms_recipients)
-                alert_obj.smsSent = sms_response
-            
-            alert_obj.save()
+
 
 def alertEmail(data_point,content,recipients):
     return send_mail("Alert email from seshdash",recipients,content)
 
+
+
 def alertSms(data_point,content,recipients):
     return send_sms(recipients, content)
 
+
+
+def get_alert_check_value(rule):
+    """ Returns the value to check for alert from latest data point """
+      
+    # if rule is valid
+    if '#' in rule.check_field:
+        model, field_name = rule.check_field.split('#') # Get model and field names
+
+        # Getting the model name and the latest value of the model field
+        model = get_model_from_string(model)  # returns a model class ex 'BoM_Data_Point'
+        latest_data_point = get_latest_instance(model)
+      
+        if latest_data_point is not None:
+            data_point_value = getattr(latest_data_point, field_name)
+        else:
+            data_point_value = None
+            logging.error("No data points for %s", model)
+        
+        return latest_data_point, data_point_value
+
+    else:
+        logging.error('Invalid alert rule')
+        return False
+
+
+
+
+def check_alert(rule, data_point_value):
+    """ Checks the alert and returns boolean value true if there is alert and false otherwise """
+    
+    ops = {'lt': lambda x,y: x<y,
+           'gt': lambda x,y: x>y,
+           'eq' : lambda x,y: x==y,
+    }
+
+    """ If there is an alert """
+    if ops[rule.operator](data_point_value,rule.value):
+        return True
+    
+    else:
+        return False
+
+
+
+def get_alert_content(site, rule, data_point, value):
+    """ Returns a dictionary containing information about the alert """
+
+    content = {}
+
+    content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(site.site_name,rule.check_field,rule.operator,rule.value, value)
+
+    # Get ready content for email
+    content['site'] = site.site_name
+    content['alert'] = content_str
+    content['time'] = data_point.time
+    content['data_point'] = data_point
+
+    return content   
+  
+ 
+def get_recipients_for_site(site):
+    """ Returns mails and sms of users with allowance to recieve messages for site """
+    users = get_users_with_perms(site)
+    mails = []
+    sms_numbers = []    
+
+    # TODO to be removed
+    for user in users:
+
+        mails.append(user.email)
+        if user.seshuser.phone_number and user.seshuser.on_call:
+            sms_numbers.append(user.seshuser.phone_number)
+
+
+            logging.debug("emailing %s" % mails)
+            #print "emailing %s"%recipients
+            
+    return mails, sms_numbers
+    
+
+def alert_factory(site, rule, data_point):
+    """ Creating an alert object """
+    alert_obj = Sesh_Alert.objects.create(
+                site = site,
+                alert=rule,
+                date=timezone.now(),
+                isSilence=False,
+                emailSent=False,
+                slackSent=False,
+                smsSent=False,
+                point_model=type(data_point).__name__ )
+    alert_obj.save()
+  
+    # Set data point to point to alert
+    data_point.target_alert = alert_obj
+    data_point.save()
+   
+    return alert_obj
+
+
+  
+
+   
+
 def unsilenced_alerts(site):
     """ Return the unsilenced alerts of a site if any, otherwiser returns false """
-    unsilenced_alerts = Sesh_Alert.objects.filter(site=site, isSilence=True)
+    unsilenced_alerts = Sesh_Alert.objects.filter(site=site, isSilence=False)
 
     if unsilenced_alerts:
         return unsilenced_alerts

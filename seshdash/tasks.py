@@ -13,7 +13,7 @@ from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
-from seshdash.utils.alert import alert_check
+from seshdash.utils.alert import alert_generator
 from seshdash.utils.reporting import prepare_report
 from seshdash.data.db.influx import Influx
 
@@ -146,7 +146,8 @@ def get_BOM_data():
 
                         print "BoM Data saved"
                         # Alert if check(data_point) fails
-                        alert_check(data_point)
+                        alert_generator(data_point)
+                        # alert_status_check(data_point, site)
         except IntegrityError, e:
             logging.debug("Duplicate entry skipping data point")
             pass
@@ -559,7 +560,7 @@ def alert_engine():
 
     # TODO check for the latest 10 alerts
     for site in sites:
-        alert_check(site)
+        alert_generator(site)
 
 
 
