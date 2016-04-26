@@ -2,7 +2,7 @@
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 
-# Models
+# Model's
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
 from django.contrib.auth.models import User
 

@@ -19,7 +19,7 @@ import logging
 
 
 def alert_generator(site):
-    
+    """ Generates alerts for a given site """ 
     mails = []
     sms_numbers = []
     rules = Alert_Rule.objects.filter(site = site)
@@ -62,12 +62,15 @@ def get_alert_check_value(rule):
       
     # if rule is valid
     if '#' in rule.check_field:
+        latest_data_point = get_latest_data_point_for_rule(rule)
+        """ 
         model, field_name = rule.check_field.split('#') # Get model and field names
 
         # Getting the model name and the latest value of the model field
         model = get_model_from_string(model)  # returns a model class ex 'BoM_Data_Point'
         latest_data_point = get_latest_instance(model)
       
+        """
         if latest_data_point is not None:
             data_point_value = getattr(latest_data_point, field_name)
         else:
@@ -155,9 +158,6 @@ def alert_factory(site, rule, data_point):
    
     return alert_obj
 
-
-  
-
    
 
 def unsilenced_alerts(site):
@@ -168,3 +168,23 @@ def unsilenced_alerts(site):
         return unsilenced_alerts
     else:
         return False
+
+def get_latest_data_point_for_rule(rule):
+    """ Get the model and the field name from checkfield rule """
+    return  rule.check_field.split('#')
+   
+
+def get_latest_data_point_rule(site, rule):
+    field_name = get_field_name_from_rule(rule)
+    
+
+
+def alert_status_check():
+    """ Checks if the alerts are expired and silences them """
+    unsilenced_alerts = Sesh_Alert.objects.filter(isSilence=False)
+    
+    for alert in unsilenced_alerts:
+        site = alert.site
+        rule = alert.alert
+        latest_data_point = get_latest_data_point_rule(site, rule)    
+    
