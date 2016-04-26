@@ -172,6 +172,9 @@ def get_historical_BoM(site_pk,start_at):
         count = 0
         site = Sesh_Site.objects.get(pk=site_pk)
         site_id = site.vrm_site_id
+        if not site_id:
+            logging.info("skipping site %s has not vrm_site_id"%site)
+            return 0
         vh_client = VictronHistoricalAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
         #site_id is a tuple
         #print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
@@ -181,20 +184,20 @@ def get_historical_BoM(site_pk,start_at):
             try:
                 data_point = BoM_Data_Point(
                     site = site,
-                    time = row['Date Time'], #TODO make sure this datetime aware
-                    soc = row['Battery State of Charge (System)'],
-                    battery_voltage = row['Battery voltage'],
-                    AC_input = row['Input power 1'],
-                    AC_output =  row['Output power 1'],
-                    AC_Load_in =  row['Input current phase 1'],
-                    AC_Load_out =  row['Output current phase 1'],
-                    inverter_state = row['VE.Bus Error'],
-                    pv_production = row['PV - AC-coupled on input L1'], # IF null need to put in 0
+                    time = row.get('Date Time'), #TODO make sure this datetime aware
+                    soc = row.get('Battery State of Charge (System)'),
+                    battery_voltage = row.get('Battery voltage'),
+                    AC_input = row.get('Input power 1'),
+                    AC_output =  row.get('Output power 1'),
+                    AC_Load_in =  row.get('Input current phase 1'),
+                    AC_Load_out =  row.get('Output current phase 1'),
+                    inverter_state = row.get('VE.Bus Error'),
+                    pv_production = row.get('PV - AC-coupled on input L1'), # IF null need to put in 0
                     #TODO these need to be activated
                     genset_state =  0,
                     relay_state = 0,
                     )
-                date =  row['Date Time']
+                date =  row.get('Date Time')
 
                 with transaction.atomic():
                     data_point.save()
@@ -561,7 +564,10 @@ def alert_engine():
     for site in sites:
         alert_check(site)
 
-
+def download_vrm_historical_data():
+    for site in Sesh_Site.objects.all():
+        if site.vrm_site_id:
+            get_historical_BoM.delay(site.pk,get_epoch_from_datetime(site.comission_date))
 
 
 
