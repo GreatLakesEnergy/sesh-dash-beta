@@ -33,7 +33,7 @@ class Influx:
            db = database
 
         start_time = "now()"
-        query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  time  >  now() - {time_delta} GROUP BY time({bucket_size}) fill(0)"
+        query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  time  >=  {start} - {time_delta} AND time <= {start} GROUP BY time({bucket_size}) fill(0)"
 
         result_set_gen = []
         if not start == "now":
@@ -45,7 +45,8 @@ class Influx:
                                                     clause = clause,
                                                     clause_value = clause_val,
                                                     time_delta = time_delta,
-                                                    operator = operator
+                                                    operator = operator,
+                                                    start = start_time
                                                     )
 
         try:

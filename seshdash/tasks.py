@@ -77,7 +77,7 @@ def generate_auto_rules(site_id):
     # Create battery low voltage alarm
     soc_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#soc',
-                        value = 20,
+                        value = 30,
                         operator = 'lt',
                         send_sms = send_sms,
                         send_mail = send_mail
@@ -100,8 +100,9 @@ def generate_auto_rules(site_id):
 
 @shared_task
 def get_BOM_data():
+    # Get all sites that have vrm id
+    sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
 
-    sites = Sesh_Site.objects.all()
     for site in sites:
         try:
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
@@ -405,12 +406,12 @@ def get_grid_stats(measurement_dict_list, measurement_value, measurement_key, bu
     return result_dict
 
 
-def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=None, toSum=True):
+def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=None, toSum=True, operator='mean'):
     """
     Calculate aggregate values from Influx for provided measuruements
     """
     i = Influx()
-    result = 0
+    result = [0]
     operator = 'mean'
 
     clause_opts = {
@@ -420,7 +421,7 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
 
     if clause and not clause in clause_opts.keys():
         logging.error("unkown clause provided %s allowed %s"%(clause,clause_opts.keys()))
-        return 0
+        return result
 
     #get measurement values from influx
     if not toSum:
@@ -447,8 +448,7 @@ def get_aggregate_data(site, measurement, delta='24h', bucket_size='1h', clause=
         logging.debug("Aggregating %s %s agr:%s"%(measurement,aggr_results,agr_value))
     else:
         message = "No Values returned for aggregate. Check Influx Connection."
-        raise Exception (message)
-        #logging.warning(message)
+        logging.warning(message)
         #rollbar.report_message(message)
     return result
 
@@ -565,9 +565,9 @@ def alert_engine():
         alert_check(site)
 
 def download_vrm_historical_data():
-    for site in Sesh_Site.objects.all():
+    for site in Sesh_Site.objects.filter(vrm_site_is__isnull=True):
         if site.vrm_site_id:
-            get_historical_BoM.delay(site.pk,get_epoch_from_datetime(site.comission_date))
-
+            get_historical_BoM.delay(site.pk,time_utils.get_epoch_from_datetime(site.comission_date))
+            run_aggregate_on_historical(site.pk)
 
 
