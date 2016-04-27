@@ -73,9 +73,10 @@ def get_alert_check_value(site, rule):
         
         return latest_data_point, data_point_value
 
-    else:
-        logging.error('Invalid alert rule')
-        return False
+    else: 
+        logging.error("Invalid alert rule")
+        return None, None
+
 
 
 
@@ -160,9 +161,9 @@ def alert_factory(site, rule, data_point):
 
    
 
-def unsilenced_alerts(site):
+def get_unsilenced_alerts():
     """ Return the unsilenced alerts of a site if any, otherwiser returns false """
-    unsilenced_alerts = Sesh_Alert.objects.filter(site=site, isSilence=False)
+    unsilenced_alerts = Sesh_Alert.objects.filter(isSilence=False)
 
     if unsilenced_alerts:
         return unsilenced_alerts
@@ -173,7 +174,6 @@ def unsilenced_alerts(site):
 def get_latest_instance_site(site, model):
     """ Returns latest instance for models with site """
     latest_instance_site = model.objects.filter(site=site).order_by('-id')
-    latest_instance_site = model.objects.filter(site=site).order_by('-id')
 
     
     if latest_instance_site:
@@ -183,7 +183,7 @@ def get_latest_instance_site(site, model):
 
 
 def get_latest_data_point_for_rule(site, rule):
-
+    """ Returns the latest point in the model specified in the rule checkfield"""
     model, field_name = rule.check_field.split('#') # Get model and field names
 
     # Getting the model name and the latest value of the model field
@@ -193,7 +193,7 @@ def get_latest_data_point_for_rule(site, rule):
     return latest_data_point
 
 def get_latest_data_point_value_for_rule(site, rule):
-    
+    """ Returns the value to check for the value of the latest point for model in the rule checkfield """
     model, field_name = rule.check_field.split('#')
 
     # Getting the model name and the latest value of the model field
@@ -207,15 +207,16 @@ def get_latest_data_point_value_for_rule(site, rule):
 
 def alert_status_check():
     """ Checks if the alert is still valid and silences it if it is invalid """
-    unsilenced_alerts = Sesh_Alert.objects.filter(isSilence=False)
+    unsilenced_alerts = get_unsilenced_alerts()
     
-    for alert in unsilenced_alerts:
-        site = alert.site
-        rule = alert.alert
-        latest_data_point_value = get_latest_data_point_value_for_rule(site, rule) 
+    if unsilenced_alerts:
+        for alert in unsilenced_alerts:
+            site = alert.site
+            rule = alert.alert
+            latest_data_point_value = get_latest_data_point_value_for_rule(site, rule) 
 
-        if check_alert(rule, latest_data_point_value):
-            print "The alert is still valid"
-        else:
-            alert.isSilence = True
-            alert.save()
+            if check_alert(rule, latest_data_point_value):
+                print "The alert is still valid"
+            else:
+                alert.isSilence = True
+                alert.save()
