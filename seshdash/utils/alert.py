@@ -122,13 +122,19 @@ def get_recipients_for_site(site):
     # TODO to be removed
     for user in users:
 
-        mails.append(user.email)
-        if user.seshuser.phone_number and user.seshuser.on_call:
-            sms_numbers.append(user.seshuser.phone_number)
+       
+        if hasattr(user, 'seshuser'):
+            mails.append(user.email)
+
+            if user.seshuser.phone_number and user.seshuser.on_call:
+                print user
+                print "User seshuser phonenumber: ",
+                print user.seshuser.phone_number
+                sms_numbers.append(user.seshuser.phone_number)
 
 
-            logging.debug("emailing %s" % mails)
-            #print "emailing %s"%recipients
+                logging.debug("emailing %s" % mails)
+                #print "emailing %s"%recipients
             
     return mails, sms_numbers
     
