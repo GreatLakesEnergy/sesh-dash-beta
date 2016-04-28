@@ -104,7 +104,7 @@ def get_latest_point_influx(site, rule):
     return latest_data_point
 
 def get_latest_point_value_influx(site, rule):
-    latest_data_point_value = get_latest_point_influx(site_rule)
+    latest_data_point_value = get_latest_point_influx(site,rule)
     return latest_data_point_value['value']
 
 def is_influx_rule(rule):
@@ -294,7 +294,7 @@ def alert_status_check():
                 latest_data_point_value = get_latest_data_point_value_mysql(site, rule) 
             elif is_influx_rule(rule):
                 print "This is unsilenced alert with influx, getting points"
-                latest_data_point_value = get_latest_point_influx(site, rule)
+                latest_data_point_value = get_latest_point_value_influx(site, rule)
                 print latest_data_point_value
             else:
                 logging.error('Invaliid rule')

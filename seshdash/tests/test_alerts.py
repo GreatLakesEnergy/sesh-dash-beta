@@ -109,6 +109,8 @@ class AlertTestCase(TestCase):
                                                         data_sent_24h=12,
                                                         time=datetime.now())
 
+        self.new_influx_data_point = influx.insert_point(self.site, 'battery_voltage',  30)
+
         print "The id of the generated rmc status is ",
         print self.new_rmc_status.id
 

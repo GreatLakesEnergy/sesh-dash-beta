@@ -135,7 +135,7 @@ class Influx:
 
     
     def insert_point(self, site, measurement_name, value):
-        
+        """ Write points to the database """
         json_body = [
                 {
                 "measurement": measurement_name,
@@ -155,6 +155,7 @@ class Influx:
 
    
     def get_latest_measurement_point(self, measurement_name, database=None):
+        """ Returns the latest point for a given measurement """
         db = self.db
         if database:
             db = database
@@ -183,7 +184,7 @@ def get_latest_point(measurement_name, db=None):
     
 
 def get_latest_point_site(site, measurement_name, db=None):
-    
+    """ Returns the latest point for a measurement for a specific siite """
     i = Influx()
     if db is not None:
         i = Influx(database=db)
@@ -199,7 +200,7 @@ def get_latest_point_site(site, measurement_name, db=None):
     return point
 
 def insert_point(site, measurement_name, value, db=None):
-    
+    """ Inserts a point into the db provided the name and the site """
     i = Influx()
     if db is not None:
         i = Influx(database=db)
