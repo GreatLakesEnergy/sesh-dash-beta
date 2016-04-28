@@ -123,6 +123,7 @@ class Alert_Rule(models.Model):
                      ('BoM_Data_Point#main_on','Grid Availible'),
                      ('BoM_Data_Point#genset_state','Generator on'),
                      ('RMC_status#minutes_last_contact', 'RMC Last Contact'),
+                     ('battery_voltage', 'Battery Voltage in influx rule'),
                 )
 
     site = models.ForeignKey(Sesh_Site)
