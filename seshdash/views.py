@@ -517,8 +517,8 @@ def get_high_chart_data(user,site_id,sites):
 
     # Getting climat conditions
 
-     high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
-     context_high_data['high_cloud_cover']=high_cloud_cover
+     #high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
+     #context_high_data['high_cloud_cover']=high_cloud_cover
 
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
@@ -725,7 +725,6 @@ def influxvalues(request):
     client = Influx('test_db')
     values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
     values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
-    
     #a
     dropdown1_values = values_drop_1[0]
     dropdown2_values = values_drop_2[0]
@@ -734,29 +733,7 @@ def influxvalues(request):
         dropdown1_choice_results.append(dropdown1_values['mean'])
 
     for dropdown2_values in values_drop_2:
-        dropdown2_choice_results.append(dropdown1_values['mean'])
-    """
-    drop2_series = dropdown2_values['series']
-    #c
-    drop1 = drop1_series[0]
-    drop2 = drop2_series[0]
-    #d
-    drop1_result = drop1['values']
-    drop2_result = drop2['values']
-    #e
-    dropdown1_results = drop1_result[0]
-    dropdown2_results = drop2_result[0]
-    #f
-    for dropdown1_results in drop1_result:
-        dropdown1_choice_results.append(dropdown1_results[1])
-
-    for dropdown2_results in drop2_result:
-        dropdown2_choice_results.append(dropdown2_results[1])
-
-    print dropdown1_choice_results
-    print dropdown2_choice_results
-    print "This was choice 2 results",
-     """
+        dropdown2_choice_results.append(dropdown2_values['mean'])
     results['drop1'] = dropdown1_choice_results
     results['drop2'] = dropdown2_choice_results
     print choice_drop_1

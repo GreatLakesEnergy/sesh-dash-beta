@@ -158,37 +158,105 @@ Morris.Bar({
                  sel.appendChild(opt);
                  }
     });
-  /*--------------------------------------DROPDOWNS-----------------------------------*/
-  $("#drop1").change(function(){
+  /*------------------------------------GRAPH-DEFAULT-----------------------------------*/
+/*------------------------------------------------------------------------------*/
+  var default1 = "AC_Load_in";
+  var default2 = "AC_Load_out";
+  $.post("/influxvalues",{csrfmiddlewaretoken: csrftoken, choice1:default1, choice2:default2 , active_site_id:active_site_id},function(data){
+        var response = JSON.parse(data);
+        console.log(response)
+        dropdown1_values = response['drop1'];
+        dropdown2_values = response['drop2'];
+        console.log(dropdown1_values)
+        console.log(dropdown2_values)
+        $('#containerhigh').highcharts({
+                 chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: ' Daily ' + default1 + ' with ' + default2 + ' In High Charts'
+        },
+        xAxis: [{
+            crosshair: true
+        }],
+        yAxis: [{ // Primary yAxis
+            labels: {
+                //format: '{value}%',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            title: {
+                text: default2,
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: default1,
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                //format: '{value} Wh',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 120,
+            verticalAlign: 'top',
+            y: 100,
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+        },
+        series: [{
+            name: default1 ,
+            type: 'spline',
+            yAxis: 1,
+            data: dropdown1_values,
+            tooltip: {
+                //valueSuffix: ' Wh'
+            }
+
+        }, {
+            name: default2,
+            type: 'spline',
+            data: dropdown2_values,
+            tooltip: {
+                //valueSuffix: ' % '
+            }
+        }]
+    });
+    });
+
+    $("#drop1").change(function(){
 
          drop_choice1 = $("#drop1").val();
-        alert(drop_choice1);
-
   });
 
   $("#drop2").change(function(){
-
         drop_choice2 = $("#drop2").val();
-       alert(drop_choice2);
-
   });
-  console.log(active_site_id)
+  /*--------------------------------------DROPDOWNS-----------------------------------*/
+
   $(".butt").click(function(){
       $.post("/influxvalues",{csrfmiddlewaretoken: csrftoken, choice1:drop_choice1, choice2:drop_choice2 , active_site_id:active_site_id},function(data){
         var response = JSON.parse(data);
         console.log(response)
         dropdown1_values = response['drop1'];
         dropdown2_values = response['drop2'];
-        /*for (var i = 0; i < response.length; i++) {
-          dropdown1_values.push(response[i].drop1)
-        }
-        console.log(dropdown1_values)
-        for (var i = 0; i < response.length; i++) {
-          dropdown2_values.push(response[i].drop2)
-        }*/
         console.log(dropdown1_values)
         console.log(dropdown2_values)
-      });
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
@@ -197,12 +265,11 @@ Morris.Bar({
             text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
         },
         xAxis: [{
-            categories:date,
             crosshair: true
         }],
         yAxis: [{ // Primary yAxis
             labels: {
-                format: '{value}%',
+                //format: '{value}%',
                 style: {
                     color: Highcharts.getOptions().colors[1]
                 }
@@ -221,7 +288,7 @@ Morris.Bar({
                 }
             },
             labels: {
-                format: '{value} Wh',
+                //format: '{value} Wh',
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -242,11 +309,11 @@ Morris.Bar({
         },
         series: [{
             name: drop_choice1 ,
-            type: 'column',
+            type: 'spline',
             yAxis: 1,
             data: dropdown1_values,
             tooltip: {
-                valueSuffix: ' Wh'
+                //valueSuffix: ' Wh'
             }
 
         }, {
@@ -254,9 +321,10 @@ Morris.Bar({
             type: 'spline',
             data: dropdown2_values,
             tooltip: {
-                valueSuffix: ' % '
+                //valueSuffix: ' % '
             }
         }]
+    });
     });
   });
   /*-------------------------------------END--OF--DROPDWONS------------------------------*/
