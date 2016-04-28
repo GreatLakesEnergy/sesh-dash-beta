@@ -28,6 +28,10 @@ class AlertTestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
+        self._influx_db_name = 'test_db'
+        self.i = Influx(database=self._influx_db_name)
+        
+
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
         self.location = Geoposition(52.5,24.3)

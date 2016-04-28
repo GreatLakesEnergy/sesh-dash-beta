@@ -42,7 +42,7 @@ class AggregateTestCase(TestCase):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
         # Setup Influx
         self._influx_db_name = 'test_db'
-        self.i = Influx(database=self._influx_db_name)
+        self.i = influx.Influx(database=self._influx_db_name)
         self.no_points = 288
         try:
             self.i.create_database(self._influx_db_name)

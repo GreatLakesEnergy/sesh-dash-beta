@@ -73,7 +73,7 @@ class SearchTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
         generate_auto_rules(self.site.pk)
-        alert.alert_generator(self.site)
+        alert.alert_generator()
 
 
     # Testing search
