@@ -155,7 +155,7 @@ class Influx:
 
    
     def get_latest_measurement_point(self, measurement_name, database=None):
-        """ Returns the latest point for a given measurement """
+        """ Returns the latest point for a point """
         db = self.db
         if database:
             db = database

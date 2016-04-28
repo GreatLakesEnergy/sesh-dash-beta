@@ -35,26 +35,18 @@ def alert_generator():
         data_point, real_value = get_alert_check_value(site, rule)
 
         if data_point is not None and real_value is not None:
-            print "Data Point is not None"
 
             if check_alert(rule, real_value):
-                print "now in alert alert generation body"
                 content = get_alert_content(site, rule, data_point, real_value)
-                print "content done"
                 mails, sms_numbers = get_recipients_for_site(site)
-                print "recipients done"
           
                 alert_obj = alert_factory(site, rule, data_point)
 
                 if rule.send_mail:
                      alert_obj.emailSent = alertEmail(data_point,content,mails)
-                     print "Mail value: ",
-                     print alert_obj.emailSent
             
                 if rule.send_sms:
                      alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
-                     print "Sms value: ",
-                     print alert_obj.smsSent
             
                 alert_obj.save()
 
@@ -139,11 +131,9 @@ def check_alert(rule, data_point_value):
 
     """ If there is an alert """
     if ops[rule.operator](data_point_value,rule.value):
-        print "This is an alert"
         return True
     
     else:
-        print "This is not an alert"
         return False
 
 
@@ -183,9 +173,6 @@ def get_recipients_for_site(site):
             mails.append(user.email)
 
             if user.seshuser.phone_number and user.seshuser.on_call:
-                print user
-                print "User seshuser phonenumber: ",
-                print user.seshuser.phone_number
                 sms_numbers.append(user.seshuser.phone_number)
 
 
@@ -225,9 +212,6 @@ def alert_factory(site, rule, data_point):
                     point_model='influx')
         alert_obj.save()
 
-    print "Alert object created"
-    print "Now alerts are: ",
-    print Sesh_Alert.objects.count()
    
     return alert_obj
 
@@ -281,29 +265,21 @@ def alert_status_check():
     """ Checks if the alert is still valid and silences it if it is invalid """
     unsilenced_alerts = get_unsilenced_alerts()
     
-    print "Now in alert_status check body"
     if unsilenced_alerts:
-        print "Found unsilenced alerts: ",
-        print unsilenced_alerts
         for alert in unsilenced_alerts:
             site = alert.site
             rule = alert.alert
 
             if is_mysql_rule(rule):
-                print "This is an unsilenced alert with mysql, getting point"
                 latest_data_point_value = get_latest_data_point_value_mysql(site, rule) 
             elif is_influx_rule(rule):
-                print "This is unsilenced alert with influx, getting points"
                 latest_data_point_value = get_latest_point_value_influx(site, rule)
-                print latest_data_point_value
             else:
                 logging.error('Invaliid rule')
                 
 
             if check_alert(rule, latest_data_point_value):
-                print "The alert is still valid"
+                logging.debug("Alert is still valid")
             else:
-                print "The alert is not valid, silencing alert "
                 alert.isSilence = True
                 alert.save()
-                print "Alert silencedd"

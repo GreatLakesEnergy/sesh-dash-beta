@@ -71,7 +71,6 @@ class AlertTestCase(TestCase):
  
         #create influx datapoint
         self.influx_data_point = influx.insert_point(self.site, 'battery_voltage', 10)
-        print "Influx datapoint created successfully"
 
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
@@ -111,8 +110,6 @@ class AlertTestCase(TestCase):
 
         self.new_influx_data_point = influx.insert_point(self.site, 'battery_voltage',  30)
 
-        print "The id of the generated rmc status is ",
-        print self.new_rmc_status.id
 
     @override_settings(DEBUG=True)
     def test_alert_fires(self):
@@ -162,8 +159,6 @@ class AlertTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_alert_autosilencing(self):
-        print "Testing alerts autosilencing"
-        print "****************************"
         alert.alert_status_check()
         alerts = Sesh_Alert.objects.filter(isSilence=False)
         self.assertEqual(alerts.count(), 0)
