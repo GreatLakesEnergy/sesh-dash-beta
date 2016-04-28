@@ -1,3 +1,6 @@
+/**{
+  border: 1px solid black;
+}*/
 body {
  font-family: "Roboto", sans-serif;
 }
@@ -243,4 +246,13 @@ div.awesomplete > ul {
 }
 .page-header{
   font-weight: 200;
+}
+#y-axis{
+  margin-left: 10px;
+}
+.dropdown{
+  margin-bottom: 10px;
+}
+.butt{
+  margin-left: 100px;
 }

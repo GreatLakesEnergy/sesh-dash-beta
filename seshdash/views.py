@@ -48,7 +48,9 @@ import logging
 from seshdash.models import *
 from django.forms import model_to_dict
 import json
-
+# Influxdb
+from influxdb import InfluxDBClient
+from seshdash.data.db.influx import Influx
 
 @login_required(login_url='/login/')
 def index(request,site_id=0):
@@ -549,8 +551,7 @@ def get_high_chart_data(user,site_id,sites):
      context_high_data['high_pv_production']= high_pv_production
      print (context_high_data['high_pv_production'])
      return context_high_data
-
-
+     
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
 
@@ -690,4 +691,87 @@ def historical_data(request):
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
+        print sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
+
+def influx(request):
+    client = InfluxDBClient()
+    client = InfluxDBClient(database='test_db')
+    measurements = client.query('show measurements')
+    measures = measurements.raw
+    measure = measures['series']
+    data_db = measure[0]
+    data = data_db['values']
+    #print measure
+    #print data_db
+    #print data
+    return  HttpResponse(json.dumps(data))
+
+def influxvalues(request):
+    results = {}
+    dropdown1_choice_results =[]
+    dropdown2_choice_results =[]
+    choice_drop_1 = request.POST.get('choice1','')
+    choice_drop_2 = request.POST.get('choice2','')
+    active_id = request.POST.get('active_site_id','')
+    active_site = Sesh_Site.objects.filter(id=active_id)
+    active_site_name = active_site [0]
+    current_site = active_site_name.site_name
+    print current_site
+    print "choice 1 is ",
+    print choice_drop_1
+    print "choice 2 is ",
+    print choice_drop_2
+    client = Influx('test_db')
+    values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
+    values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
+    
+    #a
+    dropdown1_values = values_drop_1[0]
+    dropdown2_values = values_drop_2[0]
+    #b
+    for dropdown1_values in values_drop_1:
+        dropdown1_choice_results.append(dropdown1_values['mean'])
+
+    for dropdown2_values in values_drop_2:
+        dropdown2_choice_results.append(dropdown1_values['mean'])
+    """
+    drop2_series = dropdown2_values['series']
+    #c
+    drop1 = drop1_series[0]
+    drop2 = drop2_series[0]
+    #d
+    drop1_result = drop1['values']
+    drop2_result = drop2['values']
+    #e
+    dropdown1_results = drop1_result[0]
+    dropdown2_results = drop2_result[0]
+    #f
+    for dropdown1_results in drop1_result:
+        dropdown1_choice_results.append(dropdown1_results[1])
+
+    for dropdown2_results in drop2_result:
+        dropdown2_choice_results.append(dropdown2_results[1])
+
+    print dropdown1_choice_results
+    print dropdown2_choice_results
+    print "This was choice 2 results",
+     """
+    results['drop1'] = dropdown1_choice_results
+    results['drop2'] = dropdown2_choice_results
+    print choice_drop_1
+    print dropdown1_choice_results
+    print choice_drop_2
+    print dropdown2_choice_results
+    
+    return HttpResponse(json.dumps(results))
+
+
+
+
+
+
+
+
+
+

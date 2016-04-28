@@ -125,8 +125,10 @@ class Influx:
         if database:
            db = database
         query = "select value from %s"%measurement_name
+        query = "show measurements"
         return list(self._influx_client.query(query,database=db).get_points())
-
+   
+    
     def create_database(self,name):
         self._influx_client.create_database(name)
 

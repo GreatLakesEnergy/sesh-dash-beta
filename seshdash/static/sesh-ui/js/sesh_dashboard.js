@@ -1,7 +1,99 @@
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies;
+        cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
+var csrftoken = getCookie('csrftoken');
 /*
  * Barchart for energy production
 */
+
+      /* Auto compete on search*/
+var i;
+var textid;
+var textinput;
+var option;
+var matched;
+var siteid = [];
+var sitename = [];
+/* post request to retrieve all sitename and site id */
+$.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
+    option = JSON.parse(data);
+    //console.log(option)
+    /* extracting site name array from response dict */
+   for (i=0;i < option.length;i++){
+    sitename.push(option[i].value)
+   }
+   /* extracting site id array from response dict */
+   for (i=0; i< option.length; i++){
+    siteid.push(option[i].key)
+   }
+   var input = document.getElementById('search');
+   /* proving an array of options to be suggested when a user types using awesomplete plugin */
+   new Awesomplete(input,{list: sitename});
+});
+/* checking if ENTER button is pressed */
+$('.form-control').keypress(function(event){
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    var matched = false;
+    if(keycode == '13'){
+        textinput = $(".form-control").val();
+        for (i=0;i<sitename.length;i++){
+            /* checking if entered value exists in a sitename array */
+             if (sitename[i] == textinput){
+                  matched = true;
+                  for (i=0 ;i < option.length; i++){
+                    /* finding the id of the entered sitename */
+                       if (option[i].value == textinput){
+                             textid = option[i].key;
+                             /* Linking to the asked sitename`s page */
+                             window.location.replace("/dash/" + textid);
+                        }
+                  }
+             { break; }
+             }
+        }
+        if (!matched){
+          document.getElementById("search").className = document.getElementById("search").className + " error";
+        }
+    }
+});
+/* search button */
+$(".btn-default").click(function(){
+        textinput = $(".form-control").val();
+        for (i=0;i<sitename.length;i++){
+            /* checking if entered value exists in a sitename array */
+             if (sitename[i] == textinput){
+                  matched = true;
+                  for (i=0 ;i < option.length; i++){
+                    /* finding the id of the entered sitename */
+                       if (option[i].value == textinput){
+                             textid = option[i].key;
+                             /* Linking to the asked sitename`s page */
+                             window.location.replace("/dash/" + textid);
+                        }
+                  }
+             { break; }
+
+             }
+        }
+        if (!matched){
+          document.getElementById("search").className = document.getElementById("search").className + " error";
+        }
+});
+
 function ready_graph_data(data,x_value,y_value){
     var graph_data = [];
     for (var i=0; i < data.length; i++)
@@ -39,15 +131,70 @@ Morris.Bar({
 /*
  High Chart Draw Function
 */
-function get_high_chart(date,pv,cloud)
-{
+//function get_high_chart(date,pv,cloud)
+//{
+  var dropdown1;
+  var dropdown2;
+  var dropdown1_values = [];
+  var dropdown2_values = [];
+  var drop_choice1;
+  var drop_choice2;
+  $.post("/influx",{csrfmiddlewaretoken: csrftoken},function(data){
+                 //alert(data)
+                 var measurements = JSON.parse(data)
+                 //alert(measurements);
+                 var sel = document.getElementById('drop1');
+                 for ( var i=0; i<measurements.length;i++)
+                 {
+                 var opt = document.createElement('option');
+                 opt.innerHTML = measurements[i];
+                 sel.appendChild(opt);
+                 }
 
-$('#containerhigh').highcharts({
-        chart: {
+                 var sel = document.getElementById('drop2');
+                 for ( var i=0; i<measurements.length;i++){
+                 var opt = document.createElement('option');
+                 opt.innerHTML = measurements[i];
+                 sel.appendChild(opt);
+                 }
+    });
+  /*--------------------------------------DROPDOWNS-----------------------------------*/
+  $("#drop1").change(function(){
+
+         drop_choice1 = $("#drop1").val();
+        alert(drop_choice1);
+
+  });
+
+  $("#drop2").change(function(){
+
+        drop_choice2 = $("#drop2").val();
+       alert(drop_choice2);
+
+  });
+  console.log(active_site_id)
+  $(".butt").click(function(){
+      $.post("/influxvalues",{csrfmiddlewaretoken: csrftoken, choice1:drop_choice1, choice2:drop_choice2 , active_site_id:active_site_id},function(data){
+        var response = JSON.parse(data);
+        console.log(response)
+        dropdown1_values = response['drop1'];
+        dropdown2_values = response['drop2'];
+        /*for (var i = 0; i < response.length; i++) {
+          dropdown1_values.push(response[i].drop1)
+        }
+        console.log(dropdown1_values)
+        for (var i = 0; i < response.length; i++) {
+          dropdown2_values.push(response[i].drop2)
+        }*/
+        console.log(dropdown1_values)
+        console.log(dropdown2_values)
+      });
+        $('#containerhigh').highcharts({
+                 chart: {
             zoomType: 'xy'
         },
         title: {
-            text: ' Daily PV Production with Cloud cover forecast In High Chart'
+            text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
         },
         xAxis: [{
             categories:date,
@@ -61,14 +208,14 @@ $('#containerhigh').highcharts({
                 }
             },
             title: {
-                text: 'Cloud Cover',
+                text: drop_choice2,
                 style: {
                     color: Highcharts.getOptions().colors[1]
                 }
             }
         }, { // Secondary yAxis
             title: {
-                text: 'PV Production',
+                text: drop_choice1,
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -94,52 +241,30 @@ $('#containerhigh').highcharts({
             backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
         },
         series: [{
-            name: 'PV Production',
+            name: drop_choice1 ,
             type: 'column',
             yAxis: 1,
-            data:pv,
+            data: dropdown1_values,
             tooltip: {
                 valueSuffix: ' Wh'
             }
 
         }, {
-            name: 'Percent Cloud Cover',
+            name: drop_choice2,
             type: 'spline',
-            data: cloud,
+            data: dropdown2_values,
             tooltip: {
                 valueSuffix: ' % '
             }
         }]
     });
-
-}
-
-
-
-
-
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies;
-        cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-var csrftoken = getCookie('csrftoken');
+  });
+  /*-------------------------------------END--OF--DROPDWONS------------------------------*/
+//}
 
 // Get high chart data here
 
-get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
+//get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
 
 /* Alerts modal toggle script */
@@ -239,76 +364,75 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
                   }
 
-      /* Auto compete on search*/
-var i;
-var textid;
-var textinput;
-var option;
-var matched;
-var siteid = [];
-var sitename = [];
-/* post request to retrieve all sitename and site id */
-$.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
-    option = JSON.parse(data);
-    /* extracting site name array from response dict */
-   for (i=0;i < option.length;i++){
-    sitename.push(option[i].value)
-   }
-   /* extracting site id array from response dict */
-   for (i=0; i< option.length; i++){
-    siteid.push(option[i].key)
-   }
-   var input = document.getElementById('search');
-   /* proving an array of options to be suggested when a user types using awesomplete plugin */
-   new Awesomplete(input,{list: sitename});
-});
-/* checking if ENTER button is pressed */
-$('.form-control').keypress(function(event){
-    var keycode = (event.keyCode ? event.keyCode : event.which);
-    var matched = false;
-    if(keycode == '13'){
-        textinput = $(".form-control").val();
-        for (i=0;i<sitename.length;i++){
-            /* checking if entered value exists in a sitename array */
-             if (sitename[i] == textinput){
-                  matched = true;
-                  for (i=0 ;i < option.length; i++){
-                    /* finding the id of the entered sitename */
-                       if (option[i].value == textinput){
-                             textid = option[i].key;
-                             /* Linking to the asked sitename`s page */
-                             window.location.replace("/dash/" + textid);
-                        }
-                  }
-             { break; }
-             }
-        }
-        if (!matched){
-          document.getElementById("search").className = document.getElementById("search").className + " error";
-        }
-    }
-});
-/* search button */
-$(".btn-default").click(function(){
-        textinput = $(".form-control").val();
-        for (i=0;i<sitename.length;i++){
-            /* checking if entered value exists in a sitename array */
-             if (sitename[i] == textinput){
-                  matched = true;
-                  for (i=0 ;i < option.length; i++){
-                    /* finding the id of the entered sitename */
-                       if (option[i].value == textinput){
-                             textid = option[i].key;
-                             /* Linking to the asked sitename`s page */
-                             window.location.replace("/dash/" + textid);
-                        }
-                  }
-             { break; }
+/*----------------------------    High chart-------------------------------------*/
+/*$('#containerhigh').highcharts({
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: ' Daily '+ dropdown1 +' with Cloud cover forecast In High Charts'
+        },
+        xAxis: [{
+            categories:date,
+            crosshair: true
+        }],
+        yAxis: [{ // Primary yAxis
+            labels: {
+                format: '{value}%',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            title: {
+                text: 'Cloud Cover',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: dropdown1,
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value} Wh',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 120,
+            verticalAlign: 'top',
+            y: 100,
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+        },
+        series: [{
+            name: dropdown1 ,
+            type: 'column',
+            yAxis: 1,
+            data: values,
+            tooltip: {
+                valueSuffix: ' Wh'
+            }
 
-             }
-        }
-        if (!matched){
-          document.getElementById("search").className = document.getElementById("search").className + " error";
-        }
-});
+        }, {
+            name: 'Percent Cloud Cover',
+            type: 'spline',
+            data: [9,8,7,6,5,4,3,2,1,0],
+            tooltip: {
+                valueSuffix: ' % '
+            }
+        }]
+    });*/
 
+/*------------------------------------------------------------------*/
