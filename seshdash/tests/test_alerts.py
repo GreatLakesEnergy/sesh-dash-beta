@@ -15,7 +15,7 @@ from geoposition import Geoposition
 from django.conf import settings
 
 # Influx
-from seshdash.data.db import influx
+from seshdash.data.db.influx import Influx, insert_point
 
 # Utils
 from datetime import datetime
@@ -74,7 +74,7 @@ class AlertTestCase(TestCase):
 
  
         #create influx datapoint
-        self.influx_data_point = influx.insert_point(self.site, 'battery_voltage', 10)
+        self.influx_data_point = insert_point(self.site, 'battery_voltage', 10)
 
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
@@ -112,7 +112,7 @@ class AlertTestCase(TestCase):
                                                         data_sent_24h=12,
                                                         time=datetime.now())
 
-        self.new_influx_data_point = influx.insert_point(self.site, 'battery_voltage',  30)
+        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  30)
 
 
     @override_settings(DEBUG=True)
