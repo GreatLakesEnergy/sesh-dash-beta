@@ -139,9 +139,13 @@ Morris.Bar({
   var dropdown2_values = [];
   var drop_choice1;
   var drop_choice2;
+  var message;
   /*------------------------------------GRAPH-DEFAULT-----------------------------------*/
   var default1 = $("#drop1").val();
   var default2 = $("#drop2").val();
+  message = (default1 + '  With  ' + default2);
+  $("#title-message").html(message);
+
   $.post("/get_measurements_values",{csrfmiddlewaretoken: csrftoken, choice1:default1, choice2:default2 , active_site_id:active_site_id},function(data){
         var response = JSON.parse(data);
         dropdown1_values = response['drop1'];
@@ -229,13 +233,15 @@ Morris.Bar({
   });
 /*-----------------------------END-OF-DROPDOWN-CHOICES-------------------------------------*/
 /*----------------------------------------GRAPH-------------------------------------------*/
-  $(".btn").click(function(){
+  $(".butt").click(function(){
       $.post("/get_measurements_values",{csrfmiddlewaretoken: csrftoken, choice1:drop_choice1, choice2:drop_choice2 , active_site_id:active_site_id},function(data){
         var response = JSON.parse(data);
         dropdown1_values = response['drop1'];
         dropdown2_values = response['drop2'];
         SI_unit1 = response['SI_unit1'];
         SI_unit2 = response['SI_unit2'];
+        message = (drop_choice1 + '  With  ' + drop_choice2);
+        $("#title-message").html(message);
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'

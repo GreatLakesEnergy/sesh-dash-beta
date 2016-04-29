@@ -730,7 +730,7 @@ def get_measurements_values(request):
         results['drop1'] = dropdown1_choice_results
         results['drop2'] = dropdown2_choice_results
         results['SI_unit1'] = SI_unit1
-        results['SI_unit2'] = SI_unit2    
+        results['SI_unit2'] = SI_unit2
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseForbidden()
