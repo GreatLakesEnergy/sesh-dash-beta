@@ -109,7 +109,6 @@ class AggregateTestCase(TestCase):
         ddp = Daily_Data_Point.objects.all()
         self.assertEqual(ddp.count(),1)
         ddp = ddp.first()
-        print ddp
         self.assertNotEqual(ddp.daily_pv_yield,0)
         self.assertNotEqual(ddp.daily_power_consumption_total,0)
         self.assertNotEqual(ddp.daily_grid_usage,0)

@@ -55,6 +55,8 @@ def create_test_data(site, start=None, end="now", interval=5, units='minutes' ,r
         R1 = val
         R2 = val
         R3 = val
+        R4 = val
+        R5 = val
         print "createing %s test data points"%len(data_point_dates)
         print "between %s and %s "%(data_point_dates[0],data_point_dates[len(data_point_dates)-1:])
         # Simulate Grid outage

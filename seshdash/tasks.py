@@ -466,7 +466,7 @@ def get_aggregate_daily_data(date=None):
 
     for site in sites:
 
-            print "getting aggregate data for %s for %s"%(site,date_to_fetch)
+            #print "getting aggregate data for %s for %s"%(site,date_to_fetch)
             logging.debug("aggregate data for %s date: %ss"%(site,date_to_fetch))
             agg_dict = {}
             agg_dict['aggregate_data_pv'] = get_aggregate_data (site, 'pv_production',start=date_to_fetch)[0]
