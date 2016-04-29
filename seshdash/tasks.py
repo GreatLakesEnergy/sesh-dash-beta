@@ -495,15 +495,15 @@ def get_aggregate_daily_data(date=None):
                                          daily_no_of_alerts = aggregate_data_alerts.count(),
                                          date = date_to_fetch,
                                             )
-            print "saving daily aggreagete for %s dp:%s"%(date_to_fetch,daily_aggr)
+            #print "saving daily aggreagete for %s dp:%s"%(date_to_fetch,daily_aggr)
             try:
-		daily_aggr.save()
+                daily_aggr.save()
             except IntegrityError,e:
-		logging.debug('aggregate data point not unique skipping')
-		pass
-	    except Exception,e:
-		logging.exception('Unkown error occured aggregatin data')
-		pass
+                logging.debug('aggregate data point not unique skipping')
+                pass
+            except Exception,e:
+                logging.exception('Unkown error occured aggregatin data')
+                pass
             #send to influx
             send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
 

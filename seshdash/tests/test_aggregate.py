@@ -79,10 +79,11 @@ class AggregateTestCase(TestCase):
 
 
     def test_grid_outage(self):
-        aggregate_data_grid_data = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
+        # TODO
+        #aggregate_data_grid_data = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
 
-        logging.debug("aggregate date for grid %s "%aggregate_data_grid_data)
-        aggregate_data_grid_outage_stats = get_grid_stats(aggregate_data_grid_data, 0, 'min', 10)
+        #logging.debug("aggregate date for grid %s "%aggregate_data_grid_data)
+        #aggregate_data_grid_outage_stats = get_grid_stats(aggregate_data_grid_data, 0, 'min', 10)
 
         pass
 
