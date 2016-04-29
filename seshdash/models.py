@@ -257,6 +257,20 @@ class Daily_Data_Point(models.Model):
         "daily_power_cons_pv": "W",
         "daily_power_consumption_total": "W",
         "daily_pv_yield": "W",
+        "soc":"%",
+        "battery_voltage": "V",
+        "AC_Voltage_in" : "V",
+        "AC_Voltage_out" : "V",
+        "AC_input" : "V",
+        "AC_output" : "V",
+        "AC_Load_in" : "V",
+        "AC_Load_out" : "V",
+        "pv_production" : "W",
+        "main_on" : "V",
+        "relay_state": "",
+        "trans" : "",
+        "genset_state" : "V",
+        "site" : "",
     }
 
 

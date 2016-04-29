@@ -11,14 +11,23 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
          <div class="col-lg-4" id="x-axis">
               <p>Select option</p>
               <select class="form-control" id="drop1">
+                 {{ measure }}
+                 {% for value in measure %}
+                      <option value="{{value}}">{{value}}</option>
+                 {% endfor %}
               </select>
         </div>
 
         <div class="col-lg-4" id="y-axis">
               <p>Select another option</p>
-              <select class="form-control" id="drop2" ></select>
+              <select class="form-control" id="drop2" >
+                 {{ measure }}
+                 {% for value in measure %}
+                      <option value="{{value}}">{{value}}</option>
+                 {% endfor %}
+              </select>
         </div>
-        <button class="btn-default butt">Show graph </button>
+        <button type="button" class="btn btn-primary">Show graph </button>
     </div>
     <div class="col-lg-12">
         <div class="panel panel-default">

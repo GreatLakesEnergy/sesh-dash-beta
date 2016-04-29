@@ -1,6 +1,7 @@
 #Django libs
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
+from django.http import HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
@@ -82,6 +83,13 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
+    #Getting measurements
+    measures = []
+    client = Influx('test_db')
+    measurements = client.get_measurements()
+    for i in measurements:
+        measures.append(i['name'])
+    context_dict['measure'] = measures
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -693,55 +701,39 @@ def historical_data(request):
         context_dict['sort_dict'] = sort_data_dict
         print sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
-
-def influx(request):
-    client = InfluxDBClient()
-    client = InfluxDBClient(database='test_db')
-    measurements = client.query('show measurements')
-    measures = measurements.raw
-    measure = measures['series']
-    data_db = measure[0]
-    data = data_db['values']
-    #print measure
-    #print data_db
-    #print data
-    return  HttpResponse(json.dumps(data))
-
-def influxvalues(request):
-    results = {}
-    dropdown1_choice_results =[]
-    dropdown2_choice_results =[]
-    choice_drop_1 = request.POST.get('choice1','')
-    choice_drop_2 = request.POST.get('choice2','')
-    active_id = request.POST.get('active_site_id','')
-    active_site = Sesh_Site.objects.filter(id=active_id)
-    active_site_name = active_site [0]
-    current_site = active_site_name.site_name
-    print current_site
-    print "choice 1 is ",
-    print choice_drop_1
-    print "choice 2 is ",
-    print choice_drop_2
-    client = Influx('test_db')
-    values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
-    values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
-    #a
-    dropdown1_values = values_drop_1[0]
-    dropdown2_values = values_drop_2[0]
-    #b
-    for dropdown1_values in values_drop_1:
-        dropdown1_choice_results.append(dropdown1_values['mean'])
-
-    for dropdown2_values in values_drop_2:
-        dropdown2_choice_results.append(dropdown2_values['mean'])
-    results['drop1'] = dropdown1_choice_results
-    results['drop2'] = dropdown2_choice_results
-    print choice_drop_1
-    print dropdown1_choice_results
-    print choice_drop_2
-    print dropdown2_choice_results
     
-    return HttpResponse(json.dumps(results))
+@login_required
+def get_measurements_values(request):
+    if request.method == 'POST':
+        results = {}
+        dropdown1_choice_results =[]
+        dropdown2_choice_results =[]
+        choice_drop_1 = request.POST.get('choice1','')
+        choice_drop_2 = request.POST.get('choice2','')
+        active_id = request.POST.get('active_site_id','')
+        active_site = Sesh_Site.objects.filter(id=active_id)
+        active_site_name = active_site [0]
+        current_site = active_site_name.site_name
+        SI_unit = Daily_Data_Point.UNITS_DICTIONARY
+        SI_unit1 = SI_unit[choice_drop_1]
+        SI_unit2 = SI_unit[choice_drop_2]
+        client = Influx('test_db')
+        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
+        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
+        dropdown1_values = values_drop_1[0]
+        dropdown2_values = values_drop_2[0]
+        for dropdown1_values in values_drop_1:
+            dropdown1_choice_results.append(dropdown1_values['mean'])
+
+        for dropdown2_values in values_drop_2:
+            dropdown2_choice_results.append(dropdown2_values['mean'])
+        results['drop1'] = dropdown1_choice_results
+        results['drop2'] = dropdown2_choice_results
+        results['SI_unit1'] = SI_unit1
+        results['SI_unit2'] = SI_unit2    
+        return HttpResponse(json.dumps(results))
+    else:
+        return HttpResponseForbidden()
 
 
 

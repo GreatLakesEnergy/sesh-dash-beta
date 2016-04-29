@@ -139,36 +139,15 @@ Morris.Bar({
   var dropdown2_values = [];
   var drop_choice1;
   var drop_choice2;
-  $.post("/influx",{csrfmiddlewaretoken: csrftoken},function(data){
-                 //alert(data)
-                 var measurements = JSON.parse(data)
-                 //alert(measurements);
-                 var sel = document.getElementById('drop1');
-                 for ( var i=0; i<measurements.length;i++)
-                 {
-                 var opt = document.createElement('option');
-                 opt.innerHTML = measurements[i];
-                 sel.appendChild(opt);
-                 }
-
-                 var sel = document.getElementById('drop2');
-                 for ( var i=0; i<measurements.length;i++){
-                 var opt = document.createElement('option');
-                 opt.innerHTML = measurements[i];
-                 sel.appendChild(opt);
-                 }
-    });
   /*------------------------------------GRAPH-DEFAULT-----------------------------------*/
-/*------------------------------------------------------------------------------*/
-  var default1 = "AC_Load_in";
-  var default2 = "AC_Load_out";
-  $.post("/influxvalues",{csrfmiddlewaretoken: csrftoken, choice1:default1, choice2:default2 , active_site_id:active_site_id},function(data){
+  var default1 = $("#drop1").val();
+  var default2 = $("#drop2").val();
+  $.post("/get_measurements_values",{csrfmiddlewaretoken: csrftoken, choice1:default1, choice2:default2 , active_site_id:active_site_id},function(data){
         var response = JSON.parse(data);
-        console.log(response)
         dropdown1_values = response['drop1'];
         dropdown2_values = response['drop2'];
-        console.log(dropdown1_values)
-        console.log(dropdown2_values)
+        SI_unit1 = response['SI_unit1'];
+        SI_unit2 = response['SI_unit2'];
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
@@ -181,7 +160,7 @@ Morris.Bar({
         }],
         yAxis: [{ // Primary yAxis
             labels: {
-                //format: '{value}%',
+                format: '{value} '+SI_unit2,
                 style: {
                     color: Highcharts.getOptions().colors[1]
                 }
@@ -200,7 +179,7 @@ Morris.Bar({
                 }
             },
             labels: {
-                //format: '{value} Wh',
+                format: '{value} '+ SI_unit1,
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -225,7 +204,7 @@ Morris.Bar({
             yAxis: 1,
             data: dropdown1_values,
             tooltip: {
-                //valueSuffix: ' Wh'
+                valueSuffix: SI_unit1
             }
 
         }, {
@@ -233,12 +212,13 @@ Morris.Bar({
             type: 'spline',
             data: dropdown2_values,
             tooltip: {
-                //valueSuffix: ' % '
+                valueSuffix: SI_unit2
             }
         }]
     });
     });
-
+/*-------------------------------END-OF-DEFAULT-GRAPH-------------------------------------*/
+/*-----------------------------DROPDOWN-CHOICES------------------------------------------*/
     $("#drop1").change(function(){
 
          drop_choice1 = $("#drop1").val();
@@ -247,16 +227,15 @@ Morris.Bar({
   $("#drop2").change(function(){
         drop_choice2 = $("#drop2").val();
   });
-  /*--------------------------------------DROPDOWNS-----------------------------------*/
-
-  $(".butt").click(function(){
-      $.post("/influxvalues",{csrfmiddlewaretoken: csrftoken, choice1:drop_choice1, choice2:drop_choice2 , active_site_id:active_site_id},function(data){
+/*-----------------------------END-OF-DROPDOWN-CHOICES-------------------------------------*/
+/*----------------------------------------GRAPH-------------------------------------------*/
+  $(".btn").click(function(){
+      $.post("/get_measurements_values",{csrfmiddlewaretoken: csrftoken, choice1:drop_choice1, choice2:drop_choice2 , active_site_id:active_site_id},function(data){
         var response = JSON.parse(data);
-        console.log(response)
         dropdown1_values = response['drop1'];
         dropdown2_values = response['drop2'];
-        console.log(dropdown1_values)
-        console.log(dropdown2_values)
+        SI_unit1 = response['SI_unit1'];
+        SI_unit2 = response['SI_unit2'];
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
@@ -269,7 +248,7 @@ Morris.Bar({
         }],
         yAxis: [{ // Primary yAxis
             labels: {
-                //format: '{value}%',
+                format: '{value}'+SI_unit2,
                 style: {
                     color: Highcharts.getOptions().colors[1]
                 }
@@ -288,7 +267,7 @@ Morris.Bar({
                 }
             },
             labels: {
-                //format: '{value} Wh',
+                format: '{value} '+SI_unit1,
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -313,7 +292,7 @@ Morris.Bar({
             yAxis: 1,
             data: dropdown1_values,
             tooltip: {
-                //valueSuffix: ' Wh'
+                valueSuffix:SI_unit1,
             }
 
         }, {
@@ -321,13 +300,13 @@ Morris.Bar({
             type: 'spline',
             data: dropdown2_values,
             tooltip: {
-                //valueSuffix: ' % '
+                valueSuffix: SI_unit2,
             }
         }]
     });
     });
   });
-  /*-------------------------------------END--OF--DROPDWONS------------------------------*/
+  /*-------------------------------------END--OF-GRAPH-----------------------------------*/
 //}
 
 // Get high chart data here

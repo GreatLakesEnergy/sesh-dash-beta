@@ -125,7 +125,6 @@ class Influx:
         if database:
            db = database
         query = "select value from %s"%measurement_name
-        query = "show measurements"
         return list(self._influx_client.query(query,database=db).get_points())
    
     
@@ -135,4 +134,11 @@ class Influx:
     def delete_database(self,name):
         self._influx_client.drop_database(name)
 
+    def get_measurements(self,database=None):
+       db = self.db
+       if database:
+          db = database
+       query = "show measurements"
+       return list(self._influx_client.query(query,database=db).get_points())
+    
 
