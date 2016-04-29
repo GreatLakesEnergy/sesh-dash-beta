@@ -21,7 +21,12 @@ class Influx:
                                               settings.INFLUX_PASSWORD,
                                               self.db
                                               )
-        #TODO draw this from settings
+	try:
+		self.dbs = self._influx_client.get_list_database()
+	except:
+		self.dbs = []
+		pass
+
         self._influx_tag = 'sesh_dash'
 
     def get_measurement_bucket(self,measurement,bucket_size,clause,clause_val,time_delta,start="now",operator="mean",database=None):
@@ -120,7 +125,7 @@ class Influx:
 
         return True
 
-    def query(self,measurement_name, database=None):
+    def query(self,measurement_name,database=None):
         db =  self.db
         if database:
            db = database
@@ -132,5 +137,12 @@ class Influx:
 
     def delete_database(self,name):
         self._influx_client.drop_database(name)
+   
+    def get_measurements(self,database=None):
+        db = self.db
+        if database:
+           db = database
+        query = "show measurements"
+        return list(self._influx_client.query(query,database=db).get_points())
 
 

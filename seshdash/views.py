@@ -12,6 +12,7 @@ from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
+from django.http import HttResponseForbidden
 from django import forms
 
 #Import Models and Forms
@@ -40,6 +41,9 @@ from seshdash.api.victron import VictronAPI
 
 # celery tasks
 from seshdash.tasks import get_historical_BoM, generate_auto_rules
+
+#Import for Influx
+from seshdash.data.db.influx import Influx
 
 #generics
 import logging
@@ -80,6 +84,18 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
+
+    #Generate measurements in the time_series_graph
+    client=Influx('roger_db')
+    measurements_value=client.get_measurements()
+    
+    measurements =[]
+     
+    for measurement in measurements_value:
+        measurements.append(measurement['name'])
+
+    context_dict['measurements']= measurements
+
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -691,3 +707,19 @@ def historical_data(request):
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
+
+def time_series_graph(request):
+    if request.method == 'POST':
+        client=Influx('roger_db')
+        measurement=request.POST.get('measurement','')
+        time=request.POST.get('time','')
+        active_id = request.POST.get('active_id','')
+        active_site=Sesh_Site.objects.filter(id=active_id)
+        active_site_name=active_site[0].site_name
+        time_series_values=client.get_measurement_bucket(measurement,'1h','site_name',active_site_name,time)
+        graph_values = []
+        for values in time_series_values:
+            graph_values.append(values['mean'])       
+        return HttpResponse(json.dumps(graph_values));
+    else:
+        return HttpResponseForbidden 
