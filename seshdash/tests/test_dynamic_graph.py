@@ -84,10 +84,10 @@ class dynamic_graph_TestCase(TestCase):
     def test_graph(self):
         f = Client()
         f.login(username = "patrick",password = "cdakcjocajica")
-        drop1_choice = 'pv_production'
-        drop2_choice = 'battery_voltage'
-        active_id = 1
-        response = f.post('/get_measurements_values',{'choice1':drop1_choice,'choice2':drop2_choice,'active_site_id':active_id})
+        #drop1_choice = 'pv_production'
+        #drop2_choice = 'battery_voltage'
+        #active_id = 1
+        response = f.post('/get_measurements_values',{'choice1':'pv_production','choice2':'battery_voltage','active_site_id':'6'})
         self.assertEqual(response.status_code, 200)
 
 
