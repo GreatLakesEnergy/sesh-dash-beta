@@ -86,7 +86,7 @@ class dynamic_graph_TestCase(TestCase):
         d.login(username = "patrick",password = "cdakcjocajica")
         drop1_choice = 'pv_production'
         drop2_choice = 'battery_voltage'
-        active_id = '1'
+        active_id = 1
         response = d.post('/get_measurements_values',{'choice1':drop1_choice,'choice2':drop2_choice,'active_site_id':active_id})
         self.assertEqual(response.status_code, 200)
 
