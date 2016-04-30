@@ -2,7 +2,7 @@
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 
-# Models
+# Model's
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
 from django.contrib.auth.models import User
 
@@ -58,6 +58,7 @@ class AlertTestCase(TestCase):
         #create rmc status
         self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
                                                         ip_address='127.0.0.1',
+                                                        site=self.site,
                                                         minutes_last_contact=100,
                                                         signal_strength=27,
                                                         data_sent_24h=12,
@@ -73,7 +74,27 @@ class AlertTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
         generate_auto_rules(self.site.pk)
-        alert.alert_check(self.site)
+        alert.alert_generator(self.site)
+        
+        self.new_data_point = Data_Point.objects.create(site=self.site,
+                                                    soc=30,
+                                                    battery_voltage=30,
+                                                    time=timezone.now(),
+                                                    AC_input=0.0,
+                                                    AC_output=15.0,
+                                                    AC_Load_in=0.0,
+                                                    AC_Load_out=-0.7)
+
+        self.new_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
+                                                        ip_address='127.0.0.1',
+                                                        site=self.site,
+                                                        minutes_last_contact=1,
+                                                        signal_strength=27,
+                                                        data_sent_24h=12,
+                                                        time=datetime.now())
+
+        print "The id of the generated rmc status is ",
+        print self.new_rmc_status.id
 
     @override_settings(DEBUG=True)
     def test_alert_fires(self):
@@ -122,3 +143,7 @@ class AlertTestCase(TestCase):
         response = c.post('/notifications/',{})
         self.assertEqual(response.status_code, 200)
 
+    def test_alert_autosilencing(self):
+        alert.alert_status_check()
+        alerts = Sesh_Alert.objects.filter(isSilence=False)
+        self.assertEqual(alerts.count(), 0)

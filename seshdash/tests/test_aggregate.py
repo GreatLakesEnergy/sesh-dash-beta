@@ -92,7 +92,7 @@ class AggregateTestCase(TestCase):
 
         #get aggregate daily data
         get_aggregate_daily_data()
- 
+
     @override_settings(INFLUX_DB='test_db')
     def test_data_aggregation(self):
         """
@@ -110,7 +110,7 @@ class AggregateTestCase(TestCase):
         self.assertNotEqual(ddp.daily_grid_outage_n,0)
         self.assertNotEqual(ddp.daily_grid_outage_t,0)
         self.assertNotEqual(ddp.daily_grid_usage,0)
-    
+
     @override_settings(INFLUX_DB='test_db')
     def test_reporting(self):
         """
@@ -127,7 +127,7 @@ class AggregateTestCase(TestCase):
         c.login(username='john doe', password='asdasd12345')
         data_dict = Daily_Data_Point.UNITS_DICTIONARY
         data_keys = data_dict.keys()
-        
+
         for key in data_keys:
             response = c.post('/historical_data', {"sort_value": key})
             self.assertEqual(response.status_code, 200)
