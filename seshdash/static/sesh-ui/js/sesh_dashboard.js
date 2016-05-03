@@ -140,6 +140,7 @@ Morris.Bar({
   var drop_choice1;
   var drop_choice2;
   var message;
+  var time_stamp;
   /*------------------------------------GRAPH-DEFAULT-----------------------------------*/
   var default1 = $("#drop1").val();
   var default2 = $("#drop2").val();
@@ -240,6 +241,7 @@ Morris.Bar({
         dropdown2_values = response['drop2'];
         SI_unit1 = response['SI_unit1'];
         SI_unit2 = response['SI_unit2'];
+        time_stamp = response['time']
         message = (drop_choice1 + '  With  ' + drop_choice2);
         $("#title-message").html(message);
         $('#containerhigh').highcharts({
@@ -250,6 +252,7 @@ Morris.Bar({
             text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
         },
         xAxis: [{
+            //categories:time_stamp,
             crosshair: true
         }],
         yAxis: [{ // Primary yAxis
@@ -299,6 +302,7 @@ Morris.Bar({
             data: dropdown1_values,
             tooltip: {
                 valueSuffix:SI_unit1,
+                categories: time_stamp,
             }
 
         }, {
@@ -307,6 +311,7 @@ Morris.Bar({
             data: dropdown2_values,
             tooltip: {
                 valueSuffix: SI_unit2,
+                categories: time_stamp,
             }
         }]
     });
@@ -343,7 +348,7 @@ Morris.Bar({
      $.post('/notifications',jsonData, function(data){
 
           var alertData = JSON.parse(data);
- 
+
           var out= $("#alert-notification-table");
           var element = '';
           var i;
@@ -355,7 +360,7 @@ Morris.Bar({
                                '<td>'+ alertData[i].site +  '</td>' +
                                '<td id="site-counter">'+ alertData[i].counter + '</td>' +
                                '</tr>';
-                    
+
                    out.append(element);
                    }
 

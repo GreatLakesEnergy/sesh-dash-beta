@@ -1,7 +1,7 @@
 #Django libs
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
@@ -708,32 +708,37 @@ def get_measurements_values(request):
         results = {}
         dropdown1_choice_results =[]
         dropdown2_choice_results =[]
+        time_stamp = []
+        time_stamp2 = []
         choice_drop_1 = request.POST.get('choice1','')
         choice_drop_2 = request.POST.get('choice2','')
         active_id = request.POST.get('active_site_id','')
         active_site = Sesh_Site.objects.filter(id=active_id)
         active_site_name = active_site [0]
         current_site = active_site_name.site_name
-        SI_unit = Daily_Data_Point.UNITS_DICTIONARY
+        SI_unit = BoM_Data_Point.SI_UNITS
         SI_unit1 = SI_unit[choice_drop_1]
         SI_unit2 = SI_unit[choice_drop_2]
         client = Influx('test_db')
-        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
-        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
+        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d','mean')
+        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d','mean')
         dropdown1_values = values_drop_1[0]
         dropdown2_values = values_drop_2[0]
         for dropdown1_values in values_drop_1:
+            time_stamp.append(dropdown1_values['time'])
+        for dropdown1_values in values_drop_1:
             dropdown1_choice_results.append(dropdown1_values['mean'])
-
         for dropdown2_values in values_drop_2:
             dropdown2_choice_results.append(dropdown2_values['mean'])
         results['drop1'] = dropdown1_choice_results
         results['drop2'] = dropdown2_choice_results
         results['SI_unit1'] = SI_unit1
         results['SI_unit2'] = SI_unit2
+        results['time'] = time_stamp
+        #print time_stamp
         return HttpResponse(json.dumps(results))
     else:
-        return HttpResponseForbidden()
+        return HttpResponseBadRequest()
 
 
 
