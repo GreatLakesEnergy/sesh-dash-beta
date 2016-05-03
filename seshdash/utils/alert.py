@@ -240,7 +240,7 @@ def get_latest_instance_site(site, model):
 
 def get_latest_data_point_mysql(site, rule):
     """ Returns the latest point in the model specified in the rule checkfield"""
-    model, field_name = rule.check_field.split('#') # Get model and field names
+    model, field_name = rule.check_field.strip().split('#') # Get model and field names
 
     # Getting the model name and the latest value of the model field
     model = get_model_from_string(model)  # returns a model class ex 'BoM_Data_Point'
@@ -250,7 +250,7 @@ def get_latest_data_point_mysql(site, rule):
 
 def get_latest_data_point_value_mysql(site, rule):
     """ Returns the value to check for the value of the latest point for model in the rule checkfield """
-    model, field_name = rule.check_field.split('#')
+    model, field_name = rule.check_field.strip().split('#')
 
     # Getting the model name and the latest value of the model field
     model = get_model_from_string(model)
