@@ -271,6 +271,7 @@ class Daily_Data_Point(models.Model):
         "trans" : "",
         "genset_state" : "V",
         "site" : "",
+        "AC_output_absolute" : "V",
     }
 
 
