@@ -12,7 +12,7 @@ from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
-from django.http import HttResponseForbidden
+from django.http import HttpResponseForbidden
 from django import forms
 
 #Import Models and Forms
@@ -709,17 +709,22 @@ def historical_data(request):
         return render(request, 'seshdash/historical-data.html', context_dict);
 
 def time_series_graph(request):
+    context_dict = {}
     if request.method == 'POST':
         client=Influx('roger_db')
         measurement=request.POST.get('measurement','')
         time=request.POST.get('time','')
+        measurement_units=Daily_Data_Point.UNITS_DICTIONARY
+        units=measurement_units[measurement]
         active_id = request.POST.get('active_id','')
         active_site=Sesh_Site.objects.filter(id=active_id)
         active_site_name=active_site[0].site_name
-        time_series_values=client.get_measurement_bucket(measurement,'1h','site_name',active_site_name,time)
+        time_series_values=client.get_measurement_bucket(measurement,'30m','site_name',active_site_name,time)
         graph_values = []
         for values in time_series_values:
-            graph_values.append(values['mean'])       
-        return HttpResponse(json.dumps(graph_values));
+            graph_values.append(values['mean'])
+        context_dict['graph_values']=graph_values
+        context_dict['units']=units       
+        return HttpResponse(json.dumps(context_dict));
     else:
-        return HttpResponseForbidden 
+        return HttpResponseForbidden()

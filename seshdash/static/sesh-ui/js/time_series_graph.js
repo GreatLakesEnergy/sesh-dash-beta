@@ -1,19 +1,3 @@
-function getCookie(name) {
-    var cookieValue = null;
-   if(document.cookie && document.cookie != '') {
-        var cookies;
-        cookies = document.cookie.split(';');
-        for (var i = 0 ; i<cookies.length ; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-
-            if (cookie.substring(0, name.length + 1) ==(name + '=')) {
-               cookieValue = decodeURIComponent(cookie.substring(name.length +1 ))
-                break;
-            }
-          }
-       }
-       return cookieValue;
-}
 
 var csrftoken = getCookie('csrftoken');
 
@@ -25,12 +9,11 @@ $(document).ready(function(){
     time_default_value = $('#time_dropdown').val();
 
     $.post('/time_series',{csrfmiddlewaretoken:csrftoken,'measurement':measurement_default_value,'time':time_default_value,'active_id':active_site_id},function(data){
-                 alert(data)
-                // var jsondata = JSON.parse(data)
-               //  alert(jsondata)
+                 var data_values = JSON.parse(data)
+                 graph_data_values=data_values.graph_values;
           $('#time_series_graph').highcharts({
            chart : {
-                zoomtype : 'yx'
+                zoomtype : 'x'
            },
            title : {
                 text: 'Time Series Graph '
@@ -58,7 +41,7 @@ $(document).ready(function(){
            series :[{
                  name : measurement_default_value,
                  type : 'spline',
-                 data : data,
+                 data :graph_data_values,
                  tooltip : {
                         valueSuffix : ''
                  },
@@ -75,10 +58,11 @@ $('#graph_change_trigger').click(function(){
          measurement_value = $('#measurements_dropdown').val();
          time_value = $('#time_dropdown').val();
  $.post('/time_series',{csrfmiddlewaretoken:csrftoken,'measurement':measurement_value,'time':time_value,'active_id':active_site_id},function(data){
-                 alert(data)
+                 var data_values = JSON.parse(data)
+                 var graph_data_values = data_values.graph_values
           $('#time_series_graph').highcharts({
               chart : {
-                zoomtype : 'xy'
+                zoomtype : 'x'
            },
            title : {
                 text: 'Time Series Graph '
@@ -104,10 +88,10 @@ $('#graph_change_trigger').click(function(){
            },
            series :[{
                  name : measurement_value,
-                 type : 'spline',
-                 data : data,
+                 type : 'column',
+                 data : graph_data_values,
                  tooltip : {
-                        valueSuffix : 'mxioum'
+                        valueSuffix : ''
                  },
             }],
 

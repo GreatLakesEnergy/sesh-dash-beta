@@ -1,10 +1,9 @@
 
 {% load static %}
 {% block time_series_high_chart %}
-
-    <div class="col-lg-12">
-        <div class="panel panel-default"> 
-             <div class ="filter-form" id ="time-range">
+     <div class = "row">
+         <div class="col-md-4" >
+                  <div class ="filter-form" id ="time-range">
                    <div class ="data-sort-container">
                      <p class="sort-help-text">Choose a time range </p>
                      <select class ="form-control" id ="time_dropdown">
@@ -14,6 +13,8 @@
                       </select>
                    </div>
                  </div>
+           </div>
+           <div class="col-md-4">   
            <div class ="filter-form" id ="measurements">
                    <div class ="data-sort-container">
                      <p class="sort-help-text">Choose a measurements </p>
@@ -26,8 +27,13 @@
                       </select>
                    </div>
                  </div>
-           <div class ="btn btn-primary" id ="graph_change_trigger">Update graph </div>    
-            <div class="panel-heading">
+           </div>
+           <div class="col-sm-3">
+             <div class ="btn btn-primary" id ="graph_change_trigger">Update graph </div> 
+           </div> 
+         </div>
+            <div class="panel panel-default"> 
+              <div class="panel-heading">
                 <i class ="fa fa-bar-chart-o fa-fw"></i>
                  Time series Bar
               </div>

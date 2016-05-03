@@ -241,3 +241,8 @@ div.awesomplete > ul {
   border:2px solid #CA2F2F;
   box-shadow: 10px red;
 }
+
+/* Time_Series_graph styling */
+#graph_changer_tigger{
+  margin-top:18px;
+}
