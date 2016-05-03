@@ -152,36 +152,18 @@ class Influx:
         value_returned = self._influx_client.write_points(json_body)
         return value_returned
         
-
    
-    def get_latest_measurement_point(self, measurement_name, database=None):
-        """ Returns the latest point for a point """
-        db = self.db
-        if database:
-            db = database
-        query = "select * from %s order by time desc limit 1" % measurement_name
-        return list(self._influx_client.query(query,database=db).get_points())
-
     def get_latest_measurement_point_site(self, site, measurement_name, database=None):
+        """ Returns the latest point of a site for a measurement """
         db = self.db
         if database:
             db = database
-        query = "select * from %s where site_name='%s' order by time desc limit 1" % (measurement_name, site.site_name)
+        query = "SELECT * FROM %s WHERE site_name='%s' ORDER BY time DESC LIMIT 1" % (measurement_name, site.site_name)
         return list(self._influx_client.query(query,database=db).get_points())
 
 
 
 # Helper classes to the interface
-def get_latest_point(measurement_name, db=None):
-    """ Function to return the latest datapoint of a given measurement """
-    
-    i = Influx()
-    if db is not None:
-        i = Influx(database=db)
-   
-    point = i.get_latest_measurement_point(measurement_name, db)
-    return point[0]
-    
 
 def get_latest_point_site(site, measurement_name, db=None):
     """ Returns the latest point for a measurement for a specific siite """
