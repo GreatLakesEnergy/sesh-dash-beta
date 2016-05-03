@@ -261,13 +261,20 @@ class Daily_Data_Point(models.Model):
 
 
     site = models.ForeignKey(Sesh_Site)
-    daily_pv_yield = models.FloatField(default=0, verbose_name="Battery Voltage") # Aggregate pv produced that day Kwh
-    daily_power_consumption_total = models.FloatField(default=0, verbose_name="Daily Power Consumption")
-    daily_power_cons_pv = models.FloatField(default=0, verbose_name="Power consumption pv" )
-    daily_battery_charge = models.FloatField(default=0, verbose_name="Battery Charge") # Amount of charge put in battery
-    daily_grid_outage_t = models.FloatField(default=0, verbose_name="Grid outage t") # Amount of time the grid was off
-    daily_grid_outage_n = models.FloatField(default=0, verbose_name="Grid outagen n") # Aggregate amount times  grid was off
-    daily_grid_usage = models.FloatField(default=0, verbose_name="Grid usage" ) # Aggregate amount of grid used
+    daily_pv_yield = models.FloatField(default=0,
+            verbose_name="Battery Voltage") # Aggregate pv produced that day Kwh
+    daily_power_consumption_total = models.FloatField(default=0,
+            verbose_name="Daily Power Consumption")
+    daily_power_cons_pv = models.FloatField(default=0,
+            verbose_name="Power consumption pv" )
+    daily_battery_charge = models.FloatField(default=0,
+            verbose_name="Battery Charge") # Amount of charge put in battery
+    daily_grid_outage_t = models.FloatField(default=0,
+            verbose_name="Grid outage t") # Amount of time the grid was off
+    daily_grid_outage_n = models.FloatField(default=0,
+            verbose_name="Grid outagen n") # Aggregate amount times  grid was off
+    daily_grid_usage = models.FloatField(default=0,
+            verbose_name="Grid usage" ) # Aggregate amount of grid used
     daily_no_of_alerts = models.IntegerField(default=0, verbose_name="Number of alerts")
     date = models.DateTimeField()
 
@@ -277,12 +284,11 @@ class Daily_Data_Point(models.Model):
          unique_together = ('site','date')
 
     def __str__(self):
-        return " sitename:%s pv_yield:%s power_used:%s ... " % (self.site.site_name,
-                                                            self.daily_pv_yield,
-                                                            self.daily_power_cons_pv
-                                                            )
-
-
+        return " sitename:%s \n pv_yield:%s \n power_used:%s \n daily_batt_charge:%s \n grid power used: %s" % (self.site.site_name,
+                  self.daily_pv_yield,
+                  self.daily_power_cons_pv,
+                  self.daily_battery_charge,
+                  self.daily_grid_usage)
 
 
 class Trend_Data_Point(models.Model):
