@@ -36,4 +36,9 @@ def get_model_verbose(model):
     
     return verbose_dict
 
+def get_latest_instance(model):
+    """ Returns the latest row in a model """
+    return model.objects.all().order_by('id').last()
+
+
 
