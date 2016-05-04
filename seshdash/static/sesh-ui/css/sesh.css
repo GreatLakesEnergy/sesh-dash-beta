@@ -243,6 +243,12 @@ div.awesomplete > ul {
 }
 
 /* Time_Series_graph styling */
-#graph_changer_tigger{
+
+#update_container{
+  padding-top:60px;
+  margin-bottom:-134px;
+}
+
+#update-butt{
   margin-top:18px;
 }

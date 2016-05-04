@@ -33,6 +33,7 @@ from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
+from seshdash.utils.time_utils import get_epoch_from_datetime
 
 # Import for API
 from rest_framework import generics, permissions
@@ -714,17 +715,26 @@ def time_series_graph(request):
         client=Influx('roger_db')
         measurement=request.POST.get('measurement','')
         time=request.POST.get('time','')
-        measurement_units=Daily_Data_Point.UNITS_DICTIONARY
+        measurement_units=BoM_Data_Point.SI_UNITS
         units=measurement_units[measurement]
         active_id = request.POST.get('active_id','')
         active_site=Sesh_Site.objects.filter(id=active_id)
         active_site_name=active_site[0].site_name
-        time_series_values=client.get_measurement_bucket(measurement,'30m','site_name',active_site_name,time)
+        time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
+        time_bucket=time_bucket_dict[time]
+        time_series_values=client.get_measurement_bucket(measurement,time_bucket,'site_name',active_site_name,time)
+
         graph_values = []
+
         for values in time_series_values:
-            graph_values.append(values['mean'])
+            graph_values.append([values['time'],values['mean']])
+
+        for unformatted_values in graph_values:
+            unformatted_values[0]=get_epoch_from_datetime(datetime.datetime.strptime(unformatted_values[0],"%Y-%m-%dT%H:%M:%SZ"))
+
         context_dict['graph_values']=graph_values
-        context_dict['units']=units       
+        context_dict['units']=units  
+        print context_dict     
         return HttpResponse(json.dumps(context_dict));
     else:
         return HttpResponseForbidden()
