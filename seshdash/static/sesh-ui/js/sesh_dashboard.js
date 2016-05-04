@@ -153,6 +153,8 @@ Morris.Bar({
         dropdown2_values = response['drop2'];
         SI_unit1 = response['SI_unit1'];
         SI_unit2 = response['SI_unit2'];
+        console.log("response is")
+        console.log(response)
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
@@ -242,6 +244,8 @@ Morris.Bar({
         SI_unit1 = response['SI_unit1'];
         SI_unit2 = response['SI_unit2'];
         time_stamp = response['time']
+        console.log("response is")
+        console.log(response)
         message = (drop_choice1 + '  With  ' + drop_choice2);
         $("#title-message").html(message);
         $('#containerhigh').highcharts({

@@ -83,6 +83,7 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
+    
     #Getting measurements
     measures = []
     client = Influx('test_db')
@@ -720,22 +721,26 @@ def get_measurements_values(request):
         SI_unit1 = SI_unit[choice_drop_1]
         SI_unit2 = SI_unit[choice_drop_2]
         client = Influx('test_db')
-        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
-        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
-        dropdown1_values = values_drop_1[0]
-        dropdown2_values = values_drop_2[0]
-        for dropdown1_values in values_drop_1:
-            time_stamp.append(dropdown1_values['time'])
-        for dropdown1_values in values_drop_1:
-            dropdown1_choice_results.append(dropdown1_values['mean'])
-        for dropdown2_values in values_drop_2:
-            dropdown2_choice_results.append(dropdown2_values['mean'])
+        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,{'hours': 24})
+        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,{'hours': 24})
+        #dropdown1_values = values_drop_1[0]
+        #dropdown2_values = values_drop_2[0]
+        for i in values_drop_1:
+            time_stamp.append(i['time'])
+        for i in values_drop_1:
+            dropdown1_choice_results.append(i['mean'])
+        for i in values_drop_2:
+            dropdown2_choice_results.append(i['mean'])
         results['drop1'] = dropdown1_choice_results
         results['drop2'] = dropdown2_choice_results
         results['SI_unit1'] = SI_unit1
         results['SI_unit2'] = SI_unit2
         results['time'] = time_stamp
         #print time_stamp
+        print "result are"
+        print values_drop_1
+        #print 
+        #print dropdown2_choice_results
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()
