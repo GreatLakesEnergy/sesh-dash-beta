@@ -252,7 +252,6 @@ Morris.Bar({
             text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
         },
         xAxis: [{
-            //categories:time_stamp,
             crosshair: true
         }],
         yAxis: [{ // Primary yAxis

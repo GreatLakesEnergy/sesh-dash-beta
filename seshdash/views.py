@@ -720,8 +720,8 @@ def get_measurements_values(request):
         SI_unit1 = SI_unit[choice_drop_1]
         SI_unit2 = SI_unit[choice_drop_2]
         client = Influx('test_db')
-        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d','mean')
-        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d','mean')
+        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
+        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
         dropdown1_values = values_drop_1[0]
         dropdown2_values = values_drop_2[0]
         for dropdown1_values in values_drop_1:

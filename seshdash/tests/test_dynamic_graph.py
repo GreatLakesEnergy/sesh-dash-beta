@@ -18,13 +18,11 @@ from django.conf import settings
 from datetime import datetime
 from seshdash.utils import alert
 from django.utils import timezone
-####################################
+# Influx
 from influxdb import InfluxDBClient
 from seshdash.data.db.influx import Influx
-from django.http import HttpResponseForbidden
 
-# This test case written to test alerting module.
-# It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
+# This test case written to test post request if it returns code 200
 class dynamic_graph_TestCase(TestCase):
 
     @override_settings(DEBUG=True)
