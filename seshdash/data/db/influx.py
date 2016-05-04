@@ -75,11 +75,10 @@ class Influx:
         if database:
            db = database
 
-        start_time = timezone.now()
+        start_time = timezone.now() - timedelta(**time_delta)
         end_time = start_time + timedelta(**time_delta)
 
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
-
         result_set_gen = []
         if not start == "now":
             start_time = start
