@@ -10,17 +10,28 @@ $(document).ready(function(){
 
     $.post('/time_series',{csrfmiddlewaretoken:csrftoken,'measurement':measurement_default_value,'time':time_default_value,'active_id':active_site_id},function(data){
                  var data_values = JSON.parse(data)
+                 si_units = data_values.units;
                  graph_data_values=data_values.graph_values;
-          $('#time_series_graph').highcharts({
+
+
+                  for(var i =0 , l= graph_data_values.length ; i<l ;i++){
+                      graph_data_values[i][0] = graph_data_values[i][0] * 1000;
+                 }
+                  
+            
+         $('#time_series_graph').highcharts({
            chart : {
                 zoomtype : 'x'
            },
            title : {
                 text: 'Time Series Graph '
            },
+           xAxis : {
+                  type : 'datetime'
+                  },
            yAxis : [{
                    labels : {
-                         format : '{value}',
+                         format : '{value}'+ si_units,
                          style : {
                                color : Highcharts.getOptions().colors[1]
                          },
@@ -43,7 +54,8 @@ $(document).ready(function(){
                  type : 'spline',
                  data :graph_data_values,
                  tooltip : {
-                        valueSuffix : ''
+                         
+                        valueSuffix : si_units
                  },
             }],
 
@@ -54,12 +66,21 @@ $(document).ready(function(){
 
 var measurement_value;
 var time_value;
-$('#graph_change_trigger').click(function(){ 
+$('#update-butt').click(function(){ 
          measurement_value = $('#measurements_dropdown').val();
          time_value = $('#time_dropdown').val();
  $.post('/time_series',{csrfmiddlewaretoken:csrftoken,'measurement':measurement_value,'time':time_value,'active_id':active_site_id},function(data){
-                 var data_values = JSON.parse(data)
-                 var graph_data_values = data_values.graph_values
+                
+                 data_values = JSON.parse(data)
+                 si_units = data_values.units  
+                 graph_data_values = data_values.graph_values
+
+                 for(var i =0 , l= graph_data_values.length ; i<l ;i++){
+                     graph_data_values[i][0] = graph_data_values[i][0] * 1000;
+                 }
+                  
+            
+
           $('#time_series_graph').highcharts({
               chart : {
                 zoomtype : 'x'
@@ -67,9 +88,12 @@ $('#graph_change_trigger').click(function(){
            title : {
                 text: 'Time Series Graph '
            },
+           xAxis:{
+                 type : 'datetime'
+               },
            yAxis : [{
                    labels : {
-                         format : '{value}',
+                         format : '{value}' + si_units,
                          style : {
                                color : Highcharts.getOptions().colors[1]
                          },
@@ -88,10 +112,10 @@ $('#graph_change_trigger').click(function(){
            },
            series :[{
                  name : measurement_value,
-                 type : 'column',
+                 type : 'spline',
                  data : graph_data_values,
                  tooltip : {
-                        valueSuffix : ''
+                        valueSuffix : si_units
                  },
             }],
 
