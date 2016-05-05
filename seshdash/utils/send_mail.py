@@ -11,6 +11,7 @@ import logging
 # with subject "Hello World" and body including "Here is your email"
 def send_mail(subject,list_of_recipients,content,email_template='alert'):
     try:
+        print "Message to be sent with subject %s and recipients %s" % (subject, list_of_recipients)
         if not  list_of_recipients:
             return False
         plaintext = get_template('seshdash/mail/%s_mail.txt'%email_template)
@@ -25,6 +26,7 @@ def send_mail(subject,list_of_recipients,content,email_template='alert'):
         msg = EmailMultiAlternatives(subject, text_content, FROM_EMAIL, list_of_recipients)
         msg.attach_alternative(html_content, "text/html")
         result = msg.send()
+        print "MEssage sent"
         if not result:
             raise Exception("Error sending email result:%s"%result)
         return True

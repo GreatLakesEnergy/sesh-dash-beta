@@ -141,7 +141,8 @@ class Influx:
                 "measurement": measurement_name,
                 "tags": {
                     "site_name": site.site_name,
-                    "site_id": site.id
+                    "site_id": site.id,
+                    "source": 'sesh_dash'
                 },
                 "fields":{
                     "value": value
@@ -151,7 +152,17 @@ class Influx:
 
         value_returned = self._influx_client.write_points(json_body)
         return value_returned
-        
+    
+    def get_point(self, measurement_name, point_id, database=None):
+        db = self.db   
+        if database:
+            db = database
+
+        query = "SELECT * FROM %s WHERE time='%s'" %(measurement_name, point_id)
+        return list(self._influx_client.query(query, database=db).get_points())
+     
+
+    
    
     def get_latest_measurement_point_site(self, site, measurement_name, database=None):
         """ Returns the latest point of a site for a measurement """
@@ -180,6 +191,21 @@ def get_latest_point_site(site, measurement_name, db=None):
         return None
     
     return point
+
+
+def get_point(measurement_name, point_id, db=None):
+    """ Queryies for a specific point and returns it """
+    i = Influx()
+    if db is not None:
+        i = Influx(database=db)
+
+    point = i.get_point(measurement_name, point_id, db)
+    
+    if point:
+       return point[0]
+
+    return point
+    
 
 def insert_point(site, measurement_name, value, db=None):
     """ Inserts a point into the db provided the name and the site """

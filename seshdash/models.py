@@ -156,6 +156,7 @@ class Sesh_Alert(models.Model):
     smsSent = models.BooleanField()
     slackSent = models.BooleanField()
     point_model = models.CharField(max_length=40, default="BoM_Data_Point")
+    point_id = models.CharField(max_length=40)
 
     # def __str__(self):  # Patrick: Commenting out due to errors with FK
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
