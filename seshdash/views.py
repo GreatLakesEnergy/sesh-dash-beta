@@ -608,32 +608,22 @@ def get_notifications_alerts(request):
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
-    print "ALert with id ",
-    print alert_id
    
     alert_id = int(alert_id)
     alert = Sesh_Alert.objects.filter(id=alert_id).first()
-
     alert_values = {}
-
     point = alert_utils.get_alert_point(alert)
 
     if point is not None:
 
- 
         if type(point) != type(dict()):
             alert_values = model_to_dict(point)
         else:
             alert_values = point
 
         # Converting time to json serializable value and changing it to timesince
-        print point
-        
         if type(alert_values['time'])  == type(unicode()):
-            print "Now converting"
             alert_values['time'] = parser.parse(alert_values['time'])
-            print "Time now: ",
-            print alert_values['time']
 
         alert_values['time'] = get_timesince(alert_values['time'])
         return HttpResponse(json.dumps(alert_values))
