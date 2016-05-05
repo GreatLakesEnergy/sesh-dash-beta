@@ -285,7 +285,7 @@ def get_alert_point_value(alert):
     rule = alert.alert
     point = get_alert_point(alert)
     
-    if is_mysql_rule(rule):
+    if is_mysql_rule(rule): 
         model, field_name = rule.check_field.strip().split('#')
         value = getattr(point, field_name)
     

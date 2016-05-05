@@ -173,6 +173,8 @@ class AlertTestCase(TestCase):
         response = c.post('/notifications/',{})
         self.assertEqual(response.status_code, 200)
 
+    
+    @override_settings(DEBUG=True)
     def test_alert_autosilencing(self):
         alert.alert_status_check()
         alerts = Sesh_Alert.objects.filter(isSilence=False)
