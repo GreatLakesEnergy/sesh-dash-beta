@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import logging
-from datetime import datetime
+from django.utils import timezone
+from datetime import datetime, timedelta,date
 
 from django.conf import settings
 from influxdb import InfluxDBClient
@@ -24,7 +25,44 @@ class Influx:
         #TODO draw this from settings
         self._influx_tag = 'sesh_dash'
 
-    def get_measurement_bucket(self,measurement,bucket_size,clause,clause_val,time_delta,start="now",operator="mean",database=None):
+    def _generate_date_clause(self,start,end=None):
+        """
+        Helper function to generate time constraint on influx query
+        to handle if using epoch time or datetime
+        """
+        query_str =  "time  >=  {start}s"
+        if end:
+            query_str = query_str + " AND time <= {end}s"
+
+        try:
+            start = int(start)
+        except:
+            start = start
+            pass
+        if isinstance(start,datetime):
+            start = timezone.make_naive(start)
+            if end:
+                end = timezone.make_naive(end)
+
+        if isinstance(start,date) or isinstance(start,datetime):
+            query_str =  query_str.replace("{start}s","\'{start}\'")
+            if end:
+                query_str = query_str.replace("{end}s","\'{end}\'")
+
+
+
+        query_str_formatted =  query_str.format(start=start, end=end)
+        return query_str_formatted
+
+    def get_measurement_bucket(self,
+                                measurement,
+                                bucket_size,
+                                clause,
+                                clause_val,
+                                time_delta={'hours':24},
+                                start="now",
+                                operator="mean",
+                                database=None):
         """
         return the requsted measurement values in given bucket size
         """
@@ -32,22 +70,25 @@ class Influx:
         if database:
            db = database
 
-        start_time = "now()"
-        query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  time  >  now() - {time_delta} GROUP BY time({bucket_size}) fill(0)"
+        start_time = timezone.now()
+        end_time = start_time + timedelta(**time_delta)
+
+        query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
 
         result_set_gen = []
         if not start == "now":
             start_time = start
+            end_time = start_time + timedelta(**time_delta)
 
+        time_constraint = self._generate_date_clause(start_time, end=end_time)
         query_string_formatted = query_string.format(
                                                     measurement = measurement,
                                                     bucket_size = bucket_size,
                                                     clause = clause,
                                                     clause_value = clause_val,
-                                                    time_delta = time_delta,
-                                                    operator = operator
+                                                    operator = operator,
+                                                    time_constraint = time_constraint,
                                                     )
-
         try:
             result_set = self._influx_client.query(query_string_formatted,database = db)
             logging.debug("Influx query %s"% query_string_formatted)
