@@ -5,10 +5,10 @@ var measurement_default_value;
 var time_default_value;
 $(document).ready(function(){
 
-    measurement_default_value = $('#measurements_dropdown').val();
+    measurement_value = $('#measurements_dropdown').val();
     time_default_value = $('#time_dropdown').val();
 
-    $.post('/time_series',{csrfmiddlewaretoken:csrftoken,'measurement':measurement_default_value,'time':time_default_value,'active_id':active_site_id},function(data){
+    $.post('/time_series',{csrfmiddlewaretoken:csrftoken,'measurement':measurement_value,'time':time_default_value,'active_id':active_site_id},function(data){
                  var data_values = JSON.parse(data)
                  si_units = data_values.units;
                  graph_data_values=data_values.graph_values;
@@ -37,7 +37,7 @@ $(document).ready(function(){
                          },
                      },
                    title : {
-                         text : measurement_default_value,
+                         text : measurement_value,
                    },
 
            }],
@@ -50,7 +50,7 @@ $(document).ready(function(){
                 floating:true,
            },
            series :[{
-                 name : measurement_default_value,
+                 name : measurement_value,
                  type : 'spline',
                  data :graph_data_values,
                  tooltip : {
