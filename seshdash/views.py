@@ -709,6 +709,7 @@ def historical_data(request):
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
 
+@login_required
 def time_series_graph(request):
     context_dict = {}
     if request.method == 'POST':
