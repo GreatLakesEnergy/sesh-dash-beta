@@ -82,7 +82,7 @@ class dynamic_graph_TestCase(TestCase):
     def test_time_graph(self):
         c = Client()
         c.login(username = "patrick",password = "cdakcjocajica")
-         measurement_value ='pv_production'
+        measurement_value ='pv_production'
         time_value = '24h'
         active_site_id = 1
         response = c.post('/time_series/',{'measurement':measurement_value,'time':time_value,'active_id':active_site_id})
