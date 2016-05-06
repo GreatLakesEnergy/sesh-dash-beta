@@ -22,11 +22,11 @@ class Influx:
                                               settings.INFLUX_PASSWORD,
                                               self.db
                                               )
-	try:
-		self.dbs = self._influx_client.get_list_database()
-	except:
-		self.dbs = []
-		pass
+#	try:
+#		self.dbs = self._influx_client.get_list_database()
+#	except:
+#		self.dbs = []
+#		pass
 
         self._influx_tag = 'sesh_dash'
 

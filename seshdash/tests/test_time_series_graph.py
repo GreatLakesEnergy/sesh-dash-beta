@@ -82,7 +82,7 @@ class AlertTestCase(TestCase):
     def test_time_graph(self):
         c = Client()
         measurement_value ='pv_production'
-        time_value = '7d'
+        time_value = '24h'
         active_site_id = '1'
         c.login(username = "patrick",password = "cdakcjocajica")
         response = c.post('/time_series/',{'measurement':measurement_value,'time':time_value,'active_id':active_site_id})
