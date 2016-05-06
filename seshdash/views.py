@@ -13,6 +13,7 @@ from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden
 from django import forms
 
 #Import Models and Forms
@@ -34,7 +35,6 @@ from datetime import datetime, date, time, tzinfo
 from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
 #
-import dateutil.parser
 from seshdash.utils.time_utils import get_epoch_from_datetime
 
 # Import for API
@@ -44,6 +44,9 @@ from seshdash.api.victron import VictronAPI
 
 # celery tasks
 from seshdash.tasks import get_historical_BoM, generate_auto_rules
+
+#Import for Influx
+from seshdash.data.db.influx import Influx
 
 #generics
 import logging
@@ -87,14 +90,19 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
+
+    #Generate measurements in the time_series_graph
+    client=Influx()
+    measurements_value=client.get_measurements()
     
-    #Getting measurements
-    measures = []
-    client = Influx('test_db')
-    measurements = client.get_measurements()
-    for i in measurements:
-        measures.append(i['name'])
-    context_dict['measure'] = measures
+    measurements =[]
+     
+    for measurement in measurements_value:
+        measurements.append(measurement['name'])
+
+    context_dict['measurements']= measurements
+
+    
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -705,6 +713,39 @@ def historical_data(request):
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
+
+@login_required
+def time_series_graph(request):
+    context_dict = {}
+    if request.method == 'POST':
+        client=Influx()
+        measurement=request.POST.get('measurement','')
+        time=request.POST.get('time','')
+        measurement_units=BoM_Data_Point.SI_UNITS
+        units=measurement_units[measurement]
+        active_id = request.POST.get('active_id','')
+        active_site=Sesh_Site.objects.filter(id=active_id)
+        active_site_name=active_site[0].site_name
+        time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
+        time_delta = time_delta_dict[time]
+        time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
+        time_bucket=time_bucket_dict[time]
+        time_series_values=client.get_measurement_bucket(measurement,time_bucket,'site_name',active_site_name,time_delta)
+
+        graph_values = []
+
+        for values in time_series_values:
+            graph_values.append([values['time'],values['mean']])
+
+        for unformatted_values in graph_values:
+            unformatted_values[0]=get_epoch_from_datetime(datetime.datetime.strptime(unformatted_values[0],"%Y-%m-%dT%H:%M:%SZ"))
+        print graph_values
+        context_dict['graph_values']=graph_values
+        context_dict['units']=units  
+        print context_dict     
+        return HttpResponse(json.dumps(context_dict));
+    else:
+        return HttpResponseForbidden()
     
 @login_required
 def get_measurements_values(request):
@@ -723,7 +764,7 @@ def get_measurements_values(request):
         SI_unit = BoM_Data_Point.SI_UNITS
         SI_unit1 = SI_unit[choice_drop_1]
         SI_unit2 = SI_unit[choice_drop_2]
-        client = Influx('test_db')
+        client = Influx()
         values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,{'hours': 24})
         values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,{'hours': 24})
         

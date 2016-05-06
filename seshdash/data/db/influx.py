@@ -22,7 +22,12 @@ class Influx:
                                               settings.INFLUX_PASSWORD,
                                               self.db
                                               )
-        #TODO draw this from settings
+#	try:
+#		self.dbs = self._influx_client.get_list_database()
+#	except:
+#		self.dbs = []
+#		pass
+
         self._influx_tag = 'sesh_dash'
 
     def _generate_date_clause(self,start,end=None):
@@ -76,7 +81,6 @@ class Influx:
 
        #print "start is %s end is %s" % (start_time, end_time)
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
-
         result_set_gen = []
         if not start == "now":
             start_time = start
@@ -164,7 +168,7 @@ class Influx:
 
         return True
 
-    def query(self,measurement_name, database=None):
+    def query(self,measurement_name,database=None):
         db =  self.db
         if database:
            db = database
@@ -177,6 +181,13 @@ class Influx:
 
     def delete_database(self,name):
         self._influx_client.drop_database(name)
+   
+    def get_measurements(self,database=None):
+        db = self.db
+        if database:
+           db = database
+        query = "show measurements"
+        return list(self._influx_client.query(query,database=db).get_points())
 
     def get_measurements(self,database=None):
        db = self.db

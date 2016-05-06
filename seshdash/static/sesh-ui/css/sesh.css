@@ -244,16 +244,26 @@ div.awesomplete > ul {
   border:2px solid #CA2F2F;
   box-shadow: 10px red;
 }
+
+/* Time_Series_graph styling */
+
+#update_container{
+  padding-top:60px;
+  margin-bottom:-134px;
+}
+
+#update-butt{
+  margin-top:18px;
+}
 .page-header{
   font-weight: 200;
 }
-#y-axis{
-  margin-left: 50px;
+
+#dynamic_graph_container{
+    padding:20px;
+    margin-bottom: -13px;
 }
-.dropdown{
-  margin-bottom: 10px;
+#dynamic_graph_butt {
+    margin-top: 29px;
 }
-.butt{
-  margin-left: 100px;
-  margin-top: 25px;
-}
+

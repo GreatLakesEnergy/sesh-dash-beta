@@ -234,6 +234,7 @@ class BoM_Data_Point(models.Model):
     #TODO relay will likely need to be it's own model
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
+    
     """
     SI units
     """

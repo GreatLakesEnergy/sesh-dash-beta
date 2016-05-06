@@ -7,38 +7,39 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 
 
 {% block high_chart_line_bar %}
-    <div class="dropdown col-lg-12">
-         <div class="col-lg-4" id="x-axis">
-              <p>Select option</p>
-              <select class="form-control" id="drop1">
-                 {{ measure }}
-                 {% for value in measure %}
+    <div class="row" id ="dynamic_graph_container">
+        <div class="col-md-4" id="x-axis">
+            <p>Select option</p>
+            <select class="form-control" id="drop1">
+                 {{ measurements }}
+                 {% for value in measurements %}
                       <option value="{{value}}">{{value}}</option>
                  {% endfor %}
-              </select>
+             </select>
         </div>
 
-        <div class="col-lg-4" id="y-axis">
-              <p>Select another option</p>
-              <select class="form-control" id="drop2" >
-                 {{ measure }}
-                 {% for value in measure %}
+        <div class="col-md-4" id="y-axis">
+            <p>Select another option</p>
+            <select class="form-control" id="drop2" >
+                 {{ measurements }}
+                 {% for value in measurements %}
                       <option value="{{value}}">{{value}}</option>
                  {% endfor %}
-              </select>
+            </select>
         </div>
-        <button type="button" class="btn btn-primary butt">Show graph </button>
+        <div class="col-md-3">
+           <button type="button" class="btn btn-primary butt" id = 'dynamic_graph_butt'>Show graph </button>
+        </div>
     </div>
     <div class="col-lg-12">
         <div class="panel panel-default">
-                <div class="panel-heading">
-                    <!-- TODO make this a variable -->
-                    <i class="fa fa-bar-chart-o fa-fw" ></i>
-                    <span id="title-message" ></span>
-                </div>
+            <div class="panel-heading">
+                <!-- TODO make this a variable -->
+                <i class="fa fa-bar-chart-o fa-fw" ></i>
+                <span id="title-message" ></span>
+            </div>
+ 
             <div  id="containerhigh">
-
-
             </div>
         </div>
     </div>

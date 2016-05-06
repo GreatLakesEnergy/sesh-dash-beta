@@ -139,7 +139,6 @@ Morris.Bar({
   var drop_choice2;
   var message;
   var time_stamp;
-  var time = [];
   /*------------------------------------GRAPH-DEFAULT-----------------------------------*/
   var default1 = $("#drop1").val();
   var default2 = $("#drop2").val();
@@ -152,14 +151,14 @@ Morris.Bar({
         dropdown2_values = response['drop2'];
         SI_unit1 = response['SI_unit1'];
         SI_unit2 = response['SI_unit2'];
-        //console.log("response is")
-        //console.log(response)
+        
         for (i=0;i<dropdown1_values.length;i++){
-          dropdown1_values[i][0] = dropdown1_values[i][0] * 1000
+        dropdown1_values[i][0]=dropdown1_values[i][0]*1000
         }
         for (i=0;i<dropdown2_values.length;i++){
-          dropdown2_values[i][0] = dropdown2_values[i][0] * 1000
+        dropdown2_values[i][0]=dropdown2_values[i][0]*1000
         }
+
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
@@ -168,11 +167,10 @@ Morris.Bar({
             text: ' Daily ' + default1 + ' with ' + default2 + ' In High Charts'
         },
         xAxis: [{
+            crosshair: true,
             type: 'datetime',
-            crosshair: true
         }],
         yAxis: [{ // Primary yAxis
-
             labels: {
                 format: '{value} '+SI_unit2,
                 style: {
@@ -230,22 +228,15 @@ Morris.Bar({
             }
         }]
     });
-    });
+var csrftoken = getCookie('csrftoken');
+   
 /*-------------------------------END-OF-DEFAULT-GRAPH-------------------------------------*/
-/*-----------------------------DROPDOWN-CHOICES------------------------------------------*/
-    /*$("#drop1").change(function(){
 
-         drop_choice1 = $("#drop1").val();
-  });
-
-  $("#drop2").change(function(){
-        drop_choice2 = $("#drop2").val();
-  });*/
-/*-----------------------------END-OF-DROPDOWN-CHOICES-------------------------------------*/
 /*----------------------------------------GRAPH-------------------------------------------*/
   $(".butt").click(function(){
-      drop_choice1 = $("#drop1").val();
-      drop_choice2 = $("#drop2").val();
+       drop_choice1 = $("#drop1").val();
+       drop_choice2 = $("#drop2").val();   
+   
       $.post("/get_measurements_values",{csrfmiddlewaretoken: csrftoken, choice1:drop_choice1, choice2:drop_choice2 , active_site_id:active_site_id},function(data){
         var response = JSON.parse(data);
         dropdown1_values = response['drop1'];
@@ -254,11 +245,12 @@ Morris.Bar({
         SI_unit2 = response['SI_unit2'];
         message = (drop_choice1 + '  With  ' + drop_choice2);
         for (i=0;i<dropdown1_values.length;i++){
-             dropdown1_values[i][0] = dropdown1_values[i][0] * 1000
+        dropdown1_values[i][0]=dropdown1_values[i][0]*1000
         }
         for (i=0;i<dropdown2_values.length;i++){
-             dropdown2_values[i][0] = dropdown2_values[i][0] * 1000
+        dropdown2_values[i][0]=dropdown2_values[i][0]*1000
         }
+
         $("#title-message").html(message);
         $('#containerhigh').highcharts({
                  chart: {
@@ -268,8 +260,8 @@ Morris.Bar({
             text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
         },
         xAxis: [{
-            type : 'datetime',
-            crosshair: true
+            crosshair: true,
+            type: 'datetime',
         }],
         yAxis: [{ // Primary yAxis
             labels: {
@@ -318,6 +310,7 @@ Morris.Bar({
             data: dropdown1_values,
             tooltip: {
                 valueSuffix:SI_unit1,
+              
             }
 
         }, {
@@ -326,6 +319,7 @@ Morris.Bar({
             data: dropdown2_values,
             tooltip: {
                 valueSuffix: SI_unit2,
+          
             }
         }]
     });
@@ -517,5 +511,9 @@ Morris.Bar({
             }
         }]
     });*/
+
+
+
+
 
 /*------------------------------------------------------------------*/
