@@ -104,12 +104,15 @@ class Influx:
             return list(result_set_gen)
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"% str(e))
+            print "error on server %s"% str(e)
             raise Exception
         except InfluxDBClientError,e:
             logging.error("Error running  query %s"%str(e))
+            print "error %s"% str(e)
             raise Exception
         except Exception,e:
             logging.error("influxdb unkown error %s" %str(e))
+            print "unkown error %s"% str(e)
             raise Exception
         return result_set_gen
 
