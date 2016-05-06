@@ -1,6 +1,9 @@
+/**{
+  border: 1px solid black;
+}
 body {
  font-family: "Roboto", sans-serif;
-}
+}*/
 
 
 #page-wrapper {
@@ -255,3 +258,12 @@ div.awesomplete > ul {
 .page-header{
   font-weight: 200;
 }
+
+#dynamic_graph_container{
+    padding:20px;
+    margin-bottom: -13px;
+}
+#dynamic_graph_butt {
+    margin-top: 29px;
+}
+

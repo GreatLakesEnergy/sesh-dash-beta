@@ -3,52 +3,51 @@
 {% block time_series_high_chart %}
      <div class = "row" id ="update_container">
          <div class="col-md-4" >
-                  <div class ="filter-form" id ="time-range">
-                   <div class ="data-sort-container">
+             <div class ="filter-form" id ="time-range">
+                 <div class ="data-sort-container">
                      <p class="sort-help-text">Choose a time range </p>
                      <select class ="form-control" id ="time_dropdown">
                         <option value ="24h">Daily</option>
                         <option value ="7d">Weekly</option>
                         <option value ="30d">Monthly</option>
                       </select>
-                   </div>
-                 </div>
-           </div>
-           <div class="col-md-4">   
-           <div class ="filter-form" id ="measurements">
-                   <div class ="data-sort-container">
-                     <p class="sort-help-text">Choose a measurements </p>
-                     <select class ="form-control" id ="measurements_dropdown">
-                        {{ measurements }}
-                        {% for value in measurements %}
-                            <option value ="{{value}}">{{value}}</option>
-                        {% endfor %}
-
-                      </select>
-                   </div>
-                 </div>
-           </div>
-           <div class="col-sm-3">
-             <div class ="btn btn-primary" id ="update-butt">Update graph </div> 
-           </div> 
-         </div>
-            <div class="panel panel-default"> 
-              <div class="panel-heading">
-                <i class ="fa fa-bar-chart-o fa-fw"></i>
-                 Time series Bar
+                  </div>
               </div>
-           <div class="panel-body">
-             <div id ="time_series_graph"></div>
-           </div>
-
           </div>
-        </div>
+          <div class="col-md-4">   
+              <div class ="filter-form" id ="measurements">
+                  <div class ="data-sort-container">
+                      <p class="sort-help-text">Choose a measurements </p>
+                      <select class ="form-control" id ="measurements_dropdown">
+                          {{ measurements }}
+                          {% for value in measurements %}
+                              <option value ="{{value}}">{{value}}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+              </div>
+          </div>
+          <div class="col-sm-3">
+              <div class ="btn btn-primary" id ="update-butt">Update graph </div> 
+          </div> 
+     </div>
+     <div class="panel panel-default"> 
+         <div class="panel-heading">
+            <i class ="fa fa-bar-chart-o fa-fw"></i>
+                Time series Bar
+         </div>
+         <div class="panel-body">
+            <div id ="time_series_graph"></div>
+         </div>
+
+     </div>
+  
 
 {% endblock %}
 
 {% block seshjs %}
 
-<script src ='{%static  'sesh-ui/js/time_series_graph.js' %}' > </script>
+    <script src ='{%static  'sesh-ui/js/time_series_graph.js' %}' > </script>
 
 {% endblock %}
 

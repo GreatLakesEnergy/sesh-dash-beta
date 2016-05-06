@@ -1,6 +1,7 @@
 #Django libs
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
+from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
@@ -53,7 +54,9 @@ import logging
 from seshdash.models import *
 from django.forms import model_to_dict
 import json
-
+# Influxdb
+from influxdb import InfluxDBClient
+from seshdash.data.db.influx import Influx
 
 @login_required(login_url='/login/')
 def index(request,site_id=0):
@@ -97,6 +100,14 @@ def index(request,site_id=0):
 
     context_dict['measurements']= measurements
 
+    
+    #Getting measurements
+    #measures = []
+   # client = Influx('test_db')
+  #  measurements = client.get_measurements()
+ #   for i in measurements:
+   #     measures.append(i['name'])
+  #  context_dict['measure'] = measures
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -532,8 +543,8 @@ def get_high_chart_data(user,site_id,sites):
 
     # Getting climat conditions
 
-     high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
-     context_high_data['high_cloud_cover']=high_cloud_cover
+     #high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
+     #context_high_data['high_cloud_cover']=high_cloud_cover
 
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
@@ -566,8 +577,7 @@ def get_high_chart_data(user,site_id,sites):
      context_high_data['high_pv_production']= high_pv_production
      print (context_high_data['high_pv_production'])
      return context_high_data
-
-
+     
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
 
@@ -707,6 +717,7 @@ def historical_data(request):
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
+        print sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
 
 @login_required
@@ -741,3 +752,55 @@ def time_series_graph(request):
         return HttpResponse(json.dumps(context_dict));
     else:
         return HttpResponseForbidden()
+    
+@login_required
+def get_measurements_values(request):
+    if request.method == 'POST':
+        results = {}
+        dropdown1_choice_results =[]
+        dropdown2_choice_results =[]
+        time_stamp = []
+        time_stamp2 = []
+        choice_drop_1 = request.POST.get('choice1','')
+        choice_drop_2 = request.POST.get('choice2','')
+        active_id = request.POST.get('active_site_id','')
+        active_site = Sesh_Site.objects.filter(id=active_id)
+        active_site_name = active_site [0]
+        current_site = active_site_name.site_name
+        SI_unit = BoM_Data_Point.SI_UNITS
+        SI_unit1 = SI_unit[choice_drop_1]
+        SI_unit2 = SI_unit[choice_drop_2]
+        client = Influx('roger_db')
+        values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,{'hours': 24})
+        values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,{'hours': 24})
+        #dropdown1_values = values_drop_1[0]
+        #dropdown2_values = values_drop_2[0]
+        for i in values_drop_1:
+            time_stamp.append(i['time'])
+        for i in values_drop_1:
+            dropdown1_choice_results.append(i['mean'])
+        for i in values_drop_2:
+            dropdown2_choice_results.append(i['mean'])
+        results['drop1'] = dropdown1_choice_results
+        results['drop2'] = dropdown2_choice_results
+        results['SI_unit1'] = SI_unit1
+        results['SI_unit2'] = SI_unit2
+        results['time'] = time_stamp
+        #print time_stamp
+        print "result are"
+        print values_drop_1
+        #print 
+        #print dropdown2_choice_results
+        return HttpResponse(json.dumps(results))
+    else:
+        return HttpResponseBadRequest()
+
+
+
+
+
+
+
+
+
+

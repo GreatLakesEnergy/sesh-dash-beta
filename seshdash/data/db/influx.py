@@ -76,8 +76,10 @@ class Influx:
            db = database
 
         start_time = timezone.now() - timedelta(**time_delta)
+
         end_time = start_time + timedelta(**time_delta)
 
+	print "start is %s end is %s" % (start_time, end_time)
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
         result_set_gen = []
         if not start == "now":
@@ -93,6 +95,7 @@ class Influx:
                                                     operator = operator,
                                                     time_constraint = time_constraint,
                                                     )
+        print query_string_formatted
         try:
             result_set = self._influx_client.query(query_string_formatted,database = db)
             logging.debug("Influx query %s"% query_string_formatted)
@@ -171,7 +174,8 @@ class Influx:
            db = database
         query = "select value from %s"%measurement_name
         return list(self._influx_client.query(query,database=db).get_points())
-
+   
+    
     def create_database(self,name):
         self._influx_client.create_database(name)
 
@@ -185,4 +189,11 @@ class Influx:
         query = "show measurements"
         return list(self._influx_client.query(query,database=db).get_points())
 
+    def get_measurements(self,database=None):
+       db = self.db
+       if database:
+          db = database
+       query = "show measurements"
+       return list(self._influx_client.query(query,database=db).get_points())
+    
 
