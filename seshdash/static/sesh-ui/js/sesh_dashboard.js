@@ -133,14 +133,19 @@ Morris.Bar({
 */
 //function get_high_chart(date,pv,cloud)
 //{
-  var dropdown1;
-  var dropdown2;
+var a='kigali_rwanda';
+var i;
+for (i=0;i < a.length;i++){
+a = str.replace(a,"_","");
+}
+alert(a)
   var dropdown1_values = [];
   var dropdown2_values = [];
   var drop_choice1;
   var drop_choice2;
   var message;
   var time_stamp;
+  var time = [];
   /*------------------------------------GRAPH-DEFAULT-----------------------------------*/
   var default1 = $("#drop1").val();
   var default2 = $("#drop2").val();
@@ -153,8 +158,14 @@ Morris.Bar({
         dropdown2_values = response['drop2'];
         SI_unit1 = response['SI_unit1'];
         SI_unit2 = response['SI_unit2'];
-        console.log("response is")
-        console.log(response)
+        //console.log("response is")
+        //console.log(response)
+        for (i=0;i<dropdown1_values.length;i++){
+          dropdown1_values[i][0] = dropdown1_values[i][0] * 1000
+        }
+        for (i=0;i<dropdown2_values.length;i++){
+          dropdown2_values[i][0] = dropdown2_values[i][0] * 1000
+        }
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
@@ -163,9 +174,11 @@ Morris.Bar({
             text: ' Daily ' + default1 + ' with ' + default2 + ' In High Charts'
         },
         xAxis: [{
+            type: 'datetime',
             crosshair: true
         }],
         yAxis: [{ // Primary yAxis
+
             labels: {
                 format: '{value} '+SI_unit2,
                 style: {
@@ -243,10 +256,13 @@ Morris.Bar({
         dropdown2_values = response['drop2'];
         SI_unit1 = response['SI_unit1'];
         SI_unit2 = response['SI_unit2'];
-        time_stamp = response['time']
-        console.log("response is")
-        console.log(response)
         message = (drop_choice1 + '  With  ' + drop_choice2);
+        for (i=0;i<dropdown1_values.length;i++){
+             dropdown1_values[i][0] = dropdown1_values[i][0] * 1000
+        }
+        for (i=0;i<dropdown2_values.length;i++){
+             dropdown2_values[i][0] = dropdown2_values[i][0] * 1000
+        }
         $("#title-message").html(message);
         $('#containerhigh').highcharts({
                  chart: {
@@ -256,6 +272,7 @@ Morris.Bar({
             text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
         },
         xAxis: [{
+            type : 'datetime',
             crosshair: true
         }],
         yAxis: [{ // Primary yAxis
@@ -305,7 +322,6 @@ Morris.Bar({
             data: dropdown1_values,
             tooltip: {
                 valueSuffix:SI_unit1,
-                categories: time_stamp,
             }
 
         }, {
@@ -314,7 +330,6 @@ Morris.Bar({
             data: dropdown2_values,
             tooltip: {
                 valueSuffix: SI_unit2,
-                categories: time_stamp,
             }
         }]
     });

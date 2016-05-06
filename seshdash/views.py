@@ -33,6 +33,9 @@ from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
+#
+import dateutil.parser
+from seshdash.utils.time_utils import get_epoch_from_datetime
 
 # Import for API
 from rest_framework import generics, permissions
@@ -52,6 +55,7 @@ import json
 # Influxdb
 from influxdb import InfluxDBClient
 from seshdash.data.db.influx import Influx
+
 
 @login_required(login_url='/login/')
 def index(request,site_id=0):
@@ -700,7 +704,6 @@ def historical_data(request):
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
-        print sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
     
 @login_required
@@ -709,8 +712,8 @@ def get_measurements_values(request):
         results = {}
         dropdown1_choice_results =[]
         dropdown2_choice_results =[]
-        time_stamp = []
-        time_stamp2 = []
+        time = []
+        time_epoched = []
         choice_drop_1 = request.POST.get('choice1','')
         choice_drop_2 = request.POST.get('choice2','')
         active_id = request.POST.get('active_site_id','')
@@ -723,24 +726,23 @@ def get_measurements_values(request):
         client = Influx('test_db')
         values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,{'hours': 24})
         values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,{'hours': 24})
-        #dropdown1_values = values_drop_1[0]
-        #dropdown2_values = values_drop_2[0]
+        
         for i in values_drop_1:
-            time_stamp.append(i['time'])
-        for i in values_drop_1:
-            dropdown1_choice_results.append(i['mean'])
+            dropdown1_choice_results.append([i['time'],i['mean']])
         for i in values_drop_2:
-            dropdown2_choice_results.append(i['mean'])
+            dropdown2_choice_results.append([i['time'],i['mean']])
+        
+        for i in dropdown1_choice_results:
+            i[0] = get_epoch_from_datetime(datetime.datetime.strptime(i[0],"%Y-%m-%dT%H:%M:%SZ"))
+        for i in dropdown2_choice_results:
+            i[0] = get_epoch_from_datetime(datetime.datetime.strptime(i[0],"%Y-%m-%dT%H:%M:%SZ"))
+        
+        #print dropdown1_choice_results
         results['drop1'] = dropdown1_choice_results
         results['drop2'] = dropdown2_choice_results
         results['SI_unit1'] = SI_unit1
         results['SI_unit2'] = SI_unit2
-        results['time'] = time_stamp
         #print time_stamp
-        print "result are"
-        print values_drop_1
-        #print 
-        #print dropdown2_choice_results
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()

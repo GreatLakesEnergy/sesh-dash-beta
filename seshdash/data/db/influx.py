@@ -74,7 +74,7 @@ class Influx:
 
         end_time = start_time + timedelta(**time_delta)
 
-	print "start is %s end is %s" % (start_time, end_time)
+       #print "start is %s end is %s" % (start_time, end_time)
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
 
         result_set_gen = []
@@ -91,7 +91,7 @@ class Influx:
                                                     operator = operator,
                                                     time_constraint = time_constraint,
                                                     )
-        print query_string_formatted
+       # print query_string_formatted
         try:
             result_set = self._influx_client.query(query_string_formatted,database = db)
             logging.debug("Influx query %s"% query_string_formatted)
