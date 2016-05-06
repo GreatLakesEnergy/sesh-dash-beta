@@ -133,12 +133,6 @@ Morris.Bar({
 */
 //function get_high_chart(date,pv,cloud)
 //{
-var a='kigali_rwanda';
-var i;
-for (i=0;i < a.length;i++){
-a = str.replace(a,"_","");
-}
-alert(a)
   var dropdown1_values = [];
   var dropdown2_values = [];
   var drop_choice1;
@@ -239,17 +233,19 @@ alert(a)
     });
 /*-------------------------------END-OF-DEFAULT-GRAPH-------------------------------------*/
 /*-----------------------------DROPDOWN-CHOICES------------------------------------------*/
-    $("#drop1").change(function(){
+    /*$("#drop1").change(function(){
 
          drop_choice1 = $("#drop1").val();
   });
 
   $("#drop2").change(function(){
         drop_choice2 = $("#drop2").val();
-  });
+  });*/
 /*-----------------------------END-OF-DROPDOWN-CHOICES-------------------------------------*/
 /*----------------------------------------GRAPH-------------------------------------------*/
   $(".butt").click(function(){
+      drop_choice1 = $("#drop1").val();
+      drop_choice2 = $("#drop2").val();
       $.post("/get_measurements_values",{csrfmiddlewaretoken: csrftoken, choice1:drop_choice1, choice2:drop_choice2 , active_site_id:active_site_id},function(data){
         var response = JSON.parse(data);
         dropdown1_values = response['drop1'];
