@@ -133,6 +133,8 @@ Morris.Bar({
 */
 //function get_high_chart(date,pv,cloud)
 //{
+  var dropdown1;
+  var dropdown2;
   var dropdown1_values = [];
   var dropdown2_values = [];
   var drop_choice1;
@@ -228,10 +230,15 @@ Morris.Bar({
             }
         }]
     });
+
+});
+
+
 var csrftoken = getCookie('csrftoken');
    
 /*-------------------------------END-OF-DEFAULT-GRAPH-------------------------------------*/
 
+ 
 /*----------------------------------------GRAPH-------------------------------------------*/
   $(".butt").click(function(){
        drop_choice1 = $("#drop1").val();

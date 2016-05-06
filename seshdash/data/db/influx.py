@@ -189,11 +189,5 @@ class Influx:
         query = "show measurements"
         return list(self._influx_client.query(query,database=db).get_points())
 
-    def get_measurements(self,database=None):
-       db = self.db
-       if database:
-          db = database
-       query = "show measurements"
-       return list(self._influx_client.query(query,database=db).get_points())
     
 

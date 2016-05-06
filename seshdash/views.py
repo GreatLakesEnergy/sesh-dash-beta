@@ -13,7 +13,6 @@ from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden
 from django import forms
 
 #Import Models and Forms
@@ -92,7 +91,7 @@ def index(request,site_id=0):
     context_dict['site_id'] = site_id
 
     #Generate measurements in the time_series_graph
-    client=Influx()
+    client=Influx('test_db')
     measurements_value=client.get_measurements()
     
     measurements =[]
@@ -718,7 +717,7 @@ def historical_data(request):
 def time_series_graph(request):
     context_dict = {}
     if request.method == 'POST':
-        client=Influx()
+        client=Influx('test_db')
         measurement=request.POST.get('measurement','')
         time=request.POST.get('time','')
         measurement_units=BoM_Data_Point.SI_UNITS
@@ -739,10 +738,10 @@ def time_series_graph(request):
 
         for unformatted_values in graph_values:
             unformatted_values[0]=get_epoch_from_datetime(datetime.datetime.strptime(unformatted_values[0],"%Y-%m-%dT%H:%M:%SZ"))
-        print graph_values
+       # print graph_values
         context_dict['graph_values']=graph_values
         context_dict['units']=units  
-        print context_dict     
+       # print context_dict     
         return HttpResponse(json.dumps(context_dict));
     else:
         return HttpResponseForbidden()
@@ -764,7 +763,7 @@ def get_measurements_values(request):
         SI_unit = BoM_Data_Point.SI_UNITS
         SI_unit1 = SI_unit[choice_drop_1]
         SI_unit2 = SI_unit[choice_drop_2]
-        client = Influx()
+        client = Influx('test_db')
         values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,{'hours': 24})
         values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,{'hours': 24})
         
