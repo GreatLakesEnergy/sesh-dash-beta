@@ -18,10 +18,12 @@ from django.conf import settings
 from datetime import datetime
 from seshdash.utils import alert
 from django.utils import timezone
+# Influx
+from influxdb import InfluxDBClient
+from seshdash.data.db.influx import Influx
 
-# This test case written to test alerting module.
-# It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
-class AlertTestCase(TestCase):
+# This test case written to test post request if it returns code 200
+class dynamic_graph_TestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -48,10 +50,9 @@ class AlertTestCase(TestCase):
                                                     battery_voltage=20,
                                                     time=timezone.now(),
                                                     AC_input=0.0,
-                                                    AC_output=15.0,  
+                                                    AC_output=15.0,
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
-
         #create sesh rmc account
         self.test_rmc_account = Sesh_RMC_Account(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
         self.test_rmc_account.save()
@@ -68,7 +69,6 @@ class AlertTestCase(TestCase):
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
         self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
-        
         #assign a user to the sites
 
 
@@ -81,10 +81,10 @@ class AlertTestCase(TestCase):
     #Testing Time_Series_graph
     def test_time_graph(self):
         c = Client()
-        measurement_value ='pv_production'
-        time_value = '24h'
-        active_site_id = '1'
         c.login(username = "patrick",password = "cdakcjocajica")
+         measurement_value ='pv_production'
+        time_value = '24h'
+        active_site_id = 1
         response = c.post('/time_series/',{'measurement':measurement_value,'time':time_value,'active_id':active_site_id})
         self.assertEqual(response.status_code , 200)
 
