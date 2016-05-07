@@ -56,7 +56,6 @@ from seshdash.models import *
 from django.forms import model_to_dict
 import json
 # Influxdb
-from influxdb import InfluxDBClient
 from seshdash.data.db.influx import Influx
 
 
@@ -92,7 +91,7 @@ def index(request,site_id=0):
     context_dict['site_id'] = site_id
 
     #Generate measurements in the time_series_graph
-    client=Influx()
+    client=Influx('test_db')
     measurements_value=client.get_measurements()
     
     measurements =[]
@@ -718,7 +717,7 @@ def historical_data(request):
 def time_series_graph(request):
     context_dict = {}
     if request.method == 'POST':
-        client=Influx()
+        client=Influx('test_db')
         measurement=request.POST.get('measurement','')
         time=request.POST.get('time','')
         measurement_units=BoM_Data_Point.SI_UNITS
@@ -764,7 +763,7 @@ def get_measurements_values(request):
         SI_unit = BoM_Data_Point.SI_UNITS
         SI_unit1 = SI_unit[choice_drop_1]
         SI_unit2 = SI_unit[choice_drop_2]
-        client = Influx()
+        client = Influx('test_db')
         values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,{'hours': 24})
         values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,{'hours': 24})
         
