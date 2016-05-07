@@ -730,6 +730,10 @@ def time_series_graph(request):
         time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
         time_bucket=time_bucket_dict[time]
         time_series_values=client.get_measurement_bucket(measurement,time_bucket,'site_name',active_site_name,time_delta)
+        print measurement
+        print time_bucket
+        print active_site_name
+        print time_delta
 
         graph_values = []
 

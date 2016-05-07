@@ -1,31 +1,22 @@
 # Test
 from django.test import TestCase, Client
-from django.test.utils import override_settings
 
 # Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
+from seshdash.models import Sesh_Site,VRM_Account,Sesh_User
 from django.contrib.auth.models import User
-
-# Tasks
-from seshdash.tasks import generate_auto_rules
 
 # Django
 from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
-from django.conf import settings
 
 # Utils
 from datetime import datetime
-from seshdash.utils import alert
-from django.utils import timezone
-# Influx
-from influxdb import InfluxDBClient
-from seshdash.data.db.influx import Influx
 
-# This test case written to test post request if it returns code 200
+from django.utils import timezone
+
 class dynamic_graph_TestCase(TestCase):
 
-    @override_settings(DEBUG=True)
+    #@override_settings(DEBUG=True)
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
@@ -45,26 +36,6 @@ class dynamic_graph_TestCase(TestCase):
                                              has_genset=True,
                                              has_grid=True)
 
-        self.data_point = Data_Point.objects.create(site=self.site,
-                                                    soc=10,
-                                                    battery_voltage=20,
-                                                    time=timezone.now(),
-                                                    AC_input=0.0,
-                                                    AC_output=15.0,
-                                                    AC_Load_in=0.0,
-                                                    AC_Load_out=-0.7)
-        #create sesh rmc account
-        self.test_rmc_account = Sesh_RMC_Account(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
-        self.test_rmc_account.save()
-
-        #create rmc status
-        self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
-                                                        ip_address='127.0.0.1',
-                                                        minutes_last_contact=100,
-                                                        signal_strength=27,
-                                                        data_sent_24h=12,
-                                                        time=datetime.now())
-        self.test_rmc_status.save()
 
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
@@ -74,10 +45,8 @@ class dynamic_graph_TestCase(TestCase):
 
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
-        generate_auto_rules(self.site.pk)
-        alert.alert_generator(self.site)
 
-
+    # This test case written to test post request if it returns code 200
     #Testing Time_Series_graph
     def test_time_graph(self):
         c = Client()
