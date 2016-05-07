@@ -13,7 +13,6 @@ from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden
 from django import forms
 
 #Import Models and Forms
@@ -730,6 +729,10 @@ def time_series_graph(request):
         time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
         time_bucket=time_bucket_dict[time]
         time_series_values=client.get_measurement_bucket(measurement,time_bucket,'site_name',active_site_name,time_delta)
+        print measurement
+        print time_bucket
+        print active_site_name
+        print time_delta
 
         graph_values = []
 
@@ -738,10 +741,10 @@ def time_series_graph(request):
 
         for unformatted_values in graph_values:
             unformatted_values[0]=get_epoch_from_datetime(datetime.datetime.strptime(unformatted_values[0],"%Y-%m-%dT%H:%M:%SZ"))
-        print graph_values
+       # print graph_values
         context_dict['graph_values']=graph_values
         context_dict['units']=units  
-        print context_dict     
+       # print context_dict     
         return HttpResponse(json.dumps(context_dict));
     else:
         return HttpResponseForbidden()

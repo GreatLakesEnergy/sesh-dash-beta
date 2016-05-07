@@ -1,7 +1,8 @@
 
 {% load static %}
 {% block time_series_high_chart %}
-     <div class = "row" id ="update_container">
+     <div class="panel panel-default">
+           <div class = "row" id ="update_container">
          <div class="col-md-4" >
              <div class ="filter-form" id ="time-range">
                  <div class ="data-sort-container">
@@ -14,7 +15,7 @@
                   </div>
               </div>
           </div>
-          <div class="col-md-4">   
+          <div class="col-md-4">
               <div class ="filter-form" id ="measurements">
                   <div class ="data-sort-container">
                       <p class="sort-help-text">Choose a measurements </p>
@@ -28,10 +29,10 @@
               </div>
           </div>
           <div class="col-sm-3">
-              <div class ="btn btn-primary" id ="update-butt">Update graph </div> 
-          </div> 
+              <div class ="btn btn-primary" id ="update-butt">Update graph </div>
+          </div>
      </div>
-     <div class="panel panel-default"> 
+
          <div class="panel-heading">
             <i class ="fa fa-bar-chart-o fa-fw"></i>
                 Time series Bar
@@ -41,7 +42,7 @@
          </div>
 
      </div>
-  
+
 
 {% endblock %}
 
@@ -53,4 +54,4 @@
 
 
 
-              
+
