@@ -50,7 +50,7 @@ class time_series_graph_TestCase(TestCase):
          
         #create an influx db
         self.create_influx_instance = Influx()
-        self.create_influx_db = self.create_influx_instance.create_database('test_db')
+        self._influx_db = self.create_influx_instance.create_database('test_db')
 
     #Testing Time_Series_graph
     def test_time_graph(self):
@@ -62,3 +62,6 @@ class time_series_graph_TestCase(TestCase):
         response = c.post('/time_series/',{'measurement':measurement_value,'time':time_value,'active_id':active_site_id})
         self.assertEqual(response.status_code , 200)
 
+   def teardown(self):
+       self.delete_database(self._influx_db)
+       pass
