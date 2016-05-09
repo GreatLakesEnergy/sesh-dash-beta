@@ -249,14 +249,14 @@ div.awesomplete > ul {
 .page-header {
     font-weight: 300;
 }
-#update-butt{
+#update-button{
   margin-top:18px;
 }
 #dynamic_graph_container{
     padding:20px;
     margin-bottom: -13px;
 }
-#dynamic_graph_butt {
+#dynamic_graph_button {
     margin-top: 29px;
 }
 #dynamic_graph{
