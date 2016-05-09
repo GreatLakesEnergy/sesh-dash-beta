@@ -1,6 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account
+from seshdash.utils.time_utils import get_timezone_from_geo, localize
 
 class SiteForm(ModelForm):
     error_css_class = "warning"
@@ -8,18 +9,44 @@ class SiteForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account')
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','time_zone'),
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
+
+
+    def save(self,**kwargs):
+        """
+        add timezone based on location
+        """
+        super(SiteForm, self).save(**kwargs)
+        pos =self.cleaned_data.get('position')
+        timezone = get_timezone_from_geo(pos[0], pos[1])
+        self.instance.time_zone = timezone
+        self.instance.comission_date = localize(self.instance.comission_date, timezone)
+
+        super(SiteForm, self).save(**kwargs)
+
+
 
 class SiteRMCForm(ModelForm):
     error_css_class = "warning"
     required_css_class = "info"
 
 
+    def clean(self):
+        """
+        Add timezone based on location
+        """
+        cleaned_data = super(SiteRMCForm, self).clean()
+        pos = cleaned_data.get('position')
+        timezone = get_timezone_from_geo(pos.lat, pos.lon)
+        self.cleaned_data['time_zone'] = timezone
+        return cleaned_data
+
+
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','import_data')
+        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','import_data','time_zone')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 

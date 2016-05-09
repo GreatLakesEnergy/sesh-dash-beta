@@ -22,7 +22,7 @@ from django.db.models import Sum
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
 
 # Special things we need
-from seshdash.utils import time_utils, rmc_tools
+from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
 from pprint import pprint
 
 #Import utils
@@ -31,6 +31,7 @@ from seshdash.utils.time_utils import get_timesince
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
+from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
 #
@@ -627,16 +628,23 @@ def get_notifications_alerts(request):
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
+   
     alert_id = int(alert_id)
     alert = Sesh_Alert.objects.filter(id=alert_id).first()
-
     alert_values = {}
-
-    point = get_model_first_reference(alert.point_model, alert)
+    point = alert_utils.get_alert_point(alert)
 
     if point is not None:
-        alert_values = model_to_dict(point)
+
+        if type(point) != type(dict()):
+            alert_values = model_to_dict(point)
+        else:
+            alert_values = point
+
         # Converting time to json serializable value and changing it to timesince
+        if type(alert_values['time'])  == type(unicode()):
+            alert_values['time'] = parser.parse(alert_values['time'])
+
         alert_values['time'] = get_timesince(alert_values['time'])
         return HttpResponse(json.dumps(alert_values))
 
@@ -742,13 +750,5 @@ def graphs(request):
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()
-
-
-
-
-
-
-
-
 
 

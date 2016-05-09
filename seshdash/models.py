@@ -78,6 +78,7 @@ class Sesh_Site(models.Model):
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
+    time_zone = models.CharField(max_length = 100, default='Africa/Kigali')
     position = GeopositionField()
     installed_kw = models.FloatField()
     system_voltage = models.IntegerField()
@@ -123,6 +124,7 @@ class Alert_Rule(models.Model):
                      ('BoM_Data_Point#main_on','Grid Availible'),
                      ('BoM_Data_Point#genset_state','Generator on'),
                      ('RMC_status#minutes_last_contact', 'RMC Last Contact'),
+                     ('battery_voltage', 'Battery Voltage in influx rule'),
                 )
 
     site = models.ForeignKey(Sesh_Site)
@@ -155,6 +157,7 @@ class Sesh_Alert(models.Model):
     smsSent = models.BooleanField()
     slackSent = models.BooleanField()
     point_model = models.CharField(max_length=40, default="BoM_Data_Point")
+    point_id = models.CharField(max_length=40)
 
     # def __str__(self):  # Patrick: Commenting out due to errors with FK
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )

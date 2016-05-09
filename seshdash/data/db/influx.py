@@ -281,3 +281,4 @@ def insert_point(site, measurement_name, value, db=None):
     value = i.insert_point(site, measurement_name, float(value))
 
 
+   

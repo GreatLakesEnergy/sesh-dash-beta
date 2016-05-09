@@ -40,6 +40,8 @@ class AggregateTestCase(TestCase):
 
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
         # Setup Influx
+        self.i = Influx()
+        self.i.create_database('test_db')
         self._influx_db_name = 'test_db'
         self.i = Influx(database=self._influx_db_name)
         self.no_points = 288
@@ -66,15 +68,16 @@ class AggregateTestCase(TestCase):
             #Generate random data  points for 24h
             self.no_points = create_test_data(self.site)
         except Exception,e:
-           #self.i.delete_database(self._influx_db_name)
-           #sleep(1)
-           #self.i.create_database(self._influx_db_name)
+           self.i.delete_database(self._influx_db_name)
+           sleep(1)
+           self.i.create_database(self._influx_db_name)
+           print e
            pass
 
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
     def tearDown(self):
-        #self.i.delete_database(self._influx_db_name)
+        self.i.delete_database(self._influx_db_name)
         pass
 
 
