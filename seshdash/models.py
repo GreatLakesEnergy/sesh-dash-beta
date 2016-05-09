@@ -78,6 +78,7 @@ class Sesh_Site(models.Model):
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
+    time_zone = models.CharField(max_length = 100, default='Africa/Kigali')
     position = GeopositionField()
     installed_kw = models.FloatField()
     system_voltage = models.IntegerField()

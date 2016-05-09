@@ -66,15 +66,16 @@ class AggregateTestCase(TestCase):
             #Generate random data  points for 24h
             self.no_points = create_test_data(self.site)
         except Exception,e:
-           #self.i.delete_database(self._influx_db_name)
-           #sleep(1)
-           #self.i.create_database(self._influx_db_name)
+           self.i.delete_database(self._influx_db_name)
+           sleep(1)
+           self.i.create_database(self._influx_db_name)
+           print e
            pass
 
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
     def tearDown(self):
-        #self.i.delete_database(self._influx_db_name)
+        self.i.delete_database(self._influx_db_name)
         pass
 
 

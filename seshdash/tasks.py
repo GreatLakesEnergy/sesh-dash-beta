@@ -106,14 +106,11 @@ def get_BOM_data():
     for site in sites:
         try:
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
-            #TODO figure out a way to get these automatically or add
-            #them manually to the model for now
-            #Also will the user have site's under thier account that they wouldn't like to pull data form?
-            #This will throw an error when the objects are getting created
+
             if v_client.IS_INITIALIZED:
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] )
+                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.timezone)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
@@ -565,7 +562,7 @@ def alert_engine():
     for site in sites:
         alert_generator(site)
         alert_status_check()
-    
+
 def download_vrm_historical_data():
     for site in Sesh_Site.objects.filter(vrm_site_is__isnull=True):
         if site.vrm_site_id:
