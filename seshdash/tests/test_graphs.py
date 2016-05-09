@@ -74,9 +74,6 @@ class graph_TestCase(TestCase):
 
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
-        generate_auto_rules(self.site.pk)
-        alert.alert_generator(self.site)
-
 
     # Testing graph
     def test_graph(self):

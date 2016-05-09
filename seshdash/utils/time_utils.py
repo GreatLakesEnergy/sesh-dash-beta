@@ -2,7 +2,6 @@ from datetime import datetime,timedelta
 from time import localtime,strftime
 from django.conf import settings
 from  pytz import timezone
-from tzwhere import tzwhere
 
 
 def get_epoch(tz=None):
