@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-lg-12">
             {% block header %}
- 
+
                 <h2 class="historical-header"> Historical Data </h2>
 
             {% endblock %}
@@ -21,15 +21,15 @@
             <p class="sort-help-text"> Select an option to sort by </p>
             <select class="form-control" id="data-sort">
                  {{ sort_dict }}
-                 {% for key, value in sort_dict.items %}	
+                 {% for key, value in sort_dict.items %}
                       <option value="{{key}}">{{value}}</option>
                  {% endfor %}
             </select>
         </div>
        </div>
-   
+
        <!-- Loader -->
-       <div class="historical-loader"> 
+       <div class="historical-loader">
              <div class="spinner">
                  <div class="rect1"></div>
                  <div class="rect2"></div>
@@ -41,7 +41,7 @@
 
 
        <div class="chart-data-container">
-          
+
        </div>
     </div>
 

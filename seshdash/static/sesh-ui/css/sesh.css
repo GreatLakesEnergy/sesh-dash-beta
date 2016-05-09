@@ -1,3 +1,6 @@
+/*{
+  border: 1px solid black;
+}*/
 body {
  font-family: "Roboto", sans-serif;
 }
@@ -241,6 +244,22 @@ div.awesomplete > ul {
   border:2px solid #CA2F2F;
   box-shadow: 10px red;
 }
-.page-header{
-  font-weight: 200;
+
+/* Time_Series_graph styling */
+.page-header {
+    font-weight: 300;
 }
+#update-button{
+  margin-top:18px;
+}
+#dynamic_graph_container{
+    padding:20px;
+    margin-bottom: -13px;
+}
+#dynamic_graph_button {
+    margin-top: 29px;
+}
+#dynamic_graph{
+  margin-bottom: 30px;
+}
+

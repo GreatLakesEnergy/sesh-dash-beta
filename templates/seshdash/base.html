@@ -49,6 +49,10 @@
     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel="stylesheet" type="text/css">
 
 
+    <!--utilities-->
+    <script src='{% static 'sesh-ui/js/utilities.js' %}' ></script>
+
+
 
   <title>SESH Dashboard (beta)</title>
 
@@ -178,7 +182,7 @@
     {% block javascript %}
     {% endblock %}
     </script>
- 
+
     <!-- PACE javascript -->
    <script src = '{% static  'PACE/pace.min.js' %}' > </script>
 
@@ -215,13 +219,13 @@
     <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
 
    {% block seshjs %}
-        <!-- sesh javascript -->
+             <!-- sesh javascript -->
         <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
         <!-- Sesh React -->
         <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
         <!-- Maps configuration -->
         <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
-    
+
     {% endblock %}
 
    {% endblock %}
