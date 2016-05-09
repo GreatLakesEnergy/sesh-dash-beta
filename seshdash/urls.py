@@ -23,7 +23,6 @@ urlpatterns = [
             url(r'^get-latest-bom-data', views.get_latest_bom_data),
             url(r'^search', views.search),
             url(r'^historical_data', views.historical_data),
-            url(r'^time_series',views.time_series_graph),
-            url(r'^get_measurements_values', views.get_measurements_values),
+            url(r'^graphs', views.graphs),
             ]
 

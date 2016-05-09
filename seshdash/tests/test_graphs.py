@@ -23,7 +23,7 @@ from influxdb import InfluxDBClient
 from seshdash.data.db.influx import Influx
 
 # This test case written to test post request if it returns code 200
-class dynamic_graph_TestCase(TestCase):
+class graph_TestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -82,10 +82,10 @@ class dynamic_graph_TestCase(TestCase):
     def test_graph(self):
         f = Client()
         f.login(username = "patrick",password = "cdakcjocajica")
-        drop1_choice = 'pv_production'
-        drop2_choice = 'battery_voltage'
+        choices = ['pv_production','soc']
+        time = '24h'
         active_site_id = 1
-        response = f.post('/get_measurements_values',{ 'choice1': drop1_choice, 'choice2': drop2_choice, 'active_site_id': active_site_id })
+        response = f.post('/graphs',{ 'choice': choices,'time':time , 'active_site_id': active_site_id })
         self.assertEqual(response.status_code, 200)
 
 
