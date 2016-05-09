@@ -14,6 +14,9 @@ from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
 from django.conf import settings
 
+# Influx
+from seshdash.data.db.influx import Influx, insert_point
+
 # Utils
 from datetime import datetime
 from seshdash.utils import alert
@@ -25,6 +28,21 @@ class AlertTestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
+
+        self._influx_db_name = 'test_db'
+        self.i = Influx(database=self._influx_db_name)
+
+        try:
+            self.i.create_database(self._influx_db_name)
+            #Generate random data  points for 24h
+        except:
+           self.i.delete_database(self._influx_db_name)
+           sleep(1)
+           self.i.create_database(self._influx_db_name)
+           pass
+      
+        
+
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
         self.location = Geoposition(52.5,24.3)
@@ -65,6 +83,10 @@ class AlertTestCase(TestCase):
                                                         time=datetime.now())
         self.test_rmc_status.save()
 
+ 
+        #create influx datapoint
+        self.influx_data_point = insert_point(self.site, 'battery_voltage', 10)
+
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
         self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
@@ -74,7 +96,15 @@ class AlertTestCase(TestCase):
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
         generate_auto_rules(self.site.pk)
-        alert.alert_generator(self.site)
+
+        influx_rule = Alert_Rule.objects.create(check_field='battery_voltage',
+                                                operator='lt',
+                                                send_mail=True,
+                                                send_sms=True,
+                                                site=self.site,
+                                                value=20)
+                                                
+        alert.alert_generator()
         
         self.new_data_point = Data_Point.objects.create(site=self.site,
                                                     soc=30,
@@ -93,24 +123,24 @@ class AlertTestCase(TestCase):
                                                         data_sent_24h=12,
                                                         time=datetime.now())
 
-        print "The id of the generated rmc status is ",
-        print self.new_rmc_status.id
+        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  30)
+
 
     @override_settings(DEBUG=True)
     def test_alert_fires(self):
         """ Alert working correctly"""
         # test if necessary alerts has triggered and if alert objects saved
         alerts_created = Sesh_Alert.objects.filter(site=self.site)
-        self.assertEqual(alerts_created.count(),3)
+        self.assertEqual(alerts_created.count(),4)
         """ Alert mails working correctly"""
-        self.assertEqual(alerts_created.filter(emailSent=True).count(),3)
+        self.assertEqual(alerts_created.filter(emailSent=True).count(),4)
 
     # TODO add negative test cases
 
         # test_get_alerts
         """ Getting alerts correctly """
         alerts = Sesh_Alert.objects.all().count()
-        self.assertEqual(alerts, 3)
+        self.assertEqual(alerts, 4)
 
         # test_display_alert_data
         """Getting the display alert data"""
@@ -125,7 +155,7 @@ class AlertTestCase(TestCase):
         response = c.post('/silence-alert/',{'alertId':'1'})
         alerts = Sesh_Alert.objects.filter(isSilence=False).count()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(alerts, 2)
+        self.assertEqual(alerts, 3)
 
         # test_get_latest_bom_data(self):
         response = c.post('/get-latest-bom-data/',{})
@@ -143,6 +173,8 @@ class AlertTestCase(TestCase):
         response = c.post('/notifications/',{})
         self.assertEqual(response.status_code, 200)
 
+    
+    @override_settings(DEBUG=True)
     def test_alert_autosilencing(self):
         alert.alert_status_check()
         alerts = Sesh_Alert.objects.filter(isSilence=False)

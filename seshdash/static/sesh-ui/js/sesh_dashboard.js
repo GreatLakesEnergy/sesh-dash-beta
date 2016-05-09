@@ -197,8 +197,18 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
 
 
   function setModalLoad() {
+      
+      var alertDataContainer = $('#alert-data-container'),
+          alertLoader = $('#alert-data-loader');
 
       $('.modal-toggle').click(function()  {
+          
+          alertLoader.show();
+          alertDataContainer.hide();
+
+         
+          
+         
           // Get necessary data for the get_alert_sort
           alertId = $(this).attr('classid');
           // Constructing the json
@@ -206,6 +216,10 @@ get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
                           csrfmiddlewaretoken: csrftoken};
 
           $.post('/get-alert-data', jsonData, function(data){
+               
+              alertLoader.hide();
+              alertDataContainer.show();
+
 
               var alertData = JSON.parse(data);
               alertValue = alertData.alert_value; // Getting the property that is triggering the alert

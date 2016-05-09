@@ -556,8 +556,6 @@ def rmc_status_update():
 
 @shared_task
 def alert_engine():
-    sites = Sesh_Site.objects.all()
-
     # TODO check for the latest 10 alerts
     for site in sites:
         alert_generator(site)
