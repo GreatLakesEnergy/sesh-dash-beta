@@ -91,7 +91,7 @@ def index(request,site_id=0):
     context_dict['site_id'] = site_id
 
     #Generate measurements in the time_series_graph
-    client=Influx('test_db')
+    client=Influx()
     measurements_value=client.get_measurements()
     
     measurements =[]
@@ -740,7 +740,7 @@ def graphs(request):
             time_bucket=time_bucket_dict[time]
             SI_units = BoM_Data_Point.SI_UNITS
             SI_unit = SI_units[choice]
-            client = Influx('test_db')
+            client = Influx()
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
             for value in values:
                 data_values.append([value['time'],value['mean']])
