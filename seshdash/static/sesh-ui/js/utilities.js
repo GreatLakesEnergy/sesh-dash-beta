@@ -1,4 +1,7 @@
+/* This is a Javascript Utilities File Where all Helper Functions Are Kept */
 
+
+/*function to auto-generate a CRSF cookie */  
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
