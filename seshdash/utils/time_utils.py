@@ -2,13 +2,16 @@ from datetime import datetime,timedelta
 from time import localtime,strftime
 from django.conf import settings
 from  pytz import timezone
+from tzwhere import tzwhere
 
 
-def get_epoch():
+def get_epoch(tz=None):
     """
     Return number of seconds since 1970-01-01- epoch
     """
     now = datetime.now()
+    if tz:
+        now = timezone.now(tz)
     epoch = datetime(1970,1,1)
     diff = now - epoch
     diff = str(diff.total_seconds())
@@ -16,8 +19,12 @@ def get_epoch():
     diff_int = diff_seconds[0]
     return diff_int
 
-def get_yesterday():
+def get_yesterday(tz=None):
+
     now = datetime.date(datetime.now())
+    if tz:
+        now = timezone.now(tz)
+
     one_day = timedelta(days=1)
     return now - one_day
 
@@ -59,23 +66,48 @@ def get_epoch_from_datetime(date):
     seconds_only = seconds_only_str[0]
     return seconds_only
 
-def get_epoch_from_date(year,month,day,hours,minutes):
+def get_epoch_from_date(year, month, day, hours, minutes, tz=None):
     """
     Return number of seconds since 1970-01-01- epoch
     from given date
     @params: month,day,year,hours,minutes
     """
     date = datetime(year,month,day,hours,minutes)
+    if tz:
+        date = datetime(year,month,day,hours,minutes,tzinfo=tz)
 
     epoch = datetime(1970,1,1)
     diff = date - epoch
     return diff.total_seconds()
 
-def epoch_to_date(seconds_time):
+def localize(nv_datetime,tz):
+    """
+    Add timezone info to datetime object
+    """
+    # Is our datetime object  naive?
+    if nv_datetime.tzinfo is not None and nv_datetime.tzinfo.utcoffset(nv_datetime) is not None:
+        return nv_datetime
+    localtz = timezone(tz)
+    dt_aware = localtz.localize(nv_datetime)
+    return dt_aware
+
+
+def epoch_to_date(seconds_time, tz=None):
     """
     Translate seconds time to date
     """
-    return strftime('%Y-%m-%d',localtime(seconds_time))
+    time = strftime('%Y-%m-%d',localtime(seconds_time))
+    if tz:
+        time = localize(time,tz)
+
+    return time
+
+def get_timezone_from_geo(lat, lon):
+    """
+    Return String TimeZone from provided lat,lon
+    """
+    tz = tzwhere.tzwhere()
+    return tz.tzNameAt(float(lat), float(lon))
 
 def epoch_to_datetime(seconds_time):
     """
@@ -84,14 +116,18 @@ def epoch_to_datetime(seconds_time):
     return strftime('%Y-%m-%dT%XZ',localtime(seconds_time))
 
 
-def get_last_five_days(from_date="now"):
+def get_last_five_days(from_date="now", tz=None):
     """
     Get last days returned to you as datetime objects in array
     @params:
         from_date: (date to return consecutive days ongoing from) (optional)
     """
     days = []
+
     now = datetime.now()
+    if not from_date == "now":
+        now = timezone.now()
+
     if not from_date == "now":
         now = from_date
 
@@ -126,15 +162,26 @@ def get_start_end_date(days_ago, start_day):
     delta = start_day - timedelta(days=days_ago)
     return delta
 
-def get_timesince_seconds(time):
+def get_timesince_seconds(time, tz=None):
+    """
+    Get timesince and time provided
+    """
     now = datetime.now()
+    if tz:
+        now = timezone.now(tz)
+
+
     loc = timezone(settings.TIME_ZONE)
     now = loc.localize(now)
     diff =  now - time
     return int(diff.total_seconds())
 
-def get_timesince(time):
+def get_timesince(time, tz=None):
+
     now = datetime.now()
+    if tz:
+        now = timezone.now(tz)
+
     loc = timezone(settings.TIME_ZONE)
     now = loc.localize(now)
     diff =  now - time
