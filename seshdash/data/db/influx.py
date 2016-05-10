@@ -138,7 +138,7 @@ class Influx:
             timestamp = datetime.now()
         if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
-        print "sending data to influx %s"%measurement_dict
+        #print "sending data to influx %s"%measurement_dict
         for key in measurement_dict.keys():
                # Incoming data is likely to have datetime object. We need to ignore this
                data_point = {}
