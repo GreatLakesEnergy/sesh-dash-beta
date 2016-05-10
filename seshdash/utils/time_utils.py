@@ -4,7 +4,6 @@ from django.conf import settings
 from  pytz import timezone
 from tzwhere import tzwhere
 
-
 def get_epoch(tz=None):
     """
     Return number of seconds since 1970-01-01- epoch
@@ -215,5 +214,4 @@ def format_timesince_seconds(seconds):
 def get_date_dashed(date):
     date_string = str(date.year) + '-' + str(date.month) +  '-' + str(date.day)
     return date_string
-
 
