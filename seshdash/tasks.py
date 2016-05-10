@@ -77,7 +77,7 @@ def generate_auto_rules(site_id):
     # Create soc low voltage alarm
     soc_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#soc',
-                        value = 30,
+                        value = 35,
                         operator = 'lt',
                         send_sms = send_sms,
                         send_mail = send_mail
@@ -446,7 +446,6 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
     else:
         message = "No Values returned for aggregate. Check Influx Connection."
         logging.warning(message)
-        #rollbar.report_message(message)
 
     return result
 
@@ -556,12 +555,19 @@ def rmc_status_update():
 
 @shared_task
 def alert_engine():
+    """
+    Periodic task to check rules agains data points
+    """
     # TODO check for the latest 10 alerts
+    sites = Sesh_Site.objects.all()
     for site in sites:
         alert_generator(site)
         alert_status_check()
 
 def download_vrm_historical_data():
+    """
+    Helper function to initiate one time download
+    """
     for site in Sesh_Site.objects.filter(vrm_site_is__isnull=True):
         if site.vrm_site_id:
             get_historical_BoM.delay(site.pk,time_utils.get_epoch_from_datetime(site.comission_date))

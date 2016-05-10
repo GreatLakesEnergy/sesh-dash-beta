@@ -27,7 +27,7 @@ import logging
 
 
 def alert_generator():
-    """ Generates alerts for a given site """ 
+    """ Generates alerts for a given site """
     mails = []
     sms_numbers = []
     rules = Alert_Rule.objects.all()
@@ -44,14 +44,14 @@ def alert_generator():
                 alert_obj = alert_factory(site, rule, data_point)
                 content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                 mails, sms_numbers = get_recipients_for_site(site)
-          
-                
+
+
                 if rule.send_mail:
                      alert_obj.emailSent = alertEmail('Alert Email from seshdash',data_point,content,mails)
-            
+
                 if rule.send_sms:
                      alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
-            
+
                 alert_obj.save()
 
 
@@ -69,23 +69,23 @@ def alertSms(data_point,content,recipients):
 
 def get_alert_check_value(site, rule):
     """ Returns the value to check for alert from latest data point """
-   
+
     if is_mysql_rule(rule):
         model, field_name = rule.check_field.split('#')
         latest_data_point = get_latest_data_point_mysql(site, rule)
-          
+
         if latest_data_point is not None:
             data_point_value = getattr(latest_data_point, field_name)
         else:
             data_point_value = None
             logging.error("No data points for %s", model)
-        
+
         return latest_data_point, data_point_value
-    
+
     elif is_influx_rule(rule):
         # Getting the datapoint from influx
         latest_data_point = get_latest_point_influx(site, rule)
-        
+
         if latest_data_point is not None:
             data_point_value = latest_data_point['value']
             return latest_data_point, data_point_value
@@ -116,18 +116,18 @@ def is_influx_rule(rule):
 
 def is_mysql_rule(rule):
     """ A function that detects if the alert rule defined, uses mysql """
-    
+
     if len(rule.check_field.split('#')) == 2:
         return True
     else:
-        return False 
-   
+        return False
+
 
 
 
 def check_alert(rule, data_point_value):
     """ Checks the alert and returns boolean value true if there is alert and false otherwise """
-    
+
     ops = {'lt': lambda x,y: x<y,
            'gt': lambda x,y: x>y,
            'eq' : lambda x,y: x==y,
@@ -136,7 +136,7 @@ def check_alert(rule, data_point_value):
     """ If there is an alert """
     if ops[rule.operator](data_point_value,rule.value):
         return True
-    
+
     else:
         return False
 
@@ -153,7 +153,7 @@ def get_alert_content(site, rule, data_point, value, alert):
     content['site'] = site.site_name
     content['alert_str'] = content_str
     content['alert'] = alert
-    
+
     # Handling content for influx
     if is_influx_rule(rule):
         content['time'] = data_point['time']
@@ -161,19 +161,19 @@ def get_alert_content(site, rule, data_point, value, alert):
         content['time'] = data_point.time
     content['data_point'] = data_point
 
-    return content   
-  
- 
+    return content
+
+
 def get_recipients_for_site(site):
     """ Returns mails and sms of users with allowance to recieve messages for site """
     users = get_users_with_perms(site)
     mails = []
-    sms_numbers = []    
+    sms_numbers = []
 
     # TODO to be removed
     for user in users:
 
-       
+
         if hasattr(user, 'seshuser'):
             mails.append(user.email)
 
@@ -183,9 +183,9 @@ def get_recipients_for_site(site):
 
                 logging.debug("emailing %s" % mails)
                 #print "emailing %s"%recipients
-            
+
     return mails, sms_numbers
-    
+
 
 def alert_factory(site, rule, data_point):
     """ Creating an alert object """
@@ -201,15 +201,15 @@ def alert_factory(site, rule, data_point):
                     point_model=type(data_point).__name__,
                     point_id= str(data_point.id ))
         alert_obj.save()
-  
+
         # Set data point to point to alert
         data_point.target_alert = alert_obj
         data_point.save()
-    
+
     elif is_influx_rule(rule):
         alert_obj = Sesh_Alert.objects.create(
                     site = site,
-                    alert = rule, 
+                    alert = rule,
                     date = timezone.now(),
                     isSilence=False,
                     emailSent=False,
@@ -217,11 +217,11 @@ def alert_factory(site, rule, data_point):
                     smsSent=False,
                     point_model='influx',
                     point_id = get_epoch_from_datetime(parser.parse(data_point['time'])))
-    
+
     alert_obj.save()
     return alert_obj
 
-   
+
 
 def get_unsilenced_alerts():
     """ Return the unsilenced alerts of a site if any, otherwiser returns false """
@@ -237,7 +237,7 @@ def get_latest_instance_site(site, model):
     """ Returns latest instance for models with site """
     latest_instance_site = model.objects.filter(site=site).order_by('-id')
 
-    
+
     if latest_instance_site:
         return latest_instance_site[0]
     else:
@@ -251,7 +251,7 @@ def get_latest_data_point_mysql(site, rule):
     # Getting the model name and the latest value of the model field
     model = get_model_from_string(model)  # returns a model class ex 'BoM_Data_Point'
     latest_data_point = get_latest_instance_site(site, model)
-    
+
     return latest_data_point
 
 def get_latest_data_point_value_mysql(site, rule):
@@ -262,7 +262,7 @@ def get_latest_data_point_value_mysql(site, rule):
     model = get_model_from_string(model)
     latest_data_point = get_latest_instance_site(site, model)
     latest_data_point_value = getattr(latest_data_point, field_name)
-   
+
     return latest_data_point_value
 
 
@@ -271,49 +271,49 @@ def get_alert_point(alert):
     model_name = alert.point_model
     rule = alert.alert
     check_field = alert.alert.check_field
-   
+
     if is_influx_rule(rule):
         point = influx.get_point(check_field, alert.point_id)
-    
+
     else:
         point = get_model_first_reference(model_name, alert)
 
     return point
-        
+
 def get_alert_point_value(alert):
     """ Returns the value that triggers the alert """
     rule = alert.alert
     point = get_alert_point(alert)
-    
-    if is_mysql_rule(rule): 
+
+    if is_mysql_rule(rule):
         model, field_name = rule.check_field.strip().split('#')
         value = getattr(point, field_name)
-    
+
     elif is_influx_rule(rule):
         value = point['value']
-    
+
 
     return value
-    
-    
+
+
 
 
 def alert_status_check():
     """ Checks if the alert is still valid and silences it if it is invalid """
     unsilenced_alerts = get_unsilenced_alerts()
-    
+    logging.debug("Running alert status check")
     if unsilenced_alerts:
         for alert in unsilenced_alerts:
             site = alert.site
             rule = alert.alert
 
             if is_mysql_rule(rule):
-                latest_data_point_value = get_latest_data_point_value_mysql(site, rule) 
+                latest_data_point_value = get_latest_data_point_value_mysql(site, rule)
             elif is_influx_rule(rule):
                 latest_data_point_value = get_latest_point_value_influx(site, rule)
             else:
                 logging.error('Invaliid rule')
-                
+
 
             if check_alert(rule, latest_data_point_value):
                 logging.debug("Alert is still valid")
@@ -329,6 +329,6 @@ def alert_status_check():
                 # Reporting
                 if rule.send_mail:
                     alertEmail('Alert auto silenced', data_point, content, mails)
-               
+
                 if rule.send_sms:
-                    alertSms(data_point,content,sms_numbers) 
+                    alertSms(data_point,content,sms_numbers)
