@@ -186,7 +186,6 @@ class Influx:
     def delete_database(self,name):
         self._influx_client.drop_database(name)
 
-<<<<<<< HEAD
 
     def insert_point(self, site, measurement_name, value):
         """ Write points to the database """
@@ -218,7 +217,6 @@ class Influx:
 
 
 
-=======
     def get_measurements(self,database=None):
         db = self.db
         if database:
