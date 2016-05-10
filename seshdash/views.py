@@ -1,6 +1,7 @@
 #Django libs
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
+from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
@@ -33,6 +34,8 @@ from datetime import datetime, date, time, tzinfo
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
+#
+from seshdash.utils.time_utils import get_epoch_from_datetime
 
 # Import for API
 from rest_framework import generics, permissions
@@ -42,6 +45,9 @@ from seshdash.api.victron import VictronAPI
 # celery tasks
 from seshdash.tasks import get_historical_BoM, generate_auto_rules
 
+#Import for Influx
+from seshdash.data.db.influx import Influx
+
 #generics
 import logging
 
@@ -49,6 +55,8 @@ import logging
 from seshdash.models import *
 from django.forms import model_to_dict
 import json
+# Influxdb
+from seshdash.data.db.influx import Influx
 
 
 @login_required(login_url='/login/')
@@ -81,6 +89,19 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
+
+    #Generate measurements in the time_series_graph
+    client=Influx()
+    measurements_value=client.get_measurements()
+    
+    measurements =[]
+     
+    for measurement in measurements_value:
+        measurements.append(measurement['name'])
+
+    context_dict['measurements']= measurements
+
+    
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -516,8 +537,8 @@ def get_high_chart_data(user,site_id,sites):
 
     # Getting climat conditions
 
-     high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
-     context_high_data['high_cloud_cover']=high_cloud_cover
+     #high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
+     #context_high_data['high_cloud_cover']=high_cloud_cover
 
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
@@ -550,8 +571,7 @@ def get_high_chart_data(user,site_id,sites):
      context_high_data['high_pv_production']= high_pv_production
      print (context_high_data['high_pv_production'])
      return context_high_data
-
-
+     
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
 
@@ -699,4 +719,66 @@ def historical_data(request):
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
+
+
+#function for Graph Generations   
+@login_required
+def graphs(request):
+
+    # if ajax request
+    if request.method == 'POST':
+
+        # variables declaration
+        results = {}
+        time_delta_dict = {}
+        time_bucket_dict = {}
+        data_values =[]
+        date_time = []
+
+        # Getting values from Post request
+        time = request.POST.get('time','')
+        choices = request.POST.getlist('choice[]')
+        active_id = request.POST.get('active_site_id','')
+        active_site = Sesh_Site.objects.filter(id=active_id)
+        time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
+        time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
+
+        # Checking for a valid site_id
+        if active_site != []:
+            active_site_name = active_site [0]
+        current_site = active_site_name.site_name
+
+        # processing post request values to be used in the influx queries
+        for choice in choices:
+            data_values = []
+            time_delta = time_delta_dict[time]
+            time_bucket=time_bucket_dict[time]
+            SI_units = BoM_Data_Point.SI_UNITS
+            SI_unit = SI_units[choice]
+            
+            # creating an influx instance
+            client = Influx()
+
+            # using an influx query to get measurements values with their time-stamps
+            values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
+  
+            #looping into values
+            for value in values:
+                data_values.append([value['time'],value['mean']])
+
+            #Converting date_strings into epoch_time
+            for data in data_values: 
+                data[0] = get_epoch_from_datetime(datetime.datetime.strptime(data[0],"%Y-%m-%dT%H:%M:%SZ"))
+   
+            #Rounding off values
+            for data in data_values:
+                data[1] = round(data[1],2)
+
+            #getting the measurements values with their time-stamps
+            results[choice] = [data_values,SI_unit]
+            
+        return HttpResponse(json.dumps(results))
+    else:
+        return HttpResponseBadRequest()
+
 

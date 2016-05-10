@@ -44,7 +44,8 @@ class VRM_Import_TestCase(TestCase):
         try:
             self.i.create_database(self._influx_db_name)
             #Generate random data  points for 24h
-        except:
+        except Exception, e:
+           print e
            self.i.delete_database(self._influx_db_name)
            sleep(1)
            self.i.create_database(self._influx_db_name)
