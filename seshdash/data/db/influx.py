@@ -154,7 +154,7 @@ class Influx:
                     # Get the data point array ready.
                     data_point_list.append(data_point)
                except Exception,e:
-                    logging.warning("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
+                    logging.debug("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
 
         try:
                 # Send the data list
