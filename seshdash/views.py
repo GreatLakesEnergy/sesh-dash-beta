@@ -740,20 +740,18 @@ def graphs(request):
         choices = request.POST.getlist('choice[]')
         active_id = request.POST.get('active_site_id','')
         active_site = Sesh_Site.objects.filter(id=active_id)
-       
+        time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
+        time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
+
         # Checking for a valid site_id
         if active_site != []:
             active_site_name = active_site [0]
-        else:
-            return HttpResponseBadRequest()
         current_site = active_site_name.site_name
 
         # processing post request values to be used in the influx queries
         for choice in choices:
             data_values = []
-            time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
             time_delta = time_delta_dict[time]
-            time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
             time_bucket=time_bucket_dict[time]
             SI_units = BoM_Data_Point.SI_UNITS
             SI_unit = SI_units[choice]
@@ -767,12 +765,18 @@ def graphs(request):
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
+
+            #Converting date_strings into epoch_time
             for data in data_values: 
                 data[0] = get_epoch_from_datetime(datetime.datetime.strptime(data[0],"%Y-%m-%dT%H:%M:%SZ"))
-    
+   
+            #Rounding off values
+            for data in data_values:
+                data[1] = round(data[1],2)
+
             #getting the measurements values with their time-stamps
             results[choice] = [data_values,SI_unit]
-
+            
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()
