@@ -724,16 +724,31 @@ def historical_data(request):
 #function for Graph Generations   
 @login_required
 def graphs(request):
+
+    # if ajax request
     if request.method == 'POST':
+
+        # variables declaration
         results = {}
+        time_delta_dict = {}
+        time_bucket_dict = {}
         data_values =[]
         date_time = []
+
+        # Getting values from Post request
         time = request.POST.get('time','')
         choices = request.POST.getlist('choice[]')
         active_id = request.POST.get('active_site_id','')
         active_site = Sesh_Site.objects.filter(id=active_id)
-        active_site_name = active_site [0]
+       
+        # Checking for a valid site_id
+        if active_site != []:
+            active_site_name = active_site [0]
+        else:
+            return HttpResponseBadRequest()
         current_site = active_site_name.site_name
+
+        # processing post request values to be used in the influx queries
         for choice in choices:
             data_values = []
             time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
@@ -742,13 +757,22 @@ def graphs(request):
             time_bucket=time_bucket_dict[time]
             SI_units = BoM_Data_Point.SI_UNITS
             SI_unit = SI_units[choice]
+            
+            # creating an influx instance
             client = Influx()
+
+            # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
+  
+            #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
             for data in data_values: 
                 data[0] = get_epoch_from_datetime(datetime.datetime.strptime(data[0],"%Y-%m-%dT%H:%M:%SZ"))
+    
+            #getting the measurements values with their time-stamps
             results[choice] = [data_values,SI_unit]
+
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()

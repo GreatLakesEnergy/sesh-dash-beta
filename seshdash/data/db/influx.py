@@ -22,6 +22,7 @@ class Influx:
                                               settings.INFLUX_PASSWORD,
                                               self.db
                                               )
+  #TODO draw this from settings
 #	try:
 #		self.dbs = self._influx_client.get_list_database()
 #	except:
@@ -175,7 +176,7 @@ class Influx:
         db =  self.db
         if database:
            db = database
-        query = "select value from %s"%measurement_name
+        query = "SELECT value FROM %s"%measurement_name
         return list(self._influx_client.query(query,database=db).get_points())
 
 
@@ -189,7 +190,7 @@ class Influx:
         db = self.db
         if database:
            db = database
-        query = "show measurements"
+        query = "SHOW measurements"
         return list(self._influx_client.query(query,database=db).get_points())
 
 
