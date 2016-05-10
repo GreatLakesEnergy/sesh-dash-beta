@@ -9,11 +9,18 @@ def get_model_from_string(model_name):
 """ Returns the first model reference from string """
 def get_model_first_reference(model_name, instance):
     # model_name must be a string
-   
+  
+    """ 
     model_set_attr = model_name.lower() + '_set' 
     ref = getattr(instance, model_set_attr)
     first_ref = ref.first()
     return first_ref
+    """
+
+    model = eval(model_name)
+    point = model.objects.filter(id=instance.point_id).first()
+    return point
+   
  
 def get_model_fields_names(model):
     """ Returns a list of field names """
@@ -35,5 +42,10 @@ def get_model_verbose(model):
         verbose_dict[field.name] = field.verbose_name
     
     return verbose_dict
+
+def get_latest_instance(model):
+    """ Returns the latest row in a model """
+    return model.objects.all().order_by('id').last()
+
 
 

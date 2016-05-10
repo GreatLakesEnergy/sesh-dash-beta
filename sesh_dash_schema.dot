@@ -1,6 +1,6 @@
 digraph model_graph {
   // Dotfile by Django-Extensions graph_models
-  // Created: 2016-04-18 13:33
+  // Created: 2016-04-26 14:49
   // Cli Options: seshdash
 
   fontname = "Helvetica"
@@ -197,9 +197,9 @@ digraph model_graph {
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">position</FONT>
+    <FONT FACE="Helvetica ">position</FONT>
     </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">GeopositionField</FONT>
+    <FONT FACE="Helvetica ">GeopositionField</FONT>
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
@@ -353,9 +353,15 @@ digraph model_graph {
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Helvetica Bold">rmc</FONT>
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">rmc</FONT>
     </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica Bold">ForeignKey (id)</FONT>
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">site</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">ForeignKey (id)</FONT>
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
@@ -567,7 +573,7 @@ digraph model_graph {
     <TR><TD ALIGN="LEFT" BORDER="0">
     <FONT FACE="Helvetica ">daily_no_of_alerts</FONT>
     </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica ">FloatField</FONT>
+    <FONT FACE="Helvetica ">IntegerField</FONT>
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
@@ -738,6 +744,9 @@ digraph model_graph {
 
   seshdash_models_RMC_status -> seshdash_models_Sesh_RMC_Account
   [label="rmc (rmc_status)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  seshdash_models_RMC_status -> seshdash_models_Sesh_Site
+  [label="site (rmc_status)"] [arrowhead=none, arrowtail=dot, dir=both];
 
   seshdash_models_RMC_status -> seshdash_models_Sesh_Alert
   [label="target_alert (rmc_status)"] [arrowhead=none, arrowtail=dot, dir=both];

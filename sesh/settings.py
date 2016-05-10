@@ -268,7 +268,7 @@ BOWER_INSTALLED_APPS = (
             'mapbox.js#2.4.0',
             'd3#3.5.16',
             'nvd3#1.7.1',
-            'moment',
+            'moment#2.11.2',
             'highcharts-release#4.2.4',
             'bootstrap#3.3.6',
             'font-awesome#4.6.1',

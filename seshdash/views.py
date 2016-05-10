@@ -21,7 +21,7 @@ from django.db.models import Sum
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
 
 # Special things we need
-from seshdash.utils import time_utils, rmc_tools
+from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
 from pprint import pprint
 
 #Import utils
@@ -30,6 +30,7 @@ from seshdash.utils.time_utils import get_timesince
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
+from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import json,time,random,datetime
 
@@ -592,15 +593,15 @@ def get_notifications_alerts(request):
 
     arr = []
 
-
+    
     for site in sites:
-          arr.append({
-            "site":site.site_name,
-            "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
-            "alerts_counter":Sesh_Alert.objects.filter(isSilence=False).count(),
-            "site_id":site.id,
-            })
-
+        if(Sesh_Alert.objects.filter(isSilence=False ,site=site).count() != 0):
+              arr.append({
+                "site":site.site_name,
+                "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
+                "site_id":site.id,
+                })
+ 
     return HttpResponse(json.dumps(arr))
 
 
@@ -608,16 +609,23 @@ def get_notifications_alerts(request):
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
+   
     alert_id = int(alert_id)
     alert = Sesh_Alert.objects.filter(id=alert_id).first()
-
     alert_values = {}
-
-    point = get_model_first_reference(alert.point_model, alert)
+    point = alert_utils.get_alert_point(alert)
 
     if point is not None:
-        alert_values = model_to_dict(point)
+
+        if type(point) != type(dict()):
+            alert_values = model_to_dict(point)
+        else:
+            alert_values = point
+
         # Converting time to json serializable value and changing it to timesince
+        if type(alert_values['time'])  == type(unicode()):
+            alert_values['time'] = parser.parse(alert_values['time'])
+
         alert_values['time'] = get_timesince(alert_values['time'])
         return HttpResponse(json.dumps(alert_values))
 
@@ -693,85 +701,5 @@ def historical_data(request):
         context_dict['sort_dict'] = sort_data_dict
         print sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
-
-def influx(request):
-    client = InfluxDBClient()
-    client = InfluxDBClient(database='test_db')
-    measurements = client.query('show measurements')
-    measures = measurements.raw
-    measure = measures['series']
-    data_db = measure[0]
-    data = data_db['values']
-    #print measure
-    #print data_db
-    #print data
-    return  HttpResponse(json.dumps(data))
-
-def influxvalues(request):
-    results = {}
-    dropdown1_choice_results =[]
-    dropdown2_choice_results =[]
-    choice_drop_1 = request.POST.get('choice1','')
-    choice_drop_2 = request.POST.get('choice2','')
-    active_id = request.POST.get('active_site_id','')
-    active_site = Sesh_Site.objects.filter(id=active_id)
-    active_site_name = active_site [0]
-    current_site = active_site_name.site_name
-    print current_site
-    print "choice 1 is ",
-    print choice_drop_1
-    print "choice 2 is ",
-    print choice_drop_2
-    client = Influx('test_db')
-    values_drop_1 = client.get_measurement_bucket(choice_drop_1,'10m','site_name',current_site,'1d')
-    values_drop_2 = client.get_measurement_bucket(choice_drop_2,'10m','site_name',current_site,'1d')
-    
-    #a
-    dropdown1_values = values_drop_1[0]
-    dropdown2_values = values_drop_2[0]
-    #b
-    for dropdown1_values in values_drop_1:
-        dropdown1_choice_results.append(dropdown1_values['mean'])
-
-    for dropdown2_values in values_drop_2:
-        dropdown2_choice_results.append(dropdown1_values['mean'])
-    """
-    drop2_series = dropdown2_values['series']
-    #c
-    drop1 = drop1_series[0]
-    drop2 = drop2_series[0]
-    #d
-    drop1_result = drop1['values']
-    drop2_result = drop2['values']
-    #e
-    dropdown1_results = drop1_result[0]
-    dropdown2_results = drop2_result[0]
-    #f
-    for dropdown1_results in drop1_result:
-        dropdown1_choice_results.append(dropdown1_results[1])
-
-    for dropdown2_results in drop2_result:
-        dropdown2_choice_results.append(dropdown2_results[1])
-
-    print dropdown1_choice_results
-    print dropdown2_choice_results
-    print "This was choice 2 results",
-     """
-    results['drop1'] = dropdown1_choice_results
-    results['drop2'] = dropdown2_choice_results
-    print choice_drop_1
-    print dropdown1_choice_results
-    print choice_drop_2
-    print dropdown2_choice_results
-    
-    return HttpResponse(json.dumps(results))
-
-
-
-
-
-
-
-
 
 
