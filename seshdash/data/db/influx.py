@@ -138,7 +138,7 @@ class Influx:
             timestamp = datetime.now()
         if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
-
+        #print "sending data to influx %s"%measurement_dict
         for key in measurement_dict.keys():
                # Incoming data is likely to have datetime object. We need to ignore this
                data_point = {}
@@ -185,6 +185,37 @@ class Influx:
 
     def delete_database(self,name):
         self._influx_client.drop_database(name)
+
+
+    def insert_point(self, site, measurement_name, value):
+        """ Write points to the database """
+        json_body = [
+                {
+                "measurement": measurement_name,
+                "tags": {
+                    "site_name": site.site_name,
+                    "site_id": site.id,
+                    "source": 'sesh_dash'
+                },
+                "fields":{
+                    "value": value
+                }
+            }
+        ]
+
+        value_returned = self._influx_client.write_points(json_body)
+        return value_returned
+
+    def get_point(self, measurement_name, point_id, database=None):
+        db = self.db
+        if database:
+            db = database
+
+        query = "SELECT * FROM %s WHERE time='%s'" %(measurement_name, point_id)
+        return list(self._influx_client.query(query, database=db).get_points())
+
+
+
 
     def get_measurements(self,database=None):
         db = self.db
@@ -281,4 +312,3 @@ def insert_point(site, measurement_name, value, db=None):
     value = i.insert_point(site, measurement_name, float(value))
 
 
-   

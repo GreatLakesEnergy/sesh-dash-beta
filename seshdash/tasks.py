@@ -25,6 +25,7 @@ from django.utils import timezone
 @task_failure.connect
 def handle_task_failure(**kw):
     logging.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
+    print "ERROR in task %s"%kw.get('message',"no error message")
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
@@ -53,7 +54,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
 
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
-        message = "Error sending to influx with exception %s"%e
+        message = "Error sending to influx with exception %s in datapint %s"%(e,model_data_dict)
         handle_task_failure(message= message,exception=e,data=model_data)
 
 def generate_auto_rules(site_id):
@@ -338,6 +339,8 @@ def get_weather_data(days=7,historical=False):
                     point.cloud_cover = forecast_result[day]["cloudcover"]
                     point.save()
 
+                    send_to_influx(point, site, day, to_exclude=['date'])
+
             else:
                 #else create a new object
                 w_data = Site_Weather_Data(
@@ -351,7 +354,7 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                send_to_influx(site, w_data, date, to_exclude=['date'])
+                send_to_influx(w_data, site, day, to_exclude=['date'])
 
     return "updated weather for %s"%sites
 
@@ -558,11 +561,8 @@ def alert_engine():
     """
     Periodic task to check rules agains data points
     """
-    # TODO check for the latest 10 alerts
-    sites = Sesh_Site.objects.all()
-    for site in sites:
-        alert_generator(site)
-        alert_status_check()
+    alert_generator()
+    alert_status_check()
 
 def download_vrm_historical_data():
     """
