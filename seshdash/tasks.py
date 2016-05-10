@@ -446,7 +446,7 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
     else:
         message = "No Values returned for aggregate. Check Influx Connection."
         logging.warning(message)
-        #rollbar.report_message(message)
+        rollbar.report_message(message)
 
     return result
 
