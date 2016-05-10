@@ -77,7 +77,7 @@ def generate_auto_rules(site_id):
     # Create soc low voltage alarm
     soc_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#soc',
-                        value = 30,
+                        value = 35,
                         operator = 'lt',
                         send_sms = send_sms,
                         send_mail = send_mail
