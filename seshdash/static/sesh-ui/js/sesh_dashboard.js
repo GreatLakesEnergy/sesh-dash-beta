@@ -10,7 +10,7 @@ function getCookie(name) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
-        }
+       }
     }
     return cookieValue;
 }
@@ -126,20 +126,6 @@ Morris.Bar({
 });
 */
 //nano bar
-
-
-/*
- High Chart Draw Function
-*/
-//function get_high_chart(date,pv,cloud)
-//{
-
-//}
-
-// Get high chart data here
-
-//get_high_chart( date, HighChartHighPvProduction, HighChartHighCloudCover);
-
 
 /* Alerts modal toggle script */
 
@@ -262,76 +248,3 @@ Morris.Bar({
       });
 
                   }
-
-/*----------------------------    High chart-------------------------------------*/
-/*$('#containerhigh').highcharts({
-        chart: {
-            zoomType: 'xy'
-        },
-        title: {
-            text: ' Daily '+ dropdown1 +' with Cloud cover forecast In High Charts'
-        },
-        xAxis: [{
-            categories:date,
-            crosshair: true
-        }],
-        yAxis: [{ // Primary yAxis
-            labels: {
-                format: '{value}%',
-                style: {
-                    color: Highcharts.getOptions().colors[1]
-                }
-            },
-            title: {
-                text: 'Cloud Cover',
-                style: {
-                    color: Highcharts.getOptions().colors[1]
-                }
-            }
-        }, { // Secondary yAxis
-            title: {
-                text: dropdown1,
-                style: {
-                    color: Highcharts.getOptions().colors[0]
-                }
-            },
-            labels: {
-                format: '{value} Wh',
-                style: {
-                    color: Highcharts.getOptions().colors[0]
-                }
-            },
-            opposite: true
-        }],
-        tooltip: {
-            shared: true
-        },
-        legend: {
-            layout: 'vertical',
-            align: 'left',
-            x: 120,
-            verticalAlign: 'top',
-            y: 100,
-            floating: true,
-            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
-        },
-        series: [{
-            name: dropdown1 ,
-            type: 'column',
-            yAxis: 1,
-            data: values,
-            tooltip: {
-                valueSuffix: ' Wh'
-            }
-
-        }, {
-            name: 'Percent Cloud Cover',
-            type: 'spline',
-            data: [9,8,7,6,5,4,3,2,1,0],
-            tooltip: {
-                valueSuffix: ' % '
-            }
-        }]
-    });*/
-
-/*------------------------------------------------------------------*/

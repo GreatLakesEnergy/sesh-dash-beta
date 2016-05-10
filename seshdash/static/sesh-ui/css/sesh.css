@@ -1,4 +1,4 @@
-/**{
+/*{
   border: 1px solid black;
 }*/
 body {
@@ -244,15 +244,26 @@ div.awesomplete > ul {
   border:2px solid #CA2F2F;
   box-shadow: 10px red;
 }
-.page-header{
-  font-weight: 200;
+.page-header {
+    font-weight: 300;
 }
-#y-axis{
-  margin-left: 10px;
+
+/* graphs styling */
+#update-button{
+  margin-top:18px;
 }
-.dropdown{
-  margin-bottom: 10px;
+#update_container{
+  margin-top: 66px;
+  margin-bottom:-11px;
 }
-.butt{
-  margin-left: 100px;
+#dynamic_graph_container{
+    padding:20px;
+    margin-bottom: -13px;
 }
+#dynamic_graph_button {
+    margin-top: 29px;
+}
+#dynamic_graph{
+  margin-bottom: 30px;
+}
+

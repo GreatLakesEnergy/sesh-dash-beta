@@ -46,7 +46,7 @@ def generate_date_array(start=None, end = 'now',  naive=False, interval=5, units
 def create_test_data(site, start=None, end="now", interval=5, units='minutes' ,random=True, val=50, db='test_db'):
         #TODO test weekly and monthly reports
 
-        _influx_db_name = db
+        _influx_db_name =db
         i = Influx(database=_influx_db_name)
         data_point_dates = generate_date_array(start=start, end=end, interval=interval, units=units)
         voltage_in = 220
@@ -57,7 +57,7 @@ def create_test_data(site, start=None, end="now", interval=5, units='minutes' ,r
         R3 = val
         R4 = val
         R5 = val
-        print "createing %s test data points"%len(data_point_dates)
+        print "creating %s test data points"%len(data_point_dates)
         print "between %s and %s "%(data_point_dates[0],data_point_dates[len(data_point_dates)-1:])
         # Simulate Grid outage
         for time_val in data_point_dates:

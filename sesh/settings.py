@@ -279,7 +279,6 @@ BOWER_INSTALLED_APPS = (
             'babel#d54d59ff74',
             'awesomplete#1.1.0',
             'pace#1.0.2',
-            'moment',
             )
 
 ANONYMOUS_USER_ID = -1
@@ -345,7 +344,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
-FIXTURE_DIRS = os.path.join(PROJECT_DIR, 'sample_data')
 
 STATICFILES_FINDERS = (
                         "django.contrib.staticfiles.finders.FileSystemFinder",

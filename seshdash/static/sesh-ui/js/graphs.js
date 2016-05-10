@@ -1,5 +1,6 @@
 
 var csrftoken = getCookie('csrftoken');
+
 /* Time Series Graph Generation */
 function time_series_graph() {
                  measurement_value = $('#measurements_dropdown').val();
@@ -68,6 +69,8 @@ function daily_data_points_graph() {
   $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time , 'active_site_id':active_site_id},function(data){
 
         var response = JSON.parse(data);
+        var response = JSON.parse(data);
+        
         dropdown1_values = response[drop_choice1][0];
         SI_unit1 = response[drop_choice1][1];
 
@@ -75,21 +78,13 @@ function daily_data_points_graph() {
 
         SI_unit2 = response[drop_choice2][1];
 
-        //alert("before")
-        //a = dropdown1_values[0][0];
-        //alert(a)
-        //alert((""+ a).length)
-
         for (i=0;i<dropdown1_values.length;i++){
         dropdown1_values[i][0]=dropdown1_values[i][0] * 1000
         }
         for (i=0;i<dropdown2_values.length;i++){
         dropdown2_values[i][0]=dropdown2_values[i][0] * 1000
         }
-        //alert("after")
-        //a = dropdown1_values[0][0];
-        //alert(a)
-        //alert((""+ a).length)
+
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
