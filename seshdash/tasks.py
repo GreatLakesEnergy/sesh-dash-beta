@@ -122,18 +122,18 @@ def get_BOM_data():
                         data_point = BoM_Data_Point(
                             site = site,
                             time = date,
-                            soc = bat_data['Battery State of Charge (System)']['valueFloat'],
-                            battery_voltage = bat_data['Battery voltage']['valueFloat'],
+                            soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0),
+                            battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0),
                             AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
                             AC_output_absolute =  float(sys_data['Output power 1']['valueFloat']) +
-                                                    float(sys_data['PV - AC-coupled on output L1']['valueFloat']),
+                                                    float(sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0)),
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
                             AC_Load_out =  sys_data['Output current phase 1']['valueFloat'],
                             inverter_state = sys_data['VE.Bus state']['nameEnum'],
-                            pv_production = sys_data['PV - AC-coupled on output L1']['valueFloat'],
+                            pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0),
                             #TODO these need to be activated
                             genset_state =  0,
                             main_on = mains,
