@@ -111,7 +111,7 @@ def get_BOM_data():
             if v_client.IS_INITIALIZED:
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.timezone)
+                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
@@ -546,6 +546,9 @@ def rmc_status_update():
     sites = Sesh_Site.objects.all()
     for site in sites:
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('time').first()
+        if not latest_dp:
+            logging.warning("RMC STATUS: No DP found for site")
+            return 0
         last_contact = time_utils.get_timesince_seconds(latest_dp.time)
         tn = timezone.now()
         last_contact_min = last_contact / 60

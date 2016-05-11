@@ -108,11 +108,17 @@ def get_timezone_from_geo(lat, lon):
     tz = tzwhere.tzwhere()
     return tz.tzNameAt(float(lat), float(lon))
 
-def epoch_to_datetime(seconds_time):
+def epoch_to_datetime(seconds_time, tz=None):
     """
     Translate seconds time to datetime object
     """
-    return strftime('%Y-%m-%dT%XZ',localtime(seconds_time))
+    time = localtime(seconds_time)
+
+    if tz:
+        time = localize(time,tz)
+
+
+    return strftime('%Y-%m-%dT%XZ',time)
 
 
 def get_last_five_days(from_date="now", tz=None):
