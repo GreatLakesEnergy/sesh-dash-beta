@@ -21,6 +21,7 @@ from seshdash.data.db.influx import Influx, insert_point
 from datetime import datetime
 from seshdash.utils import alert
 from django.utils import timezone
+from time import sleep
 
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
@@ -40,8 +41,8 @@ class AlertTestCase(TestCase):
            sleep(1)
            self.i.create_database(self._influx_db_name)
            pass
-      
-        
+
+
 
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
@@ -83,7 +84,7 @@ class AlertTestCase(TestCase):
                                                         time=datetime.now())
         self.test_rmc_status.save()
 
- 
+
         #create influx datapoint
         self.influx_data_point = insert_point(self.site, 'battery_voltage', 10)
 
@@ -103,11 +104,12 @@ class AlertTestCase(TestCase):
                                                 send_sms=True,
                                                 site=self.site,
                                                 value=20)
-                                                
+
         alert.alert_generator()
-        
+
+        # Create data point that will silence alert
         self.new_data_point = Data_Point.objects.create(site=self.site,
-                                                    soc=30,
+                                                    soc=50,
                                                     battery_voltage=30,
                                                     time=timezone.now(),
                                                     AC_input=0.0,
@@ -123,7 +125,7 @@ class AlertTestCase(TestCase):
                                                         data_sent_24h=12,
                                                         time=datetime.now())
 
-        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  30)
+        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  50)
 
 
     @override_settings(DEBUG=True)
@@ -173,9 +175,14 @@ class AlertTestCase(TestCase):
         response = c.post('/notifications/',{})
         self.assertEqual(response.status_code, 200)
 
-    
+
     @override_settings(DEBUG=True)
     def test_alert_autosilencing(self):
+        """
+        Test if alerts are silencing
+        """
         alert.alert_status_check()
+        # Get none silenced alerts
         alerts = Sesh_Alert.objects.filter(isSilence=False)
+        # Check they are equal to zero
         self.assertEqual(alerts.count(), 0)

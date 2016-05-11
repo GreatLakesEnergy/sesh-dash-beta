@@ -44,7 +44,8 @@ class VRM_Import_TestCase(TestCase):
         try:
             self.i.create_database(self._influx_db_name)
             #Generate random data  points for 24h
-        except:
+        except Exception, e:
+           print e
            self.i.delete_database(self._influx_db_name)
            sleep(1)
            self.i.create_database(self._influx_db_name)
@@ -52,7 +53,7 @@ class VRM_Import_TestCase(TestCase):
 
         self.location = Geoposition(52.5,24.3)
         self.now = timezone.now()
-        self.start_date = self.now - timedelta(weeks=2)
+        self.start_date = self.now - timedelta(weeks=1)
 
         self.site = Sesh_Site.objects.create(site_name=u"Test_aggregate",
                                              comission_date=self.start_date,

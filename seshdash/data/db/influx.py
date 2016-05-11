@@ -22,7 +22,13 @@ class Influx:
                                               settings.INFLUX_PASSWORD,
                                               self.db
                                               )
-        #TODO draw this from settings
+  #TODO draw this from settings
+#	try:
+#		self.dbs = self._influx_client.get_list_database()
+#	except:
+#		self.dbs = []
+#		pass
+
         self._influx_tag = 'sesh_dash'
 
     def _generate_date_clause(self,start,end=None):
@@ -70,11 +76,12 @@ class Influx:
         if database:
            db = database
 
-        start_time = timezone.now()
+        start_time = timezone.now() - timedelta(**time_delta)
+
         end_time = start_time + timedelta(**time_delta)
 
+       #print "start is %s end is %s" % (start_time, end_time)
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
-
         result_set_gen = []
         if not start == "now":
             start_time = start
@@ -89,6 +96,7 @@ class Influx:
                                                     operator = operator,
                                                     time_constraint = time_constraint,
                                                     )
+       # print query_string_formatted
         try:
             result_set = self._influx_client.query(query_string_formatted,database = db)
             logging.debug("Influx query %s"% query_string_formatted)
@@ -97,12 +105,15 @@ class Influx:
             return list(result_set_gen)
         except InfluxDBServerError,e:
             logging.error("Error running query on server %s"% str(e))
+            print "error on server %s"% str(e)
             raise Exception
         except InfluxDBClientError,e:
             logging.error("Error running  query %s"%str(e))
+            print "error %s"% str(e)
             raise Exception
         except Exception,e:
             logging.error("influxdb unkown error %s" %str(e))
+            print "unkown error %s"% str(e)
             raise Exception
         return result_set_gen
 
@@ -127,7 +138,7 @@ class Influx:
             timestamp = datetime.now()
         if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
-
+        #print "sending data to influx %s"%measurement_dict
         for key in measurement_dict.keys():
                # Incoming data is likely to have datetime object. We need to ignore this
                data_point = {}
@@ -161,12 +172,13 @@ class Influx:
 
         return True
 
-    def query(self,measurement_name, database=None):
+    def query(self,measurement_name,database=None):
         db =  self.db
         if database:
            db = database
-        query = "select value from %s"%measurement_name
+        query = "SELECT value FROM %s"%measurement_name
         return list(self._influx_client.query(query,database=db).get_points())
+
 
     def create_database(self,name):
         self._influx_client.create_database(name)
@@ -174,7 +186,7 @@ class Influx:
     def delete_database(self,name):
         self._influx_client.drop_database(name)
 
-    
+
     def insert_point(self, site, measurement_name, value):
         """ Write points to the database """
         json_body = [
@@ -193,29 +205,72 @@ class Influx:
 
         value_returned = self._influx_client.write_points(json_body)
         return value_returned
-    
+
     def get_point(self, measurement_name, point_id, database=None):
-        db = self.db   
+        db = self.db
         if database:
             db = database
 
         query = "SELECT * FROM %s WHERE time='%s'" %(measurement_name, point_id)
         return list(self._influx_client.query(query, database=db).get_points())
-     
 
-    
-   
-    def get_latest_measurement_point_site(self, site, measurement_name, database=None):
-        """ Returns the latest point of a site for a measurement """
+
+
+
+    def get_measurements(self,database=None):
         db = self.db
         if database:
-            db = database
-        query = "SELECT * FROM %s WHERE site_name='%s' ORDER BY time DESC LIMIT 1" % (measurement_name, site.site_name)
+           db = database
+        query = "SHOW measurements"
         return list(self._influx_client.query(query,database=db).get_points())
 
 
 
-# Helper classes to the interface
+
+    def delete_database(self,name):
+        self._influx_client.drop_database(name)
+
+    def insert_point(self, site, measurement_name, value):
+         """ Write points to the database """
+         json_body = [
+                 {
+                 "measurement": measurement_name,
+                 "tags": {
+                     "site_name": site.site_name,
+                     "site_id": site.id,
+                     "source": 'sesh_dash'
+                 },
+                 "fields":{
+                     "value": value
+                 }
+             }
+         ]
+
+         value_returned = self._influx_client.write_points(json_body)
+         return value_returned
+
+    def get_point(self, measurement_name, point_id, database=None):
+         db = self.db
+         if database:
+             db = database
+
+         query = "SELECT * FROM %s WHERE time='%s'" %(measurement_name, point_id)
+         return list(self._influx_client.query(query, database=db).get_points())
+
+
+
+
+    def get_latest_measurement_point_site(self, site, measurement_name, database=None):
+         """ Returns the latest point of a site for a measurement """
+         db = self.db
+         if database:
+             db = database
+         query = "SELECT * FROM %s WHERE site_name='%s' ORDER BY time DESC LIMIT 1" % (measurement_name, site.site_name)
+         return list(self._influx_client.query(query,database=db).get_points())
+
+
+
+    # Helper classes to the interface
 
 def get_latest_point_site(site, measurement_name, db=None):
     """ Returns the latest point for a measurement for a specific siite """
@@ -224,13 +279,13 @@ def get_latest_point_site(site, measurement_name, db=None):
         i = Influx(database=db)
 
     point = i.get_latest_measurement_point_site(site, measurement_name, db)
-   
+
     if len(point) > 0:
         point = point[0]
     else:
         logging.error('No influx data points for the site')
         return None
-    
+
     return point
 
 
@@ -241,19 +296,19 @@ def get_point(measurement_name, point_id, db=None):
         i = Influx(database=db)
 
     point = i.get_point(measurement_name, point_id, db)
-    
+
     if point:
-       return point[0]
+        return point[0]
 
     return point
-    
+
 
 def insert_point(site, measurement_name, value, db=None):
     """ Inserts a point into the db provided the name and the site """
     i = Influx()
     if db is not None:
         i = Influx(database=db)
-    
+
     value = i.insert_point(site, measurement_name, float(value))
 
-    
+

@@ -25,6 +25,7 @@ from django.utils import timezone
 @task_failure.connect
 def handle_task_failure(**kw):
     logging.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
+    print "ERROR in task %s"%kw.get('message',"no error message")
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
@@ -53,7 +54,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
 
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
-        message = "Error sending to influx with exception %s"%e
+        message = "Error sending to influx with exception %s in datapint %s"%(e,model_data_dict)
         handle_task_failure(message= message,exception=e,data=model_data)
 
 def generate_auto_rules(site_id):
@@ -77,7 +78,7 @@ def generate_auto_rules(site_id):
     # Create soc low voltage alarm
     soc_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#soc',
-                        value = 30,
+                        value = 35,
                         operator = 'lt',
                         send_sms = send_sms,
                         send_mail = send_mail
@@ -106,14 +107,11 @@ def get_BOM_data():
     for site in sites:
         try:
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
-            #TODO figure out a way to get these automatically or add
-            #them manually to the model for now
-            #Also will the user have site's under thier account that they wouldn't like to pull data form?
-            #This will throw an error when the objects are getting created
+
             if v_client.IS_INITIALIZED:
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] )
+                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
@@ -341,6 +339,8 @@ def get_weather_data(days=7,historical=False):
                     point.cloud_cover = forecast_result[day]["cloudcover"]
                     point.save()
 
+                    send_to_influx(point, site, day, to_exclude=['date'])
+
             else:
                 #else create a new object
                 w_data = Site_Weather_Data(
@@ -354,7 +354,7 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                send_to_influx(site, w_data, date, to_exclude=['date'])
+                send_to_influx(w_data, site, day, to_exclude=['date'])
 
     return "updated weather for %s"%sites
 
@@ -449,7 +449,6 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
     else:
         message = "No Values returned for aggregate. Check Influx Connection."
         logging.warning(message)
-        #rollbar.report_message(message)
 
     return result
 
@@ -547,6 +546,9 @@ def rmc_status_update():
     sites = Sesh_Site.objects.all()
     for site in sites:
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('time').first()
+        if not latest_dp:
+            logging.warning("RMC STATUS: No DP found for site")
+            return 0
         last_contact = time_utils.get_timesince_seconds(latest_dp.time)
         tn = timezone.now()
         last_contact_min = last_contact / 60
@@ -559,11 +561,16 @@ def rmc_status_update():
 
 @shared_task
 def alert_engine():
-    # TODO check for the latest 10 alerts
+    """
+    Periodic task to check rules agains data points
+    """
     alert_generator()
     alert_status_check()
-    
+
 def download_vrm_historical_data():
+    """
+    Helper function to initiate one time download
+    """
     for site in Sesh_Site.objects.filter(vrm_site_is__isnull=True):
         if site.vrm_site_id:
             get_historical_BoM.delay(site.pk,time_utils.get_epoch_from_datetime(site.comission_date))

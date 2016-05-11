@@ -3,7 +3,7 @@
 *settings_local.py
 settings_local.ini
 settings.ini
-*.swp
+*.sw*
 *.db
 
 =======
@@ -58,6 +58,9 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+*.csv
+*.xsl
+
 nosetests.xml
 coverage.xml
 *,cover
