@@ -248,4 +248,12 @@ Morris.Bar({
           });
       });
 
+
+      // Draggable panelsa
+      var panelsContainer = $('.panels-container');
+      
+      panelsContainer.sortable();
+      panelsContainer.disableSelection();
+      
+
 }
