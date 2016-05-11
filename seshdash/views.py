@@ -95,6 +95,8 @@ def index(request,site_id=0):
     measurements_value=client.get_measurements()
     
     measurements =[]
+
+    print "The measuments are "
      
     for measurement in measurements_value:
         measurements.append(measurement['name'])
