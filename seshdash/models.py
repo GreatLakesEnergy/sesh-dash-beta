@@ -242,6 +242,7 @@ class BoM_Data_Point(models.Model):
     SI units
     """
     SI_UNITS = {
+        "id": '',
         "soc":"%",
         "battery_voltage": "V",
         "AC_Voltage_in" : "V",
