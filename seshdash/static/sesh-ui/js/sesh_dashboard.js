@@ -126,6 +126,8 @@ Morris.Bar({
 });
 */
 //nano bar
+
+
 /* Alerts modal toggle script */
 
   var  modal = $('#alert-modal'),
@@ -246,4 +248,13 @@ Morris.Bar({
           });
       });
 
-                  }
+
+      // Draggable panels
+      // INFO: Uses the jquery ui sortable method
+      var panelsContainer = $('.panels-container');
+      
+      panelsContainer.sortable();
+      panelsContainer.disableSelection();
+      
+
+}
