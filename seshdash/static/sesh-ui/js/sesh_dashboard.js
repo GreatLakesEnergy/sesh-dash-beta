@@ -39,6 +39,8 @@ Morris.Bar({
 /*
  High Chart Draw Function
 */
+
+
 function get_high_chart(date,pv,cloud)
 {
 
