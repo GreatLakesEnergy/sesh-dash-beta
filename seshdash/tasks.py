@@ -181,9 +181,11 @@ def get_historical_BoM(site_pk,start_at):
         logging.debug("Importing data for site:%s"%site)
         for row in data:
             try:
+                parsed_date = datetime.strptime(row.get('Date Time'),'%Y-%d-%m %X')
+                date = time_utils.localize(parsed_date, tz=site.time_zone)
                 data_point = BoM_Data_Point(
                     site = site,
-                    time = row.get('Date Time'), #TODO make sure this datetime aware
+                    time = date,
                     soc = row.get('Battery State of Charge (System)'),
                     battery_voltage = row.get('Battery voltage'),
                     AC_input = row.get('Input power 1'),

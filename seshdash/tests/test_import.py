@@ -56,12 +56,12 @@ class VRM_Import_TestCase(TestCase):
 
         if self.VRM_API.IS_INITIALIZED:
            sites = self.VRM_API.SYSTEMS_IDS
-           vrm_site_id = sites.pop()[0]
-           print vrm_site_id
+           vrm_site_id = sites[0][0]
+           print sites
 
         self.location = Geoposition(52.5,24.3)
         self.now = timezone.now()
-        self.start_date = self.now - timedelta(weeks=1)
+        self.start_date = self.now - timedelta(days=2)
 
         self.site = Sesh_Site.objects.create(site_name=u"Test_aggregate",
                                              comission_date=self.start_date,
