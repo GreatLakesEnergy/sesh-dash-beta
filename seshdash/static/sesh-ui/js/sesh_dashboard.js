@@ -249,7 +249,8 @@ Morris.Bar({
       });
 
 
-      // Draggable panelsa
+      // Draggable panels
+      // INFO: Uses the jquery ui sortable method
       var panelsContainer = $('.panels-container');
       
       panelsContainer.sortable();
