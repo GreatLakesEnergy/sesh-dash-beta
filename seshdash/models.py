@@ -150,7 +150,7 @@ class Alert_Rule(models.Model):
 #TODO Add alert Object to save alerts
 class Sesh_Alert(models.Model):
     site = models.ForeignKey(Sesh_Site)
-    alert = models.ForeignKey(Alert_Rule)
+    alert = models.ForeignKey(Alert_Rule, related_name="alert_point")
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     emailSent = models.BooleanField()
