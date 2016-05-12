@@ -683,7 +683,7 @@ def get_latest_bom_data(request):
     latest_point_data = []
    
     # If the points exist 
-    if latest_points and latest_rmc_status:
+    if len(latest_points) == 3 and latest_rmc_status:
         latest_point_data.append({"item": "State of Charge", "value":str(round(latest_points['soc']['value'], 2)) + '%' })
         latest_point_data.append({"item": "Battery Voltage", "value": str(round(latest_points['battery_voltage']['value'],2)) + "V"})
         latest_point_data.append({"item": "Consumption Data", "value":round(latest_points['AC_output_absolute']['value'], 2)})
