@@ -71,7 +71,7 @@ $('.form-control').keypress(function(event){
     }
 });
 /* search button */
-$(".btn-default").click(function(){
+$(".button-search").click(function(){
         textinput = $(".form-control").val();
         for (i=0;i<sitename.length;i++){
             /* checking if entered value exists in a sitename array */
@@ -248,3 +248,7 @@ Morris.Bar({
       });
 
                   }
+
+  $("#id_location_city").keypress(function(){
+                    $("#id_location_country").val($(this).val());
+                  });

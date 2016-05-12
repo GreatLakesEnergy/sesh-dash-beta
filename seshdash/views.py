@@ -687,8 +687,8 @@ def get_latest_bom_data(request):
 def search(request):
     data=[]
     sites = Sesh_Site.objects.all()
-    site = sites[0]
-    site.site_name
+    #site = sites[0]
+    #site.site_name
     for site in sites:
         data.append({"key":site.id,"value":site.site_name})
     return HttpResponse(json.dumps(data))
@@ -779,4 +779,51 @@ def graphs(request):
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()
+
+
+#function to create/edit sites
+@login_required
+def edit_settings(request):
+    site_available = []
+    sites = _get_user_sites(request)
+
+    for site in sites:
+        site_available.append(site.site_name)
+
+    form = SiteForm()
+
+    if request.method == 'POST':
+
+        form = SiteForm(request.POST)
+
+        if form.is_valid:
+
+            form = form.save()
+
+            #return render(request,'seshdash/settings.html', {'form':form})
+
+        else:
+
+            return HttpResponse("Didn`t validate")
+    
+    
+        
+    return render(request,'seshdash/settings.html', {'form':form, 'sites':site_available})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
