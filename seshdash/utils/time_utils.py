@@ -83,6 +83,12 @@ def localize(nv_datetime,tz):
     """
     Add timezone info to datetime object
     """
+    if not isinstance(nv_datetime,datetime):
+        try:
+            # Try to convert to datetime
+            time = datetime(nv_datetime)
+        except Exception, e:
+            return nv_datetime
     # Is our datetime object  naive?
     if nv_datetime.tzinfo is not None and nv_datetime.tzinfo.utcoffset(nv_datetime) is not None:
         return nv_datetime
