@@ -33,7 +33,6 @@
 
                            {{ form.media }}
 
-                           {{ form.management_form}}
                         </table>
 
                            <button type="submit" class="btn btn-primary">SAVE</button>
@@ -44,20 +43,31 @@
 
                <div id="Edit_site" class="tab-pane fade">
 
-                    <p>Available Sesh Sites</p>
+                    <h3>Available Sesh Sites</h3>
 
                     <table class="table table-striped table-bordered table-hover">
-                      <th>Sites</th>
-                      <tb>Mukuyu HC</tb>
+                      <tr>
+                          <th> SITES </th>
+
+                      </tr>
+
+                      <tr>
+                           {% for value in sites %}
+                       <tr>
+                           <th>
+
+                           <a href="">{{value}}</a>
+
+                           </th>
+
+                       </tr>
+                           {% endfor %}
+                      </tr>
                     </table>
 
               </div>
 
               <div id="Change_settings" class="tab-pane fade">
-
-                   <h3>Menu 2</h3>
-
-                   <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem </p>
 
               </div>
 

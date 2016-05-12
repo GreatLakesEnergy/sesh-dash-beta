@@ -70,12 +70,5 @@ class VRMForm(ModelForm):
         widgets = {
                   'vrm_password': forms.PasswordInput(),
                    }
-'''
-class siteEdit(forms.Form):
-    
-    site_name = forms.CharField(max_length=100)
-    comission_date = forms.DateTimeField('date comissioned')
-    location_country = forms.CharField(max_length = 100)
-    widgets = {'comission_date':forms.DateInput()}
-'''
+
     

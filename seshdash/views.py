@@ -785,8 +785,8 @@ def graphs(request):
 @login_required
 def edit_settings(request):
     site_available = []
-    sites = _get_user_sites(request)
-
+    #fetching list of all site
+    sites = Sesh_Site.objects.all()
     for site in sites:
         site_available.append(site.site_name)
 
@@ -795,19 +795,13 @@ def edit_settings(request):
     if request.method == 'POST':
 
         form = SiteForm(request.POST)
-
+        #checking if the form is valid
         if form.is_valid:
 
             form = form.save()
-
-            #return render(request,'seshdash/settings.html', {'form':form})
-
         else:
-
             return HttpResponse("Didn`t validate")
-    
-    
-        
+               
     return render(request,'seshdash/settings.html', {'form':form, 'sites':site_available})
 
 
