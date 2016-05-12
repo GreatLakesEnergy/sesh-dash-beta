@@ -46,7 +46,7 @@ from seshdash.api.victron import VictronAPI
 from seshdash.tasks import get_historical_BoM, generate_auto_rules
 
 #Import for Influx
-from seshdash.data.db.influx import Influx
+from seshdash.data.db.influx import Influx, get_measurements_latest_point
 
 #generics
 import logging
@@ -669,20 +669,27 @@ def silence_alert(request):
 
 @login_required
 def get_latest_bom_data(request):
-    latest_bom = BoM_Data_Point.objects.order_by('-time')
+    """ Returns the latest information of a site to be displayed in the status card """
+    # getting current site and latest rmc status object
+    site_id = request.POST.get('siteId')
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    latest_rmc_status = RMC_status.objects.filter(site=site).last()
+
     
-    if latest_bom:
-        latest_bom = latest_bom.first()
-    else:
-        return HttpResponse(json.dumps({}))
+    measurement_list = ['soc','battery_voltage','AC_output_absolute']
+    latest_points = get_measurements_latest_point(site, measurement_list)
+    
 
-    latest_bom_data = []
-    latest_bom_data.append({"item": "State of Charge", "value":str(latest_bom.soc) + '%' })
-    latest_bom_data.append({"item": "Battery Voltage", "value":latest_bom.battery_voltage})
-    latest_bom_data.append({"item": "Consumption Data", "value":round(latest_bom.AC_output_absolute, 2)})
-    latest_bom_data.append({"item": "Recent Contact", "value": get_timesince(latest_bom.time)})
+    latest_point_data = []
+   
+    # If the points exist 
+    if latest_points and latest_rmc_status:
+        latest_point_data.append({"item": "State of Charge", "value":str(round(latest_points['soc']['value'], 2)) + '%' })
+        latest_point_data.append({"item": "Battery Voltage", "value": str(round(latest_points['battery_voltage']['value'],2)) + "V"})
+        latest_point_data.append({"item": "Consumption Data", "value":round(latest_points['AC_output_absolute']['value'], 2)})
+        latest_point_data.append({"item": "Recent Contact", "value": get_timesince(latest_rmc_status.time)})
 
-    return HttpResponse(json.dumps(latest_bom_data))
+    return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
 @login_required
