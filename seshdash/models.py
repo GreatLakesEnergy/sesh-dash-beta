@@ -230,7 +230,7 @@ class BoM_Data_Point(models.Model):
     AC_Load_out = models.FloatField(default=0)
     #NEW  victron now tells us pv production
     pv_production = models.FloatField(default=0)
-    inverter_state = models.CharField(max_length = 100)
+    inverter_state = models.CharField(max_length = 100, blank=True, null=True)
     target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
     main_on = models.BooleanField(default=False)
     genset_state = models.IntegerField(default=0)
