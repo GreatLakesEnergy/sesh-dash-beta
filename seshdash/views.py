@@ -679,14 +679,14 @@ def get_latest_bom_data(request):
 
     
     # The measurement list contains attributes to be displayed in the status card,
-    measurement_list = ['pv_production', 'soc','battery_voltage','AC_output_absolute']
+    measurement_list = ['soc','battery_voltage','AC_output_absolute']
     latest_points = get_measurements_latest_point(site, measurement_list)
     
 
     latest_point_data = []
    
     # If the points exist and the points returned are equal to the items in measurement list
-    if len(latest_points) == len(latest_points) and latest_rmc_status:
+    if len(latest_points) == len(latest_points):
         for measurement, point in latest_points.items():
             latest_point_data.append({"item":get_measurement_verbose_name(measurement),
                                       "value":str(round(latest_points[measurement]['value'], 2))
