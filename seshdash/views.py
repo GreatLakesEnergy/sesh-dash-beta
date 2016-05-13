@@ -28,7 +28,7 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -676,18 +676,17 @@ def get_latest_bom_data(request):
     latest_rmc_status = RMC_status.objects.filter(site=site).last()
 
     
-    measurement_list = ['soc','battery_voltage','AC_output_absolute']
+    measurement_list = ['pv_production', 'soc','battery_voltage','AC_output_absolute']
     latest_points = get_measurements_latest_point(site, measurement_list)
     
 
     latest_point_data = []
    
     # If the points exist 
-    if len(latest_points) == 3 and latest_rmc_status:
-        latest_point_data.append({"item": "State of Charge", "value":str(round(latest_points['soc']['value'], 2)) + '%' })
-        latest_point_data.append({"item": "Battery Voltage", "value": str(round(latest_points['battery_voltage']['value'],2)) + "V"})
-        latest_point_data.append({"item": "Consumption Data", "value":round(latest_points['AC_output_absolute']['value'], 2)})
-        latest_point_data.append({"item": "Recent Contact", "value": get_timesince(latest_rmc_status.time)})
+    if len(latest_points) == len(latest_points) and latest_rmc_status:
+        for measurement, point in latest_points.items():
+            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                      "value":str(round(latest_points[measurement]['value'], 2)) + get_measurement_unit(measurement)})
 
     return HttpResponse(json.dumps(latest_point_data))
 

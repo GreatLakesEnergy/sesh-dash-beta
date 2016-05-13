@@ -277,14 +277,8 @@ class Influx:
         if database:
            db = database        
 
-        measurements = ""
+        measurements = ",".join(measurement_list)
        
-        # Formatting the measurement list
-        for i, measurement in enumerate(measurement_list):
-            measurements += measurement
-            if i == len(measurement_list) - 1:
-                break
-            measurements += ','
 
         query = "SELECT * FROM %s WHERE site_name='%s' LIMIT 1" % (measurements, site.site_name)
         points = list(self._influx_client.query(query,database=db).get_points())

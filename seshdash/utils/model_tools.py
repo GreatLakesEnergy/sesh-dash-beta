@@ -1,5 +1,5 @@
 # Import all the neccessary models
-from seshdash.models import *
+from seshdash.models import Daily_Data_Point
 
 def get_model_from_string(model_name):
     model = eval(model_name)
@@ -49,3 +49,9 @@ def get_latest_instance(model):
 
 
 
+def get_measurement_verbose_name(measurement):
+    return Daily_Data_Point.MEASUREMENTS_VERBOSE_NAMES[measurement]
+
+
+def get_measurement_unit(measurement):
+    return Daily_Data_Point.UNITS_DICTIONARY[measurement]
