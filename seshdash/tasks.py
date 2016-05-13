@@ -548,18 +548,20 @@ def rmc_status_update():
     """
     sites = Sesh_Site.objects.all()
     for site in sites:
-        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('time').first()
-        if not latest_dp:
+        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
+        logging.debug("getting status from site %s"%site)
+        if latest_dp:
+            last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+            tn = timezone.now()
+            last_contact_min = last_contact / 60
+            rmc_status = RMC_status(site = site,
+                                    rmc = site.rmc_account,
+                                    minutes_last_contact = last_contact_min,
+                                    time = tn)
+            logging.debug("rmc status logging now: %s last_contact: %s "%(tn,latest_dp.time))
+            rmc_status.save()
+        else:
             logging.warning("RMC STATUS: No DP found for site")
-            return 0
-        last_contact = time_utils.get_timesince_seconds(latest_dp.time)
-        tn = timezone.now()
-        last_contact_min = last_contact / 60
-        rmc_status = RMC_status(site = site,
-                                rmc = site.rmc_account,
-                                minutes_last_contact = last_contact_min,
-                                time = tn)
-        rmc_status.save()
 
 
 @shared_task
