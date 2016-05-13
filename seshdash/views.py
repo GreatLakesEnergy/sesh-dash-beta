@@ -694,7 +694,11 @@ def get_latest_bom_data(request):
                              })
 
     # adding data from the rmc_status
-    latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
+    try:
+        latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
+    except StopIteration:
+        logging.warning("No further points")
+        pass
 
     return HttpResponse(json.dumps(latest_point_data))
 
