@@ -27,7 +27,7 @@ from pprint import pprint
 
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
-from seshdash.utils.time_utils import get_timesince
+from seshdash.utils.time_utils import get_timesince, get_timesince_influx
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
@@ -669,28 +669,38 @@ def silence_alert(request):
 
 @login_required
 def get_latest_bom_data(request):
-    """ Returns the latest information of a site to be displayed in the status card """
+    """
+      Returns the latest information of a site to be displayed in the status card 
+      The data is got from the influx db 
+    """
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
     site = Sesh_Site.objects.filter(id=site_id).first()
-    latest_rmc_status = RMC_status.objects.filter(site=site).last()
 
     
+    # The measurement list contains attributes to be displayed in the status card,
     measurement_list = ['pv_production', 'soc','battery_voltage','AC_output_absolute']
     latest_points = get_measurements_latest_point(site, measurement_list)
     
 
     latest_point_data = []
    
-    # If the points exist 
+    # If the points exist and the points returned are equal to the items in measurement list
     if len(latest_points) == len(latest_points) and latest_rmc_status:
         for measurement, point in latest_points.items():
             latest_point_data.append({"item":get_measurement_verbose_name(measurement),
-                                      "value":str(round(latest_points[measurement]['value'], 2)) + get_measurement_unit(measurement)})
+                                      "value":str(round(latest_points[measurement]['value'], 2))
+                                              + get_measurement_unit(measurement)
+                             })
+
+    # adding data from the rmc_status
+    latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
 
     return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
+
+
 @login_required
 def search(request):
     data=[]
