@@ -160,7 +160,7 @@ class AlertTestCase(TestCase):
         self.assertEqual(alerts, 3)
 
         # test_get_latest_bom_data(self):
-        response = c.post('/get-latest-bom-data/',{})
+        response = c.post('/get-latest-bom-data/',{"siteId": 1})
         self.assertEqual(response.status_code, 200)
 
         # test_sent_sms(self):

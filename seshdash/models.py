@@ -150,7 +150,7 @@ class Alert_Rule(models.Model):
 #TODO Add alert Object to save alerts
 class Sesh_Alert(models.Model):
     site = models.ForeignKey(Sesh_Site)
-    alert = models.ForeignKey(Alert_Rule)
+    alert = models.ForeignKey(Alert_Rule, related_name="alert_point")
     date = models.DateTimeField()
     isSilence = models.BooleanField()
     emailSent = models.BooleanField()
@@ -230,7 +230,7 @@ class BoM_Data_Point(models.Model):
     AC_Load_out = models.FloatField(default=0)
     #NEW  victron now tells us pv production
     pv_production = models.FloatField(default=0)
-    inverter_state = models.CharField(max_length = 100)
+    inverter_state = models.CharField(max_length = 100, blank=True, null=True)
     target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
     main_on = models.BooleanField(default=False)
     genset_state = models.IntegerField(default=0)
@@ -259,7 +259,7 @@ class BoM_Data_Point(models.Model):
         "site" : "",
         "AC_output_absolute" : "V",
         }
-
+    
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
@@ -274,6 +274,22 @@ class Daily_Data_Point(models.Model):
     """
 
     UNITS_DICTIONARY = {
+        "id": '',
+        "soc":"%",
+        "battery_voltage": "V",
+        "AC_Voltage_in" : "V",
+        "AC_Voltage_out" : "V",
+        "AC_input" : "V",
+        "AC_output" : "V",
+        "AC_Load_in" : "V",
+        "AC_Load_out" : "V",
+        "pv_production" : "W",
+        "main_on" : "V",
+        "relay_state": "",
+        "trans" : "",
+        "genset_state" : "V",
+        "site" : "",
+        "AC_output_absolute" : "V",
         "daily_battery_charge": "W",
         "daily_grid_outage_n": "minute",
         "daily_grid_outage_t": "",
@@ -283,6 +299,34 @@ class Daily_Data_Point(models.Model):
         "daily_power_consumption_total": "W",
         "daily_pv_yield": "W",
     }
+
+
+    MEASUREMENTS_VERBOSE_NAMES = {
+        "soc":"State of Charge",
+        "battery_voltage": "Battery Voltage",
+        "AC_Voltage_in": "AC Voltage In",
+        "AC_Voltage_out": "AC Voltage Out",
+        "AC_input": "AC Input",
+        "AC_output": "AC Output",
+        "AC_Load_in": "AC Load in",
+        "AC_Load_out": "AC Load out",
+        "pv_production": "PV Production",
+        "main_on": "Main On",
+        "relay_state": "Relay State",
+        "trans": " Trans",
+        "genset_state": "Genset State",
+        "AC_output_absolute": "AC Output absolute",
+        "daily_battery_charge": "Daily Battery Charge",
+        "daily_grid_outage_n": "Daily Grid Outage N",
+        "daily_grid_outage_t": "Daily Grid Outage T",
+        "daily_grid_usage": "Daily Grid Usage",
+        "daily_no_of_alerts": "Daily Number of Alerts",
+        "daily_power_cons_pv": "Daily Power Cons Pv",
+        "daily_power_consumption_total": "Daily Power Consumption Total",
+        "daily_pv_yield": "Daily Pv Yield"       
+    }
+
+   
 
 
     site = models.ForeignKey(Sesh_Site)

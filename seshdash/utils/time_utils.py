@@ -1,4 +1,5 @@
 from datetime import datetime,timedelta
+from dateutil.parser import parse
 from time import localtime,strftime
 from django.conf import settings
 from  pytz import timezone
@@ -227,3 +228,12 @@ def get_date_dashed(date):
     date_string = str(date.year) + '-' + str(date.month) +  '-' + str(date.day)
     return date_string
 
+
+def convert_influx_time_string(date_string):
+    """ Converts influx style strings to datetime """
+    return parse(date_string)   
+
+def get_timesince_influx(date_string):
+    date_obj = convert_influx_time_string(date_string)
+    return get_timesince(date_obj)
+    

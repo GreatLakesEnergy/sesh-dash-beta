@@ -27,8 +27,8 @@ from pprint import pprint
 
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
-from seshdash.utils.time_utils import get_timesince
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose
+from seshdash.utils.time_utils import get_timesince, get_timesince_influx
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -46,7 +46,7 @@ from seshdash.api.victron import VictronAPI
 from seshdash.tasks import get_historical_BoM, generate_auto_rules
 
 #Import for Influx
-from seshdash.data.db.influx import Influx
+from seshdash.data.db.influx import Influx, get_measurements_latest_point
 
 #generics
 import logging
@@ -669,22 +669,42 @@ def silence_alert(request):
 
 @login_required
 def get_latest_bom_data(request):
-    latest_bom = BoM_Data_Point.objects.order_by('-time')
+    """
+      Returns the latest information of a site to be displayed in the status card 
+      The data is got from the influx db 
+    """
+    # getting current site and latest rmc status object
+    site_id = request.POST.get('siteId')
+    site = Sesh_Site.objects.filter(id=site_id).first()
+
     
-    if latest_bom:
-        latest_bom = latest_bom.first()
-    else:
-        return HttpResponse(json.dumps({}))
+    # The measurement list contains attributes to be displayed in the status card,
+    measurement_list = ['soc','battery_voltage','AC_output_absolute']
+    latest_points = get_measurements_latest_point(site, measurement_list)
+    
 
-    latest_bom_data = []
-    latest_bom_data.append({"item": "State of Charge", "value":str(latest_bom.soc) + '%' })
-    latest_bom_data.append({"item": "Battery Voltage", "value":latest_bom.battery_voltage})
-    latest_bom_data.append({"item": "Consumption Data", "value":round(latest_bom.AC_output_absolute, 2)})
-    latest_bom_data.append({"item": "Recent Contact", "value": get_timesince(latest_bom.time)})
+    latest_point_data = []
+   
+    # If the points exist and the points returned are equal to the items in measurement list
+    if len(latest_points) == len(latest_points):
+        for measurement, point in latest_points.items():
+            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                      "value":str(round(latest_points[measurement]['value'], 2))
+                                              + get_measurement_unit(measurement)
+                             })
 
-    return HttpResponse(json.dumps(latest_bom_data))
+    # adding data from the rmc_status
+    try:
+        latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
+    except StopIteration:
+        logging.warning("No further points")
+        pass
+
+    return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
+
+
 @login_required
 def search(request):
     data=[]

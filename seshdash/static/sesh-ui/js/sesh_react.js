@@ -122,7 +122,9 @@ var BoMLatestDataRow = React.createClass({
 function getLatestBoMData(){
     var bomJsonData = {
             csrfmiddlewaretoken: csrftoken,
+            siteId: active_site_id,
         };
+   
 
     $.post('/get-latest-bom-data', bomJsonData, function(data){
         data = JSON.parse(data)
