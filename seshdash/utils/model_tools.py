@@ -1,5 +1,5 @@
 # Import all the neccessary models
-from seshdash.models import Daily_Data_Point
+from seshdash.models import *
 
 def get_model_from_string(model_name):
     model = eval(model_name)
