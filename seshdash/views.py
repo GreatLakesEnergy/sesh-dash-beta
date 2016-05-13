@@ -679,7 +679,7 @@ def get_latest_bom_data(request):
 
     
     # The measurement list contains attributes to be displayed in the status card,
-    measurement_list = ['pv_production', 'soc','battery_voltage','AC_output_absolute']
+    measurement_list = ['soc','battery_voltage','AC_output_absolute']
     latest_points = get_measurements_latest_point(site, measurement_list)
     
 
@@ -694,7 +694,11 @@ def get_latest_bom_data(request):
                              })
 
     # adding data from the rmc_status
-    latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
+    try:
+        latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
+    except StopIteration:
+        logging.warning("No further points")
+        pass
 
     return HttpResponse(json.dumps(latest_point_data))
 
