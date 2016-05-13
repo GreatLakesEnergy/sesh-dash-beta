@@ -57,6 +57,16 @@ class RMCTestCase(TestCase):
                                                 AC_Load_in=0.0,
                                                 AC_Load_out=-0.7)
 
+        self.data_point = Data_Point.objects.create(site=self.site,
+                                                soc=10,
+                                                battery_voltage=20,
+                                                time=timezone.now()-timedelta(minutes=50),
+                                                AC_input=0.0,
+                                                AC_output=15.0,
+                                                AC_Load_in=0.0,
+                                                AC_Load_out=-0.7)
+
+
         self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
