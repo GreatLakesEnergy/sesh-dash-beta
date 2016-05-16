@@ -53,7 +53,6 @@ import logging
 
 #Autocomplete
 from seshdash.models import *
-from django.forms import model_to_dict
 import json
 # Influxdb
 from seshdash.data.db.influx import Influx
@@ -691,6 +690,7 @@ def search(request):
     #site.site_name
     for site in sites:
         data.append({"key":site.id,"value":site.site_name})
+    print data
     return HttpResponse(json.dumps(data))
 
 @login_required
@@ -784,25 +784,69 @@ def graphs(request):
 #function to create/edit sites
 @login_required
 def edit_settings(request):
-    site_available = []
-    #fetching list of all site
+
+    all_sites = []
+    #all sesh sites
     sites = Sesh_Site.objects.all()
+
     for site in sites:
-        site_available.append(site.site_name)
 
-    form = SiteForm()
+        all_sites.append({site.site_name:site.id})
 
+    #fetching list of sites for the user
+
+    user_sites =  _get_user_sites(request)
+    
+    if request.method == 'POST':
+        
+        siteName = request.POST.get('site-name','')
+        for site in all_sites:
+            if siteName in site:
+                site_Id = site[siteName]
+
+        #form = SiteForm( instance =get_object_or_404(Sesh_Site, id=site_Id))
+        instance = get_object_or_404(Sesh_Site, id=site_Id)
+        print "Id is"
+        print site_Id
+        form = SiteForm(request.POST, instance=instance)
+
+        #checking if the form is valid
+        if form.is_valid:
+            form = form.save()
+
+            form = SiteForm()
+
+        else:
+            
+            form = SiteForm()
+           # return HttpResponse("Didn`t validate")
+    else:
+        form = SiteForm()
+               
+    return render(request,'seshdash/settings.html', {'form':form, 'sites':user_sites})
+
+
+@login_required
+def add_site(request):
     if request.method == 'POST':
 
         form = SiteForm(request.POST)
-        #checking if the form is valid
+
         if form.is_valid:
 
             form = form.save()
+
+            form = SiteForm()
+
+            return render(request,'seshdash/settings.html', {'form':form})
         else:
-            return HttpResponse("Didn`t validate")
-               
-    return render(request,'seshdash/settings.html', {'form':form, 'sites':site_available})
+            form = SiteForm()
+    else:
+
+        form = SiteForm()
+
+    return render(request, 'seshdash/settings.html', {'form':form})
+    
 
 
 

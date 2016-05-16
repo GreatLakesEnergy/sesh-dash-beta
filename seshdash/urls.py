@@ -25,5 +25,6 @@ urlpatterns = [
             url(r'^historical_data', views.historical_data),
             url(r'^graphs', views.graphs),
             url(r'^edit_settings',views.edit_settings),
+            url(r'^add_site',views.add_site),
             ]
 

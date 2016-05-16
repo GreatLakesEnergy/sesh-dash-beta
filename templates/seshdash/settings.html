@@ -12,9 +12,9 @@
 
            <ul class="nav nav-tabs">
 
-                <li class="active"><a data-toggle="tab" href="#Add_import">Add/Import</a></li>
+                <li class="active"><a data-toggle="tab" href="#Edit_site" >Edit Existing site</a></li>
 
-                <li><a data-toggle="tab" href="#Edit_site">Edit Existing site</a></li>
+                <li><a data-toggle="tab" href="#Add_import">Add/Import</a></li>
 
                 <li><a data-toggle="tab" href="#Change_settings">Change User Settings</a></li>
 
@@ -22,58 +22,71 @@
 
            <div class="tab-content">
 
-                <div id="Add_Import" class="tab-pane fade in active">
+                 <div id="Edit_site" class="tab-pane fade in active">
 
-                     <form action="edit_settings" method="post" novalidate>
+                      <div class="site-list">
 
-                        <table class="table table-striped table-bordered table-hover">
-                           {% csrf_token %}
+                           <h3>Available Sesh Sites</h3>
 
-                           {{form.as_table}}
+                           <table class="table table-striped table-bordered table-hover">
+                                  <tr>
 
-                           {{ form.media }}
+                                     <th> SITES </th>
 
-                        </table>
+                                  </tr>
 
-                           <button type="submit" class="btn btn-primary">SAVE</button>
+                                  <tr>
 
-                     </form>
+                                      {% for value in sites %}
+                                      <tr>
 
-               </div>
 
-               <div id="Edit_site" class="tab-pane fade">
+                                             <th class="sites-available">{{value}}</th>
 
-                    <h3>Available Sesh Sites</h3>
 
-                    <table class="table table-striped table-bordered table-hover">
-                      <tr>
-                          <th> SITES </th>
 
-                      </tr>
+                                      </tr>
 
-                      <tr>
-                           {% for value in sites %}
-                       <tr>
-                           <th>
+                                      {% endfor %}
+                                 </tr>
 
-                           <a href="">{{value}}</a>
+                          </table>
 
-                           </th>
+                          <button class="btn btn-default add-site">
+                                 Add Site<a href="add_site"></a>
+                          </button>
+                      </div>
 
-                       </tr>
-                           {% endfor %}
-                      </tr>
-                    </table>
+                      <div class="create-new-site" hidden>
 
-              </div>
+                           <form action="/add_site" method="post" novalidate>
 
-              <div id="Change_settings" class="tab-pane fade">
+                                 <table class="table table-striped table-bordered table-hover">
 
-                   <h3>Sub Menu 3</h3>
+                                        {% csrf_token %}
 
-                   <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem </p>
+                                        {{form.as_table}}
 
-              </div>
+                                        {{ form.media }}
+
+                                 </table>
+
+                                 <button type="submit" class="btn btn-primary">SAVE </button>
+                                 <button type="button" class="btn btn-primary back"> Back </button>
+                        </form>
+
+                      </div>
+                 </div>
+
+                 <div id="Change_settings" class="tab-pane fade">
+
+                   <p> Nothing here </p>
+
+                 </div>
+
+                 <div id="Add_Import" class="tab-pane fade">
+
+                 </div >
 
            </div>
 

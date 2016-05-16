@@ -249,6 +249,39 @@ Morris.Bar({
 
                   }
 
-  $("#id_location_city").keypress(function(){
-                    $("#id_location_country").val($(this).val());
-                  });
+
+/*------------------------------------------------------------------------*/
+$(document).ready(function(){
+
+            $('.add-site').click(function(){
+
+                  $('.site-list').hide();
+
+                  $('.create-new-site').show();
+
+            });
+
+            $('.back').click(function(){
+              $('.create-new-site').hide();
+              $('.site-list').show();
+            });
+
+            $('.sites-available').click(function(){
+
+                 siteName = $(this).text();
+
+                 alert(siteName)
+
+                 $.post('edit_settings',{csrfmiddlewaretoken:csrftoken, 'site-name':siteName}, function(data){
+
+                 })
+
+                 $('.create-new-site').show();
+
+                 $('.site-list').hide();
+
+            });
+
+});
+
+
