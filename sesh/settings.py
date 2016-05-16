@@ -68,7 +68,7 @@ config.read( os.path.join(BASE_DIR,CONFIG_FILE))
 SECRET_KEY = config.get('system','SECRET_KEY')
 
 # security warning: don't run with debug turned on in production!
-DEBUG = config.get('system','DEV_MODE_ON')
+DEBUG = eval(config.get('system','DEV_MODE_ON'))
 
 
 ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
@@ -300,7 +300,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 if not DEBUG:
-    MIDDLEWARE_CLASSES.append('rollbar.contrib.django.middleware.RollbarNotifierMiddleware')
+    MIDDLEWARE_CLASSES + ('rollbar.contrib.django.middleware.RollbarNotifierMiddleware',)
 
 ROOT_URLCONF = 'sesh.urls'
 
