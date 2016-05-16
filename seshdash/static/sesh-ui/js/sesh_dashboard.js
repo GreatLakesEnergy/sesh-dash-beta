@@ -252,12 +252,14 @@ Morris.Bar({
 
 /*------------------------------------------------------------------------*/
 $(document).ready(function(){
-
+            $('.create-new-site').hide();
             $('.add-site').click(function(){
 
                   $('.site-list').hide();
 
                   $('.create-new-site').show();
+
+                  $('.add-site').hide();
 
             });
 
@@ -279,6 +281,8 @@ $(document).ready(function(){
                  $('.create-new-site').show();
 
                  $('.site-list').hide();
+
+                 $('.add-site').hide();
 
             });
 

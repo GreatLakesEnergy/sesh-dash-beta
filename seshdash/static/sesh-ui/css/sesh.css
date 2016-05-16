@@ -110,7 +110,6 @@ tr.modal-toggle {
   -webkit-animation-delay: -0.9s;
   animation-delay: -0.9s;
 }
-
 .spinner .rect5 {
   -webkit-animation-delay: -0.8s;
   animation-delay: -0.8s;
@@ -268,4 +267,7 @@ div.awesomplete > ul {
 }
 .create-site{
   max-width: 1012px;
+}
+.graph-loader{
+  margin-top: 890px;
 }

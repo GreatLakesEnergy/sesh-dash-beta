@@ -57,9 +57,9 @@
                           </button>
                       </div>
 
-                      <div class="create-new-site" hidden>
+                      <div class="create-new-site">
 
-                           <form action="/add_site" method="post" novalidate>
+                           <form action="/edit_settings" method="post" novalidate>
 
                                  <table class="table table-striped table-bordered table-hover">
 
@@ -69,8 +69,12 @@
 
                                         {{ form.media }}
 
-                                 </table>
+                                        <!--{% if form.non_field_errors %}
+                                         {{form.non_field_errors}}
 
+                                         {% endif %}-->
+
+                                 </table>
                                  <button type="submit" class="btn btn-primary">SAVE </button>
                                  <button type="button" class="btn btn-primary back"> Back </button>
                         </form>

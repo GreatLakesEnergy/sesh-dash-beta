@@ -781,12 +781,13 @@ def graphs(request):
         return HttpResponseBadRequest()
 
 
-#function to create/edit sites
+#function to editing existing sites
 @login_required
 def edit_settings(request):
 
     all_sites = []
     #all sesh sites
+
     sites = Sesh_Site.objects.all()
 
     for site in sites:
@@ -796,54 +797,54 @@ def edit_settings(request):
     #fetching list of sites for the user
 
     user_sites =  _get_user_sites(request)
-    
+
     if request.method == 'POST':
         
         siteName = request.POST.get('site-name','')
-        for site in all_sites:
-            if siteName in site:
-                site_Id = site[siteName]
 
-        #form = SiteForm( instance =get_object_or_404(Sesh_Site, id=site_Id))
-        instance = get_object_or_404(Sesh_Site, id=site_Id)
+        for site in all_sites:
+
+            if siteName in site:
+
+                site_Id = site[siteName]
         print "Id is"
         print site_Id
+        #creating an instance
+        
+        instance = get_object_or_404(Sesh_Site, id=site_Id)
+
+        print "instance is"
+        print instance
+
         form = SiteForm(request.POST, instance=instance)
-
+        #print form
         #checking if the form is valid
-        if form.is_valid:
+
+        if form.is_valid():
+
             form = form.save()
-
-            form = SiteForm()
-
-        else:
-            
-            form = SiteForm()
-           # return HttpResponse("Didn`t validate")
     else:
+
         form = SiteForm()
                
     return render(request,'seshdash/settings.html', {'form':form, 'sites':user_sites})
 
-
+# function of adding new site
 @login_required
 def add_site(request):
     if request.method == 'POST':
-
+    
         form = SiteForm(request.POST)
 
-        if form.is_valid:
+        if form.is_valid():
 
             form = form.save()
 
             form = SiteForm()
-
-            return render(request,'seshdash/settings.html', {'form':form})
-        else:
-            form = SiteForm()
     else:
 
         form = SiteForm()
+        
 
     return render(request, 'seshdash/settings.html', {'form':form})
     
