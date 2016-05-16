@@ -110,7 +110,7 @@ class AlertTestCase(TestCase):
         # Create data point that will silence alert
         self.new_data_point = Data_Point.objects.create(site=self.site,
                                                     soc=50,
-                                                    battery_voltage=30,
+                                                    battery_voltage=24,
                                                     time=timezone.now(),
                                                     AC_input=0.0,
                                                     AC_output=15.0,
@@ -125,7 +125,7 @@ class AlertTestCase(TestCase):
                                                         data_sent_24h=12,
                                                         time=datetime.now())
 
-        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  50)
+        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  24)
 
 
     @override_settings(DEBUG=True)
