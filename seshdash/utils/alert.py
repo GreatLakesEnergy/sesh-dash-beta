@@ -3,7 +3,7 @@ from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
 from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
 from django.utils import timezone
-from guardian.shortcuts import get_users_with_perms
+from guardian.shortcuts import get_users_with_perms, get_groups_with_perms
 from django.conf import settings
 from dateutil import parser
 
@@ -36,18 +36,14 @@ def alert_generator():
 
     for rule in rules:
         site = rule.site
-        # Get datapoint and value
+        site_groups = get_groups_with_perms(site)
+       
+        # Get datapoint and real value
         data_point, real_value = get_alert_check_value(site, rule)
 
         if data_point is not None and real_value is not None:
 
             if check_alert(rule, real_value):
-                print "Got an alert"
-                print "-------------"
-                print "The rule is: ",
-                print rule
-                print "Send Slack value is: ",
-                print rule.send_slack
 
                 alert_obj = alert_factory(site, rule, data_point)
 
@@ -68,8 +64,16 @@ def alert_generator():
 
                     if rule.send_slack:
                          print "Sending slack message"
-                         slack = Slack()
-                         alert_obj.slackSent = slack.send_message_to_channel('sesh_alerts', content['alert_str'])
+                         for site_group in site_groups:
+                             # unpacking the neccessary data
+                             sesh_organisation = site_group.sesh_organisation
+                             channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
+
+                             # instantiating the client
+                             slack = Slack(sesh_organisation.slack_token)
+                              
+                             for channel in channels:
+                                 alert_obj.slackSent = slack.send_message_to_channel(channel.name, content['alert_str'])
 
                     alert_obj.save()
               
@@ -208,6 +212,7 @@ def get_recipients_for_site(site):
 
     return mails, sms_numbers
 
+        
 
 def alert_factory(site, rule, data_point):
     """ Creating an alert object """

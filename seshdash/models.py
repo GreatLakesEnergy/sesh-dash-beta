@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.db import models
 from datetime import timedelta
 from django.conf import settings
@@ -68,6 +68,21 @@ class Sesh_User(models.Model):
     class Meta:
          verbose_name = 'User'
          verbose_name_plural = 'Users'
+
+class Sesh_Organisation(models.Model):
+    group = models.OneToOneField(Group)
+    slack_token = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.group.name
+
+class Slack_Channel(models.Model):
+    organisation = models.ForeignKey(Sesh_Organisation, related_name='slack_channel')
+    name = models.CharField(max_length=40)
+    is_alert_channel = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.name
 
 
 class Sesh_Site(models.Model):
