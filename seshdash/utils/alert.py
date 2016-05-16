@@ -40,19 +40,22 @@ def alert_generator():
         if data_point is not None and real_value is not None:
 
             if check_alert(rule, real_value):
-
                 alert_obj = alert_factory(site, rule, data_point)
-                content = get_alert_content(site, rule, data_point, real_value, alert_obj)
-                mails, sms_numbers = get_recipients_for_site(site)
+
+                # if alert_obj is created
+                if alert_obj is not None:
+                    content = get_alert_content(site, rule, data_point, real_value, alert_obj)
+                    mails, sms_numbers = get_recipients_for_site(site)
 
 
-                if rule.send_mail:
-                     alert_obj.emailSent = alertEmail('Alert Email from seshdash',data_point,content,mails)
+                    if rule.send_mail:
+                         alert_obj.emailSent = alertEmail('Alert Email from seshdash',data_point,content,mails)
 
-                if rule.send_sms:
-                     alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
+                    if rule.send_sms:
+                         alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
 
-                alert_obj.save()
+                    alert_obj.save()
+              
 
 
 
@@ -127,6 +130,8 @@ def is_mysql_rule(rule):
 
 def check_alert(rule, data_point_value):
     """ Checks the alert and returns boolean value true if there is alert and false otherwise """
+    
+    print "Checking for alerts"
 
     ops = {'lt': lambda x,y: x<y,
            'gt': lambda x,y: x>y,
@@ -189,6 +194,23 @@ def get_recipients_for_site(site):
 
 def alert_factory(site, rule, data_point):
     """ Creating an alert object """
+    point = rule.alert_point.last()
+  
+    alert_obj = None
+    # If they are last alert exists
+    if point is None:
+        alert_obj = create_alert_instance(site, rule, data_point)
+     
+    # if there is a last alert check if it is silenced
+    else:
+        # if the last alert is silenced create an alert
+        if point.isSilence is True:
+            alert_obj = create_alert_instance(site, rule, data_point)
+
+    return alert_obj
+
+
+def create_alert_instance(site, rule, data_point):
     if is_mysql_rule(rule):
         alert_obj = Sesh_Alert.objects.create(
                     site = site,
@@ -202,7 +224,7 @@ def alert_factory(site, rule, data_point):
                     point_id= str(data_point.id ))
         alert_obj.save()
 
-        # Set data point to point to alert
+            # Set data point to point to alert
         data_point.target_alert = alert_obj
         data_point.save()
 
@@ -217,9 +239,9 @@ def alert_factory(site, rule, data_point):
                     smsSent=False,
                     point_model='influx',
                     point_id = get_epoch_from_datetime(parser.parse(data_point['time'])))
-
     alert_obj.save()
     return alert_obj
+
 
 
 

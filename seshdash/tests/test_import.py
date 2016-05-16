@@ -90,6 +90,7 @@ class VRM_Import_TestCase(TestCase):
 
     def test_bom_data_point(self):
         get_BOM_data()
+        sleep(1)
         bom_data = Data_Point.objects.all()
         self.assertEqual(len(bom_data),1)
 

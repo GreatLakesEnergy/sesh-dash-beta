@@ -15,20 +15,22 @@
 
     {% block maps %}
 
-    <div class="col-lg-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                    <!-- TODO make this a variable -->
-                    <i class="fa fa-map-marker fa-fw"></i>
-                        site map
+
+    <div class="panels-container">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                        <!-- TODO make this a variable -->
+                        <i class="fa fa-map-marker fa-fw"></i>
+                           site map
                 </div>
-            <div class="panel-body">
-                <!-- TODO movestyle to css -->
-                <div id="map">
-                </div>
+                <div class="panel-body">
+                          <!-- TODO movestyle to css -->
+                     <div id="map">
+                    </div>
+               </div>
             </div>
-        </div>
-    </div>
+       </div>
     {% endblock %}
     <!-- energy production -->
     <!--
@@ -84,6 +86,9 @@
              {% include "seshdash/alerts.html" with title="System Alerts" type="danger" %}
 	     {% include "seshdash/high_chart_line_bar.html" %}
              {% include "seshdash/time_series_high_chart.html" %}
+
+   
+     </div><!--END OF .panels-container-->
 
 
     <!-- end expermiental chart-->

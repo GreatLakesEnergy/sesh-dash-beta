@@ -49,3 +49,9 @@ def get_latest_instance(model):
 
 
 
+def get_measurement_verbose_name(measurement):
+    return Daily_Data_Point.MEASUREMENTS_VERBOSE_NAMES[measurement]
+
+
+def get_measurement_unit(measurement):
+    return Daily_Data_Point.UNITS_DICTIONARY[measurement]

@@ -236,7 +236,37 @@ class Influx:
          return list(self._influx_client.query(query,database=db).get_points())
 
     # Helper classes to the interface
+    def get_measurements_latest_point(self, site, measurement_list, database=None):
+        """ Returns a list of elements containing the latest points of provided measurements """
 
+        # Handling the db to be used
+        db = self.db
+        if database:
+           db = database
+
+        measurements = ",".join(measurement_list)
+
+
+        query = "SELECT * FROM %s WHERE site_name='%s' LIMIT 1" % (measurements, site.site_name)
+        points = list(self._influx_client.query(query,database=db).get_points())
+
+        # Creating a dictionary with measurement as key and point as value
+        measurement_dict = {}
+        for i, measurement in enumerate(measurement_list):
+            try:
+                measurement_dict[measurement] = points[i]
+            except:
+                print "No measurements found for %s" % measurement
+                pass
+
+
+        return measurement_dict
+
+
+
+
+
+# Helper classes to the interface
 def get_latest_point_site(site, measurement_name, db=None):
     """ Returns the latest point for a measurement for a specific siite """
     i = Influx()
@@ -278,3 +308,12 @@ def insert_point(site, measurement_name, value, db=None):
     value = i.insert_point(site, measurement_name, float(value))
 
 
+
+def get_measurements_latest_point(site, measurements_list, db=None):
+    """ Returns a list of latest measurement points for a given site """
+    i = Influx()
+    if db is not None:
+        i = Influx(database=db)
+
+
+    return i.get_measurements_latest_point(site, measurements_list)

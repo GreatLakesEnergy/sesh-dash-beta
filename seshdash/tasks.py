@@ -139,7 +139,8 @@ def get_BOM_data():
                             main_on = mains,
                             relay_state = 0,
                             )
-                        data_point.save()
+                	with transaction.atomic():
+                        	data_point.save()
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
 
