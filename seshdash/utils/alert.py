@@ -252,7 +252,7 @@ def get_unsilenced_alerts():
     if unsilenced_alerts:
         return unsilenced_alerts
     else:
-        return False
+        return []
 
 
 def get_latest_instance_site(site, model):
@@ -302,11 +302,17 @@ def get_alert_point(alert):
 
     return point
 
-def get_alert_point_value(alert):
+def get_alert_point_value(alert, point=None):
     """ Returns the value that triggers the alert """
     rule = alert.alert
-    point = get_alert_point(alert)
+    if not point:
+        point = get_alert_point(alert)
 
+    # Handle if alert has no point, (no puns intended)
+    if not point:
+        return None
+
+    # Get the alert data
     if is_mysql_rule(rule):
         model, field_name = rule.check_field.strip().split('#')
         value = getattr(point, field_name)
@@ -335,6 +341,7 @@ def alert_status_check():
                 latest_data_point_value = get_latest_point_value_influx(site, rule)
             else:
                 logging.error('Invaliid rule')
+                return None
 
 
             if check_alert(rule, latest_data_point_value):
@@ -344,7 +351,14 @@ def alert_status_check():
                 alert.isSilence = True
                 alert.save()
                 data_point = get_alert_point(alert)
-                content = get_alert_content(site, rule, get_alert_point(alert), get_alert_point_value(alert), alert)
+                data_point_value = get_alert_point_value(alert, data_point)
+
+                # Handle no data point getting returned
+                if not data_point_value:
+                    logging.warning("Now DP found for alert skipping ")
+                    return None
+
+                content = get_alert_content(site, rule, data_point, data_point_value, alert)
 
                 mails, sms_numbers = get_recipients_for_site(site)
 
