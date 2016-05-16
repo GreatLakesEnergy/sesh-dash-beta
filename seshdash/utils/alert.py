@@ -9,8 +9,10 @@ from dateutil import parser
 
 # Influx client
 from seshdash.data.db import influx
+
 from seshdash.utils.model_tools import get_model_first_reference
 from seshdash.utils.time_utils import get_epoch_from_datetime
+from seshdash.utils.send_slack import Slack
 
 import logging
 
@@ -40,10 +42,20 @@ def alert_generator():
         if data_point is not None and real_value is not None:
 
             if check_alert(rule, real_value):
+                print "Got an alert"
+                print "-------------"
+                print "The rule is: ",
+                print rule
+                print "Send Slack value is: ",
+                print rule.send_slack
+
                 alert_obj = alert_factory(site, rule, data_point)
 
                 # if alert_obj is created
+                print "The alert obj is: ",
+                print alert_obj
                 if alert_obj is not None:
+                    print "Alert obj created"
                     content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                     mails, sms_numbers = get_recipients_for_site(site)
 
@@ -53,6 +65,11 @@ def alert_generator():
 
                     if rule.send_sms:
                          alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
+
+                    if rule.send_slack:
+                         print "Sending slack message"
+                         slack = Slack()
+                         alert_obj.slackSent = slack.send_message_to_channel('sesh_alerts', content['alert_str'])
 
                     alert_obj.save()
               
@@ -194,10 +211,13 @@ def get_recipients_for_site(site):
 
 def alert_factory(site, rule, data_point):
     """ Creating an alert object """
+
+    # Getting the last alert for rule
     point = rule.alert_point.last()
   
     alert_obj = None
-    # If they are last alert exists
+
+    # If the last alert exists does not exist
     if point is None:
         alert_obj = create_alert_instance(site, rule, data_point)
      

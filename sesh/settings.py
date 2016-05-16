@@ -56,7 +56,8 @@ config = RawConfigParser(
                'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
-               'CLICKATELL_KEY':''
+               'CLICKATELL_KEY':'',
+               'SLACK_KEY':''
                }
         )
 
@@ -76,6 +77,9 @@ ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
+
+# slack key
+SLACK_KEY = config.get('api', 'slack_key')
 
 # Temp folder for misc files
 

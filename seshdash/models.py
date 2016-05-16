@@ -135,7 +135,7 @@ class Alert_Rule(models.Model):
                                       default="lt")
     send_mail = models.BooleanField(default=True)
     send_sms = models.BooleanField(default=True)
-    #send_slack = models.BooleanField(default=True)
+    send_slack = models.BooleanField(default=True)
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
