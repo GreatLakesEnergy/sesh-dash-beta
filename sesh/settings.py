@@ -53,7 +53,6 @@ config = RawConfigParser(
                'EMAIL_HOST_PASSWORD':'PASSWORD',
                'EMAIL_HOST_BACKEND':'django.core.mail.backends.smtp.EmailBackend',
                'FROM_EMAIL':'some_email@gmail.com',
-               'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':''
@@ -69,7 +68,7 @@ config.read( os.path.join(BASE_DIR,CONFIG_FILE))
 SECRET_KEY = config.get('system','SECRET_KEY')
 
 # security warning: don't run with debug turned on in production!
-DEBUG = config.get('system','DEV_MODE')
+DEBUG = config.get('system','DEV_MODE_ON')
 
 
 ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
@@ -230,7 +229,7 @@ LOGGING = {
         '''
 # Error reporting
 if not DEBUG:
-     print "rollbar disabled"
+     print "rollbar enabled"
      ROLLBAR = {
              'access_token': config.get('rollbar','token'),
              'environment': 'development' if DEBUG else 'production',
