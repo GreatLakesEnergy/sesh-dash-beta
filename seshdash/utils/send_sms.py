@@ -5,8 +5,6 @@ from django.conf import settings
 
 def send_sms(recipients, context, sms_template='alert'):
 
-    print "Settings debug is ",
-    print settings.DEBUG
     if settings.CLICKATELL_KEY == 'your_clickatell_key' or settings.DEBUG:
         clicksms = False
     else:

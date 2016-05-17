@@ -65,6 +65,7 @@ def generate_auto_rules(site_id):
 
     send_sms = False
     send_mail = True
+    send_slack = True
 
     # Create battery low voltage alarm
     lv_alarm = Alert_Rule(site =site,
@@ -72,7 +73,8 @@ def generate_auto_rules(site_id):
                         value = site.system_voltage,
                         operator = 'lt',
                         send_sms = send_sms,
-                        send_mail = send_mail
+                        send_mail = send_mail,
+                        send_slack = send_slack,
             )
 
     # Create soc low voltage alarm
@@ -81,7 +83,8 @@ def generate_auto_rules(site_id):
                         value = 35,
                         operator = 'lt',
                         send_sms = send_sms,
-                        send_mail = send_mail
+                        send_mail = send_mail,
+                        send_slack = send_slack,
             )
     # Create communication alarm
     com_alarm = Alert_Rule(site =site,
@@ -89,7 +92,8 @@ def generate_auto_rules(site_id):
                         value = 60,
                         operator = 'gt',
                         send_sms = send_sms,
-                        send_mail = send_mail
+                        send_mail = send_mail,
+                        send_slack = send_slack,
             )
 
     lv_alarm.save()
