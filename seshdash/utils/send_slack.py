@@ -28,9 +28,9 @@ class Slack():
             return True
         except Error, e: 
             # Try creating the channel and post the message
+            logging.warning('Slack channel not found')
             self.slack_client.channels.create(channel)
             self.slack_client.chat.post_message(channel, message)
-            logging.error('Slack Channel not Found')
             return True
         except Exception, e:
             logging.error("Cant post message: %s", e)

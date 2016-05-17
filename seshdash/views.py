@@ -656,7 +656,9 @@ def display_alert_data(request):
 
 @login_required
 def silence_alert(request):
-    alert_id = request.POST.get("alertId", '')
+    alert_id = request.POST.get("alert_id", '')
+    print "The alert id is: ",
+    print alert_id
     alerts = Sesh_Alert.objects.filter(id=alert_id)
 
     if len(alerts) >= 1:
