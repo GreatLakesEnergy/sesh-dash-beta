@@ -261,8 +261,11 @@ Morris.Bar({
       // INFO: Uses the jquery ui sortable method
       var panelsContainer = $('.panels-container');
       
-      panelsContainer.sortable();
-      panelsContainer.disableSelection();
+      panelsContainer.sortable({
+          handle: '.panel-heading'
+      });
+
+
       
 
 }
