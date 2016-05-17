@@ -1,4 +1,4 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status
+from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status, Slack_Channel
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
 from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
@@ -48,10 +48,7 @@ def alert_generator():
                 alert_obj = alert_factory(site, rule, data_point)
 
                 # if alert_obj is created
-                print "The alert obj is: ",
-                print alert_obj
                 if alert_obj is not None:
-                    print "Alert obj created"
                     content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                     mails, sms_numbers = get_recipients_for_site(site)
 
@@ -63,17 +60,21 @@ def alert_generator():
                          alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
 
                     if rule.send_slack:
-                         print "Sending slack message"
                          for site_group in site_groups:
+
                              # unpacking the neccessary data
                              sesh_organisation = site_group.sesh_organisation
                              channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
+                            
 
                              # instantiating the client
                              slack = Slack(sesh_organisation.slack_token)
                               
                              for channel in channels:
-                                 alert_obj.slackSent = slack.send_message_to_channel(channel.name, content['alert_str'])
+                                 if settings.DEBUG == True:
+                                     alert_obj.slackSent = True
+                                 else:
+                                     alert_obj.slackSent = slack.send_message_to_channel(channel.name, content['alert_str'])
 
                     alert_obj.save()
               
@@ -152,7 +153,6 @@ def is_mysql_rule(rule):
 def check_alert(rule, data_point_value):
     """ Checks the alert and returns boolean value true if there is alert and false otherwise """
     
-    print "Checking for alerts"
 
     ops = {'lt': lambda x,y: x<y,
            'gt': lambda x,y: x>y,
@@ -208,7 +208,6 @@ def get_recipients_for_site(site):
 
 
                 logging.debug("emailing %s" % mails)
-                #print "emailing %s"%recipients
 
     return mails, sms_numbers
 
