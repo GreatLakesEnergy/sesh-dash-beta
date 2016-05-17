@@ -212,13 +212,11 @@ Morris.Bar({
 
 
               var alertData = JSON.parse(data);
-              console.log(data);
               alertValue = alertData.alert_value; // Getting the property that is triggering the alert
 
                   for (var value in alertData) {
 
                       if(value == 'id'){ // Checking for alert_id so that it is not displayed
-                          console.log('alertid found');
                           element = '<tr><td class="alert-id hidden">' + alertData[value] + '</td></tr>';
                           alertDataPointInfo.append(element)
                           continue;
