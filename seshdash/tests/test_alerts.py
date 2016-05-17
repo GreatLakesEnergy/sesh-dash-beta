@@ -109,7 +109,7 @@ class AlertTestCase(TestCase):
         print "The permission for the test site are "
         print get_groups_with_perms(self.site)
 
-        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group, slack_token=settings.SLACK_KEY)
+        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group, slack_token=settings.SLACK_TEST_KEY)
          
         # Creating test channels
         self.test_channels = Slack_Channel.objects.create(organisation=self.test_organisation,

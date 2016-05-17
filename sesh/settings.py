@@ -57,7 +57,7 @@ config = RawConfigParser(
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':'',
-               'SLACK_KEY':''
+               'SLACK_TEST_KEY':''
                }
         )
 
@@ -79,7 +79,7 @@ ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
 FORECAST_KEY = config.get('api','forecast_key')
 
 # slack key
-SLACK_KEY = config.get('api', 'slack_key')
+SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
 # Temp folder for misc files
 
