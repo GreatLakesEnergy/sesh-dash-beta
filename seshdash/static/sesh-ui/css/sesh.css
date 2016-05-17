@@ -267,3 +267,7 @@ div.awesomplete > ul {
   margin-bottom: 30px;
 }
 
+
+.ui-sortable-handle:hover {
+  cursor: pointer;
+}

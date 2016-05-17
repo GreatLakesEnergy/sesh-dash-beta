@@ -686,7 +686,7 @@ def get_latest_bom_data(request):
     latest_point_data = []
    
     # If the points exist and the points returned are equal to the items in measurement list
-    if len(latest_points) == len(latest_points):
+    if len(latest_points) == len(measurement_list):
         for measurement, point in latest_points.items():
             latest_point_data.append({"item":get_measurement_verbose_name(measurement),
                                       "value":str(round(latest_points[measurement]['value'], 2))
