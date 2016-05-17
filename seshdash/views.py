@@ -648,6 +648,9 @@ def display_alert_data(request):
             alert_values['time'] = parser.parse(alert_values['time'])
 
         alert_values['time'] = get_timesince(alert_values['time'])
+        
+        # Setting the id to the alert id (NEEDED FOR SILENCING ALERTS)
+        alert_values['id'] =  alert_id
         return HttpResponse(json.dumps(alert_values))
 
     else:
@@ -657,16 +660,23 @@ def display_alert_data(request):
 @login_required
 def silence_alert(request):
     alert_id = request.POST.get("alert_id", '')
-    print "The alert id is: ",
-    print alert_id
     alerts = Sesh_Alert.objects.filter(id=alert_id)
 
+    print "The alerts got are ",
+    print alerts
+    print "Got alert id: ",
+    print alert_id
+    print "Now silencing alert "
+ 
     if len(alerts) >= 1:
        alert = alerts[0]
        alert.isSilence = True
        alert.save()
+       print "Alert value is now: ",
+       print alert.isSilence
        return HttpResponse(True);
     else:
+       print "Alert value is now False",
        return HttpResponse(False);
 
 @login_required
