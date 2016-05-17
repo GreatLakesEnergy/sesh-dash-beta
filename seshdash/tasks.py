@@ -186,7 +186,7 @@ def get_historical_BoM(site_pk,start_at):
         logging.debug("Importing data for site:%s"%site)
         for row in data:
             try:
-                parsed_date = datetime.strptime(row.get('Date Time'),'%Y-%d-%m %X')
+                parsed_date = datetime.strptime(row.get('Date Time'),'%Y-%m-%d %X')
                 date = time_utils.localize(parsed_date, tz=site.time_zone)
                 data_point = BoM_Data_Point(
                     site = site,
