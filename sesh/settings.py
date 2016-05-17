@@ -56,7 +56,8 @@ config = RawConfigParser(
                'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
-               'CLICKATELL_KEY':''
+               'CLICKATELL_KEY':'',
+               'SLACK_TEST_KEY':''
                }
         )
 
@@ -76,6 +77,9 @@ ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
+
+# slack key
+SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
 # Temp folder for misc files
 
@@ -134,12 +138,12 @@ CELERYBEAT_SCHEDULE = {
     'get_send_reports': {
         'task': 'seshdash.tasks.send_reports',
         'schedule': crontab(hour=0, minute=30, day_of_week=6),
-        'args': 'week',
+        'args': ['week'],
     },
     'get_send_reports': {
         'task': 'seshdash.tasks.send_reports',
         'schedule': crontab(hour=0, minute=30),
-        'args': 'day',
+        'args': ['day'],
     },
     'alert_checker': {
         'task': 'seshdash.tasks.alert_engine',
@@ -265,6 +269,7 @@ INSTALLED_APPS = (
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
             'jquery#2.2.1',
+            'jquery-ui#1.11.4',
             'mapbox.js#2.4.0',
             'd3#3.5.16',
             'nvd3#1.7.1',

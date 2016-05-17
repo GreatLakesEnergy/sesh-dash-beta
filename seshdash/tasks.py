@@ -25,6 +25,7 @@ from django.utils import timezone
 @task_failure.connect
 def handle_task_failure(**kw):
     logging.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
+    print "ERROR in task %s"%kw.get('message',"no error message")
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
@@ -53,7 +54,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
 
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
-        message = "Error sending to influx with exception %s"%e
+        message = "Error sending to influx with exception %s in datapint %s"%(e,model_data_dict)
         handle_task_failure(message= message,exception=e,data=model_data)
 
 def generate_auto_rules(site_id):
@@ -64,6 +65,7 @@ def generate_auto_rules(site_id):
 
     send_sms = False
     send_mail = True
+    send_slack = True
 
     # Create battery low voltage alarm
     lv_alarm = Alert_Rule(site =site,
@@ -71,7 +73,8 @@ def generate_auto_rules(site_id):
                         value = site.system_voltage,
                         operator = 'lt',
                         send_sms = send_sms,
-                        send_mail = send_mail
+                        send_mail = send_mail,
+                        send_slack = send_slack,
             )
 
     # Create soc low voltage alarm
@@ -80,7 +83,8 @@ def generate_auto_rules(site_id):
                         value = 35,
                         operator = 'lt',
                         send_sms = send_sms,
-                        send_mail = send_mail
+                        send_mail = send_mail,
+                        send_slack = send_slack,
             )
     # Create communication alarm
     com_alarm = Alert_Rule(site =site,
@@ -88,7 +92,8 @@ def generate_auto_rules(site_id):
                         value = 60,
                         operator = 'gt',
                         send_sms = send_sms,
-                        send_mail = send_mail
+                        send_mail = send_mail,
+                        send_slack = send_slack,
             )
 
     lv_alarm.save()
@@ -110,7 +115,7 @@ def get_BOM_data():
             if v_client.IS_INITIALIZED:
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.timezone)
+                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
@@ -121,24 +126,25 @@ def get_BOM_data():
                         data_point = BoM_Data_Point(
                             site = site,
                             time = date,
-                            soc = bat_data['Battery State of Charge (System)']['valueFloat'],
-                            battery_voltage = bat_data['Battery voltage']['valueFloat'],
+                            soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0),
+                            battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0),
                             AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
                             AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
                             AC_input = sys_data['Input power 1']['valueFloat'],
                             AC_output =  sys_data['Output power 1']['valueFloat'],
                             AC_output_absolute =  float(sys_data['Output power 1']['valueFloat']) +
-                                                    float(sys_data['PV - AC-coupled on output L1']['valueFloat']),
+                                                    float(sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0)),
                             AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
                             AC_Load_out =  sys_data['Output current phase 1']['valueFloat'],
                             inverter_state = sys_data['VE.Bus state']['nameEnum'],
-                            pv_production = sys_data['PV - AC-coupled on output L1']['valueFloat'],
+                            pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0),
                             #TODO these need to be activated
                             genset_state =  0,
                             main_on = mains,
                             relay_state = 0,
                             )
-                        data_point.save()
+                	with transaction.atomic():
+                        	data_point.save()
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
 
@@ -180,9 +186,11 @@ def get_historical_BoM(site_pk,start_at):
         logging.debug("Importing data for site:%s"%site)
         for row in data:
             try:
+                parsed_date = datetime.strptime(row.get('Date Time'),'%Y-%m-%d %X')
+                date = time_utils.localize(parsed_date, tz=site.time_zone)
                 data_point = BoM_Data_Point(
                     site = site,
-                    time = row.get('Date Time'), #TODO make sure this datetime aware
+                    time = date,
                     soc = row.get('Battery State of Charge (System)'),
                     battery_voltage = row.get('Battery voltage'),
                     AC_input = row.get('Input power 1'),
@@ -338,6 +346,8 @@ def get_weather_data(days=7,historical=False):
                     point.cloud_cover = forecast_result[day]["cloudcover"]
                     point.save()
 
+                    send_to_influx(point, site, day, to_exclude=['date'])
+
             else:
                 #else create a new object
                 w_data = Site_Weather_Data(
@@ -351,7 +361,7 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                send_to_influx(site, w_data, date, to_exclude=['date'])
+                send_to_influx(w_data, site, day, to_exclude=['date'])
 
     return "updated weather for %s"%sites
 
@@ -542,15 +552,20 @@ def rmc_status_update():
     """
     sites = Sesh_Site.objects.all()
     for site in sites:
-        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('time').first()
-        last_contact = time_utils.get_timesince_seconds(latest_dp.time)
-        tn = timezone.now()
-        last_contact_min = last_contact / 60
-        rmc_status = RMC_status(site = site,
-                                rmc = site.rmc_account,
-                                minutes_last_contact = last_contact_min,
-                                time = tn)
-        rmc_status.save()
+        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
+        logging.debug("getting status from site %s"%site)
+        if latest_dp:
+            last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+            tn = timezone.now()
+            last_contact_min = last_contact / 60
+            rmc_status = RMC_status(site = site,
+                                    rmc = site.rmc_account,
+                                    minutes_last_contact = last_contact_min,
+                                    time = tn)
+            logging.debug("rmc status logging now: %s last_contact: %s "%(tn,latest_dp.time))
+            rmc_status.save()
+        else:
+            logging.warning("RMC STATUS: No DP found for site")
 
 
 @shared_task
@@ -558,11 +573,8 @@ def alert_engine():
     """
     Periodic task to check rules agains data points
     """
-    # TODO check for the latest 10 alerts
-    sites = Sesh_Site.objects.all()
-    for site in sites:
-        alert_generator(site)
-        alert_status_check()
+    alert_generator()
+    alert_status_check()
 
 def download_vrm_historical_data():
     """

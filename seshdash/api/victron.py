@@ -43,12 +43,12 @@ class VictronAPI:
 
     FORMAT = "json"
 
-    """
-    Provide API key and User Key to get started
-    more info here:https://developer.enphase.com/docs/quickstart.html
-
-    """
     def __init__(self , user_name, user_password, format_type=json):
+        """
+        Provide API key and User Key to get started
+        more info here:https://developer.enphase.com/docs/quickstart.html
+
+        """
         #Initiate object constants within object
         self.SYSTEMS_IDS = []
         self.USERNAME = ""
@@ -68,12 +68,12 @@ class VictronAPI:
         else:
             logging.error("unable to initialize the api")
 
-    """
-    Initialize the system.
-    Do this so by making a request to VRM portal logging in and obtaining user session ID
-    TODO: print out user info gatherd from system
-    """
     def initialize(self):
+        """
+        Initialize the system.
+        Do this so by making a request to VRM portal logging in and obtaining user session ID
+        TODO: print out user info gatherd from system
+        """
         response  = self._make_request(
                 "user",
                 "login",
@@ -104,22 +104,23 @@ class VictronAPI:
             self.IS_INITIALIZED = False
 
 
-    """
-    reformat attribute dictionary so it's easier to use
-    """
     def _reformat_attr_dict(self,atr_dict):
+        """
+        reformat attribute dictionary so it's easier to use
+        """
         flat = {}
         c =  map(lambda x:{x['customLabel']:x},atr_dict)
         for val in c:
                 flat[val.keys()[0]] = val[val.keys()[0]]
         return flat
 
-    """
-    Utiliy function to make requsts.
-    Will return json or request based on response parameter
-    Data needs to be passed with data keyword
-    """
+
     def _make_request(self,call_type,function,response="json",**data):
+        """
+        Utiliy function to make requsts.
+        Will return json or request based on response parameter
+        Data needs to be passed with data keyword
+        """
         #format string with our paramters can do this with requests as well
         formated_URL = self.API_BASE_URL.format(call_type=call_type,function=function)
 
@@ -144,10 +145,11 @@ class VictronAPI:
         else:
             return r.json()
 
-    """
-    unwrap each package
-    """
+
     def _parse_results(self,results,key=None):
+        """
+        unwrap each package
+        """
         result = {}
         if results['status']['code'] == 200:
             if key:
@@ -158,67 +160,69 @@ class VictronAPI:
             logging.error("error in response %s"%results)
         return result
 
-    """
-    Get system list
-    """
     def get_site_list(self):
+        """
+        Get system list
+        """
         key = "sites"
         result  = self._make_request("sites","get")
         result = self._parse_results(result,key)
         return result
 
-    """
-    Get system stats for provided system_id
-    @params: site_id
-    """
     def get_site_stats(self,site_id):
-         key = "sites"
-         result =  self._make_request(key,"get_site",siteid=site_id)
-         result = self._parse_results(result,key)
-         return result
+        """
+        Get system stats for provided system_id
+        @params: site_id
+        """
+        key = "sites"
+        result =  self._make_request(key,"get_site",siteid=site_id)
+        result = self._parse_results(result,key)
+        return result
 
-    """
-    return monthly production from start date
-    @params: site_id
-    """
     def get_energy_data(self,site_id):
-         result =  self._make_request("sites","get_energy_data", siteid=site_id, instance = 0)
-         result = self._parse_results(result)
-         return result
+        """
+        return monthly production from start date
+        @params: site_id
+        """
+        result =  self._make_request("sites","get_energy_data", siteid=site_id, instance = 0)
+        result = self._parse_results(result)
+        return result
 
-    """
-    Get all associated attributes with a site
-    @params: site_id
-    """
     def get_site_attributes_list(self,site_id):
-         result =  self._make_request("sites","get_site_attributes", siteid=site_id, instance = 0)
-         return self._parse_results(result)
+        """
+        Get all associated attributes with a site
+        @params: site_id
+        """
+        result =  self._make_request("sites","get_site_attributes", siteid=site_id, instance = 0)
+        return self._parse_results(result)
 
-    """
-    Get all attribute data from  with a site
-    @params: site_id, attribute_code_arr
-    """
     def get_site_attribute(self,site_id,attribute_code_arr):
-         codes_arr_json = json.dumps(attribute_code_arr)
-         results = self._make_request("sites","attributes_by_code",codes=codes_arr_json, siteid=site_id, instance = 0)
-         parsed = self._parse_results(results,'attributes')
-         return parsed
+        """
+        Get all attribute data from  with a site
+        @params: site_id, attribute_code_arr
+        """
+        codes_arr_json = json.dumps(attribute_code_arr)
+        results = self._make_request("sites","attributes_by_code",codes=codes_arr_json, siteid=site_id, instance = 0)
+        parsed = self._parse_results(results,'attributes')
+        return parsed
 
-    """
-    Get the  basic system stats
-    """
+
     def get_system_stats(self,site_id):
+        """
+        Get the  basic system stats
+        """
         code_arr = []
         for key in self._SYSTEM_STAT_KEYS:
-            code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+            if self.ATTRIBUTE_DICT[site_id].has_key(key):
+                code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
         result_arr = self.get_site_attribute(site_id,code_arr)
         resut_dict = self._reformat_attr_dict(result_arr)
         return resut_dict
 
-    """
-    Get the battery stats:
-    """
     def get_battery_stats(self,site_id):
+        """
+        Get the battery stats:
+        """
         #TODO  merge this function with system stats and other stas as they are identical
         code_arr = []
         for key in self._BATTERY_STAT_KEYS:

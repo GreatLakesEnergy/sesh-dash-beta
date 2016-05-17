@@ -1,4 +1,5 @@
 from datetime import datetime,timedelta
+from dateutil.parser import parse
 from time import localtime,strftime
 from django.conf import settings
 from  pytz import timezone
@@ -83,6 +84,12 @@ def localize(nv_datetime,tz):
     """
     Add timezone info to datetime object
     """
+    if not isinstance(nv_datetime,datetime):
+        try:
+            # Try to convert to datetime
+            time = datetime(nv_datetime)
+        except Exception, e:
+            return nv_datetime
     # Is our datetime object  naive?
     if nv_datetime.tzinfo is not None and nv_datetime.tzinfo.utcoffset(nv_datetime) is not None:
         return nv_datetime
@@ -108,11 +115,17 @@ def get_timezone_from_geo(lat, lon):
     tz = tzwhere.tzwhere()
     return tz.tzNameAt(float(lat), float(lon))
 
-def epoch_to_datetime(seconds_time):
+def epoch_to_datetime(seconds_time, tz=None):
     """
     Translate seconds time to datetime object
     """
-    return strftime('%Y-%m-%dT%XZ',localtime(seconds_time))
+    time = localtime(seconds_time)
+
+    if tz:
+        time = localize(time,tz)
+
+
+    return strftime('%Y-%m-%dT%XZ',time)
 
 
 def get_last_five_days(from_date="now", tz=None):
@@ -215,3 +228,12 @@ def get_date_dashed(date):
     date_string = str(date.year) + '-' + str(date.month) +  '-' + str(date.day)
     return date_string
 
+
+def convert_influx_time_string(date_string):
+    """ Converts influx style strings to datetime """
+    return parse(date_string)   
+
+def get_timesince_influx(date_string):
+    date_obj = convert_influx_time_string(date_string)
+    return get_timesince(date_obj)
+    
