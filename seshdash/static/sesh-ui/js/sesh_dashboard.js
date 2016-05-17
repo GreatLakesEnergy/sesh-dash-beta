@@ -205,6 +205,10 @@ Morris.Bar({
                           csrfmiddlewaretoken: csrftoken};
 
           $.post('/get-alert-data', jsonData, function(data){
+          /* 
+            This gets the alert information from a server when
+            The alert is clicked on 
+          */
                
               alertLoader.hide();
               alertDataContainer.show();
@@ -215,7 +219,7 @@ Morris.Bar({
 
                   for (var value in alertData) {
 
-                      if(value == 'alert_id'){ // Checking for alert_id so that it is not displayed
+                      if(value == 'id'){ // Checking for alert_id so that it is not displayed
                           element = '<tr><td class="alert-id hidden">' + alertData[value] + '</td></tr>';
                           alertDataPointInfo.append(element)
                           continue;
@@ -240,11 +244,12 @@ Morris.Bar({
       });
 
       silenceAlert.click(function(){
-          alertId = parseInt($('.alert-id').text());
+          alertId = parseInt($('.alert-data-point-info .alert-id').text());
+          alert("The alert id is " + alertId);
           jsonData = {
                       alert_id : alertId,
                       csrfmiddlewaretoken: csrftoken
-                     };
+               };
 
           $.post('/silence-alert', jsonData, function(data) {
                modal.modal('hide');

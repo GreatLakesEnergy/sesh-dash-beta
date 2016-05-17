@@ -180,7 +180,7 @@ class AlertTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-        response = c.post('/silence-alert/',{'alertId':'1'})
+        response = c.post('/silence-alert/',{'alert_id':'1'})
         alerts = Sesh_Alert.objects.filter(isSilence=False).count()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(alerts, 3)
