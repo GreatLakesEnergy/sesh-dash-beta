@@ -75,7 +75,6 @@ def index(request,site_id=0):
 
     if not site_id:
         #return first site user has action
-        print "no site id recieved"
         site_id = sites[0].pk
     #Check if user has any sites under their permission
     context_dict, content_json = get_user_data(request.user,site_id,sites)
@@ -96,7 +95,6 @@ def index(request,site_id=0):
     
     measurements =[]
 
-    print "The measuments are "
      
     for measurement in measurements_value:
         measurements.append(measurement['name'])
@@ -121,7 +119,6 @@ def get_user_sites(vrm_user_id,vrm_password):
     site_list = []
     flatten_list = []
     v = VictronAPI(vrm_user_id,vrm_password)
-    print 'getting suer sites'
     if v.IS_INITIALIZED:
             logging.debug("victron API is initialized ")
             sites = v.get_site_list()
@@ -661,22 +658,13 @@ def display_alert_data(request):
 def silence_alert(request):
     alert_id = request.POST.get("alert_id", '')
     alerts = Sesh_Alert.objects.filter(id=alert_id)
-
-    print "The alerts got are ",
-    print alerts
-    print "Got alert id: ",
-    print alert_id
-    print "Now silencing alert "
  
     if len(alerts) >= 1:
        alert = alerts[0]
        alert.isSilence = True
        alert.save()
-       print "Alert value is now: ",
-       print alert.isSilence
        return HttpResponse(True);
     else:
-       print "Alert value is now False",
        return HttpResponse(False);
 
 @login_required
