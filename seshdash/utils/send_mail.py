@@ -24,7 +24,6 @@ def send_mail(subject,list_of_recipients,content,email_template='alert'):
         text_content = plaintext.render(d)
         html_content = htmly.render(d)
 
-        logger.debug(html_content)
         msg = EmailMultiAlternatives(subject, text_content, FROM_EMAIL, list_of_recipients)
         msg.attach_alternative(html_content, "text/html")
         result = msg.send()
