@@ -16,6 +16,9 @@ from seshdash.utils.send_slack import Slack
 
 import logging
 
+#Insantiating the logger
+logger = logging.getLogger(__name__)
+
 # Sends an email if the received data point fails to pass the defined rules for its site.
 
 # New Alert Rules can be defined as below:
@@ -37,7 +40,7 @@ def alert_generator():
     for rule in rules:
         site = rule.site
         site_groups = get_groups_with_perms(site)
-       
+
         # Get datapoint and real value
         data_point, real_value = get_alert_check_value(site, rule)
 
@@ -65,11 +68,11 @@ def alert_generator():
                              # unpacking the neccessary data
                              sesh_organisation = site_group.sesh_organisation
                              channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
-                            
+
 
                              # instantiating the client
                              slack = Slack(sesh_organisation.slack_token)
-                              
+
                              for channel in channels:
                                  if settings.DEBUG == True:
                                      alert_obj.slackSent = True
@@ -77,7 +80,7 @@ def alert_generator():
                                      alert_obj.slackSent = slack.send_message_to_channel(channel.name, content['alert_str'])
 
                     alert_obj.save()
-              
+
 
 
 
@@ -103,7 +106,7 @@ def get_alert_check_value(site, rule):
             data_point_value = getattr(latest_data_point, field_name)
         else:
             data_point_value = None
-            logging.error("No data points for %s", model)
+            logger.error("No data points for %s", model)
 
         return latest_data_point, data_point_value
 
@@ -152,7 +155,7 @@ def is_mysql_rule(rule):
 
 def check_alert(rule, data_point_value):
     """ Checks the alert and returns boolean value true if there is alert and false otherwise """
-    
+
 
     ops = {'lt': lambda x,y: x<y,
            'gt': lambda x,y: x>y,
@@ -207,24 +210,24 @@ def get_recipients_for_site(site):
                 sms_numbers.append(user.seshuser.phone_number)
 
 
-                logging.debug("emailing %s" % mails)
+                logger.debug("emailing %s" % mails)
 
     return mails, sms_numbers
 
-        
+
 
 def alert_factory(site, rule, data_point):
     """ Creating an alert object """
 
     # Getting the last alert for rule
     point = rule.alert_point.last()
-  
+
     alert_obj = None
 
     # If the last alert exists does not exist
     if point is None:
         alert_obj = create_alert_instance(site, rule, data_point)
-     
+
     # if there is a last alert check if it is silenced
     else:
         # if the last alert is silenced create an alert
@@ -353,7 +356,7 @@ def get_alert_point_value(alert, point=None):
 def alert_status_check():
     """ Checks if the alert is still valid and silences it if it is invalid """
     unsilenced_alerts = get_unsilenced_alerts()
-    logging.debug("Running alert status check")
+    logger.debug("Running alert status check")
     if unsilenced_alerts:
         for alert in unsilenced_alerts:
             site = alert.site
@@ -364,12 +367,12 @@ def alert_status_check():
             elif is_influx_rule(rule):
                 latest_data_point_value = get_latest_point_value_influx(site, rule)
             else:
-                logging.error('Invaliid rule')
+                logger.error('Invaliid rule')
                 return None
 
 
             if check_alert(rule, latest_data_point_value):
-                logging.debug("Alert is still valid")
+                logger.debug("Alert is still valid")
             else:
                 # Silencing the alert and generating email content
                 alert.isSilence = True
@@ -379,7 +382,7 @@ def alert_status_check():
 
                 # Handle no data point getting returned
                 if not data_point_value:
-                    logging.warning("Now DP found for alert skipping ")
+                    logger.warning("Now DP found for alert skipping ")
                     return None
 
                 content = get_alert_content(site, rule, data_point, data_point_value, alert)

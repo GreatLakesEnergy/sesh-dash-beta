@@ -10,7 +10,11 @@ from datetime import datetime
 from datetime import timedelta
 import logging
 
+# Instantiating the logger
+logger = logging.getLogger()
+
 # Sends an email of reporting data on past duration
+
 
 def prepare_report(site, duration="week"):
     """
@@ -56,7 +60,7 @@ def prepare_report(site, duration="week"):
     users = get_users_with_perms(site)
     for user in users:
         recipients.append(user.email)
-    logging.debug("emailing %s" %recipients)
+    logger.debug("emailing %s" %recipients)
 
     # Add in meta
     subject = "%sly energy usage for %s"%(duration,site.site_name)
@@ -76,6 +80,3 @@ def prepare_report(site, duration="week"):
 
 def report(subject,content,recipients):
     return send_mail(subject, recipients, content, email_template="reporting")
-
-
-

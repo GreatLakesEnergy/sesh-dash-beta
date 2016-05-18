@@ -22,9 +22,11 @@ from datetime import datetime, date, timedelta
 from seshdash.utils import time_utils
 from django.utils import timezone
 
+logger = logging.getLogger(__name__)
+
 @task_failure.connect
 def handle_task_failure(**kw):
-    logging.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
+    logger.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
     print "ERROR in task %s"%kw.get('message',"no error message")
     if not settings.DEBUG:
         import rollbar
@@ -100,7 +102,7 @@ def generate_auto_rules(site_id):
     com_alarm.save()
     soc_alarm.save()
 
-    logging.debug("Added low voltage, soc, and comm alert for site %s"%site)
+    logger.debug("Added low voltage, soc, and comm alert for site %s"%site)
 
 
 @shared_task
@@ -152,11 +154,11 @@ def get_BOM_data():
                         # Alert if check(data_point) fails
 
         except IntegrityError, e:
-            logging.debug("Duplicate entry skipping data point")
+            logger.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
             message = "error with geting site %s data exception %s"%(site,e)
-            logging.exception("error with geting site %s data exception"%site)
+            logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message)
             pass
 
@@ -177,13 +179,13 @@ def get_historical_BoM(site_pk,start_at):
         site = Sesh_Site.objects.get(pk=site_pk)
         site_id = site.vrm_site_id
         if not site_id:
-            logging.info("skipping site %s has not vrm_site_id"%site)
+            logger.info("skipping site %s has not vrm_site_id"%site)
             return 0
         vh_client = VictronHistoricalAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
         #site_id is a tuple
         #print "getting data for siteid %s starting at %s"%(site.vrm_site_id,start_at)
         data = vh_client.get_data(site_id,start_at)
-        logging.debug("Importing data for site:%s"%site)
+        logger.debug("Importing data for site:%s"%site)
         for row in data:
             try:
                 parsed_date = datetime.strptime(row.get('Date Time'),'%Y-%m-%d %X')
@@ -211,22 +213,22 @@ def get_historical_BoM(site_pk,start_at):
 
                 count = count +1
                 if count % 100:
-                    logging.debug("imported  %s points"%count)
+                    logger.debug("imported  %s points"%count)
                 #print "saved %s BoM data points"%count
             except IntegrityError, e:
-                    logging.warning("data point already exist %s"%e)
+                    logger.warning("data point already exist %s"%e)
                     pass
             except ValueError,e:
-                    logging.warning("Invalid values in data point dropping  %s"%(e))
+                    logger.warning("Invalid values in data point dropping  %s"%(e))
                     pass
             except Exception,e:
                     message = "error with creating data point  data exception %s"%(e)
-                    logging.debug(message)
-                    logging.exception( message )
+                    logger.debug(message)
+                    logger.exception( message )
                     handle_task_failure(message = message)
                     pass
 
-        logging.debug("saved %s BoM data points"%count)
+        logger.debug("saved %s BoM data points"%count)
         # Clean up
         site.import_data  = False
         site.save()
@@ -244,9 +246,9 @@ def run_aggregate_on_historical(site_id):
     start_date = site.comission_date # TODO this hould porbably be based on range in DB
     end_date =  timezone.now()
     days_to_agr = time_utils.get_time_interval_array(24,'hours',start_date,end_date)
-    logging.debug( "getting historic aggregates %s"%(days_to_agr))
+    logger.debug( "getting historic aggregates %s"%(days_to_agr))
     for day in days_to_agr:
-        logging.debug("Batch processing aggregates")
+        logger.debug("Batch processing aggregates")
         get_aggregate_daily_data(day)
 
 @shared_task
@@ -403,13 +405,13 @@ def get_grid_stats(measurement_dict_list, measurement_value, measurement_key, bu
                 }
 
     chunked_list = find_chunks(measurement_dict_list,measurement_key)
-    logging.debug("Chunked list  %s"%chunked_list)
+    logger.debug("Chunked list  %s"%chunked_list)
     count = 0
     for chunk_dict in chunked_list:
         if measurement_value in chunk_dict.keys():
             result_dict['duration'] = time_gap * chunk_dict[measurement_value]
             result_dict['count'] = count + 1
-    logging.debug("Found chunks %s"%result_dict)
+    logger.debug("Found chunks %s"%result_dict)
     return result_dict
 
 
@@ -427,7 +429,7 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
             'zero' : (lambda x: x[operator] == 0)}
 
     if clause and not clause in clause_opts.keys():
-        logging.error("unkown clause provided %s allowed %s"%(clause,clause_opts.keys()))
+        logger.error("unkown clause provided %s allowed %s"%(clause,clause_opts.keys()))
         return result
 
     #get measurement values from influx
@@ -436,7 +438,7 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
 
     aggr_results = i.get_measurement_bucket(measurement, bucket_size, 'site_name', site.site_name, operator=operator, start=start)
 
-    logging.debug("influx results %s "%(aggr_results))
+    logger.debug("influx results %s "%(aggr_results))
 
     #we have mean values by the hour now aggregate them
     if aggr_results:
@@ -452,10 +454,10 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
         else:
             result = aggr_results
 
-        logging.debug("Aggregating %s %s agr:%s"%(measurement,aggr_results,agr_value))
+        logger.debug("Aggregating %s %s agr:%s"%(measurement,aggr_results,agr_value))
     else:
         message = "No Values returned for aggregate. Check Influx Connection."
-        logging.warning(message)
+        logger.warning(message)
 
     return result
 
@@ -473,7 +475,7 @@ def get_aggregate_daily_data(date=None):
     for site in sites:
 
             #print "getting aggregate data for %s for %s"%(site,date_to_fetch)
-            logging.debug("aggregate data for %s date: %ss"%(site,date_to_fetch))
+            logger.debug("aggregate data for %s date: %ss"%(site,date_to_fetch))
             agg_dict = {}
             agg_dict['aggregate_data_pv'] = get_aggregate_data (site, 'pv_production',start=date_to_fetch)[0]
             agg_dict['aggregate_data_AC'] = get_aggregate_data (site, 'AC_output_absolute',start=date_to_fetch)[0]
@@ -481,7 +483,7 @@ def get_aggregate_daily_data(date=None):
             agg_dict['aggregate_data_grid'] = get_aggregate_data (site, 'AC_input', clause='positive',start=date_to_fetch)[0]
             agg_dict['aggregate_data_grid_data'] = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
 
-            logging.debug("aggregate date for grid %s "%agg_dict['aggregate_data_grid_data'])
+            logger.debug("aggregate date for grid %s "%agg_dict['aggregate_data_grid_data'])
             aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
             aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
             agg_dict['sum_power_pv'] = agg_dict['aggregate_data_AC'] - agg_dict['aggregate_data_grid']
@@ -505,10 +507,10 @@ def get_aggregate_daily_data(date=None):
             try:
                 daily_aggr.save()
             except IntegrityError,e:
-                logging.debug('aggregate data point not unique skipping')
+                logger.debug('aggregate data point not unique skipping')
                 pass
             except Exception,e:
-                logging.exception('Unkown error occured aggregatin data')
+                logger.exception('Unkown error occured aggregatin data')
                 pass
             #send to influx
             send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
@@ -538,7 +540,7 @@ def send_reports(duration="week"):
 
     sites = Sesh_Site.objects.all()
     for site in sites:
-        logging.debug("Sending report for site %s"%site)
+        logger.debug("Sending report for site %s"%site)
         result = prepare_report(site, duration=duration)
         if not result:
             send_reports.update_state(
@@ -553,7 +555,7 @@ def rmc_status_update():
     sites = Sesh_Site.objects.all()
     for site in sites:
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
-        logging.debug("getting status from site %s"%site)
+        logger.debug("getting status from site %s"%site)
         if latest_dp:
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
             tn = timezone.now()
@@ -562,10 +564,10 @@ def rmc_status_update():
                                     rmc = site.rmc_account,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
-            logging.debug("rmc status logging now: %s last_contact: %s "%(tn,latest_dp.time))
+            logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))
             rmc_status.save()
         else:
-            logging.warning("RMC STATUS: No DP found for site")
+            logger.warning("RMC STATUS: No DP found for site")
 
 
 @shared_task
@@ -584,5 +586,3 @@ def download_vrm_historical_data():
         if site.vrm_site_id:
             get_historical_BoM.delay(site.pk,time_utils.get_epoch_from_datetime(site.comission_date))
             run_aggregate_on_historical(site.pk)
-
-
