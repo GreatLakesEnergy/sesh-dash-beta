@@ -244,7 +244,7 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
-    }
+    },
     'handlers': {
         'console': {
             'level': LOGGING_LEVEL,
