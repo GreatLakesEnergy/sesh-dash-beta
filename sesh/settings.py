@@ -255,7 +255,7 @@ LOGGING = {
         'file':{
            'level': 'DEBUG',
            'class': 'logging.FileHandler',
-           'filename':os.path.join(LOG_DIR, "all.log"),
+           'filename':os.path.join(LOG_DIR, "all.logs"),
            'formatter': 'verbose',
         },
     },
