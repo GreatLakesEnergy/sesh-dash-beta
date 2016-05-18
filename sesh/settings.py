@@ -265,7 +265,7 @@ LOGGING = {
             'handlers': ['console'],
         },
         'seshdash': {
-            'handlers': ['console', 'file'],
+            'handlers': [ 'file'],
             'level': LOGGING_LEVEL,
         }    
     }
