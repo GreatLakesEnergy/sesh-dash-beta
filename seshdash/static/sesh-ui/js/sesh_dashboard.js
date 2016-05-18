@@ -252,20 +252,22 @@ Morris.Bar({
 
 /*------------------------------------------------------------------------*/
 $(document).ready(function(){
-            $('.create-new-site').hide();
-            $('.add-site').click(function(){
+            //$("#create_site").tabs();
 
+            $('.edit-site').hide();
+
+            $('.add-site-button').click(function(){
+                  $('.edit-site').show();
                   $('.site-list').hide();
-
-                  $('.create-new-site').show();
-
-                  $('.add-site').hide();
-
+                  $('.add-site-button').hide();
             });
 
             $('.back').click(function(){
-              $('.create-new-site').hide();
+              $('.edit-site').hide();
               $('.site-list').show();
+              $('.add-site-button').show();
+
+
             });
 
             $('.sites-available').click(function(){
@@ -274,15 +276,11 @@ $(document).ready(function(){
 
                  alert(siteName)
 
-                 $.post('edit_settings',{csrfmiddlewaretoken:csrftoken, 'site-name':siteName}, function(data){
+                 $.get('edit_settings',{'sitename': siteName});
 
-                 })
-
-                 $('.create-new-site').show();
+                 $('.edit-site').show();
 
                  $('.site-list').hide();
-
-                 $('.add-site').hide();
 
             });
 

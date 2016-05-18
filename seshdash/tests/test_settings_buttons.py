@@ -6,6 +6,9 @@ from django.test.utils import override_settings
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
 from django.contrib.auth.models import User
 
+#Forms
+from seshdash.forms import SiteForm
+
 # Tasks
 from seshdash.tasks import generate_auto_rules
 
@@ -76,12 +79,23 @@ class SearchTestCase(TestCase):
         generate_auto_rules(self.site.pk)
 
 
-    # Testing search
-    def test_search(self):
+    #testing form
+    def test_form(self):
         f = Client()
         f.login(username = "patrick",password = "cdakcjocajica")
-
-        response = f.post('/search',{})
+        data={'site_name':u'kibuye',
+                              'comission_date':datetime(2015,12,11,22,0),
+                              'location_city':u'kigali',
+                              'location_country':u'rwanda',
+                              'time_zone':'Africa/Kigali',
+                              'position_0':36,
+                              'position_1':42,
+                              'installed_kw':2,
+                              'system_voltage':4,
+                              'number_of_panels':100,
+                              'battery_bank_capacity':1200}
+        form = SiteForm(data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        response = f.post('/add_site', data)
         self.assertEqual(response.status_code, 200)
-
-

@@ -784,54 +784,49 @@ def graphs(request):
 #function to editing existing sites
 @login_required
 def edit_settings(request):
-
     all_sites = []
     #all sesh sites
-
     sites = Sesh_Site.objects.all()
 
     for site in sites:
 
         all_sites.append({site.site_name:site.id})
 
-    #fetching list of sites for the user
+    SiteName = request.GET
+    SiteName_dict = dict(SiteName.iterlists())
+    site_clicked = SiteName.values()
 
-    user_sites =  _get_user_sites(request)
+    Site_Name_Clicked = "".join(site_clicked)
 
+    #extracting the id of a clicked site
+    for sites in all_sites:
+        if Site_Name_Clicked in sites:
+            site_Id = sites[Site_Name_Clicked]
+    print "site id is"
+    print Site_Name_Clicked
+    #print site_Id
+
+    edit = get_object_or_404(Sesh_Site, id =21)
+    form = SiteForm(instance=edit)
+
+    print "instance "
+    print edit
     if request.method == 'POST':
-        
-        siteName = request.POST.get('site-name','')
-
-        for site in all_sites:
-
-            if siteName in site:
-
-                site_Id = site[siteName]
-        print "Id is"
-        print site_Id
-        #creating an instance
-        
-        instance = get_object_or_404(Sesh_Site, id=site_Id)
-
-        print "instance is"
-        print instance
-
-        form = SiteForm(request.POST, instance=instance)
-        #print form
+        form = SiteForm(request.POST)
+    
         #checking if the form is valid
 
         if form.is_valid():
 
             form = form.save()
-    else:
-
-        form = SiteForm()
-               
-    return render(request,'seshdash/settings.html', {'form':form, 'sites':user_sites})
+    print "On form edit"
+    return render(request,'seshdash/settings.html', {'form_edit':form})
 
 # function of adding new site
 @login_required
 def add_site(request):
+    #fetching list of sites for the user
+    user_sites =  _get_user_sites(request)
     if request.method == 'POST':
     
         form = SiteForm(request.POST)
@@ -845,8 +840,8 @@ def add_site(request):
 
         form = SiteForm()
         
-
-    return render(request, 'seshdash/settings.html', {'form':form})
+    print "On form add"
+    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':user_sites})
     
 
 
