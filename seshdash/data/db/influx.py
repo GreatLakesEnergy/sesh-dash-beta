@@ -7,6 +7,8 @@ from django.conf import settings
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError,InfluxDBServerError
 
+# Instantiating the logger
+logger = logging.getLogger(__name__)
 
 class Influx:
 
@@ -99,20 +101,20 @@ class Influx:
        # print query_string_formatted
         try:
             result_set = self._influx_client.query(query_string_formatted,database = db)
-            logging.debug("Influx query %s"% query_string_formatted)
+            logger.debug("Influx query %s"% query_string_formatted)
             #get values
             result_set_gen = result_set.get_points(measurement=measurement)
             return list(result_set_gen)
         except InfluxDBServerError,e:
-            logging.error("Error running query on server %s"% str(e))
+            logger.error("Error running query on server %s"% str(e))
             print "error on server %s"% str(e)
             raise Exception
         except InfluxDBClientError,e:
-            logging.error("Error running  query %s"%str(e))
+            logger.error("Error running  query %s"%str(e))
             print "error %s"% str(e)
             raise Exception
         except Exception,e:
-            logging.error("influxdb unkown error %s" %str(e))
+            logger.error("influxdb unkown error %s" %str(e))
             print "unkown error %s"% str(e)
             raise Exception
         return result_set_gen
@@ -132,7 +134,7 @@ class Influx:
         if database:
            db = database
 
-        logging.debug("recieved data point %s"%measurement_dict)
+        logger.debug("recieved data point %s"%measurement_dict)
         # Create our timestamp if one was not provided.
         if not timestamp:
             timestamp = datetime.now()
@@ -150,24 +152,24 @@ class Influx:
                     data_point["time"] = timestamp
                     # Cast everything not string to Float
                     data_point["fields"] = {"value" : float(measurement_dict[key])}
-                    logging.debug("INFLUX prepping data point %s"%(data_point))
+                    logger.debug("INFLUX prepping data point %s"%(data_point))
                     # Get the data point array ready.
                     data_point_list.append(data_point)
                except Exception,e:
-                    logging.debug("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
+                    logger.debug("INFLUX: unable to cast to float skipping: %s key: %s"%(e,key))
 
         try:
                 # Send the data list
-                logging.debug("INFLUX sending %s"%data_point_list)
+                logger.debug("INFLUX sending %s"%data_point_list)
                 self._influx_client.write_points(data_point_list)
         except InfluxDBServerError,e:
-            logging.warning("INFLUX Error running query on server %s %s"%(e,data_point_list))
+            logger.warning("INFLUX Error running query on server %s %s"%(e,data_point_list))
             print e
         except InfluxDBClientError,e:
-            logging.warning("INFLUX Error running  query %s %s"%(e,data_point_list))
+            logger.warning("INFLUX Error running  query %s %s"%(e,data_point_list))
             print e
         except Exception,e:
-            logging.warning("INFLUX unkown error %s %s"%(e,data_point))
+            logger.warning("INFLUX unkown error %s %s"%(e,data_point))
             print e
 
         return True
@@ -204,7 +206,7 @@ class Influx:
         ]
 
         value_returned = self._influx_client.write_points(json_body)
-        logging.debug("inserting point into DB %s %s"%(json_body, value_returned))
+        logger.debug("inserting point into DB %s %s"%(json_body, value_returned))
         print "inserting point into DB %s %s"%(json_body, value_returned)
 
         return value_returned
@@ -279,7 +281,7 @@ def get_latest_point_site(site, measurement_name, db=None):
     if len(point) > 0:
         point = point[0]
     else:
-        logging.error('No influx data points for the site')
+        logger.error('No influx data points for the site')
         return None
 
     return point
