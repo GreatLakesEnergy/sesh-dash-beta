@@ -245,27 +245,14 @@ class Influx:
         db = self.db
         if database:
            db = database
-
-        measurements = ",".join(measurement_list)
-
-
-        query = "SELECT * FROM %s WHERE site_name='%s' LIMIT 1" % (measurements, site.site_name)
-        points = list(self._influx_client.query(query,database=db).get_points())
-
-        # Creating a dictionary with measurement as key and point as value
+        
         measurement_dict = {}
-        for i, measurement in enumerate(measurement_list):
-            try:
-                measurement_dict[measurement] = points[i]
-            except:
-                print "No measurements found for %s" % measurement
-                pass
-
+        for measurement in measurement_list:
+            measurement_dict[measurement] = self.get_latest_measurement_point_site(site, measurement)[0]
 
         return measurement_dict
-
-
-
+        
+ 
 
 
 # Helper classes to the interface
