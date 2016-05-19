@@ -65,6 +65,10 @@ nosetests.xml
 coverage.xml
 *,cover
 
+
+# All log files
+*.log
+
 # Translations
 *.mo
 *.pot
