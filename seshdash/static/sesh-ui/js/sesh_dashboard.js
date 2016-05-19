@@ -254,14 +254,11 @@ Morris.Bar({
 $(document).ready(function(){
             //$("#create_site").tabs();
 
-            $('.edit-site').hide();
-
-            $('.add-site-button').click(function(){
-                  $('.edit-site').show();
-                  $('.site-list').hide();
-                  $('.add-site-button').hide();
-            });
-
+            /*$('#create_site a').click(function (e) {
+                 e.preventDefault()
+                 $(this).tab('show')
+              });
+*/
             $('.back').click(function(){
               $('.edit-site').hide();
               $('.site-list').show();
@@ -270,19 +267,19 @@ $(document).ready(function(){
 
             });
 
-            $('.sites-available').click(function(){
+            //$('.sites-available').click(function(){
 
                  siteName = $(this).text();
 
-                 alert(siteName)
+                 //alert(siteName)
 
-                 $.get('edit_settings',{'sitename': siteName});
+                 //$.get('edit_site',{'sitename': siteName});
 
-                 $('.edit-site').show();
+                 //$('.edit-site').show();
 
-                 $('.site-list').hide();
+                 //$('.site-list').hide();
 
-            });
+            //});
 
 });
 

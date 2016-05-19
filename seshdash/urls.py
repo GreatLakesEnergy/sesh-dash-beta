@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
             url(r'^$', views.index, name='index'),
-            url(r'^dash/([0-9]{1,5})$', views.index, name='index'),
+            url(r'^dash/([0-30]{1,5})$', views.index, name='index'),
             url(r'^linebar/$', views.linebar, name='linebar'),
             url(r'^login/$', views.login_user, name='login_user'),
             #url(r'^login\?next=/$', views.login_user, name='login_user_2'),
@@ -24,7 +24,8 @@ urlpatterns = [
             url(r'^search', views.search),
             url(r'^historical_data', views.historical_data),
             url(r'^graphs', views.graphs),
-            url(r'^edit_settings',views.edit_settings),
-            url(r'^add_site',views.add_site),
+           # url(r'^edit_site',views.edit_site, name='edit_site'),
+            url(r'^edit_site/([0-30]{1,5})$',views.edit_site),
+            url(r'^add_site',views.add_site, name='add_site'),
             ]
 

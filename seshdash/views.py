@@ -60,6 +60,8 @@ from seshdash.data.db.influx import Influx
 
 @login_required(login_url='/login/')
 def index(request,site_id=0):
+    print "Site id is"
+    print site_id 
     """
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
@@ -690,7 +692,7 @@ def search(request):
     #site.site_name
     for site in sites:
         data.append({"key":site.id,"value":site.site_name})
-    print data
+    # print data
     return HttpResponse(json.dumps(data))
 
 @login_required
@@ -718,6 +720,7 @@ def historical_data(request):
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
+        print sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
 
 #function for Graph Generations   
@@ -783,50 +786,29 @@ def graphs(request):
 
 #function to editing existing sites
 @login_required
-def edit_settings(request):
-    all_sites = []
-    #all sesh sites
-    sites = Sesh_Site.objects.all()
-
-    for site in sites:
-
-        all_sites.append({site.site_name:site.id})
-
-    SiteName = request.GET
-    SiteName_dict = dict(SiteName.iterlists())
-    site_clicked = SiteName.values()
-
-    Site_Name_Clicked = "".join(site_clicked)
-
-    #extracting the id of a clicked site
-    for sites in all_sites:
-        if Site_Name_Clicked in sites:
-            site_Id = sites[Site_Name_Clicked]
-    print "site id is"
-    print Site_Name_Clicked
-    #print site_Id
-
-    edit = get_object_or_404(Sesh_Site, id =21)
-    form = SiteForm(instance=edit)
-
-    print "instance "
-    print edit
-    if request.method == 'POST':
-        form = SiteForm(request.POST)
-    
-        #checking if the form is valid
-
-        if form.is_valid():
-
-            form = form.save()
-    print "On form edit"
+def edit_site(request,site_Id):
+    #creating an instance to populate a form
+    instance = get_object_or_404(Sesh_Site, id=site_Id)
+    print instance
+    form = SiteForm(instance=instance)    
+    #checking if the form is valid
+    if form.is_valid():
+        form = form.save()
     return render(request,'seshdash/settings.html', {'form_edit':form})
 
 # function of adding new site
 @login_required
 def add_site(request):
     #fetching list of sites for the user
-    user_sites =  _get_user_sites(request)
+    user_sites = {}
+    user_site_name = []
+    user_site_id = []
+    sites =  _get_user_sites(request)
+    for site in sites:
+        user_site_name.append(site.site_name)
+        user_site_id.append(site.id)
+    user_sites = dict(zip(user_site_id,user_site_name))
+    # on ajax 
     if request.method == 'POST':
     
         form = SiteForm(request.POST)
@@ -836,11 +818,10 @@ def add_site(request):
             form = form.save()
 
             form = SiteForm()
+    #on page load
     else:
-
+   
         form = SiteForm()
-        
-    print "On form add"
     return render(request, 'seshdash/settings.html', {'form_add':form,'sites':user_sites})
     
 

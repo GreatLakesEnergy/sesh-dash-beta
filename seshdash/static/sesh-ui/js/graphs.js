@@ -80,7 +80,6 @@ function daily_data_points_graph() {
   $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time , 'active_site_id':active_site_id},function(data){
 
         var response = JSON.parse(data);
-        var response = JSON.parse(data);
 
         dropdown1_values = response[drop_choice1][0];
         SI_unit1 = response[drop_choice1][1];
