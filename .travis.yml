@@ -4,6 +4,8 @@ python:
 
 addons:
     apt:
+        sources:
+            - deb.nodesource.com
         packages:
             - python-dev
             - libpq-dev
@@ -11,7 +13,6 @@ addons:
             - libxslt1-dev
             - nodejs-legacy
             - redis-server
-            - redis-client
 
 before_install:
       - wget https://s3.amazonaws.com/influxdb/influxdb_0.10.1-1_amd64.deb
