@@ -1,6 +1,9 @@
 import requests, json, logging
 from lxml import html
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
 class EnphaseAPI:
     API_BASE_URL = "https://api.enphaseenergy.com/api/v2/systems/{system_id}/{function}?key={key}&user_id={user_id}"
     API_BASE_URL_INDEX = "https://api.enphaseenergy.com/api/v2/systems/?key={key}&user_id={user_id}"
@@ -22,9 +25,9 @@ class EnphaseAPI:
         self._initialize()
         if self.IS_INITIALIZED:
             print "system initialized"
-            logging.info("System Initialized with %s systems"%len(self.SYSTEMS_IDS))
+            logger.info("System Initialized with %s systems"%len(self.SYSTEMS_IDS))
         else:
-            logging.error("unable to initialize the api")
+            logger.error("unable to initialize the api")
     """
     Initialization function This will talk to enphase and get aall system ids
     """
@@ -36,7 +39,7 @@ class EnphaseAPI:
         response = requests.get(formatedURL)
         #check that everything is good with the request here
         if response.status_code == 401:
-            logging.error("Access denied unable to initialize \nresponse: %s:" %response)
+            logger.error("Access denied unable to initialize \nresponse: %s:" %response)
             self.IS_INITIALIZED = False
         if response.status_code== 200:
             response_parsed = response.json()
@@ -50,7 +53,7 @@ class EnphaseAPI:
 
                 self.IS_INITIALIZED = True
             else:
-                logging.warning("No systems registerd")
+                logger.warning("No systems registerd")
                 self.SYSTEMS_IDS = []
                 self.IS_INITIALIZED = False
 
@@ -143,7 +146,7 @@ class EnphaseLocalAPI:
 		self._initialize()
 
 		if self._IS_INTIALIZED:
-			logging.info('ENHPASE LOCAL API initialised')
+			logger.info('ENHPASE LOCAL API initialised')
 
 	def _initialize(self):
 
@@ -156,7 +159,7 @@ class EnphaseLocalAPI:
 			self._CURRENT_DATA = self._parse_production_data(page_html)
 			self._IS_INTIALIZED = True
 		else:
-			logging.error("unable to initialize API error: %s"%envoy_page.status_code)
+			logger.error("unable to initialize API error: %s"%envoy_page.status_code)
 			self._IS_INTIALIZED = False
 
 	def _parse_production_data(self,page_html):

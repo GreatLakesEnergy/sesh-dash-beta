@@ -13,6 +13,7 @@ from __future__ import absolute_import
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 from celery.schedules import crontab
 from datetime import timedelta
 from ConfigParser import RawConfigParser
@@ -53,10 +54,10 @@ config = RawConfigParser(
                'EMAIL_HOST_PASSWORD':'PASSWORD',
                'EMAIL_HOST_BACKEND':'django.core.mail.backends.smtp.EmailBackend',
                'FROM_EMAIL':'some_email@gmail.com',
-               'ENPHASE_KEY':'enphase_api_key',
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
-               'CLICKATELL_KEY':''
+               'CLICKATELL_KEY':'',
+               'SLACK_TEST_KEY':''
                }
         )
 
@@ -69,13 +70,16 @@ config.read( os.path.join(BASE_DIR,CONFIG_FILE))
 SECRET_KEY = config.get('system','SECRET_KEY')
 
 # security warning: don't run with debug turned on in production!
-DEBUG = config.get('system','DEV_MODE')
+DEBUG = eval(config.get('system','DEV_MODE_ON'))
 
 
 ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
+
+# slack key
+SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
 # Temp folder for misc files
 
@@ -134,12 +138,12 @@ CELERYBEAT_SCHEDULE = {
     'get_send_reports': {
         'task': 'seshdash.tasks.send_reports',
         'schedule': crontab(hour=0, minute=30, day_of_week=6),
-        'args': 'week',
+        'args': ['week'],
     },
     'get_send_reports': {
         'task': 'seshdash.tasks.send_reports',
         'schedule': crontab(hour=0, minute=30),
-        'args': 'day',
+        'args': ['day'],
     },
     'alert_checker': {
         'task': 'seshdash.tasks.alert_engine',
@@ -167,8 +171,8 @@ FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
 LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
 
-#logging
 '''
+#logging
 LOGGING = {
         'version':1,
         'disable_existing_loggers': False,
@@ -227,10 +231,50 @@ LOGGING = {
                 }
             }
         }
-        '''
+   
+'''
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s',
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': LOGGING_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            
+        },
+        'file':{
+           'level': 'DEBUG',
+           'class': 'logging.FileHandler',
+           'filename':os.path.join(LOG_DIR, "all.logs"),
+           'formatter': 'verbose',
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+        'seshdash': {
+            'handlers': ['console', 'file'],
+            'level': LOGGING_LEVEL,
+        }    
+    }
+    
+} 
+
+    
 # Error reporting
 if not DEBUG:
-     print "rollbar disabled"
+     print "rollbar enabled"
      ROLLBAR = {
              'access_token': config.get('rollbar','token'),
              'environment': 'development' if DEBUG else 'production',
@@ -265,6 +309,7 @@ INSTALLED_APPS = (
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
             'jquery#2.2.1',
+            'jquery-ui#1.11.4',
             'mapbox.js#2.4.0',
             'd3#3.5.16',
             'nvd3#1.7.1',
@@ -300,7 +345,18 @@ MIDDLEWARE_CLASSES = (
 )
 
 if not DEBUG:
-    MIDDLEWARE_CLASSES.append('rollbar.contrib.django.middleware.RollbarNotifierMiddleware')
+    MIDDLEWARE_CLASSES = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'rollbar.contrib.django.middleware.RollbarNotifierMiddleware',
+    )
+
 
 ROOT_URLCONF = 'sesh.urls'
 

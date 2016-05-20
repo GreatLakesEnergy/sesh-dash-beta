@@ -8,32 +8,6 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 
 {% block high_chart_line_bar %}
     <div class="col-lg-12" id="dynamic_graph">
-
-    <div class="row" id ="dynamic_graph_container">
-        <div id="x-axis" class="col-md-4">
-            <p>Select option</p>
-            <select class="form-control" id="drop1">
-                 {{ measurements }}
-                 {% for value in measurements %}
-                      <option value="{{value}}">{{value}}</option>
-                 {% endfor %}
-             </select>
-        </div>
-        <div id="y-axis" class="col-md-4">
-            <p>Select another option</p>
-            <select class="form-control" id="drop2" >
-                 {{ measurements }}
-                 {% for value in measurements %}
-                      <option value="{{value}}">{{value}}</option>
-                 {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-4">
-           <button type="button" class="btn btn-primary butt" id = 'dynamic_graph_button'>update graph </button>
-        </div>
-    </div>
-
-
         <div class="panel panel-default">
             <div class="panel-heading">
                 <!-- TODO make this a variable -->
@@ -43,6 +17,37 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 
             <div  id="containerhigh">
             </div>
+
+
+            <div class="panel-footer">
+
+		    <div class="row" id ="dynamic_graph_container">
+			<div id="x-axis" class="col-md-4">
+			    <p>Select option</p>
+			    <select class="form-control" id="drop1">
+				 {{ measurements }}
+				 {% for value in measurements %}
+				      <option value="{{value}}">{{value}}</option>
+				 {% endfor %}
+			     </select>
+			</div>
+			<div id="y-axis" class="col-md-4">
+			    <p>Select another option</p>
+			    <select class="form-control" id="drop2" >
+				 {{ measurements }}
+				 {% for value in measurements %}
+				      <option value="{{value}}">{{value}}</option>
+				 {% endfor %}
+			    </select>
+			</div>
+			<div class="col-md-4">
+			   <button type="button" class="btn btn-primary butt" id = 'dynamic_graph_button'>update graph </button>
+			</div>
+		    </div>
+
+         </div>
+
+
         </div>
     </div>
     <!--Loader-->

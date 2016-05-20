@@ -265,6 +265,7 @@ div.awesomplete > ul {
 #dynamic_graph{
   margin-bottom: 30px;
 }
+<<<<<<< HEAD
 #create_site{
   max-width: 1000px;
 }
@@ -276,4 +277,8 @@ div.awesomplete > ul {
 }
 .btn-back{
   margin-left: 50px;
+}
+.ui-sortable-handle:hover {
+  cursor: pointer;
+
 }
