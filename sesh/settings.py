@@ -73,7 +73,7 @@ SECRET_KEY = config.get('system','SECRET_KEY')
 DEBUG = eval(config.get('system','DEV_MODE_ON'))
 
 
-ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
+ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS') ]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
