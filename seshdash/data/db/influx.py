@@ -206,8 +206,7 @@ class Influx:
         ]
 
         value_returned = self._influx_client.write_points(json_body)
-        logger.debug("inserting point into DB %s %s"%(json_body, value_returned))
-        print "inserting point into DB %s %s"%(json_body, value_returned)
+        logging.debug("inserting point into DB %s %s"%(json_body, value_returned))
 
         return value_returned
 
@@ -276,7 +275,6 @@ def get_latest_point_site(site, measurement_name, db=None):
         i = Influx(database=db)
 
     point = i.get_latest_measurement_point_site(site, measurement_name, db)
-    print "### got points %s"%point
 
     if len(point) > 0:
         point = point[0]

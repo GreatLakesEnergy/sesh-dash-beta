@@ -56,7 +56,7 @@ class VRM_Import_TestCase(TestCase):
 
         if self.VRM_API.IS_INITIALIZED:
            sites = self.VRM_API.SYSTEMS_IDS
-           vrm_site_id = sites[0][0]
+           vrm_site_id = sites[2][0]
            print sites
 
         self.location = Geoposition(52.5,24.3)
