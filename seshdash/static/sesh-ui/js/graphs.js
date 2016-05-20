@@ -63,9 +63,9 @@ function time_series_graph() {
           });
      });
 
-    //$("#time_series").show();
+    $("#time_series").show();
 
-    //$(".graph-loader-time-series").hide();
+    $(".graph-loader-time-series").hide();
 }
 
 /* Function For Daily DataPoints Graph Generation */

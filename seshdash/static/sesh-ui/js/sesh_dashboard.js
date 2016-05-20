@@ -253,13 +253,22 @@ Morris.Bar({
           });
       });
 /*------------------------------------------------------------------------*/
-$(document).ready(function(){
-             //$('.edit-sites').hide();
-             $('.sites-available').click(function(){
-                    alert('clicked')
-                   $('.btn-add-site').hide();
-             });
-});
+//$(document).ready(function(){
+               //checking if the form exists
+      if ($("#id_site_name").length){
+
+            $(".button-save").hide();
+
+      } else{
+            $(".button-save").show();
+
+            }
+
+      $('.sites-available').click(function(){
+           console.log("button hidden")
+          $('#button-add-site').hide();
+      });
+//});
 
       // Draggable panels
       // INFO: Uses the jquery ui sortable method
