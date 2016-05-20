@@ -107,16 +107,26 @@ def generate_auto_rules(site_id):
 
 @shared_task
 def get_BOM_data():
+    print "Getting started getting the bom point "
     # Get all sites that have vrm id
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
 
     for site in sites:
         try:
+            print " Now for site: ",
+            print site
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
+            print "NOT GETTING HERE"
 
             if v_client.IS_INITIALIZED:
+               
+                        print " V IS INITIALIZEd"
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
+                        print "THE BAT DATA IS: ",
+                        print bat_data
+                        print "THE SYS DATA IS : ", 
+                        print sys_data
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
@@ -149,7 +159,7 @@ def get_BOM_data():
                         	data_point.save()
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
-
+                       
                         print "BoM Data saved"
                         # Alert if check(data_point) fails
 
@@ -157,6 +167,8 @@ def get_BOM_data():
             logger.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
+            print "The exceptions is ",
+            print Exception
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message)

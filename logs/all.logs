@@ -20778,3 +20778,205 @@ DEBUG 2016-05-19 10:54:06,969 influx
 DEBUG 2016-05-19 11:28:55,926 influx
 DEBUG 2016-05-19 11:28:55,930 influx
 DEBUG 2016-05-19 11:28:56,054 influx
+DEBUG 2016-05-20 11:30:40,327 victron
+DEBUG 2016-05-20 11:30:44,255 victron
+DEBUG 2016-05-20 11:30:45,616 victron
+DEBUG 2016-05-20 11:30:45,617 victron
+DEBUG 2016-05-20 11:30:46,748 victron
+DEBUG 2016-05-20 11:30:46,748 victron
+DEBUG 2016-05-20 11:30:48,153 victron
+DEBUG 2016-05-20 11:30:48,153 victron
+DEBUG 2016-05-20 11:30:49,426 victron
+DEBUG 2016-05-20 11:30:49,427 victron
+INFO 2016-05-20 11:30:50,736 victron
+DEBUG 2016-05-20 11:30:50,876 victron
+DEBUG 2016-05-20 11:30:52,413 victron
+DEBUG 2016-05-20 11:30:53,659 victron
+DEBUG 2016-05-20 11:30:53,660 victron
+DEBUG 2016-05-20 11:30:54,796 victron
+DEBUG 2016-05-20 11:30:54,797 victron
+DEBUG 2016-05-20 11:30:59,535 victron
+DEBUG 2016-05-20 11:30:59,536 victron
+DEBUG 2016-05-20 11:31:00,892 victron
+DEBUG 2016-05-20 11:31:00,892 victron
+INFO 2016-05-20 11:31:02,203 victron
+ERROR 2016-05-20 11:31:02,207 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 118, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:31:02,228 tasks
+DEBUG 2016-05-20 11:44:04,649 victron
+DEBUG 2016-05-20 11:44:06,427 victron
+DEBUG 2016-05-20 11:44:07,828 victron
+DEBUG 2016-05-20 11:44:07,828 victron
+DEBUG 2016-05-20 11:44:09,030 victron
+DEBUG 2016-05-20 11:44:09,030 victron
+DEBUG 2016-05-20 11:44:10,313 victron
+DEBUG 2016-05-20 11:44:10,314 victron
+DEBUG 2016-05-20 11:44:11,568 victron
+DEBUG 2016-05-20 11:44:11,568 victron
+INFO 2016-05-20 11:44:13,240 victron
+DEBUG 2016-05-20 11:44:13,367 victron
+DEBUG 2016-05-20 11:44:14,980 victron
+DEBUG 2016-05-20 11:44:16,948 victron
+DEBUG 2016-05-20 11:44:16,949 victron
+DEBUG 2016-05-20 11:44:19,217 victron
+DEBUG 2016-05-20 11:44:19,218 victron
+DEBUG 2016-05-20 11:44:20,709 victron
+DEBUG 2016-05-20 11:44:20,709 victron
+DEBUG 2016-05-20 11:44:22,171 victron
+DEBUG 2016-05-20 11:44:22,171 victron
+INFO 2016-05-20 11:44:23,512 victron
+ERROR 2016-05-20 11:44:23,513 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 118, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:44:23,545 tasks
+INFO 2016-05-20 11:48:09,080 victron
+INFO 2016-05-20 11:48:18,873 victron
+ERROR 2016-05-20 11:48:18,873 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 118, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:48:18,874 tasks
+INFO 2016-05-20 11:49:49,654 victron
+INFO 2016-05-20 11:49:58,935 victron
+ERROR 2016-05-20 11:49:58,935 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 119, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:49:58,936 tasks
+INFO 2016-05-20 11:50:54,961 victron
+INFO 2016-05-20 11:51:02,907 victron
+ERROR 2016-05-20 11:51:02,908 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 121, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:51:02,909 tasks
+INFO 2016-05-20 11:55:03,284 victron
+INFO 2016-05-20 11:55:14,926 victron
+ERROR 2016-05-20 11:55:14,927 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 121, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:55:14,928 tasks
+INFO 2016-05-20 11:56:33,514 victron
+INFO 2016-05-20 11:56:43,209 victron
+ERROR 2016-05-20 11:56:43,210 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 121, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:56:43,211 tasks
+INFO 2016-05-20 11:59:01,410 victron
+INFO 2016-05-20 11:59:09,340 victron
+ERROR 2016-05-20 11:59:09,341 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 122, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 11:59:09,342 tasks
+INFO 2016-05-20 12:00:30,138 victron
+INFO 2016-05-20 12:00:38,212 victron
+ERROR 2016-05-20 12:00:38,214 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 123, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 12:00:38,216 tasks
+INFO 2016-05-20 12:01:43,447 victron
+INFO 2016-05-20 12:01:52,301 victron
+ERROR 2016-05-20 12:01:52,301 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 123, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 12:01:52,302 tasks
+INFO 2016-05-20 12:03:48,658 victron
+INFO 2016-05-20 12:04:03,179 victron
+ERROR 2016-05-20 12:04:03,180 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 123, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 232, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 12:04:03,181 tasks
+INFO 2016-05-20 12:06:50,634 victron
+INFO 2016-05-20 12:06:59,562 victron
+ERROR 2016-05-20 12:06:59,563 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 123, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 235, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 12:06:59,564 tasks
+INFO 2016-05-20 12:08:54,731 victron
+INFO 2016-05-20 12:09:03,311 victron
+ERROR 2016-05-20 12:09:03,416 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 125, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 237, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 12:09:03,417 tasks
+INFO 2016-05-20 12:11:54,334 victron
+INFO 2016-05-20 12:12:02,952 victron
+ERROR 2016-05-20 12:12:02,954 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 125, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 237, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 12:12:02,955 tasks
+INFO 2016-05-20 12:20:22,065 victron
+INFO 2016-05-20 12:20:30,288 victron
+ERROR 2016-05-20 12:20:30,331 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 125, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 240, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 12:20:30,398 tasks
+INFO 2016-05-20 13:17:28,938 victron
+INFO 2016-05-20 13:17:37,361 victron
+INFO 2016-05-20 13:24:36,053 victron
+INFO 2016-05-20 13:25:12,278 victron
+ERROR 2016-05-20 13:25:12,325 tasks
+Traceback (most recent call last):
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/tasks.py", line 124, in get_BOM_data
+    bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+  File "/home/patrick/Dev/gle/sesh-dash-beta/seshdash/api/victron.py", line 241, in get_battery_stats
+    code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+KeyError: 'Battery State of Charge (System)'
+WARNING 2016-05-20 13:25:12,369 tasks
