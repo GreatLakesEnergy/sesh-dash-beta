@@ -140,39 +140,42 @@ Morris.Bar({
 
 
 
-/*ALerts Notifoication modal */
-
+/*ALerts Notification modal */
 
     $(document).ready(function(){
     alertId = $(this).attr('classid');
 
+    // getting alerts site and number from the server
     var jsonData = {"alertId" : alertId,
                       csrfmiddlewaretoken: csrftoken};
      $.post('/notifications',jsonData, function(data){
 
+         //parsing data objects into a json file
           var alertData = JSON.parse(data);
-
+        
+          //declaring variables
           var out= $("#alert-notification-table");
           var element = '';
           var i;
           var sum_of_counters = 0;
-
+    
+          //looping through the json object appending to a table
           for(i=0 ; i<alertData.length ; i++){
-
               sum_of_counters += alertData[i].counter;                                                                                      element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
                                '<td>'+ alertData[i].site +  '</td>' +
                                '<td id="site-counter">'+ alertData[i].counter + '</td>' +
                                '</tr>';
+          }
+       
+          out.append(element);
+                   
+         //appending table into the notification dropdown box
+         $('#pop').html(sum_of_counters);
+         if (sum_of_counters > 0){
+             $('#pop').show();
+          }
 
-                   out.append(element);
-                   }
-
-                 $('#pop').html(sum_of_counters);
-                 if (sum_of_counters > 0){
-                     $('#pop').show();
-                  }
-
-
+                //linking each table row to it's corresponding site
                 $('.clickable-row').click(function(){
                    window.location.href =$(this).data("href");
                  });
@@ -202,6 +205,10 @@ Morris.Bar({
                           csrfmiddlewaretoken: csrftoken};
 
           $.post('/get-alert-data', jsonData, function(data){
+          /* 
+            This gets the alert information from a server when
+            The alert is clicked on 
+          */
                
               alertLoader.hide();
               alertDataContainer.show();
@@ -212,7 +219,7 @@ Morris.Bar({
 
                   for (var value in alertData) {
 
-                      if(value == 'alert_id'){ // Checking for alert_id so that it is not displayed
+                      if(value == 'id'){ // Checking for alert_id so that it is not displayed
                           element = '<tr><td class="alert-id hidden">' + alertData[value] + '</td></tr>';
                           alertDataPointInfo.append(element)
                           continue;
@@ -237,11 +244,12 @@ Morris.Bar({
       });
 
       silenceAlert.click(function(){
-          alertId = parseInt($('.alert-id').text());
+          alertId = parseInt($('.alert-data-point-info .alert-id').text());
+          alert("The alert id is " + alertId);
           jsonData = {
                       alert_id : alertId,
                       csrfmiddlewaretoken: csrftoken
-                     };
+               };
 
           $.post('/silence-alert', jsonData, function(data) {
                modal.modal('hide');
@@ -253,8 +261,11 @@ Morris.Bar({
       // INFO: Uses the jquery ui sortable method
       var panelsContainer = $('.panels-container');
       
-      panelsContainer.sortable();
-      panelsContainer.disableSelection();
+      panelsContainer.sortable({
+          handle: '.panel-heading'
+      });
+
+
       
 
 }

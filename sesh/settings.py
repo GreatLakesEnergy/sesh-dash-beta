@@ -13,6 +13,7 @@ from __future__ import absolute_import
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 from celery.schedules import crontab
 from datetime import timedelta
 from ConfigParser import RawConfigParser
@@ -55,7 +56,8 @@ config = RawConfigParser(
                'FROM_EMAIL':'some_email@gmail.com',
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
-               'CLICKATELL_KEY':''
+               'CLICKATELL_KEY':'',
+               'SLACK_TEST_KEY':''
                }
         )
 
@@ -75,6 +77,9 @@ ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
+
+# slack key
+SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
 # Temp folder for misc files
 
@@ -166,8 +171,8 @@ FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
 LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
 
-#logging
 '''
+#logging
 LOGGING = {
         'version':1,
         'disable_existing_loggers': False,
@@ -226,7 +231,47 @@ LOGGING = {
                 }
             }
         }
-        '''
+   
+'''
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s',
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': LOGGING_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            
+        },
+        'file':{
+           'level': 'DEBUG',
+           'class': 'logging.FileHandler',
+           'filename':os.path.join(LOG_DIR, "all.logs"),
+           'formatter': 'verbose',
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+        'seshdash': {
+            'handlers': ['console', 'file'],
+            'level': LOGGING_LEVEL,
+        }    
+    }
+    
+} 
+
+    
 # Error reporting
 if not DEBUG:
      print "rollbar enabled"

@@ -59,12 +59,16 @@ import json
 from seshdash.data.db.influx import Influx
 
 
+# Initializing the logger
+logger = logging.getLogger(__name__)
+
 @login_required(login_url='/login/')
 def index(request,site_id=0):
     """
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
+
     sites =  _get_user_sites(request)
 
     context_dict = {}
@@ -75,7 +79,6 @@ def index(request,site_id=0):
 
     if not site_id:
         #return first site user has action
-        print "no site id recieved"
         site_id = sites[0].pk
     #Check if user has any sites under their permission
     context_dict, content_json = get_user_data(request.user,site_id,sites)
@@ -93,17 +96,16 @@ def index(request,site_id=0):
     #Generate measurements in the time_series_graph
     client=Influx()
     measurements_value=client.get_measurements()
-    
+
     measurements =[]
 
-    print "The measuments are "
-     
+
     for measurement in measurements_value:
         measurements.append(measurement['name'])
 
     context_dict['measurements']= measurements
 
-    
+
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -121,11 +123,10 @@ def get_user_sites(vrm_user_id,vrm_password):
     site_list = []
     flatten_list = []
     v = VictronAPI(vrm_user_id,vrm_password)
-    print 'getting suer sites'
     if v.IS_INITIALIZED:
-            logging.debug("victron API is initialized ")
+            logger.debug("victron API is initialized ")
             sites = v.get_site_list()
-            logging.info("Found sites %s "%sites)
+            logger.info("Found sites %s "%sites)
             site_list.append(sites)
     if site_list:
         #make list of lists flat
@@ -396,7 +397,7 @@ def logout_user(request):
 
 def login_user(request):
     """
-    Login motions for user logging into system
+    Login motions for user logginng into system
     """
     context_dict = {}
     #is the user already logged in?
@@ -573,7 +574,7 @@ def get_high_chart_data(user,site_id,sites):
      context_high_data['high_pv_production']= high_pv_production
      print (context_high_data['high_pv_production'])
      return context_high_data
-     
+
 def display_alerts(site_id):
      alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
 
@@ -605,16 +606,16 @@ def get_alerts(request):
 
     return HttpResponse(json.dumps(alert_data))
 
-    
+
 
 @login_required
 def get_notifications_alerts(request):
-    
+
     sites =_get_user_sites(request)
 
     arr = []
 
-    
+
     for site in sites:
         if(Sesh_Alert.objects.filter(isSilence=False ,site=site).count() != 0):
               arr.append({
@@ -622,7 +623,7 @@ def get_notifications_alerts(request):
                 "counter":Sesh_Alert.objects.filter(isSilence=False,site=site).count(),
                 "site_id":site.id,
                 })
- 
+
     return HttpResponse(json.dumps(arr))
 
 
@@ -630,7 +631,7 @@ def get_notifications_alerts(request):
 def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
-   
+
     alert_id = int(alert_id)
     alert = Sesh_Alert.objects.filter(id=alert_id).first()
     alert_values = {}
@@ -648,6 +649,9 @@ def display_alert_data(request):
             alert_values['time'] = parser.parse(alert_values['time'])
 
         alert_values['time'] = get_timesince(alert_values['time'])
+
+        # Setting the id to the alert id (NEEDED FOR SILENCING ALERTS)
+        alert_values['id'] =  alert_id
         return HttpResponse(json.dumps(alert_values))
 
     else:
@@ -656,7 +660,7 @@ def display_alert_data(request):
 
 @login_required
 def silence_alert(request):
-    alert_id = request.POST.get("alertId", '')
+    alert_id = request.POST.get("alert_id", '')
     alerts = Sesh_Alert.objects.filter(id=alert_id)
 
     if len(alerts) >= 1:
@@ -670,23 +674,23 @@ def silence_alert(request):
 @login_required
 def get_latest_bom_data(request):
     """
-      Returns the latest information of a site to be displayed in the status card 
-      The data is got from the influx db 
+      Returns the latest information of a site to be displayed in the status card
+      The data is got from the influx db
     """
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
     site = Sesh_Site.objects.filter(id=site_id).first()
 
-    
+
     # The measurement list contains attributes to be displayed in the status card,
     measurement_list = ['soc','battery_voltage','AC_output_absolute']
     latest_points = get_measurements_latest_point(site, measurement_list)
-    
+
 
     latest_point_data = []
-   
+
     # If the points exist and the points returned are equal to the items in measurement list
-    if len(latest_points) == len(latest_points):
+    if len(latest_points) == len(measurement_list):
         for measurement, point in latest_points.items():
             latest_point_data.append({"item":get_measurement_verbose_name(measurement),
                                       "value":str(round(latest_points[measurement]['value'], 2))
@@ -697,7 +701,7 @@ def get_latest_bom_data(request):
     try:
         latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
     except StopIteration:
-        logging.warning("No further points")
+        logger.warning("No further points")
         pass
 
     return HttpResponse(json.dumps(latest_point_data))
@@ -718,11 +722,11 @@ def search(request):
 @login_required
 def historical_data(request):
     # If ajax request
-    if request.method == 'POST': 
+    if request.method == 'POST':
         sort_value = request.POST.get('sort_value', '')
         historical_data = get_historical_dict(column=sort_value)
         return HttpResponse(json.dumps(historical_data))
-   
+
     # On page load
     else:
         sort_data_dict = get_model_verbose(Daily_Data_Point)
@@ -731,7 +735,7 @@ def historical_data(request):
         sort_data_dict.pop('site')
         sort_data_dict.pop('date')
 
- 
+
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
         active_site = sites[0]
         context_dict = {}
@@ -743,7 +747,7 @@ def historical_data(request):
         return render(request, 'seshdash/historical-data.html', context_dict);
 
 
-#function for Graph Generations   
+#function for Graph Generations
 @login_required
 def graphs(request):
 
@@ -777,30 +781,28 @@ def graphs(request):
             time_bucket=time_bucket_dict[time]
             SI_units = BoM_Data_Point.SI_UNITS
             SI_unit = SI_units[choice]
-            
+
             # creating an influx instance
             client = Influx()
 
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
-  
+
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
 
             #Converting date_strings into epoch_time
-            for data in data_values: 
+            for data in data_values:
                 data[0] = get_epoch_from_datetime(datetime.datetime.strptime(data[0],"%Y-%m-%dT%H:%M:%SZ"))
-   
+
             #Rounding off values
             for data in data_values:
                 data[1] = round(data[1],2)
 
             #getting the measurements values with their time-stamps
             results[choice] = [data_values,SI_unit]
-            
+
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()
-
-

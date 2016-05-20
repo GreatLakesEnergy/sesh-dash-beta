@@ -3,16 +3,17 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Model's
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
-from django.contrib.auth.models import User
+from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User, Sesh_Organisation, Slack_Channel
+from django.contrib.auth.models import User, Group, Permission
 
 # Tasks
 from seshdash.tasks import generate_auto_rules
 
 # Django
-from guardian.shortcuts import assign_perm
+from guardian.shortcuts import assign_perm, get_groups_with_perms
 from geoposition import Geoposition
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType 
 
 # Influx
 from seshdash.data.db.influx import Influx, insert_point
@@ -62,6 +63,13 @@ class AlertTestCase(TestCase):
                                              has_genset=True,
                                              has_grid=True)
 
+
+        # Creating permissions for group
+        content_type = ContentType.objects.get_for_model(Sesh_Site)
+        self.permission = Permission.objects.create(codename='can_manage_sesh_site', 
+                                                    name='Can add Sesh Site',
+                                                    content_type=content_type)
+
         self.data_point = Data_Point.objects.create(site=self.site,
                                                     soc=10,
                                                     battery_voltage=20,
@@ -91,6 +99,23 @@ class AlertTestCase(TestCase):
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
         self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
+
+        # Creating test group
+        self.test_group = Group(name='test_group')
+        self.test_group.save()
+        
+        assign_perm('can_manage_sesh_site', self.test_group, self.site)
+
+        print "The permission for the test site are "
+        print get_groups_with_perms(self.site)
+
+        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group, slack_token=settings.SLACK_TEST_KEY)
+         
+        # Creating test channels
+        self.test_channels = Slack_Channel.objects.create(organisation=self.test_organisation,
+                                                          name='test_alerts_channel',
+                                                          is_alert_channel=True)    
+
         #assign a user to the sites
 
 
@@ -102,6 +127,7 @@ class AlertTestCase(TestCase):
                                                 operator='lt',
                                                 send_mail=True,
                                                 send_sms=True,
+                                                send_slack=True,
                                                 site=self.site,
                                                 value=20)
 
@@ -154,7 +180,7 @@ class AlertTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-        response = c.post('/silence-alert/',{'alertId':'1'})
+        response = c.post('/silence-alert/',{'alert_id':'1'})
         alerts = Sesh_Alert.objects.filter(isSilence=False).count()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(alerts, 3)
@@ -171,9 +197,14 @@ class AlertTestCase(TestCase):
         else:
             self.assertEqual(alert_sms_sent.count(), 1)
 
+        #test_slack
+        alert_slack_sent = Sesh_Alert.objects.filter(slackSent=True)
+        self.assertEqual(alert_slack_sent.count(), 4)
+
         #test_get_alerts_notifications
         response = c.post('/notifications/',{})
         self.assertEqual(response.status_code, 200)
+
 
 
     @override_settings(DEBUG=True)

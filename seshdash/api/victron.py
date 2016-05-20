@@ -10,6 +10,9 @@ from ..utils import time_utils
 # Configuration
 from django.conf import settings
 
+# Instantiating a logger
+logger = logging.getLogger(__name__)
+
 class VictronAPI:
     #API_BASE_URL = "http://juice.m2mobi.com/{call_type}/{function}"
     API_BASE_URL = "https://juice.victronenergy.com/{call_type}/{function}"
@@ -64,9 +67,9 @@ class VictronAPI:
 
         self.initialize()
         if self.IS_INITIALIZED:
-            logging.info("System Initialized with %s systems"%len(self.SYSTEMS_IDS))
+            logger.info("System Initialized with %s systems"%len(self.SYSTEMS_IDS))
         else:
-            logging.error("unable to initialize the api")
+            logger.error("unable to initialize the api")
 
     def initialize(self):
         """
@@ -80,7 +83,7 @@ class VictronAPI:
                 username=self.USERNAME,
                 password=self.PASSWORD)
         if response['status']['code'] == 403:
-            logging.error("Access denied unable to initialize check credentials \nresponse: %s:" %response)
+            logger.error("Access denied unable to initialize check credentials \nresponse: %s:" %response)
             self.IS_INITIALIZED = False
             return None
         if response.has_key("data"):
@@ -89,7 +92,7 @@ class VictronAPI:
             #Populate sites  under account
             for site in v_sites:
                 self.SYSTEMS_IDS.append((site['idSite'],site['name']))
-                logging.debug("initializing sites, getting attributes")
+                logger.debug("initializing sites, getting attributes")
                 site_id =  site['idSite']
                 atr = self.get_site_attributes_list(site_id)
                 #make attribute dictionary more usefull
@@ -100,7 +103,7 @@ class VictronAPI:
 
                 self.IS_INITIALIZED = True
         else:
-            logging.error("Problem getting session id %s"%response)
+            logger.error("Problem getting session id %s"%response)
             self.IS_INITIALIZED = False
 
 
@@ -130,7 +133,7 @@ class VictronAPI:
         data['sessionid'] = self.SESSION_ID
         data['verification_token'] = self.VERIFICATION_TOKEN
         ###
-        logging.debug(data)
+        logger.debug(data)
         if  data:
             r = requests.post(formated_URL,data=data, headers = headers)
 
@@ -139,8 +142,8 @@ class VictronAPI:
         if r.status_code == 200:
                 return r.json()
         elif r.status_code == 401:
-            logging.error("recieved error code %s %s"%(r.status_code,r.json()))
-            logging.error("The system needs o be re_initialized please run intialize()")
+            logger.error("recieved error code %s %s"%(r.status_code,r.json()))
+            logger.error("The system needs o be re_initialized please run intialize()")
             return r.json()
         else:
             return r.json()
@@ -157,7 +160,7 @@ class VictronAPI:
             else:
                 result = results['data']
         else:
-            logging.error("error in response %s"%results)
+            logger.error("error in response %s"%results)
         return result
 
     def get_site_list(self):
@@ -323,7 +326,7 @@ class VictronHistoricalAPI:
              second_cookies  = r.cookies.get_dict()
          except Exception,e:
              self.IS_HIST_INITIALIZED = False
-             logging.error("Victron Hist apI error getting cookies "%str(e))
+             logger.error("Victron Hist apI error getting cookies "%str(e))
 
          # Merge our cookie dictionaries
 
@@ -332,10 +335,10 @@ class VictronHistoricalAPI:
          #TODO this is border line screan scraping so this error condition will not be caught
          if r.status_code == 200 and self.SESSION_COOKIES.has_key('VRM_session_id'):
                 self.IS_HIST_INITIALIZED = True
-                logging.info("Victron historical API initialized")
+                logger.info("Victron historical API initialized")
          else:
                 self.IS_HIST_INITIALIZED = False
-                logging.warning("Problem initializing Victorn Hist API")
+                logger.warning("Problem initializing Victorn Hist API")
 
 
     def get_data(self,site_id,start_at,end_at=None):
@@ -361,14 +364,14 @@ class VictronHistoricalAPI:
         headers  = {'user-agent':self.USER_AGENT}
         #data = self.SESSION.get(formated_URL,stream=True)
         data = self.SESSION.get(formated_URL,stream=True,verify=False)
-        logging.debug(" starting downloading csv file")
+        logger.debug(" starting downloading csv file")
         with open(full_file, 'wb') as fd:
-            logging.debug("writing csv file to %s"%full_file)
+            logger.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
                 fd.write(chunk)
 
         #DEBUG
-        logging.debug("finished downloading csv")
+        logger.debug("finished downloading csv")
         self._csv_file = full_file
         return self._parse_csv_data(full_file)
 
@@ -377,7 +380,7 @@ class VictronHistoricalAPI:
         return iterable csv reader object
 
         """
-        logging.debug("parsing csv data %s"%csv_data_file)
+        logger.debug("parsing csv data %s"%csv_data_file)
         #data_arr = []
         try:
             self._csv_file = open(csv_data_file)
@@ -391,7 +394,7 @@ class VictronHistoricalAPI:
             return self._csv_reader
 
         except Exception,e:
-            logging.error("unable to find file or key %s"%e)
+            logger.error("unable to find file or key %s"%e)
             remove(csv_data_file)
             self._csv_file.close()
 
@@ -400,5 +403,4 @@ class VictronHistoricalAPI:
             self._csv_file.close()
             remove(self._csv_file_path)
         except Exception, e:
-            logging.exception("Unable to flush csv files %s : %s"%(self._csv_file,e))
-
+            logger.exception("Unable to flush csv files %s : %s"%(self._csv_file,e))

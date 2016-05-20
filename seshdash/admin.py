@@ -36,11 +36,22 @@ class RMC_AccountAdmin(GuardedModelAdmin):
     list_display = ('api_key','api_key_numeric')
     pass
 
+@admin.register(Sesh_Organisation)
+class Organisation(GuardedModelAdmin):
+    list_display = ('group', 'slack_token')
+    pass
+
 @admin.register(Sesh_User)
 class SeshUser(GuardedModelAdmin):
     list_display = ('user','phone_number','on_call')
     list_filter = ('on_call',)
     pass
+
+@admin.register(Slack_Channel)
+class SlackAlertChannel(GuardedModelAdmin):
+    list_display = ('name','organisation')
+    pass
+
 
 @admin.register(RMC_status)
 class RMCStatus(GuardedModelAdmin):
