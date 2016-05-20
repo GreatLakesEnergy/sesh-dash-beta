@@ -8,7 +8,7 @@ function time_series_graph() {
 
                  $("#time_series").hide();
 
-                 $(".graph-loader").show();
+                 $(".graph-loader-time-series").show();
 
     $.post('/graphs',{csrfmiddlewaretoken:csrftoken,'choice':[measurement_value],'time':time_value,'active_site_id':active_site_id},function(data){
                  var response = JSON.parse(data)
@@ -65,7 +65,7 @@ function time_series_graph() {
 
     $("#time_series").show();
 
-    $(".graph-loader").hide();
+    $(".graph-loader-time-series").hide();
 }
 
 /* Function For Daily DataPoints Graph Generation */
@@ -75,7 +75,9 @@ function daily_data_points_graph() {
    time = "24h";
   message = ('Daily ' + drop_choice1 + '  With  ' + drop_choice2);
   $("#title-message").html(message);
+
    $("#dynamic_graph").hide();
+   $(".graph-loader").show();
 
   $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time , 'active_site_id':active_site_id},function(data){
 
@@ -167,8 +169,12 @@ function daily_data_points_graph() {
 
 });
 
-  $("#dynamic_graph").show();
-  $(".graph-loader").hide();
+    $("#dynamic_graph").show();
+    //$(".graph-loader").toggle(5000,function(){
+
+    //$("#dynamic_graph").show();
+    $(".graph-loader").hide();
+    //});
 }
 
 

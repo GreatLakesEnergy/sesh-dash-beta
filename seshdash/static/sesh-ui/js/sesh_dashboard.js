@@ -252,35 +252,11 @@ Morris.Bar({
 
 /*------------------------------------------------------------------------*/
 $(document).ready(function(){
-            //$("#create_site").tabs();
-
-            /*$('#create_site a').click(function (e) {
-                 e.preventDefault()
-                 $(this).tab('show')
-              });
-*/
-            $('.back').click(function(){
-              $('.edit-site').hide();
-              $('.site-list').show();
-              $('.add-site-button').show();
-
-
-            });
-
-            //$('.sites-available').click(function(){
-
-                 siteName = $(this).text();
-
-                 //alert(siteName)
-
-                 //$.get('edit_site',{'sitename': siteName});
-
-                 //$('.edit-site').show();
-
-                 //$('.site-list').hide();
-
-            //});
-
+             //$('.edit-sites').hide();
+             $('.sites-available').click(function(){
+                    alert('clicked')
+                   $('.btn-add-site').hide();
+             });
 });
 
 

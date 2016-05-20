@@ -50,12 +50,16 @@
                                  </tr>
 
                           </table>
+                          <button class="btn btn-default btn-add-site">
+
+                            <a data-toggle="tab" href="#Add_site">Add new site</a>
+
+                          </button>
                       </div>
 
                       <div class="edit-sites">
 
-                               <form action="/edit_site" method="post" novalidate>
-                                        <p> Edit existing Sesh Site</p>
+                               <form action="/add_site" method="post" novalidate>
                                         <table class="table table-striped table-bordered table-hover">
 
                                                {% csrf_token %}
@@ -66,14 +70,14 @@
 
                                         </table>
                                         <button type="submit" class="btn btn-primary">SAVE </button>
-                                        <button type="button" class="btn btn-primary back"> Back </button>
+
                                 </form>
 
                       </div>
                   </div>
 
                   <div id="Add_site" class="tab-pane fade">
-                    <form action="/add_site" method="post" novalidate>
+                                 <form action="/add_site" method="post" novalidate>
                                        <h3> Add a new Sesh Site</h3>
 
                                         <table class="table table-striped table-bordered table-hover">
@@ -85,18 +89,23 @@
                                                {{ form_add.media }}
 
                                         </table>
-                                        <button type="submit" class="btn btn-primary">SAVE </button>
+
+                                        <button type="submit" class="btn btn-default">SAVE </button>
+
+                                        <button class="btn btn-default btn-back">
+
+                                                <a data-toggle="tab" href="#Edit_site"> Back </a>
+
+                                        </button>
                                 </form>
                   </div>
 
                  <div id="Change_settings" class="tab-pane fade">
 
-                   <p> Nothing here </p>
-
                  </div>
 
                  <div id="Add_Import" class="tab-pane fade">
-                  <p>Waiting for data</p>
+
                  </div >
 
 

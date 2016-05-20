@@ -789,9 +789,10 @@ def graphs(request):
 def edit_site(request,site_Id):
     #creating an instance to populate a form
     instance = get_object_or_404(Sesh_Site, id=site_Id)
-    print instance
+   
     form = SiteForm(instance=instance)    
     #checking if the form is valid
+   
     if form.is_valid():
         form = form.save()
     return render(request,'seshdash/settings.html', {'form_edit':form})
