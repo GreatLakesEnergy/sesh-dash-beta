@@ -206,8 +206,7 @@ class Influx:
         ]
 
         value_returned = self._influx_client.write_points(json_body)
-        logger.debug("inserting point into DB %s %s"%(json_body, value_returned))
-        print "inserting point into DB %s %s"%(json_body, value_returned)
+        logging.debug("inserting point into DB %s %s"%(json_body, value_returned))
 
         return value_returned
 
@@ -245,27 +244,18 @@ class Influx:
         db = self.db
         if database:
            db = database
-
-        measurements = ",".join(measurement_list)
-
-
-        query = "SELECT * FROM %s WHERE site_name='%s' LIMIT 1" % (measurements, site.site_name)
-        points = list(self._influx_client.query(query,database=db).get_points())
-
-        # Creating a dictionary with measurement as key and point as value
+        
         measurement_dict = {}
-        for i, measurement in enumerate(measurement_list):
+        for measurement in measurement_list:
             try:
-                measurement_dict[measurement] = points[i]
-            except:
-                print "No measurements found for %s" % measurement
+                measurement_dict[measurement] = self.get_latest_measurement_point_site(site, measurement)[0]
+            except IndexError, e:
+                logger.debug('No points for %s ' % measurement)
                 pass
 
-
         return measurement_dict
-
-
-
+        
+ 
 
 
 # Helper classes to the interface
@@ -276,7 +266,6 @@ def get_latest_point_site(site, measurement_name, db=None):
         i = Influx(database=db)
 
     point = i.get_latest_measurement_point_site(site, measurement_name, db)
-    print "### got points %s"%point
 
     if len(point) > 0:
         point = point[0]
