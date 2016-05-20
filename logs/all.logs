@@ -20980,3 +20980,8 @@ Traceback (most recent call last):
     code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
 KeyError: 'Battery State of Charge (System)'
 WARNING 2016-05-20 13:25:12,369 tasks
+DEBUG 2016-05-20 13:37:58,077 tasks
+DEBUG 2016-05-20 13:37:59,298 alert
+DEBUG 2016-05-20 13:37:59,745 tasks
+DEBUG 2016-05-20 13:38:01,170 influx
+DEBUG 2016-05-20 13:38:01,204 influx
