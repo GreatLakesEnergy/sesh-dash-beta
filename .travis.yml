@@ -4,14 +4,11 @@ python:
 
 addons:
     apt:
-        sources:
-            - deb.nodesource.com
         packages:
             - python-dev
             - libpq-dev
             - libxml2-dev
             - libxslt1-dev
-            - nodejs-legacy
             - redis-server
 
 before_install:
