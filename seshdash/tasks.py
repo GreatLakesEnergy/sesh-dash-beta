@@ -205,14 +205,14 @@ def get_historical_BoM(site_pk,start_at):
                 data_point = BoM_Data_Point(
                     site = site,
                     time = date,
-                    soc = row.get('Battery State of Charge (System)'),
-                    battery_voltage = row.get('Battery voltage'),
-                    AC_input = row.get('Input power 1'),
-                    AC_output =  row.get('Output power 1'),
-                    AC_Load_in =  row.get('Input current phase 1'),
-                    AC_Load_out =  row.get('Output current phase 1'),
-                    inverter_state = row.get('VE.Bus Error'),
-                    pv_production = row.get('PV - AC-coupled on input L1'), # IF null need to put in 0
+                    soc = row.get('Battery State of Charge (System)', 0),
+                    battery_voltage = row.get('Battery voltage', 0),
+                    AC_input = row.get('Input power 1', 0),
+                    AC_output =  row.get('Output power 1', 0),
+                    AC_Load_in =  row.get('Input current phase 1', 0),
+                    AC_Load_out =  row.get('Output current phase 1', 0),
+                    inverter_state = row.get('VE.Bus Error', ''),
+                    pv_production = row.get('PV - AC-coupled on input L1', 0), # IF null need to put in 0
                     #TODO these need to be activated
                     genset_state =  0,
                     relay_state = 0,
