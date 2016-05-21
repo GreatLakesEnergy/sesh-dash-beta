@@ -62,9 +62,7 @@ from seshdash.data.db.influx import Influx
 logger = logging.getLogger(__name__)
 
 @login_required(login_url='/login/')
-def index(request,site_id=0):
-    print "Site id is"
-    print site_id 
+def index(request,site_id=0): 
     """
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
@@ -782,8 +780,8 @@ def graphs(request):
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
             SI_units = BoM_Data_Point.SI_UNITS
-            SI_unit = SI_units[choice]
-
+            default_unit = 'V'
+            SI_unit = SI_units.get(choice, default_unit)
             # creating an influx instance
             client = Influx()
 
