@@ -73,7 +73,7 @@ SECRET_KEY = config.get('system','SECRET_KEY')
 DEBUG = eval(config.get('system','DEV_MODE_ON'))
 
 
-ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS')]
+ALLOWED_HOSTS = [config.get('system','ALLOWED_HOSTS') ]
 
 # weather key
 FORECAST_KEY = config.get('api','forecast_key')
@@ -171,68 +171,13 @@ FROM_EMAIL = config.get('mail','FROM_EMAIL')
 
 LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
 
-'''
 #logging
-LOGGING = {
-        'version':1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-                'datefmt' : "%d/%b/%Y %H:%M:%S"
-            },
-            'simple': {
-                'format': '%(levelname)s %(message)s'
-            },
-        },
-        'handlers':
-            {
-            'file':{
-                    'level': 'DEBUG',
-                    'class': 'logging.FileHandler',
-                    'filename':os.path.join(LOG_DIR, "all.log")
-                },
-            'celery_file':{
-                    'level': 'DEBUG',
-                    'class': 'logging.FileHandler',
-                    'filename': os.path.join(LOG_DIR , "celery.log")
+# Make sure logging folder exists
 
-                },
-            'console':{
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-                },
-
-            'default': {
-                'level':'DEBUG',
-                'class':'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(LOG_DIR , "celery_default.log"),
-                'maxBytes': 1024*1024*5, # 5 MB
-                'backupCount': 5,
-                'formatter':'simple',
-                }
-            },
-        'loggers':{
-            'django.db.backends':
-                {
-                'handler':['file'],
-                 'level': LOGGING_LEVEL,
-                 'filename' : True
-                },
-            'django':{
-                'handler':['file'],
-                'level': LOGGING_LEVEL,
-                'propogate':True
-                },
-            '':{
-                 'handler':['default'],
-                 'level': 'DEBUG',
-                 'propogate':True
-                }
-            }
-        }
-   
-'''
+if not os.path.exists(LOG_DIR):
+    # Create log dir
+    print "LOG DIR %s doesn't exist creating"%LOG_DIR
+    os.mkdir(LOG_DIR)
 
 LOGGING = {
     'version': 1,
@@ -249,12 +194,12 @@ LOGGING = {
             'level': LOGGING_LEVEL,
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
-            
+
         },
         'file':{
            'level': 'DEBUG',
            'class': 'logging.FileHandler',
-           'filename':os.path.join(LOG_DIR, "all.logs"),
+           'filename':os.path.join(LOG_DIR, "all.log"),
            'formatter': 'verbose',
         },
     },
@@ -266,12 +211,12 @@ LOGGING = {
         'seshdash': {
             'handlers': ['console', 'file'],
             'level': LOGGING_LEVEL,
-        }    
+        }
     }
-    
-} 
 
-    
+}
+
+
 # Error reporting
 if not DEBUG:
      print "rollbar enabled"

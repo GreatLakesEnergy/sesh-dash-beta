@@ -24,6 +24,6 @@ install:
     - pip install -r requirements.txt
 
 before_script:
-      - python manage.py migrate --noinput
+    - python manage.py migrate --noinput
 script: 
     - python -W ignore manage.py  test -v 2

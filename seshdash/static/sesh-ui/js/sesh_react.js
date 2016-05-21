@@ -58,7 +58,10 @@ var alertsJsonData = {csrfmiddlewaretoken: csrftoken,
 
 function getLatestAlerts () {
     $.post('/get-alerts', alertsJsonData,function(data) {
-        var jsonData = JSON.parse(data);
+        var jsonData = JSON.parse(data),
+            alertsLoader = $('.alerts-loader');
+
+        alertsLoader.hide();
         ReactDOM.render(
             <AlertList data={jsonData} />,
             document.getElementById('alerts-container')
@@ -123,11 +126,13 @@ function getLatestBoMData(){
     var bomJsonData = {
             csrfmiddlewaretoken: csrftoken,
             siteId: active_site_id,
-        };
+        },
+        statusCardLoader = $('.status-card-loader');
    
 
     $.post('/get-latest-bom-data', bomJsonData, function(data){
-        data = JSON.parse(data)
+        data = JSON.parse(data);
+        statusCardLoader.hide();
         ReactDOM.render(
            <LatestBoMData data={data} />,
            document.getElementById('latest-bom-data')

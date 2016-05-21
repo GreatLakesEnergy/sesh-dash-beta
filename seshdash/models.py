@@ -304,7 +304,7 @@ class Daily_Data_Point(models.Model):
         "trans" : "",
         "genset_state" : "V",
         "site" : "",
-        "AC_output_absolute" : "V",
+        "AC_output_absolute" : "W",
         "daily_battery_charge": "W",
         "daily_grid_outage_n": "minute",
         "daily_grid_outage_t": "",

@@ -7,6 +7,8 @@ from pprint import pprint
 from datetime import datetime,timedelta
 from ..utils import time_utils
 
+import pprint
+
 # Configuration
 from django.conf import settings
 
@@ -92,7 +94,7 @@ class VictronAPI:
             #Populate sites  under account
             for site in v_sites:
                 self.SYSTEMS_IDS.append((site['idSite'],site['name']))
-                logger.debug("initializing sites, getting attributes")
+                #logger.debug("initializing sites, getting attributes")
                 site_id =  site['idSite']
                 atr = self.get_site_attributes_list(site_id)
                 #make attribute dictionary more usefull
@@ -133,7 +135,7 @@ class VictronAPI:
         data['sessionid'] = self.SESSION_ID
         data['verification_token'] = self.VERIFICATION_TOKEN
         ###
-        logger.debug(data)
+        #logger.debug(data)
         if  data:
             r = requests.post(formated_URL,data=data, headers = headers)
 
@@ -227,12 +229,21 @@ class VictronAPI:
         Get the battery stats:
         """
         #TODO  merge this function with system stats and other stas as they are identical
+        #TODO: UNCOMMENT THE logging.debug // COMMENT Them out for proper priting
+        #print "NOW INT THE BATTERRY STATS"
+        #print "THE Battery Stat keys is: ",
+        #print self._BATTERY_STAT_KEYS
+        #print "BUT THE ATTRIBUTE DICT CONTAINS",
+        #pretty_printer = pprint.PrettyPrinter(indent=4)
+        #print pretty_printer.pprint(self.ATTRIBUTE_DICT[site_id])
         code_arr = []
         for key in self._BATTERY_STAT_KEYS:
             code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
 
         result_arr = self.get_site_attribute(site_id,code_arr)
         resut_dict = self._reformat_attr_dict(result_arr)
+        #print "The returned data from the get battery stats is: ",
+        #print resut_dict
         return resut_dict
 
 
@@ -364,14 +375,14 @@ class VictronHistoricalAPI:
         headers  = {'user-agent':self.USER_AGENT}
         #data = self.SESSION.get(formated_URL,stream=True)
         data = self.SESSION.get(formated_URL,stream=True,verify=False)
-        logger.debug(" starting downloading csv file")
+        #logger.debug(" starting downloading csv file")
         with open(full_file, 'wb') as fd:
-            logger.debug("writing csv file to %s"%full_file)
+            #logger.debug("writing csv file to %s"%full_file)
             for chunk in data.iter_content(chunksize):
                 fd.write(chunk)
 
         #DEBUG
-        logger.debug("finished downloading csv")
+        #logger.debug("finished downloading csv")
         self._csv_file = full_file
         return self._parse_csv_data(full_file)
 
@@ -380,7 +391,7 @@ class VictronHistoricalAPI:
         return iterable csv reader object
 
         """
-        logger.debug("parsing csv data %s"%csv_data_file)
+        #logger.debug("parsing csv data %s"%csv_data_file)
         #data_arr = []
         try:
             self._csv_file = open(csv_data_file)

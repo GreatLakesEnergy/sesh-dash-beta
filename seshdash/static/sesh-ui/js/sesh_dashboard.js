@@ -245,7 +245,6 @@ Morris.Bar({
 
       silenceAlert.click(function(){
           alertId = parseInt($('.alert-data-point-info .alert-id').text());
-          alert("The alert id is " + alertId);
           jsonData = {
                       alert_id : alertId,
                       csrfmiddlewaretoken: csrftoken
