@@ -230,20 +230,20 @@ class VictronAPI:
         """
         #TODO  merge this function with system stats and other stas as they are identical
         #TODO: UNCOMMENT THE logging.debug // COMMENT Them out for proper priting
-        print "NOW INT THE BATTERRY STATS"
-        print "THE Battery Stat keys is: ",
-        print self._BATTERY_STAT_KEYS
-        print "BUT THE ATTRIBUTE DICT CONTAINS",
-        pretty_printer = pprint.PrettyPrinter(indent=4)
-        print pretty_printer.pprint(self.ATTRIBUTE_DICT[site_id])
+        #print "NOW INT THE BATTERRY STATS"
+        #print "THE Battery Stat keys is: ",
+        #print self._BATTERY_STAT_KEYS
+        #print "BUT THE ATTRIBUTE DICT CONTAINS",
+        #pretty_printer = pprint.PrettyPrinter(indent=4)
+        #print pretty_printer.pprint(self.ATTRIBUTE_DICT[site_id])
         code_arr = []
         for key in self._BATTERY_STAT_KEYS:
             code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
 
         result_arr = self.get_site_attribute(site_id,code_arr)
         resut_dict = self._reformat_attr_dict(result_arr)
-        print "The returned data from the get battery stats is: ",
-        print resut_dict
+        #print "The returned data from the get battery stats is: ",
+        #print resut_dict
         return resut_dict
 
 
