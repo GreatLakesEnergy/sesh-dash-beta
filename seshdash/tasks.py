@@ -26,13 +26,14 @@ logger = logging.getLogger(__name__)
 
 @task_failure.connect
 def handle_task_failure(**kw):
+    message = 'error occured in task: %/n message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
     logger.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
     print "ERROR in task %s"%kw.get('message',"no error message")
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
         kw['trace'] = trace
-        rollbar.report_message(message='Error occured in task',extra_data=kw)
+        rollbar.report_message(message=message,extra_data=kw)
 
 
 def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
@@ -57,7 +58,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
         message = "Error sending to influx with exception %s in datapint %s"%(e,model_data_dict)
-        handle_task_failure(message= message,exception=e,data=model_data)
+        handle_task_failure(message= message, name='send_to_influx' ,exception=e,data=model_data)
 
 def generate_auto_rules(site_id):
     """
@@ -162,7 +163,7 @@ def get_BOM_data():
             print Exception
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
-            handle_task_failure(message = message)
+            handle_task_failure(message = message, exception=e)
             pass
 
 def _check_data_pont(data_point_arr):
