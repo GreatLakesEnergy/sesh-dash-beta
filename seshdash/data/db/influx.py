@@ -161,7 +161,8 @@ class Influx:
         try:
                 # Send the data list
                 logger.debug("INFLUX sending %s"%data_point_list)
-                self._influx_client.write_points(data_point_list)
+                result = self._influx_client.write_points(data_point_list)
+                logger.debug("Result %s"%result)
         except InfluxDBServerError,e:
             logger.warning("INFLUX Error running query on server %s %s"%(e,data_point_list))
             print e
@@ -234,6 +235,7 @@ class Influx:
              db = database
 
          query = "SELECT * FROM %s WHERE site_name='%s' ORDER BY time DESC LIMIT 1" % (measurement_name, site.site_name)
+         logger.debug(query)
          return list(self._influx_client.query(query,database=db).get_points())
 
     # Helper classes to the interface
@@ -244,7 +246,7 @@ class Influx:
         db = self.db
         if database:
            db = database
-        
+
         measurement_dict = {}
         for measurement in measurement_list:
             try:
@@ -254,8 +256,8 @@ class Influx:
                 pass
 
         return measurement_dict
-        
- 
+
+
 
 
 # Helper classes to the interface

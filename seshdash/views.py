@@ -27,15 +27,14 @@ from pprint import pprint
 
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
-from seshdash.utils.time_utils import get_timesince, get_timesince_influx
+from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
-import json,time,random,datetime
-#
-from seshdash.utils.time_utils import get_epoch_from_datetime
+
+import json,time,random
 
 # Import for API
 from rest_framework import generics, permissions
@@ -440,7 +439,7 @@ def get_user_data(user,site_id,sites):
     context_data['active_site'] = site
     context_data_json['sites'] = serialize_objects(sites)
     #get 5 days ago and 5 days in future for weather
-    now = datetime.datetime.now()
+    now = timezone.localtime(timezone.now())
     five_day_past = now - timedelta(days=5)
     five_day_future = now + timedelta(days=5)
 
@@ -534,7 +533,7 @@ def get_high_chart_data(user,site_id,sites):
         #TODO return 403 permission denied
         return context_high_data
 
-     now = datetime.datetime.now()
+     now = timezone.localtime(timezone.now())
      five_day_past2 = now - timedelta(days=5)
      five_day_future2 = now + timedelta(days=6)
 
@@ -702,7 +701,7 @@ def get_latest_bom_data(request):
         latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
         logging.debug("RMC status card %s"%latest_points)
     except StopIteration:
-        logger.warning("No further points")
+        logger.warning("No further points %s"%latest_points)
         pass
 
     return HttpResponse(json.dumps(latest_point_data))
@@ -795,7 +794,7 @@ def graphs(request):
 
             #Converting date_strings into epoch_time
             for data in data_values:
-                data[0] = get_epoch_from_datetime(datetime.datetime.strptime(data[0],"%Y-%m-%dT%H:%M:%SZ"))
+                data[0] = get_epoch_from_datetime(datetime.strptime(data[0],"%Y-%m-%dT%H:%M:%SZ"))
 
             #Rounding off values
             for data in data_values:

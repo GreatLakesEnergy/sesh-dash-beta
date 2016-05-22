@@ -154,7 +154,7 @@ CELERYBEAT_SCHEDULE = {
         'task': 'seshdash.tasks.rmc_status_update',
         'schedule': timedelta(minutes=5),
         'args': '',
-    },   },
+       },
 }
 #authentication
 LOGIN_REDIRECT_URL = '/'
