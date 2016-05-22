@@ -568,6 +568,7 @@ def rmc_status_update():
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
             logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))
+            logger.debug("saving status %s "%rmc_status)
             rmc_status.save()
         else:
             logger.warning("RMC STATUS: No DP found for site")

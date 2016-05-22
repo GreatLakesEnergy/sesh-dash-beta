@@ -55,7 +55,7 @@ class SlackAlertChannel(GuardedModelAdmin):
 
 @admin.register(RMC_status)
 class RMCStatus(GuardedModelAdmin):
-    list_display = ('site','ip_address','time')
+    list_display = ('site','ip_address','time','minutes_last_contact')
     list_filter = ('site',)
     pass
 
