@@ -113,27 +113,18 @@ def get_BOM_data():
 
     for site in sites:
         try:
-            print " Now for site: ",
-            print site
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
-            print "NOT GETTING HERE"
 
             if v_client.IS_INITIALIZED:
-               
-                        print " V IS INITIALIZEd"
+
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        print "THE BAT DATA IS: ",
-                        print bat_data
-                        print "THE SYS DATA IS : ", 
-                        print sys_data
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         mains = False
+                        loggind.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
                             mains = True
-
-
 
                         data_point = BoM_Data_Point(
                             site = site,
@@ -159,7 +150,7 @@ def get_BOM_data():
                         	data_point.save()
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
-                       
+
                         print "BoM Data saved"
                         # Alert if check(data_point) fails
 
