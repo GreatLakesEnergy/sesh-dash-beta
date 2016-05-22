@@ -698,6 +698,7 @@ def get_latest_bom_data(request):
 
     # adding data from the rmc_status
     try:
+        # TODO letest_point should only return one point
         latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
         logger.debug("RMC status card %s"%latest_points)
     except StopIteration:

@@ -262,7 +262,7 @@ class Influx:
 
 # Helper classes to the interface
 def get_latest_point_site(site, measurement_name, db=None):
-    """ Returns the latest point for a measurement for a specific siite """
+    """ Static method for that returns  latest point for a measurement for a specific siite """
     i = Influx()
     if db is not None:
         i = Influx(database=db)
