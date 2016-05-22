@@ -121,7 +121,7 @@ def get_BOM_data():
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         mains = False
-                        loggind.debug("Fetching vrm data %s for %s"%(date,site))
+                        logger.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
                             mains = True
@@ -247,7 +247,7 @@ def run_aggregate_on_historical(site_id):
     """
     site = Sesh_Site.objects.get(pk=site_id)
     start_date = site.comission_date # TODO this hould porbably be based on range in DB
-    end_date =  timezone.now()
+    end_date =  timezone.localtime(timezone.now())
     days_to_agr = time_utils.get_time_interval_array(24,'hours',start_date,end_date)
     logger.debug( "getting historic aggregates %s"%(days_to_agr))
     for day in days_to_agr:
@@ -561,7 +561,7 @@ def rmc_status_update():
         logger.debug("getting status from site %s"%site)
         if latest_dp:
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
-            tn = timezone.now()
+            tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
             rmc_status = RMC_status(site = site,
                                     rmc = site.rmc_account,
