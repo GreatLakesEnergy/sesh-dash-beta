@@ -21,7 +21,7 @@ sudo initctl restart seshdash
                                                          
 sudo initctl restart sesh-clry                           
 
-ACCESS_TOKEN=6f98580e034f4d72b2788c368ee23743
+ACCESS_TOKEN=
 ENVIRONMENT=production
 LOCAL_USERNAME=`whoami`
 REVISION=`git log -n 1 --pretty=format:"%H"`
