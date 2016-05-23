@@ -25,7 +25,7 @@ from django.utils import timezone
 
 # This test case written to test alerting module.
 # It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
-class SearchTestCase(TestCase):
+class EditTestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -80,7 +80,7 @@ class SearchTestCase(TestCase):
 
 
     #testing form
-    def test_form(self):
+    def test_add_site(self):
         f = Client()
         f.login(username = "patrick",password = "cdakcjocajica")
         data={'site_name':u'kibuye',
@@ -95,7 +95,10 @@ class SearchTestCase(TestCase):
                               'number_of_panels':100,
                               'battery_bank_capacity':1200}
         form = SiteForm(data)
+        # testing form is valid
         self.assertTrue(form.is_valid())
-        form.save()
+        # checking created site
+        sites = Sesh_Site.objects.all()
+        self.assertEqual(len(sites),1)
         response = f.post('/add_site', data)
         self.assertEqual(response.status_code, 200)

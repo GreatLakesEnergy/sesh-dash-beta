@@ -710,13 +710,12 @@ def get_latest_bom_data(request):
 
 @login_required
 def search(request):
+    
     data=[]
-    sites = Sesh_Site.objects.all()
-    #site = sites[0]
-    #site.site_name
+    # Getting all user sites
+    sites = _get_user_sites(request)
     for site in sites:
         data.append({"key":site.id,"value":site.site_name})
-    # print data
     return HttpResponse(json.dumps(data))
 
 @login_required
@@ -809,20 +808,23 @@ def graphs(request):
 
 #function to editing existing sites
 @login_required
-def edit_site(request,site_Id):
-    #creating an instance to populate a form
-    instance = get_object_or_404(Sesh_Site, id=site_Id)
-   
-    form = SiteForm(instance=instance)    
-    #checking if the form is valid
-   
-    if form.is_valid():
-        form = form.save()
+def edit_site(request,site_Id=12):
+    if request.method == 'GET':
+        #creating an instance to populate a form
+        instance = get_object_or_404(Sesh_Site, id=site_Id)
+        form = SiteForm(instance=instance)    
+    else:
+        form = SiteForm(request.POST)
+        #checking if the form is valid
+        if form.is_valid():
+            form = form.save()
+
     return render(request,'seshdash/settings.html', {'form_edit':form})
 
 # function of adding new site
 @login_required
 def add_site(request):
+   
     #fetching list of sites for the user
     user_sites = {}
     user_site_name = []
@@ -832,16 +834,16 @@ def add_site(request):
         user_site_name.append(site.site_name)
         user_site_id.append(site.id)
     user_sites = dict(zip(user_site_id,user_site_name))
+   
     # on ajax 
     if request.method == 'POST':
     
         form = SiteForm(request.POST)
 
         if form.is_valid():
-
             form = form.save()
-
             form = SiteForm()
+   
     #on page load
     else:
    
