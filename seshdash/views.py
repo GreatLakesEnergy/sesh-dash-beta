@@ -779,9 +779,8 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            SI_units = BoM_Data_Point.SI_UNITS
-            default_unit = 'V'
-            SI_unit = SI_units.get(choice, default_unit)
+            SI_unit = get_measurement_unit(choice)
+            print SI_unit
             # creating an influx instance
             client = Influx()
 
@@ -810,17 +809,17 @@ def graphs(request):
 #function to editing existing sites
 @login_required
 def edit_site(request,site_Id=12):
-    if request.method == 'GET':
+   # if request.method == 'GET':
         #creating an instance to populate a form
         instance = get_object_or_404(Sesh_Site, id=site_Id)
         form = SiteForm(instance=instance)    
-    else:
-        form = SiteForm(request.POST)
+   # else:
+     #   form = SiteForm(request.POST)
         #checking if the form is valid
         if form.is_valid():
             form = form.save()
 
-    return render(request,'seshdash/settings.html', {'form_edit':form})
+        return render(request,'seshdash/settings.html', {'form_edit':form})
 
 # function of adding new site
 @login_required
