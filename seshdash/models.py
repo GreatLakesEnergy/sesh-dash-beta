@@ -63,7 +63,6 @@ class Sesh_User(models.Model):
     on_call = models.BooleanField(default=False)
     send_mail = models.BooleanField(default=False)
     send_sms = models.BooleanField(default=False)
-    send_slack = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -74,6 +73,7 @@ class Sesh_User(models.Model):
 
 class Sesh_Organisation(models.Model):
     group = models.OneToOneField(Group)
+    send_slack = models.BooleanField(default=False)
     slack_token = models.CharField(max_length=100)
 
     def __str__(self):
