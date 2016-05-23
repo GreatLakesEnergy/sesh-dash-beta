@@ -45,53 +45,49 @@ def alert_generator():
         data_point, real_value = get_alert_check_value(site, rule)
 
         if data_point is not None and real_value is not None:
-
             if check_alert(rule, real_value):
-
                 alert_obj = alert_factory(site, rule, data_point)
 
                 # if alert_obj is created
-                if alert_obj is not None:
+                if alert_obj is not None: 
                     content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                     mails, sms_numbers = get_recipients_for_site(site)
-
-
-                    if rule.send_mail:
-                         alert_obj.emailSent = alertEmail('Alert Email from seshdash',data_point,content,mails)
-
-                    if rule.send_sms:
-                         alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
-
-                    if rule.send_slack:
-                         for site_group in site_groups:
-
-                             # unpacking the neccessary data
-                             sesh_organisation = site_group.sesh_organisation
-                             channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
-
-
-                             # instantiating the client
-                             slack = Slack(sesh_organisation.slack_token)
-
-                             for channel in channels:
-                                 if settings.DEBUG == True:
-                                     alert_obj.slackSent = True
-                                 else:
-                                     alert_obj.slackSent = slack.send_message_to_channel(channel.name, content['alert_str'])
-
+                    
+                    # reporting
+                    alert_obj.emailSent = send_mail("Alert Mail", mails, content)
+                    alert_obj.smsSent = send_sms(sms_numbers, content)
+                    alert_obj.slackSent = send_alert_slack(site_groups, content)                   
+   
                     alert_obj.save()
+                 
 
 
+def send_alert_slack(site_groups, content):
+    """
+    Sends the alert message to specific channels in slack for organisations
+    """
+    for site_group in site_groups:
+        try:
+           sesh_organisation = site_group.sesh_organisation
+        except RelatedObjectDoesNotExist:
+           logging.error("There is not associated sesh organisation for group %s " % site_group)
+	   return False
 
+        if sesh_organisation.send_slack:
+            channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
+            slack = Slack(sesh_organisation.slack_token)  # instantiate the api for the organisation
+       
+            for channel in channels:
+                response = slack.send_message_to_channel(channel.name, content['alert_str'])
+             
+                if not response:
+                    logging.error('Failed to send message for %s in %s' % (sesh_organisation, channel))
+                    return False
+        else:
+            logger.debug("Slack reports disabled for %s organisation " % sesh_organisation)
+            return False
 
-
-def alertEmail(subject, data_point,content,recipients):
-    return send_mail(subject,recipients,content)
-
-
-
-def alertSms(data_point,content,recipients):
-    return send_sms(recipients, content)
+    return True
 
 
 
@@ -199,23 +195,16 @@ def get_recipients_for_site(site):
     mails = []
     sms_numbers = []
 
-    # TODO to be removed
     for user in users:
-
-
-        if hasattr(user, 'seshuser'):
+        if user.seshuser:
             mails.append(user.email)
-
-            if user.seshuser.phone_number and user.seshuser.on_call:
-                sms_numbers.append(user.seshuser.phone_number)
-
-
-                logger.debug("emailing %s" % mails)
+           
+        if user.seshuser and user.seshuser.on_call and user.seshuser.send_sms and user.seshuser.phone_number:
+            sms_numbers.append(user.seshuser.phone_number)
 
     return mails, sms_numbers
-
-
-
+ 
+       
 def alert_factory(site, rule, data_point):
     """ Creating an alert object """
 
@@ -354,7 +343,9 @@ def get_alert_point_value(alert, point=None):
 
 
 def alert_status_check():
-    """ Checks if the alert is still valid and silences it if it is invalid """
+    """ 
+    Checks if the alert is still valid and silences it if it is invalid 
+    """
     unsilenced_alerts = get_unsilenced_alerts()
     logger.debug("Running alert status check")
     if unsilenced_alerts:
@@ -388,10 +379,12 @@ def alert_status_check():
                 content = get_alert_content(site, rule, data_point, data_point_value, alert)
 
                 mails, sms_numbers = get_recipients_for_site(site)
+                site_groups = get_groups_with_perms(site)
 
                 # Reporting
-                if rule.send_mail:
-                    alertEmail('Alert auto silenced', data_point, content, mails)
+                send_mail('Alert auto silenced', content, mails)
+                send_sms(content, sms_numbers)
+                send_alert_slack(site_groups, content)
+                
+                
 
-                if rule.send_sms:
-                    alertSms(data_point,content,sms_numbers)
