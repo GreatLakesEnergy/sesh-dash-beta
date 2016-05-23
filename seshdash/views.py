@@ -809,17 +809,16 @@ def graphs(request):
 #function to editing existing sites
 @login_required
 def edit_site(request,site_Id=12):
-   # if request.method == 'GET':
-        #creating an instance to populate a form
-        instance = get_object_or_404(Sesh_Site, id=site_Id)
-        form = SiteForm(instance=instance)    
-   # else:
-     #   form = SiteForm(request.POST)
+   #creating an instance to populate a form
+   instance = get_object_or_404(Sesh_Site, id=site_Id)
+   form = SiteForm(instance=instance)    
+   if request.method == 'POST':
+        form = SiteForme(request.POST, instance=instance)
         #checking if the form is valid
         if form.is_valid():
             form = form.save()
 
-        return render(request,'seshdash/settings.html', {'form_edit':form})
+   return render(request,'seshdash/settings.html', {'form_edit':form})
 
 # function of adding new site
 @login_required
