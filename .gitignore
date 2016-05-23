@@ -65,12 +65,18 @@ nosetests.xml
 coverage.xml
 *,cover
 
+
+# All log files
+*.log
+*.logs
+
 # Translations
 *.mo
 *.pot
 
-# Django stuff:
-*.log
+
+# logs
+*.logs
 
 # Sphinx documentation
 docs/_build/

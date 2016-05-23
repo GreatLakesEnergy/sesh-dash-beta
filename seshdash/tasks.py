@@ -26,13 +26,14 @@ logger = logging.getLogger(__name__)
 
 @task_failure.connect
 def handle_task_failure(**kw):
+    message = 'error occured in task: %/n message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
     logger.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
     print "ERROR in task %s"%kw.get('message',"no error message")
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
         kw['trace'] = trace
-        rollbar.report_message(message='Error occured in task',extra_data=kw)
+        rollbar.report_message(message=message,extra_data=kw)
 
 
 def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
@@ -57,7 +58,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
         message = "Error sending to influx with exception %s in datapint %s"%(e,model_data_dict)
-        handle_task_failure(message= message,exception=e,data=model_data)
+        handle_task_failure(message= message, name='send_to_influx' ,exception=e,data=model_data)
 
 def generate_auto_rules(site_id):
     """
@@ -113,27 +114,18 @@ def get_BOM_data():
 
     for site in sites:
         try:
-            print " Now for site: ",
-            print site
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
-            print "NOT GETTING HERE"
 
             if v_client.IS_INITIALIZED:
-               
-                        print " V IS INITIALIZEd"
+
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        print "THE BAT DATA IS: ",
-                        print bat_data
-                        print "THE SYS DATA IS : ", 
-                        print sys_data
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         mains = False
+                        logger.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
                             mains = True
-
-
 
                         data_point = BoM_Data_Point(
                             site = site,
@@ -159,7 +151,7 @@ def get_BOM_data():
                         	data_point.save()
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
-                       
+
                         print "BoM Data saved"
                         # Alert if check(data_point) fails
 
@@ -171,7 +163,7 @@ def get_BOM_data():
             print Exception
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
-            handle_task_failure(message = message)
+            handle_task_failure(message = message, exception=e)
             pass
 
 def _check_data_pont(data_point_arr):
@@ -205,14 +197,14 @@ def get_historical_BoM(site_pk,start_at):
                 data_point = BoM_Data_Point(
                     site = site,
                     time = date,
-                    soc = row.get('Battery State of Charge (System)'),
-                    battery_voltage = row.get('Battery voltage'),
-                    AC_input = row.get('Input power 1'),
-                    AC_output =  row.get('Output power 1'),
-                    AC_Load_in =  row.get('Input current phase 1'),
-                    AC_Load_out =  row.get('Output current phase 1'),
-                    inverter_state = row.get('VE.Bus Error'),
-                    pv_production = row.get('PV - AC-coupled on input L1'), # IF null need to put in 0
+                    soc = row.get('Battery State of Charge (System)', 0),
+                    battery_voltage = row.get('Battery voltage', 0),
+                    AC_input = row.get('Input power 1', 0),
+                    AC_output =  row.get('Output power 1', 0),
+                    AC_Load_in =  row.get('Input current phase 1', 0),
+                    AC_Load_out =  row.get('Output current phase 1', 0),
+                    inverter_state = row.get('VE.Bus Error', ''),
+                    pv_production = row.get('PV - AC-coupled on input L1', 0), # IF null need to put in 0
                     #TODO these need to be activated
                     genset_state =  0,
                     relay_state = 0,
@@ -256,7 +248,7 @@ def run_aggregate_on_historical(site_id):
     """
     site = Sesh_Site.objects.get(pk=site_id)
     start_date = site.comission_date # TODO this hould porbably be based on range in DB
-    end_date =  timezone.now()
+    end_date =  timezone.localtime(timezone.now())
     days_to_agr = time_utils.get_time_interval_array(24,'hours',start_date,end_date)
     logger.debug( "getting historic aggregates %s"%(days_to_agr))
     for day in days_to_agr:
@@ -570,13 +562,14 @@ def rmc_status_update():
         logger.debug("getting status from site %s"%site)
         if latest_dp:
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
-            tn = timezone.now()
+            tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
             rmc_status = RMC_status(site = site,
                                     rmc = site.rmc_account,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
             logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))
+            logger.debug("saving status %s "%rmc_status)
             rmc_status.save()
         else:
             logger.warning("RMC STATUS: No DP found for site")
