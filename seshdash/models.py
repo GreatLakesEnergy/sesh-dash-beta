@@ -61,6 +61,9 @@ class Sesh_User(models.Model):
     department = models.CharField(max_length=100)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
+    send_mail = models.BooleanField(default=False)
+    send_sms = models.BooleanField(default=False)
+    send_slack = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -148,9 +151,7 @@ class Alert_Rule(models.Model):
     operator = models.CharField(max_length=2,
                                       choices=OPERATOR_CHOICES,
                                       default="lt")
-    send_mail = models.BooleanField(default=True)
-    send_sms = models.BooleanField(default=True)
-    send_slack = models.BooleanField(default=True)
+
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
