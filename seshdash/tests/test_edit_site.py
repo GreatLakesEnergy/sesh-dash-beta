@@ -76,7 +76,7 @@ class AddTestCase(TestCase):
 
     def test_edit_site(self):
         f = Client()
-        f.login(username='frank',password='rtwrt3iurgiger')
+        f.login(username = "patrick",password = "cdakcjocajica")
         data={'site_name':u'kibuye',
                               'comission_date':datetime(2015,12,11,22,0),
                               'location_city':u'kigali',

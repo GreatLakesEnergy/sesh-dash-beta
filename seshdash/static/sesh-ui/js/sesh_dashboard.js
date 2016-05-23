@@ -254,7 +254,7 @@ Morris.Bar({
 /*------------------------------------------------------------------------*/
 //$(document).ready(function(){
                //checking if the form exists
-  /*    if ($("#id_site_name").length){
+      if ($("#id_site_name").length){
 
             $(".button-save").hide();
 
@@ -262,7 +262,7 @@ Morris.Bar({
             $(".button-save").show();
 
             }
-*/
+
       $('.sites-available').click(function(){
            console.log("button hidden")
           $('#button-add-site').hide();
