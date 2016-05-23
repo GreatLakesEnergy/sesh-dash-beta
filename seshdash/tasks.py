@@ -549,6 +549,8 @@ def rmc_status_update():
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
         logger.debug("getting status from site %s"%site)
         if latest_dp:
+            #localize to time of site
+            localized = timezone.localtime(latest_dp.time)
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
