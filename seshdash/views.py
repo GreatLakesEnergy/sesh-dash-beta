@@ -808,12 +808,16 @@ def graphs(request):
 
 #function to editing existing sites
 @login_required
-def edit_site(request,site_Id=12):
-   #creating an instance to populate a form
-   instance = get_object_or_404(Sesh_Site, id=site_Id)
-   form = SiteForm(instance=instance)    
-   if request.method == 'POST':
-        form = SiteForme(request.POST, instance=instance)
+def edit_site(request,site_Id=1):
+   if request.method == 'GET':
+       
+       #creating an instance to populate a form
+       instance = get_object_or_404(Sesh_Site, id=site_Id)
+       form = SiteForm(instance=instance)    
+  
+   else:
+       
+        form = SiteForm(request.POST)
         #checking if the form is valid
         if form.is_valid():
             form = form.save()

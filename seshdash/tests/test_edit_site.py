@@ -96,3 +96,9 @@ class AddTestCase(TestCase):
         self.assertEqual(len(sites),1)
         response = f.post('/edit_site',data)
         self.assertEqual(response.status_code,200)
+        #checking if a valid id is passed
+        response = f.get('/edit_site/1')
+        self.assertEqual(response.status_code,200)
+        # checking if a wrong id is passed
+        response = f.get('/edit_site/5')
+        self.assertEqual(response.status_code,404)
