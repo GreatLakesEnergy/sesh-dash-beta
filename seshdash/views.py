@@ -809,15 +809,15 @@ def graphs(request):
 #function to editing existing sites
 @login_required
 def edit_site(request,site_Id=1):
-   if request.method == 'GET':
-       
+   print site_Id
+   #if request.method == 'GET':
        #creating an instance to populate a form
-       instance = get_object_or_404(Sesh_Site, id=site_Id)
-       form = SiteForm(instance=instance)    
-  
-   else:
+   instance = get_object_or_404(Sesh_Site, id=site_Id)
+   form = SiteForm(instance=instance)    
+   if request.method == 'POST':
+        instance = get_object_or_404(Sesh_Site, id=site_Id)
+        form = SiteForm(request.POST or None, instance=instance)
        
-        form = SiteForm(request.POST)
         #checking if the form is valid
         if form.is_valid():
             form = form.save()
