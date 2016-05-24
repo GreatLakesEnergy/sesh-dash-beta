@@ -114,6 +114,8 @@ def get_BOM_data():
  
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
                         date = parse(date)
+                        print "The date of the point is ",
+                        print date
 
                         mains = False
                         logger.debug("Fetching vrm data %s for %s"%(date,site))
@@ -556,12 +558,22 @@ def rmc_status_update():
     sites = Sesh_Site.objects.all()
     for site in sites:
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
+        print "Got the latest data point: ",
+        print "The time is ",
+        print latest_dp.time
+
         logger.debug("getting status from site %s"%site)
         if latest_dp:
             #localize to time of site
-            #localized = timezone.localtime(latest_dp.time)
+            localized = timezone.localtime(latest_dp.time)
+            print "The localized time is ",
+            print localized
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+            print "The last contact is ",
+            print last_contact
             tn = timezone.localtime(timezone.now())
+            print "The time to be saved on the rmc status is ",
+            print tn
             last_contact_min = last_contact / 60
             rmc_status = RMC_status(site = site,
                                     rmc = site.rmc_account,
