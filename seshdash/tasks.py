@@ -19,6 +19,7 @@ from seshdash.data.db.influx import Influx
 
 # Time related
 from datetime import datetime, date, timedelta
+from dateutil.parser import parse
 from seshdash.utils import time_utils
 from django.utils import timezone
 
@@ -109,6 +110,9 @@ def get_BOM_data():
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
+                        date = parse(date)
+                        date = timezone.localtime(date)
+         
                         mains = False
                         logger.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
