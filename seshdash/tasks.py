@@ -111,12 +111,10 @@ def get_BOM_data():
                         print "V is initialized "
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
+ 
+                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
                         date = parse(date)
-                        date = timezone.localtime(date)
-         
-                        print "The date is ",
-                        print date
+
                         mains = False
                         logger.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
@@ -162,6 +160,8 @@ def get_BOM_data():
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e)
             pass
+
+    print "Done no site"
 
 def _check_data_pont(data_point_arr):
         """
@@ -559,7 +559,7 @@ def rmc_status_update():
         logger.debug("getting status from site %s"%site)
         if latest_dp:
             #localize to time of site
-            localized = timezone.localtime(latest_dp.time)
+            #localized = timezone.localtime(latest_dp.time)
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
