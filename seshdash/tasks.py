@@ -66,18 +66,12 @@ def generate_auto_rules(site_id):
     """
     site = Sesh_Site.objects.get(pk=site_id)
 
-    send_sms = False
-    send_mail = True
-    send_slack = True
 
     # Create battery low voltage alarm
     lv_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#battery_voltage',
                         value = site.system_voltage,
                         operator = 'lt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
 
     # Create soc low voltage alarm
@@ -85,18 +79,12 @@ def generate_auto_rules(site_id):
                         check_field = 'BoM_Data_Point#soc',
                         value = 35,
                         operator = 'lt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
     # Create communication alarm
     com_alarm = Alert_Rule(site =site,
                         check_field = 'RMC_status#minutes_last_contact',
                         value = 60,
                         operator = 'gt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
 
     lv_alarm.save()
