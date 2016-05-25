@@ -61,6 +61,8 @@ class Sesh_User(models.Model):
     department = models.CharField(max_length=100)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
+    send_mail = models.BooleanField(default=False)
+    send_sms = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -71,6 +73,7 @@ class Sesh_User(models.Model):
 
 class Sesh_Organisation(models.Model):
     group = models.OneToOneField(Group)
+    send_slack = models.BooleanField(default=False)
     slack_token = models.CharField(max_length=100)
 
     def __str__(self):
@@ -148,9 +151,7 @@ class Alert_Rule(models.Model):
     operator = models.CharField(max_length=2,
                                       choices=OPERATOR_CHOICES,
                                       default="lt")
-    send_mail = models.BooleanField(default=True)
-    send_sms = models.BooleanField(default=True)
-    send_slack = models.BooleanField(default=True)
+
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
@@ -253,28 +254,6 @@ class BoM_Data_Point(models.Model):
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
     
-    """
-    SI units
-    """
-    SI_UNITS = {
-        "id": '',
-        "soc":"%",
-        "battery_voltage": "V",
-        "AC_Voltage_in" : "V",
-        "AC_Voltage_out" : "V",
-        "AC_input" : "V",
-        "AC_output" : "V",
-        "AC_Load_in" : "V",
-        "AC_Load_out" : "V",
-        "pv_production" : "W",
-        "main_on" : "V",
-        "relay_state": "",
-        "trans" : "",
-        "genset_state" : "V",
-        "site" : "",
-        "AC_output_absolute" : "V",
-        }
-    
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
@@ -296,8 +275,8 @@ class Daily_Data_Point(models.Model):
         "AC_Voltage_out" : "V",
         "AC_input" : "V",
         "AC_output" : "V",
-        "AC_Load_in" : "V",
-        "AC_Load_out" : "V",
+        "AC_Load_in" : "A",
+        "AC_Load_out" : "A",
         "pv_production" : "W",
         "main_on" : "V",
         "relay_state": "",

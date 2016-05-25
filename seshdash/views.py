@@ -52,7 +52,6 @@ import logging
 
 #Autocomplete
 from seshdash.models import *
-from django.forms import model_to_dict
 import json
 # Influxdb
 from seshdash.data.db.influx import Influx
@@ -62,7 +61,7 @@ from seshdash.data.db.influx import Influx
 logger = logging.getLogger(__name__)
 
 @login_required(login_url='/login/')
-def index(request,site_id=0):
+def index(request,site_id=0): 
     """
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
@@ -712,10 +711,10 @@ def get_latest_bom_data(request):
 
 @login_required
 def search(request):
+    
     data=[]
-    sites = Sesh_Site.objects.all()
-    site = sites[0]
-    site.site_name
+    # Getting all user sites
+    sites = _get_user_sites(request)
     for site in sites:
         data.append({"key":site.id,"value":site.site_name})
     return HttpResponse(json.dumps(data))
@@ -745,8 +744,8 @@ def historical_data(request):
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
+        print sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
-
 
 #function for Graph Generations
 @login_required
@@ -780,9 +779,8 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            SI_units = BoM_Data_Point.SI_UNITS
-            SI_unit = SI_units[choice]
-
+            SI_unit = get_measurement_unit(choice)
+            print SI_unit
             # creating an influx instance
             client = Influx()
 
@@ -807,3 +805,50 @@ def graphs(request):
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()
+
+#function to editing existing sites
+@login_required
+def edit_site(request,site_Id=1):
+   print site_Id
+   #if request.method == 'GET':
+       #creating an instance to populate a form
+   instance = get_object_or_404(Sesh_Site, id=site_Id)
+   form = SiteForm(instance=instance)    
+   if request.method == 'POST':
+        instance = get_object_or_404(Sesh_Site, id=site_Id)
+        form = SiteForm(request.POST or None, instance=instance)
+       
+        #checking if the form is valid
+        if form.is_valid():
+            form = form.save()
+
+   return render(request,'seshdash/settings.html', {'form_edit':form})
+
+# function of adding new site
+@login_required
+def add_site(request):
+   
+    #fetching list of sites for the user
+    user_sites = {}
+    user_site_name = []
+    user_site_id = []
+    sites =  _get_user_sites(request)
+    for site in sites:
+        user_site_name.append(site.site_name)
+        user_site_id.append(site.id)
+    user_sites = dict(zip(user_site_id,user_site_name))
+   
+    # on ajax 
+    if request.method == 'POST':
+    
+        form = SiteForm(request.POST)
+
+        if form.is_valid():
+            form = form.save()
+            form = SiteForm()
+   
+    #on page load
+    else:
+   
+        form = SiteForm()
+    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':user_sites})
