@@ -183,8 +183,9 @@ def import_site(request):
                     pre_pop_data = []
                     for site in site_list['sites']:
                         #get one and only vrm account
+                        #TODO this is a bug
                         VRM = VRM_Account.objects.first()
-
+                        logger.debug("Fetching VRM account %s"%VRM)
                         site_model_form = {'site_name':site['name'],
                                             'vrm_site_id':site['idSite'],
                                             'has_genset': site['hasGenerator'],
@@ -229,6 +230,9 @@ def _download_data(request):
             get_historical_BoM.delay(site_id, time_utils.get_epoch_from_datetime(site.comission_date))
 
 def _aggregate_imported_data(sites):
+    """
+    Run aggregations on daily data
+    """
     for site in sites:
         aggregate_daily_data()
 
@@ -237,6 +241,7 @@ def _validate_form(form,context_dict):
     Validate forms basedo no form input
     """
     if form.is_valid():
+        logger.debug("getting ready to save form %s")
         form = form.save(commit=False)
         context_dict['error'] =  False
 
@@ -313,6 +318,7 @@ def _create_site_vrm(request):
     """
     #TODO Bug allert!!  more than one VRM account will cause problem
     VRM = VRM_Account.objects.first()
+    logger.debug("Getting VRM m2m object %s"%VRM)
     site_forms_factory = inlineformset_factory(VRM_Account,
             Sesh_Site,
             form=SiteForm,

@@ -101,6 +101,9 @@ def get_BOM_data():
     # Get all sites that have vrm id
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
 
+    print  "The sites are: ",
+    print sites
+
     for site in sites:
         print "For site: ",
         print site
@@ -114,7 +117,7 @@ def get_BOM_data():
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
                         date = parse(date)
                         date = timezone.localtime(date)
-         
+
                         print "The date is ",
                         print date
                         mains = False
@@ -162,6 +165,8 @@ def get_BOM_data():
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e)
             pass
+
+    print " DONe no sites"
 
 def _check_data_pont(data_point_arr):
         """
