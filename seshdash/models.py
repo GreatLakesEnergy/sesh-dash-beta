@@ -254,28 +254,6 @@ class BoM_Data_Point(models.Model):
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
     
-    """
-    SI units
-    """
-    SI_UNITS = {
-        "id": '',
-        "soc":"%",
-        "battery_voltage": "V",
-        "AC_Voltage_in" : "V",
-        "AC_Voltage_out" : "V",
-        "AC_input" : "V",
-        "AC_output" : "V",
-        "AC_Load_in" : "V",
-        "AC_Load_out" : "V",
-        "pv_production" : "W",
-        "main_on" : "V",
-        "relay_state": "",
-        "trans" : "",
-        "genset_state" : "V",
-        "site" : "",
-        "AC_output_absolute" : "V",
-        }
-    
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
@@ -297,8 +275,8 @@ class Daily_Data_Point(models.Model):
         "AC_Voltage_out" : "V",
         "AC_input" : "V",
         "AC_output" : "V",
-        "AC_Load_in" : "V",
-        "AC_Load_out" : "V",
+        "AC_Load_in" : "A",
+        "AC_Load_out" : "A",
         "pv_production" : "W",
         "main_on" : "V",
         "relay_state": "",
