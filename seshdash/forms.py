@@ -14,17 +14,19 @@ class SiteForm(ModelForm):
         widgets = {'comission_date':forms.DateInput()}
 
 
-    def save(self,**kwargs):
+    def clean(self,**kwargs):
         """
         add timezone based on location
         """
-        super(SiteForm, self).save(**kwargs)
+        # super(SiteForm, self).save(**kwargs)
+        cleaned_data = super(SiteForm, self).clean()
         pos =self.cleaned_data.get('position')
         timezone = get_timezone_from_geo(pos[0], pos[1])
         self.instance.time_zone = timezone
         self.instance.comission_date = localize(self.instance.comission_date, timezone)
 
-        super(SiteForm, self).save(**kwargs)
+        #super(SiteForm, self).save(**kwargs)
+        return cleaned_data
 
 
 
@@ -71,4 +73,4 @@ class VRMForm(ModelForm):
                   'vrm_password': forms.PasswordInput(),
                    }
 
-    
+
