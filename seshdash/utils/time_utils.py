@@ -11,6 +11,7 @@ def get_epoch(tz=None):
     """
     now = datetime.now()
     if tz:
+        tz = _clean_tz(tz)
         now = timezone.now(tz)
     epoch = datetime(1970,1,1)
     diff = now - epoch
@@ -23,6 +24,7 @@ def get_yesterday(tz=None):
 
     now = datetime.date(datetime.now())
     if tz:
+        tz = _clean_tz(tz)
         now = timezone.now(tz)
 
     one_day = timedelta(days=1)
@@ -37,6 +39,7 @@ def get_time_interval_array(interval,interval_type,start,end,tz=None):
     """
 
     if tz:
+        tz = _clean_tz(tz)
         timez = timezone(tz)
     else:
         timez = timezone(settings.TIME_ZONE)
@@ -74,6 +77,7 @@ def get_epoch_from_date(year, month, day, hours, minutes, tz=None):
     """
     date = datetime(year,month,day,hours,minutes)
     if tz:
+        tz = _clean_tz(tz)
         date = datetime(year,month,day,hours,minutes,tzinfo=tz)
 
     epoch = datetime(1970,1,1)
@@ -104,6 +108,7 @@ def epoch_to_date(seconds_time, tz=None):
     """
     time = strftime('%Y-%m-%d',localtime(seconds_time))
     if tz:
+        tz = _clean_tz(tz)
         time = localize(time,tz)
 
     return time
@@ -119,13 +124,15 @@ def epoch_to_datetime(seconds_time, tz=None):
     """
     Translate seconds time to datetime object
     """
-    time = localtime(seconds_time)
+    time = datetime.fromtimestamp(seconds_time)
 
     if tz:
+        tz = _clean_tz(tz)
         time = localize(time,tz)
 
 
-    return strftime('%Y-%m-%dT%XZ',time)
+    #return strftime('%Y-%m-%dT%XZ',time)
+    return time
 
 
 def get_last_five_days(from_date="now", tz=None):
@@ -192,6 +199,7 @@ def get_timesince(time, tz=None):
 
     now = datetime.now()
     if tz:
+        tz = _clean_tz(tz)
         now = timezone.now(tz)
 
     loc = timezone(settings.TIME_ZONE)
@@ -231,9 +239,11 @@ def get_date_dashed(date):
 
 def convert_influx_time_string(date_string):
     """ Converts influx style strings to datetime """
-    return parse(date_string)   
+    return parse(date_string)
 
 def get_timesince_influx(date_string):
     date_obj = convert_influx_time_string(date_string)
     return get_timesince(date_obj)
-    
+
+def _clean_tz(tz):
+    return tz.strip().replace('\'','').replace('\"','')
