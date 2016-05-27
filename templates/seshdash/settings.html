@@ -38,11 +38,11 @@
                                   </tr>
 
                                   <tr>
-                                      {% for key,value in sites.items %}
+                                      {% for site in sites %}
                                       <tr>
 
 
-                                             <th class="sites-available"><a href="/edit_site/{{ key }}">{{ value }}</a></th>
+                                             <th class="sites-available"><a href="/edit_site/{{ site.id }}">{{ site.site_name }}</a></th>
 
                                       </tr>
 
@@ -64,12 +64,15 @@
 
                                                {% csrf_token %}
 
-                                               {{form_edit.as_table}}
+                                               {% if form_edit.as_table|length > 1 %}
 
-                                               {{ form_edit.media }}
+                                                   {{ form_edit.as_table }}
+                                                   {{ form_edit.media }}
 
+                                                   <button type="submit" class="btn btn-primary button-save">SAVE </button>
+                                                {% else %}
+                                               {% endif %}
                                         </table>
-                                        <button type="submit" class="btn btn-primary button-save">SAVE </button>
 
                                 </form>
 
@@ -84,7 +87,7 @@
 
                                                {% csrf_token %}
 
-                                               {{form_add.as_table}}
+                                               {{ form_add.as_table }}
 
                                                {{ form_add.media }}
 

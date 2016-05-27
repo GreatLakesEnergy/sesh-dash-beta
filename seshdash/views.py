@@ -830,15 +830,7 @@ def edit_site(request,site_Id=1):
 def add_site(request):
 
     #fetching list of sites for the user
-    user_sites = {}
-    user_site_name = []
-    user_site_id = []
     sites =  _get_user_sites(request)
-    for site in sites:
-        user_site_name.append(site.site_name)
-        user_site_id.append(site.id)
-    user_sites = dict(zip(user_site_id,user_site_name))
-
     # on ajax
     if request.method == 'POST':
 
@@ -852,4 +844,4 @@ def add_site(request):
     else:
 
         form = SiteForm()
-    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':user_sites})
+    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':sites})
