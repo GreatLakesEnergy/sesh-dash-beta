@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 import logging
 import sys
+import pytz
 
 from django.conf import settings
 from django.db import IntegrityError,transaction
@@ -112,9 +113,20 @@ def get_BOM_data():
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
  
+                        print "The date from victron is: ",
+                        print sys_data['VE.Bus state']['timestamp']
+
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
-                        date = parse(date)
-                        print "The date of the point is ",
+                        print "The date from the time utils is : ",
+                        print date
+
+                        date = parse(date, ignoretz=True)
+                        print "The unlocated time is: ",
+                        print date
+ 
+                        tz = pytz.timezone(site.time_zone)
+                        date = tz.localize(date, is_dst=None)
+                        print "The localized time is: ",
                         print date
 
                         mains = False
@@ -568,7 +580,7 @@ def rmc_status_update():
             localized = timezone.localtime(latest_dp.time)
             print "The localized time is ",
             print localized
-            last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+            last_contact = time_utils.get_timesince_seconds(latest_dp.time, site.time_zone)
             print "The last contact is ",
             print last_contact
             tn = timezone.localtime(timezone.now())

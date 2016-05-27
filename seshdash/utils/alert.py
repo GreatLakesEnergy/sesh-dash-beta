@@ -10,7 +10,7 @@ from dateutil import parser
 # Influx client
 from seshdash.data.db import influx
 
-from seshdash.utils.model_tools import get_model_first_reference
+from seshdash.utils.model_tools import get_model_first_reference, get_measurement_from_rule, get_measurement_unit, get_measurement_verbose_name
 from seshdash.utils.time_utils import get_epoch_from_datetime
 from seshdash.utils.send_slack import Slack
 
@@ -36,20 +36,32 @@ def alert_generator():
     mails = []
     sms_numbers = []
     rules = Alert_Rule.objects.all()
+    print "Done setting up",
+    print "Got rules: ",
+    print rules
 
     for rule in rules:
+        print "For rule: ",
+        print rule
         site = rule.site
         site_groups = get_groups_with_perms(site)
 
         # Get datapoint and real value
         data_point, real_value = get_alert_check_value(site, rule)
 
+        print "Getting datapoints",
+        print "Got datapoint: ",
+        print data_point
+
         if data_point is not None and real_value is not None:
+            print "Data point and value is not none "
             if check_alert(rule, real_value):
+                print "Alert Found"
                 alert_obj = alert_factory(site, rule, data_point)
 
                 # if alert_obj is created
                 if alert_obj is not None: 
+                    print "Alert obj created "
                     content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                     mails, sms_numbers = get_recipients_for_site(site)
                     
@@ -129,8 +141,8 @@ def get_latest_point_value_influx(site, rule):
 
 def is_influx_rule(rule):
     """
-       A function that detects if the alert rule defined uses influx,
-       Influx rules should not contain a '#' because split returns
+    A function that detects if the alert rule defined uses influx,
+    Influx rules should not contain a '#' because split returns
     """
     if len(rule.check_field.split('#')) == 1:
         return True
@@ -139,7 +151,9 @@ def is_influx_rule(rule):
 
 
 def is_mysql_rule(rule):
-    """ A function that detects if the alert rule defined, uses mysql """
+    """
+    A function that detects if the alert rule defined, uses mysql
+    """
 
     if len(rule.check_field.split('#')) == 2:
         return True
@@ -166,13 +180,24 @@ def check_alert(rule, data_point_value):
         return False
 
 
+def get_message_alert(alert):
+    """
+    Returns an alert mesage represetnation
+    """
+    measurement = get_measurement_from_rule(alert.alert)
+    return "At site %s \n %s is %s %s%s" % (alert.site, get_measurement_verbose_name(measurement),
+                                            alert.alert.get_operator_display(), alert.alert.value,
+                                            get_measurement_unit(measurement))
+
+
+
 
 def get_alert_content(site, rule, data_point, value, alert):
     """ Returns a dictionary containing information about the alert """
 
     content = {}
 
-    content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(site.site_name,rule.check_field,rule.operator,rule.value, value)
+    content_str = get_message_alert(alert)
 
     # Get ready content for email
     content['site'] = site.site_name

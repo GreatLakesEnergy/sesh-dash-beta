@@ -5,6 +5,7 @@ from django.conf import settings
 from  pytz import timezone
 from tzwhere import tzwhere
 
+
 def get_epoch(tz=None):
     """
     Return number of seconds since 1970-01-01- epoch
@@ -184,11 +185,14 @@ def get_timesince_seconds(time, tz=None):
     """
     now = datetime.now()
     if tz:
-        now = timezone.now(tz)
+        now = timezone(tz).localize(datetime.now())
 
-
-    loc = timezone(settings.TIME_ZONE)
-    now = loc.localize(now)
+    #loc = timezone(settings.TIME_ZONE)
+    #now = loc.localize(now)
+    print "Now is : ",
+    print now
+    print "Time is: ",
+    print time
     diff =  now - time
     return int(diff.total_seconds())
 

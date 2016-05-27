@@ -57,7 +57,8 @@ config = RawConfigParser(
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':'',
-               'SLACK_TEST_KEY':''
+               'SLACK_TEST_KEY':'',
+               'USE_TEMPLATE_TWO':'False'
                }
         )
 
@@ -81,6 +82,19 @@ FORECAST_KEY = config.get('api','forecast_key')
 # slack key
 SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
+# use template twoo
+USE_TEMPLATE_TWO = eval(config.get('templates', 'USE_TEMPLATE_TWO'))
+
+
+print "The template value is: ",
+print USE_TEMPLATE_TWO
+
+# for switching to template two
+if USE_TEMPLATE_TWO:
+    TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates_two')
+   
+
+
 # Temp folder for misc files
 
 try:
@@ -100,6 +114,7 @@ DATABASES = {
         'HOST': config.get('database','HOST'),
     }
 }
+
 #influx settings
 INFLUX_HOST = config.get('influx','HOST')
 INFLUX_PORT = config.get('influx','PORT')

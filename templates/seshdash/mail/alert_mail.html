@@ -172,15 +172,19 @@ ul li {
 					<td>
 						<h1>SESH ALERT: {{ content.site }} </h1>
 						<p>Hi there {{ username }} ,</p>
-                        Alert was 
+                        Alert was <strong>
                                   {% if content.alert.isSilence %} 
                                        silenced
                                   {% else %}
                                        triggered
                                   {% endif %}
+                                  </strong>
                                  
                                   at {{ time }}
                         for site: {{ content.site }} <br><br>
+                        
+                        {{ content.alert_str }}  <br>
+                         
                         {{ alert.isSilence }}
                         Alert status: {% if content.alert.isSilence %}
                                           inactive
