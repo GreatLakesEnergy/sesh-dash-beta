@@ -105,15 +105,6 @@ function ready_graph_data(data,x_value,y_value){
   }
 
 
-// energy production graph
-/* NOTE commenting out for now, switching out nvd3 graphs
-Morris.Bar({
-      element: 'energy-production-last-5-days',
-      data: ready_graph_data(power_data,'time','w_production'),
-  xkey: 'y',
-  ykeys: ['a'],
-  labels: ['wh']
-});
 
 //cloudcover forecast
 Morris.Bar({
@@ -124,8 +115,6 @@ Morris.Bar({
   ykeys: ['a'],
   labels: ['Cloud Cover %']
 });
-*/
-//nano bar
 
 
 /* Alerts modal toggle script */
@@ -142,7 +131,7 @@ Morris.Bar({
 
 /*ALerts Notification modal */
 
-    $(document).ready(function(){
+$(document).ready(function(){
     alertId = $(this).attr('classid');
 
     // getting alerts site and number from the server
@@ -155,16 +144,17 @@ Morris.Bar({
         
           //declaring variables
           var out= $("#alert-notification-table");
-          var element = '';
-          var i;
-          var sum_of_counters = 0;
+              element = '',
+              i,
+              sum_of_counters = 0;
     
           //looping through the json object appending to a table
           for(i=0 ; i<alertData.length ; i++){
-              sum_of_counters += alertData[i].counter;                                                                                      element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
-                               '<td>'+ alertData[i].site +  '</td>' +
-                               '<td id="site-counter">'+ alertData[i].counter + '</td>' +
-                               '</tr>';
+              sum_of_counters += alertData[i].counter;                                                                                      element += '<tr class ="clickable-row" data-href="/dash/' 
+                           + alertData[i].site_id + '#alerts-panel">'
+                           + '<td>' + alertData[i].site +  '</td>'
+                           +'<td id="site-counter">'+ alertData[i].counter + '</td>'
+                           +'</tr>';
           }
        
           out.append(element);
