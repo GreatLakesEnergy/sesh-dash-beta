@@ -14,6 +14,7 @@ from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
 from django.conf import settings
 
+
 # Utils
 from datetime import datetime
 from seshdash.utils import alert
@@ -82,4 +83,5 @@ class SearchTestCase(TestCase):
 
         response = f.post('/search',{})
         self.assertEqual(response.status_code, 200)
+
 

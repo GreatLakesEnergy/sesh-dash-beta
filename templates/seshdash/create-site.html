@@ -2,8 +2,8 @@
         <!-- Create Site Form -->
         <div class="col-lg-12">
             <div class="panel panel-default">
-                <div class="panel-heading">                          
-                        <!-- TODO make this a variable -->               
+                <div class="panel-heading">
+                        <!-- TODO make this a variable -->
                             {% if site_forms  and form_type == 'vrm' %}
                                 {% if error %}
                                     <p class="text-danger"> Site import was failure    </p>
@@ -15,11 +15,11 @@
                                 {% if error %}
                                 <p class="text-danger"> {{ account_type }}  import was failed :  {{ message }}    </p>
                                 {% else %}
-                                <p class="text-info"> Please enter details of site </p>   
+                                <p class="text-info"> Please enter details of site </p>
                                 {% endif %}
                            {% endif %}
-                     
-                    </div>                                               
+
+                    </div>
                 <div class="panel-body">
                     <form action="/create-site/" method="post">
                             {% csrf_token %}
@@ -28,9 +28,9 @@
 
                                     {% if form_type != 'vrm' %}
                                         <!-- RMC FORM -->
-                                         <input type="hidden" name="form_type" value="rmc"> 
+                                         <input type="hidden" name="form_type" value="rmc">
                                     {% else %}
-                                         <input type="hidden" name="form_type" value="vrm"> 
+                                         <input type="hidden" name="form_type" value="vrm">
                                     {% endif %}
 
                                     {{ site_forms.media}}

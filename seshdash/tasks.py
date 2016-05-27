@@ -19,6 +19,7 @@ from seshdash.data.db.influx import Influx
 
 # Time related
 from datetime import datetime, date, timedelta
+from dateutil.parser import parse
 from seshdash.utils import time_utils
 from django.utils import timezone
 
@@ -26,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 @task_failure.connect
 def handle_task_failure(**kw):
-    message = 'error occured in task: %/n message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
-    logger.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
-    print "ERROR in task %s"%kw.get('message',"no error message")
+    message = 'error occured in task: %s message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
+    logger.error("CELERY TASK FAILURE:%s"%(message))
+    print "ERROR in task %s"%message
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
@@ -66,18 +67,12 @@ def generate_auto_rules(site_id):
     """
     site = Sesh_Site.objects.get(pk=site_id)
 
-    send_sms = False
-    send_mail = True
-    send_slack = True
-
+    logger.info("Running auto rule generation")
     # Create battery low voltage alarm
     lv_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#battery_voltage',
                         value = site.system_voltage,
                         operator = 'lt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
 
     # Create soc low voltage alarm
@@ -85,18 +80,12 @@ def generate_auto_rules(site_id):
                         check_field = 'BoM_Data_Point#soc',
                         value = 35,
                         operator = 'lt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
     # Create communication alarm
     com_alarm = Alert_Rule(site =site,
                         check_field = 'RMC_status#minutes_last_contact',
                         value = 60,
                         operator = 'gt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
 
     lv_alarm.save()
@@ -111,16 +100,23 @@ def get_BOM_data():
     print "Getting started getting the bom point "
     # Get all sites that have vrm id
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
-
+    logger.info("Running VRM data collection")
     for site in sites:
+        logger.debug("Getting VRM data for %s"%site)
         try:
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
 
             if v_client.IS_INITIALIZED:
-
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
+                        #This data is already localazied
+                        logger.debug("got raw date %s with timezone %s"%(
+                            sys_data['VE.Bus state']['timestamp'],
+                            site.time_zone
+                            ))
+                        date = time_utils.epoch_to_datetime(float(sys_data['VE.Bus state']['timestamp']) , tz=site.time_zone)
+                        logger.debug("saving before localize  BOM data point with time %s"%date)
+                        logger.debug("saving BOM data point with time %s"%date)
                         mains = False
                         logger.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
@@ -156,6 +152,7 @@ def get_BOM_data():
                         # Alert if check(data_point) fails
 
         except IntegrityError, e:
+            print "There is a duplicate"
             logger.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
@@ -165,6 +162,8 @@ def get_BOM_data():
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e)
             pass
+
+    print " DONe no sites"
 
 def _check_data_pont(data_point_arr):
         """
@@ -561,6 +560,8 @@ def rmc_status_update():
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
         logger.debug("getting status from site %s"%site)
         if latest_dp:
+            #localize to time of site
+            localized = timezone.localtime(latest_dp.time)
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60

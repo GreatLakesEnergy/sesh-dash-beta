@@ -1,11 +1,15 @@
 
 var csrftoken = getCookie('csrftoken');
 
-
 /* Time Series Graph Generation */
 function time_series_graph() {
                  measurement_value = $('#measurements_dropdown').val();
                  time_value = $('#time_dropdown').val();
+
+                 $("#time_series").hide();
+
+                 $(".graph-loader-time-series").show();
+
     $.post('/graphs',{csrfmiddlewaretoken:csrftoken,'choice':[measurement_value],'time':time_value,'active_site_id':active_site_id},function(data){
                  var response = JSON.parse(data)
                 graph_data_values = response[measurement_value][0]
@@ -58,6 +62,10 @@ function time_series_graph() {
 
           });
      });
+
+    $("#time_series").show();
+
+    $(".graph-loader-time-series").hide();
 }
 
 /* Function For Daily DataPoints Graph Generation */
@@ -67,10 +75,13 @@ function daily_data_points_graph() {
    time = "24h";
   message = ('Daily ' + drop_choice1 + '  With  ' + drop_choice2);
   $("#title-message").html(message);
+
+   $("#dynamic_graph").hide();
+   $(".graph-loader").show();
+
   $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time , 'active_site_id':active_site_id},function(data){
-        
+
         var response = JSON.parse(data);
-        
 
         dropdown1_values = response[drop_choice1][0];
         SI_unit1 = response[drop_choice1][1];
@@ -80,10 +91,10 @@ function daily_data_points_graph() {
         SI_unit2 = response[drop_choice2][1];
 
         for (i=0;i<dropdown1_values.length;i++){
-        dropdown1_values[i][0]=dropdown1_values[i][0]*1000
+        dropdown1_values[i][0]=dropdown1_values[i][0] * 1000
         }
         for (i=0;i<dropdown2_values.length;i++){
-        dropdown2_values[i][0]=dropdown2_values[i][0]*1000
+        dropdown2_values[i][0]=dropdown2_values[i][0] * 1000
         }
 
         $('#containerhigh').highcharts({
@@ -157,14 +168,19 @@ function daily_data_points_graph() {
     });
 
 });
+
+    $("#dynamic_graph").show();
+    $(".graph-loader").hide();
 }
 
 
 
 
 $(document).ready(function(){
-   time_series_graph()
-   daily_data_points_graph()
+ time_series_graph()
+
+ daily_data_points_graph()
+
  });
 
 
