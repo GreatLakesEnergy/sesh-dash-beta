@@ -258,4 +258,11 @@ Morris.Bar({
       panelsContainer.sortable({
           handle: '.panel-heading'
       });
+}
+
+  if ($(".button-save").length){
+    $(".site-list").hide();
+  }
+  else{
+    $(".site-list").show();
   }

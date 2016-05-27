@@ -832,6 +832,7 @@ def edit_site(request,site_Id=1):
    context_dict['form_edit']= form
    context_dict['form_add']= form_add
    context_dict['site_Id']= site_Id
+   context_dict['sites']=sites
    return render(request,'seshdash/settings.html', context_dict)
 
 # function of adding new site
