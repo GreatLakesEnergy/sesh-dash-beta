@@ -259,7 +259,6 @@ Morris.Bar({
           handle: '.panel-heading'
       });
 }
-
   if ($(".button-save").length){
     $(".site-list").hide();
   }
