@@ -808,24 +808,27 @@ def graphs(request):
     else:
         return HttpResponseBadRequest()
 
+
 #function to editing existing sites
 @login_required
 def edit_site(request,site_Id=1):
-  
+   
+   sites =  _get_user_sites(request)
    form_add = SiteForm()
    #creating an instance to populate a form
    instance = get_object_or_404(Sesh_Site, id=site_Id)
    form = SiteForm(instance=instance)
+  
    if request.method == 'POST':
-       
-        instance = get_object_or_404(Sesh_Site, id=site_Id)
-        form = SiteForm(request.POST or None, instance=instance)
+       site_Id = request.POST.get('site_Id','')
+       print site_Id
+       instance = get_object_or_404(Sesh_Site, id=site_Id)
+       form = SiteForm(request.POST or None, instance=instance)
+       #checking if the form is valid
+       if form.is_valid():
+           form = form.save()
 
-        #checking if the form is valid
-        if form.is_valid():
-            form = form.save()
-
-   return render(request,'seshdash/settings.html', {'form_edit':form,'form_add':form_add})
+   return render(request,'seshdash/settings.html', {'form_edit':form,'form_add':form_add,'site_Id':site_Id})
 
 # function of adding new site
 @login_required

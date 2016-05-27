@@ -62,7 +62,7 @@
                                                {% if form_edit.as_table|length > 1 %}
 
                                                    {{ form_edit.as_table }}
-                                                   {{ form_edit.media }}
+                                                   <input type="text" value="{{site_Id}}" name="site_Id" hidden>
 
                                                    <button type="submit" class="btn btn-primary button-save">SAVE </button>
                                                 {% else %}

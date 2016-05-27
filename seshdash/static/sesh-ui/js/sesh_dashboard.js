@@ -251,7 +251,6 @@ Morris.Bar({
                modal.modal('hide');
           });
       });
-
       // Draggable panels
       // INFO: Uses the jquery ui sortable method
       var panelsContainer = $('.panels-container');
@@ -262,5 +261,8 @@ Morris.Bar({
 
 
 
-
-}
+    $(".sites-available").click(function(){
+      alert("list clicked")
+      $(".site-list").hide();
+    });
+  }
