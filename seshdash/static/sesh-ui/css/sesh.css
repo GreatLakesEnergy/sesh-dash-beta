@@ -110,7 +110,6 @@ tr.modal-toggle {
   -webkit-animation-delay: -0.9s;
   animation-delay: -0.9s;
 }
-
 .spinner .rect5 {
   -webkit-animation-delay: -0.8s;
   animation-delay: -0.8s;
@@ -266,8 +265,19 @@ div.awesomplete > ul {
 #dynamic_graph{
   margin-bottom: 30px;
 }
-
-
+#create_site{
+  max-width: 900px;
+}
+.graph-loader{
+  margin-top: 890px;
+}
+.graph-loader-time-series{
+  margin-top: 300px;
+}
+.btn-back{
+  margin-left: 50px;
+}
 .ui-sortable-handle:hover {
   cursor: pointer;
+
 }

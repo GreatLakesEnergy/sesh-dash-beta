@@ -1,10 +1,13 @@
-# Test
+
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Models
 from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
 from django.contrib.auth.models import User
+
+#Forms
+from seshdash.forms import SiteForm
 
 # Tasks
 from seshdash.tasks import generate_auto_rules
@@ -14,16 +17,12 @@ from guardian.shortcuts import assign_perm
 from geoposition import Geoposition
 from django.conf import settings
 
-
 # Utils
 from datetime import datetime
 from seshdash.utils import alert
 from django.utils import timezone
 
-# This test case written to test alerting module.
-# It aims to test if the system sends an email and creates an Sesh_Alert object when an alert is triggered.
-class SearchTestCase(TestCase):
-
+class AddTestCase(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
@@ -75,13 +74,31 @@ class SearchTestCase(TestCase):
 
         generate_auto_rules(self.site.pk)
 
-
-    # Testing search
-    def test_search(self):
+    def test_edit_site(self):
         f = Client()
         f.login(username = "patrick",password = "cdakcjocajica")
-
-        response = f.post('/search',{})
-        self.assertEqual(response.status_code, 200)
-
-
+        data={'site_name':u'kibuye',
+                              'comission_date':datetime(2015,12,11,22,0),
+                              'location_city':u'kigali',
+                              'location_country':u'rwanda',
+                              'time_zone':'Africa/Kigali',
+                              'position_0':36,
+                              'position_1':42,
+                              'installed_kw':2,
+                              'system_voltage':4,
+                              'number_of_panels':100,
+                              'battery_bank_capacity':1200}
+        form = SiteForm(data)
+        # checking if site is valid
+        self.assertTrue(form.is_valid())
+        # checking created site
+        sites = Sesh_Site.objects.all()
+        self.assertEqual(len(sites),1)
+        response = f.post('/edit_site',data)
+        self.assertEqual(response.status_code,200)
+        #checking if a valid id is passed
+        response = f.get('/edit_site/1')
+        self.assertEqual(response.status_code,200)
+        # checking if a wrong id is passed
+        response = f.get('/edit_site/5')
+        self.assertEqual(response.status_code,404)

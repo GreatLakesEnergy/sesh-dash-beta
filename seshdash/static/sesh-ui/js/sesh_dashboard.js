@@ -71,7 +71,7 @@ $('.form-control').keypress(function(event){
     }
 });
 /* search button */
-$(".btn-default").click(function(){
+$(".button-search").click(function(){
         textinput = $(".form-control").val();
         for (i=0;i<sitename.length;i++){
             /* checking if entered value exists in a sitename array */
@@ -126,8 +126,6 @@ Morris.Bar({
 });
 */
 //nano bar
-
-
 /* Alerts modal toggle script */
 
   var  modal = $('#alert-modal'),
@@ -152,13 +150,13 @@ Morris.Bar({
 
          //parsing data objects into a json file
           var alertData = JSON.parse(data);
-        
+
           //declaring variables
           var out= $("#alert-notification-table");
           var element = '';
           var i;
           var sum_of_counters = 0;
-    
+
           //looping through the json object appending to a table
           for(i=0 ; i<alertData.length ; i++){
               sum_of_counters += alertData[i].counter;                                                                                      element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
@@ -166,9 +164,9 @@ Morris.Bar({
                                '<td id="site-counter">'+ alertData[i].counter + '</td>' +
                                '</tr>';
           }
-       
+
           out.append(element);
-                   
+
          //appending table into the notification dropdown box
          $('#pop').html(sum_of_counters);
          if (sum_of_counters > 0){
@@ -186,18 +184,18 @@ Morris.Bar({
 
 
   function setModalLoad() {
-      
+
       var alertDataContainer = $('#alert-data-container'),
           alertLoader = $('#alert-data-loader');
 
       $('.modal-toggle').click(function()  {
-          
+
           alertLoader.show();
           alertDataContainer.hide();
 
-         
-          
-         
+
+
+
           // Get necessary data for the get_alert_sort
           alertId = $(this).attr('classid');
           // Constructing the json
@@ -205,11 +203,10 @@ Morris.Bar({
                           csrfmiddlewaretoken: csrftoken};
 
           $.post('/get-alert-data', jsonData, function(data){
-          /* 
+          /*
             This gets the alert information from a server when
-            The alert is clicked on 
+            The alert is clicked on
           */
-               
               alertLoader.hide();
               alertDataContainer.show();
 
@@ -254,17 +251,34 @@ Morris.Bar({
                modal.modal('hide');
           });
       });
+/*------------------------------------------------------------------------*/
+//$(document).ready(function(){
+               //checking if the form exists
+      if ($("#id_site_name").length){
 
+            $(".button-save").show();
+
+      } else{
+            $(".button-save").hide();
+
+
+            }
+
+      $('.sites-available').click(function(){
+           console.log("button hidden")
+          $('#button-add-site').hide();
+      });
+//});
 
       // Draggable panels
       // INFO: Uses the jquery ui sortable method
       var panelsContainer = $('.panels-container');
-      
+
       panelsContainer.sortable({
           handle: '.panel-heading'
       });
 
 
-      
+
 
 }
