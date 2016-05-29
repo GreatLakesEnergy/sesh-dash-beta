@@ -8,7 +8,7 @@ from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account
 
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
@@ -565,8 +565,11 @@ def rmc_status_update():
             last_contact = time_utils.get_timesince_seconds(latest_dp.time)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
+
+            # Get RMC account
+            rmc = Sesh_RMC_Account.objects.get(site=site).first()
             rmc_status = RMC_status(site = site,
-                                    rmc = site.rmc_account,
+                                    rmc = site.rmc,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
             logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))
