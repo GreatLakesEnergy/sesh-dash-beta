@@ -567,9 +567,9 @@ def rmc_status_update():
             last_contact_min = last_contact / 60
 
             # Get RMC account
-            rmc = Sesh_RMC_Account.objects.get(site=site).first()
+            rmc = Sesh_RMC_Account.objects.get(site=site)
             rmc_status = RMC_status(site = site,
-                                    rmc = site.rmc,
+                                    rmc = rmc,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
             logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))

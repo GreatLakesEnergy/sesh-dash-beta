@@ -142,9 +142,10 @@ class LoginTestCase(TestCase):
                  'battery_bank_capacity':12321,
                  'has_genset':True,
                  'has_grid':True,
-                 'sesh_site_set-TOTAL_FORMS':1,
-                 'sesh_site_set-INITIAL_FORMS':0,
-                 'sesh_site_set-MAX_NUM_FORMS':1,
+                 'form-TOTAL_FORMS':1,
+                 'form-INITIAL_FORMS':0,
+                 'form-MAX_NUM_FORMS':1,
+                 'form-MIN_NUM_FORMS':1,
                 }
 
         form_factory = modelformset_factory(
@@ -158,9 +159,9 @@ class LoginTestCase(TestCase):
         self.assertTrue(form.is_valid())
         form.save()
 
-        site = Sesh_Site.objects.all().first()
-        rmc = Sesh_RMC_Account.objects.create(site=site,api_key=rmc_tools.generate_rmc_api_key())
-        rmc.save()
+        site = Sesh_Site.objects.all()
+
+
 
 
 
