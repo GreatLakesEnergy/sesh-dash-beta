@@ -54,7 +54,7 @@ class graph_TestCase(TestCase):
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
         #create sesh rmc account
-        self.test_rmc_account = Sesh_RMC_Account(site=site,api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+        self.test_rmc_account = Sesh_RMC_Account(site=self.site,api_key='lcda5c15ae5cdsac464zx8f49asc16a')
         self.test_rmc_account.save()
 
         #create rmc status
