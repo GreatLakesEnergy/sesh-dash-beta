@@ -786,37 +786,38 @@ def graphs(request):
     else:
         return HttpResponseBadRequest()
 
+
 #function to editing existing sites
 @login_required
 def edit_site(request,site_Id=1):
-   #if request.method == 'GET':
-       #creating an instance to populate a form
+   context_dict = {}   
+   sites =  _get_user_sites(request)
+   form_add = SiteForm()
+
+   #creating an instance to populate a form
    instance = get_object_or_404(Sesh_Site, id=site_Id)
    form = SiteForm(instance=instance)
+  
    if request.method == 'POST':
-        instance = get_object_or_404(Sesh_Site, id=site_Id)
-        form = SiteForm(request.POST or None, instance=instance)
-
-        #checking if the form is valid
-        if form.is_valid():
-            form = form.save()
-
-   return render(request,'seshdash/settings.html', {'form_edit':form})
+       # creating new instance for POST
+       site_Id = request.POST.get('site_Id','')
+       instance = get_object_or_404(Sesh_Site, id=site_Id)
+       form = SiteForm(request.POST or None, instance=instance)
+      
+       #checking if the form is valid
+       if form.is_valid():
+           form = form.save()
+   context_dict['form_edit']= form
+   context_dict['form_add']= form_add
+   context_dict['site_Id']= site_Id
+   context_dict['sites']=sites
+   return render(request,'seshdash/settings.html', context_dict)
 
 # function of adding new site
 @login_required
 def add_site(request):
-
     #fetching list of sites for the user
-    user_sites = {}
-    user_site_name = []
-    user_site_id = []
     sites =  _get_user_sites(request)
-    for site in sites:
-        user_site_name.append(site.site_name)
-        user_site_id.append(site.id)
-    user_sites = dict(zip(user_site_id,user_site_name))
-
     # on ajax
     if request.method == 'POST':
 
@@ -828,6 +829,5 @@ def add_site(request):
 
     #on page load
     else:
-
         form = SiteForm()
-    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':user_sites})
+    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':sites})
