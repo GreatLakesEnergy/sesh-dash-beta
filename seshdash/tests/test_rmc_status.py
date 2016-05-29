@@ -42,7 +42,6 @@ class RMCTestCase(TestCase):
                                              system_voltage=12,
                                              number_of_panels=12,
                                              vrm_site_id=213,
-                                             rmc_account=self.test_rmc_account,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
                                              has_grid=True)

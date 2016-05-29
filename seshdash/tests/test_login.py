@@ -154,7 +154,7 @@ class LoginTestCase(TestCase):
                                     extra=1)
 
 
-        form = form_factory(self.data, instance=rmc)
+        form = form_factory(self.data)
         self.assertTrue(form.is_valid())
         form.save()
 
