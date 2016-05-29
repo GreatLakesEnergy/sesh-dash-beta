@@ -27,33 +27,6 @@ class VRM_Account(models.Model):
     class Meta:
         verbose_name = "VRM Account"
 
-
-class Sesh_RMC_Account(models.Model):
-    """
-    API key used by SESH EMON node to communicate
-    """
-    #site = models.ForeignKey(Sesh_Site)
-    api_key = models.CharField(max_length=130,default="")
-    api_key_numeric = models.CharField(max_length=130, default="")
-
-    def __str__(self):
-        return "alphanum:%s numeric:%s "%(self.api_key,self.api_key_numeric)
-
-    def save(self, **kwargs):
-        """
-        Generate numeric version of api key
-        """
-        numeric_key = ""
-        for l in self.api_key:
-            numeric_key = numeric_key + str(ord(l));
-        self.api_key_numeric = numeric_key[:len(self.api_key)]
-
-        super(Sesh_RMC_Account,self).save(**kwargs)
-
-    class Meta:
-        verbose_name = "RMC API Account"
-
-
 class Sesh_User(models.Model):
     #TODO each user will have his her own settings / alarms this needs
     #to be added
@@ -83,7 +56,7 @@ class Slack_Channel(models.Model):
     organisation = models.ForeignKey(Sesh_Organisation, related_name='slack_channel')
     name = models.CharField(max_length=40)
     is_alert_channel = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -110,7 +83,7 @@ class Sesh_Site(models.Model):
     has_grid = models.BooleanField(default=False)
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
-    rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
+    #rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
 
     def __str__(self):
         return self.site_name
@@ -123,6 +96,33 @@ class Sesh_Site(models.Model):
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
+
+
+class Sesh_RMC_Account(models.Model):
+    """
+    API key used by SESH EMON node to communicate
+    """
+    site = models.OneToOneField(Sesh_Site, on_delete = models.CASCADE, primary_key = True)
+    api_key = models.CharField(max_length=130,default="")
+    api_key_numeric = models.CharField(max_length=130, default="")
+
+    def __str__(self):
+        return "alphanum:%s numeric:%s "%(self.api_key,self.api_key_numeric)
+
+    def save(self, **kwargs):
+        """
+        Generate numeric version of api key
+        """
+        numeric_key = ""
+        for l in self.api_key:
+            numeric_key = numeric_key + str(ord(l));
+        self.api_key_numeric = numeric_key[:len(self.api_key)]
+
+        super(Sesh_RMC_Account,self).save(**kwargs)
+
+    class Meta:
+        verbose_name = "RMC API Account"
+
 
 
 class Alert_Rule(models.Model):
@@ -253,7 +253,7 @@ class BoM_Data_Point(models.Model):
     #TODO relay will likely need to be it's own model
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
-    
+
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
@@ -317,10 +317,10 @@ class Daily_Data_Point(models.Model):
         "daily_no_of_alerts": "Daily Number of Alerts",
         "daily_power_cons_pv": "Daily Power Cons Pv",
         "daily_power_consumption_total": "Daily Power Consumption Total",
-        "daily_pv_yield": "Daily Pv Yield"       
+        "daily_pv_yield": "Daily Pv Yield"
     }
 
-   
+
 
 
     site = models.ForeignKey(Sesh_Site)

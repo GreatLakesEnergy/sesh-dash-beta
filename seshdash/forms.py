@@ -41,7 +41,7 @@ class SiteRMCForm(ModelForm):
         """
         cleaned_data = super(SiteRMCForm, self).clean()
         pos = cleaned_data.get('position')
-        timezone = get_timezone_from_geo(pos.lat, pos.lon)
+        timezone = get_timezone_from_geo(pos[0], pos[1])
         self.cleaned_data['time_zone'] = timezone
         return cleaned_data
 
