@@ -13,7 +13,7 @@ from seshdash.tasks import generate_auto_rules
 from guardian.shortcuts import assign_perm, get_groups_with_perms
 from geoposition import Geoposition
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType 
+from django.contrib.contenttypes.models import ContentType
 
 # Influx
 from seshdash.data.db.influx import Influx, insert_point
@@ -66,7 +66,7 @@ class AlertTestCase(TestCase):
 
         # Creating permissions for group
         content_type = ContentType.objects.get_for_model(Sesh_Site)
-        self.permission = Permission.objects.create(codename='can_manage_sesh_site', 
+        self.permission = Permission.objects.create(codename='can_manage_sesh_site',
                                                     name='Can add Sesh Site',
                                                     content_type=content_type)
 
@@ -79,7 +79,7 @@ class AlertTestCase(TestCase):
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
         #create sesh rmc account
-        self.test_rmc_account = Sesh_RMC_Account(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+        self.test_rmc_account = Sesh_RMC_Account(site=site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
         self.test_rmc_account.save()
 
         #create rmc status
@@ -103,20 +103,20 @@ class AlertTestCase(TestCase):
         # Creating test group
         self.test_group = Group(name='test_group')
         self.test_group.save()
-        
+
         assign_perm('can_manage_sesh_site', self.test_group, self.site)
 
         print "The permission for the test site are "
         print get_groups_with_perms(self.site)
 
-        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group, 
+        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group,
                                                                   send_slack=True,
                                                                   slack_token=settings.SLACK_TEST_KEY)
-         
+
         # Creating test channels
         self.test_channels = Slack_Channel.objects.create(organisation=self.test_organisation,
                                                           name='test_alerts_channel',
-                                                          is_alert_channel=True)    
+                                                          is_alert_channel=True)
 
         #assign a user to the sites
 

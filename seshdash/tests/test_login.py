@@ -153,7 +153,7 @@ class LoginTestCase(TestCase):
                                     can_delete=False,
                                     extra=1)
 
-        rmc = Sesh_RMC_Account.objects.create(api_key=rmc_tools.generate_rmc_api_key())
+        rmc = Sesh_RMC_Account.objects.create(site=site,api_key=rmc_tools.generate_rmc_api_key())
         rmc.save()
 
         form = form_factory(self.data, instance=rmc)
