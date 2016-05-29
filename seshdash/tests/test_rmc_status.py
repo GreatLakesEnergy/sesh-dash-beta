@@ -46,7 +46,7 @@ class RMCTestCase(TestCase):
                                              battery_bank_capacity=12321,
                                              has_genset=True,
                                              has_grid=True)
-        self.test_rmc_account = Sesh_RMC_Account.objects.create(site = site.api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+        self.test_rmc_account = Sesh_RMC_Account.objects.create(site = self.site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
 
         self.data_point = Data_Point.objects.create(site=self.site,
                                                 soc=10,

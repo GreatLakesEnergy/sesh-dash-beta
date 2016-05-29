@@ -147,18 +147,21 @@ class LoginTestCase(TestCase):
                  'sesh_site_set-MAX_NUM_FORMS':1,
                 }
 
-        form_factory = inlineformset_factory(Sesh_RMC_Account,
+        form_factory = modelformset_factory(
                                     Sesh_Site,
                                     form=SiteRMCForm,
                                     can_delete=False,
                                     extra=1)
 
-        rmc = Sesh_RMC_Account.objects.create(site=site,api_key=rmc_tools.generate_rmc_api_key())
-        rmc.save()
 
         form = form_factory(self.data, instance=rmc)
         self.assertTrue(form.is_valid())
         form.save()
+
+        site = Sesh_Site.objects.all().first()
+        rmc = Sesh_RMC_Account.objects.create(site=site,api_key=rmc_tools.generate_rmc_api_key())
+        rmc.save()
+
 
 
 
