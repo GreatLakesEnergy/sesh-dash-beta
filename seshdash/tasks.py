@@ -56,6 +56,9 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
                 #if to_exclude  in model_data_dict.keys():
                 model_data_dict.pop(val)
 
+        #Add our status will be used for RMC_Status
+        model_data_dict['status'] = 1
+
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
         message = "Error sending to influx with exception %s in datapint %s"%(e,model_data_dict)
@@ -557,6 +560,7 @@ def rmc_status_update():
     """
     sites = Sesh_Site.objects.all()
     for site in sites:
+
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
         logger.debug("getting status from site %s"%site)
         if latest_dp:
