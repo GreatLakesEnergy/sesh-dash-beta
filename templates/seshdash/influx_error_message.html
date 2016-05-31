@@ -1,0 +1,34 @@
+{% load staticfiles %}
+
+<!Doctype HTML>
+<html>
+   <head>
+
+     <!-- bootstrap   -->
+    <link href='{% static 'bootstrap/dist/css/bootstrap.css' %}' rel="stylesheet">
+
+   </head>
+   <body>
+       <div class ="row">
+          <div class = "col-md-1"></div>
+          <div class="col-md-10">
+              <div class= "panel panel-danger">
+                  <div class="panel-heading">
+                      Sesh-Dash-Beta
+                  </div>
+                  <div class="panel-body">
+                      <p> You have landed on this page because your Influx database is not setted correctly.<br>
+                          We recommend you to recheck your influx database name.<br>
+                           Contact your software providers,if this doesn't make sense to you !!!
+                      </p>
+                  </div>
+              </div>
+          </div>
+          <div class= "col-md-1"></div>
+      </div>
+   </body>
+    <!-- bootstrap js -->
+   <script src='{% static 'bootstrap/dist/js/bootstrap.js' %}' ></script>
+</html>
+
+

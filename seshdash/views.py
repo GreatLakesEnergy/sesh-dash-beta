@@ -97,9 +97,9 @@ def index(request,site_id=0):
 
     measurements =[]
 
-
-    for measurement in measurements_value:
-        measurements.append(measurement['name'])
+    if measurements_value is not None:
+        for measurement in measurements_value:
+            measurements.append(measurement['name'])
 
     context_dict['measurements']= measurements
 
@@ -853,3 +853,6 @@ def add_site(request):
     else:
         form = SiteForm()
     return render(request, 'seshdash/settings.html', {'form_add':form,'sites':sites})
+
+def influx_error_message(request):
+    return render(request ,'seshdash/influx_error_message.html')

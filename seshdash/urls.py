@@ -27,5 +27,6 @@ urlpatterns = [
             url(r'^edit_site$',views.edit_site, name='edit_site'),
             url(r'^edit_site/([0-9]{1,5})$',views.edit_site),
             url(r'^add_site',views.add_site, name='add_site'),
+            url(r'^influx_error_message',views.influx_error_message , name ='influx error message'),
             ]
 

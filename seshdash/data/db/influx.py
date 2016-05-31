@@ -17,14 +17,16 @@ class Influx:
         self.db = settings.INFLUX_DB
         if database:
            self.db = database
-
+              
+              
         self._influx_client = InfluxDBClient (settings.INFLUX_HOST,
                                               settings.INFLUX_PORT,
                                               settings.INFLUX_USERNAME,
                                               settings.INFLUX_PASSWORD,
                                               self.db
                                               )
-  #TODO draw this from settings
+        
+ #TODO draw this from settings
 #	try:
 #		self.dbs = self._influx_client.get_list_database()
 #	except:
@@ -111,7 +113,7 @@ class Influx:
             raise Exception
         except InfluxDBClientError,e:
             logger.error("Error running  query %s"%str(e))
-            print "error %s"% str(e)
+            print "error %s"% str(e)            
             raise Exception
         except Exception,e:
             logger.error("influxdb unkown error %s" %str(e))
@@ -189,7 +191,7 @@ class Influx:
     def delete_database(self,name):
         self._influx_client.drop_database(name)
 
-
+   
     def insert_point(self, site, measurement_name, value):
         """ Write points to the database """
         json_body = [
@@ -223,10 +225,13 @@ class Influx:
     def get_measurements(self,database=None):
         db = self.db
         if database:
-           db = database
+            db = database
         query = "SHOW measurements"
-        return list(self._influx_client.query(query,database=db).get_points())
-
+        try:
+            return list(self._influx_client.query(query,database=db).get_points())
+        except InfluxDBClientError, e:
+            print"the error is %s" % str(e)
+    
 
     def get_latest_measurement_point_site(self, site, measurement_name, database=None):
          """ Returns the latest point of a site for a measurement """
@@ -257,8 +262,7 @@ class Influx:
 
         return measurement_dict
 
-
-
+  
 
 # Helper classes to the interface
 def get_latest_point_site(site, measurement_name, db=None):
