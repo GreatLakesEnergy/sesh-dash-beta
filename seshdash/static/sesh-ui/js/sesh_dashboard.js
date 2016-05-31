@@ -251,25 +251,6 @@ Morris.Bar({
                modal.modal('hide');
           });
       });
-/*------------------------------------------------------------------------*/
-//$(document).ready(function(){
-               //checking if the form exists
-      if ($("#id_site_name").length){
-
-            $(".button-save").show();
-
-      } else{
-            $(".button-save").hide();
-
-
-            }
-
-      $('.sites-available').click(function(){
-           console.log("button hidden")
-          $('#button-add-site').hide();
-      });
-//});
-
       // Draggable panels
       // INFO: Uses the jquery ui sortable method
       var panelsContainer = $('.panels-container');
@@ -277,8 +258,10 @@ Morris.Bar({
       panelsContainer.sortable({
           handle: '.panel-heading'
       });
-
-
-
-
 }
+  if ($(".button-save").length){
+    $(".site-list").hide();
+  }
+  else{
+    $(".site-list").show();
+  }

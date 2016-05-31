@@ -28,7 +28,6 @@ class AddTestCase(TestCase):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
         self.location = Geoposition(52.5,24.3)
-
         self.site = Sesh_Site.objects.create(site_name=u"Test site",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
                                              location_city=u"kigali",
@@ -87,17 +86,23 @@ class AddTestCase(TestCase):
                               'installed_kw':2,
                               'system_voltage':4,
                               'number_of_panels':100,
+                              'site_Id':2,
                               'battery_bank_capacity':1200}
         form = SiteForm(data)
+
         # checking if site is valid
         self.assertTrue(form.is_valid())
+        form.save()
         # checking created site
         sites = Sesh_Site.objects.all()
-        self.assertEqual(len(sites),1)
+        self.assertEqual(len(sites),2)
+
+        # submit form
         response = f.post('/edit_site',data)
         self.assertEqual(response.status_code,200)
+
         #checking if a valid id is passed
-        response = f.get('/edit_site/1')
+        response = f.get('/edit_site/2')
         self.assertEqual(response.status_code,200)
         # checking if a wrong id is passed
         response = f.get('/edit_site/5')
