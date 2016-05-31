@@ -1,9 +1,23 @@
 # Import all the neccessary models
 from seshdash.models import *
+from seshdash.models import Sesh_Site
 
 def get_model_from_string(model_name):
     model = eval(model_name)
     return model
+
+
+def get_measurement_from_rule(rule):
+    """
+    Return the name of the measurement from 
+    the Alert_Rule checkfield
+    """
+    if len(rule.check_field.split('#')) == 2:
+        model, measurement = rule.check_field.strip().split('#')
+        return measurement
+    elif len(rule.check_field.split('#')) == 1:
+        return rule.check_field
+
 
 
 """ Returns the first model reference from string """
