@@ -679,6 +679,7 @@ def get_latest_bom_data(request):
       Returns the latest information of a site to be displayed in the status card
       The data is got from the influx db
     """
+    print "Receiving request"
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
     site = Sesh_Site.objects.filter(id=site_id).first()
@@ -687,7 +688,9 @@ def get_latest_bom_data(request):
     # The measurement list contains attributes to be displayed in the status card,
     measurement_list = ['soc','battery_voltage','AC_output_absolute']
     latest_points = get_measurements_latest_point(site, measurement_list)
-
+    
+    print "The latest points are: ",
+    print latest_points
 
     latest_point_data = []
 
@@ -707,6 +710,9 @@ def get_latest_bom_data(request):
     except StopIteration:
         logger.warning("No further points %s"%latest_points)
         pass
+
+    print "The returned data is : ",
+    print latest_point_data
 
     return HttpResponse(json.dumps(latest_point_data))
 

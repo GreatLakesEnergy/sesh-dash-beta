@@ -89,6 +89,30 @@ class Slack_Channel(models.Model):
         return self.name
 
 
+class Status_Card(models.Model):
+     """ 
+     Contains the rows to be displayed in the 
+     status card
+     """
+   
+     ROW_CHOICES = (
+         ('battery_voltage', 'Battery Voltage'),
+         ('soc', 'State of Charge'),
+     )
+
+
+     row1 = models.CharField(max_length=30, choices=ROW_CHOICES)
+     row2 = models.CharField(max_length=30, choices=ROW_CHOICES)
+     row3 = models.CharField(max_length=30, choices=ROW_CHOICES)
+     row4 = models.CharField(max_length=30, choices=ROW_CHOICES)
+     row5 = models.CharField(max_length=30, choices=ROW_CHOICES)
+
+
+     def __str__(self):
+         return "row_one: " + self.row1
+
+
+
 class Sesh_Site(models.Model):
     """
     Model for each PV SESH installed site
@@ -112,6 +136,7 @@ class Sesh_Site(models.Model):
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
+    status_card = models.OneToOneField(Status_Card, default=None, blank=True, null=True)
 
     def __str__(self):
         return self.site_name
