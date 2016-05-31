@@ -86,8 +86,6 @@ SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 USE_TEMPLATE_TWO = eval(config.get('templates', 'USE_TEMPLATE_TWO'))
 
 
-print "The template value is: ",
-print USE_TEMPLATE_TWO
 
 # for switching to template two
 if USE_TEMPLATE_TWO:

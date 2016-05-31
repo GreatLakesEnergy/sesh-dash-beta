@@ -36,39 +36,29 @@ def alert_generator():
     mails = []
     sms_numbers = []
     rules = Alert_Rule.objects.all()
-    print "Done setting up",
-    print "Got rules: ",
-    print rules
 
     for rule in rules:
-        print "For rule: ",
-        print rule
         site = rule.site
         site_groups = get_groups_with_perms(site)
 
         # Get datapoint and real value
         data_point, real_value = get_alert_check_value(site, rule)
 
-        print "Getting datapoints",
-        print "Got datapoint: ",
-        print data_point
 
         if data_point is not None and real_value is not None:
-            print "Data point and value is not none "
             if check_alert(rule, real_value):
-                print "Alert Found"
                 alert_obj = alert_factory(site, rule, data_point)
 
                 # if alert_obj is created
                 if alert_obj is not None: 
-                    print "Alert obj created "
                     content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                     mails, sms_numbers = get_recipients_for_site(site)
                     
                     # reporting
                     alert_obj.emailSent = send_mail("Alert Mail", mails, content)
                     alert_obj.smsSent = send_sms(sms_numbers, content)
-                    alert_obj.slackSent = send_alert_slack(site_groups, content)                   
+                    slack_msg = get_slack_message("Alert Silenced", content['alert_str'])
+                    alert_obj.slackSent = send_alert_slack(site_groups, slack_msg)                   
    
                     alert_obj.save()
                  
@@ -90,7 +80,7 @@ def send_alert_slack(site_groups, content):
             slack = Slack(sesh_organisation.slack_token)  # instantiate the api for the organisation
        
             for channel in channels:
-                response = slack.send_message_to_channel(channel.name, content['alert_str'])
+                response = slack.send_message_to_channel(channel.name, content)
              
                 if not response:
                     logging.error('Failed to send message for %s in %s' % (sesh_organisation, channel))
@@ -100,6 +90,16 @@ def send_alert_slack(site_groups, content):
             return False
 
     return True
+
+
+def get_slack_message(subject, message):
+    """
+    For easy concatenation and generation of slack messages
+    """
+    slack_message = subject
+    slack_message += '\n '
+    slack_message += message
+    return slack_message
 
 
 
@@ -407,9 +407,10 @@ def alert_status_check():
                 site_groups = get_groups_with_perms(site)
 
                 # Reporting
-                send_mail('Alert auto silenced', content, mails)
+                send_mail('Alert Silenced', content, mails)
                 send_sms(content, sms_numbers)
-                send_alert_slack(site_groups, content)
+                slack_msg = get_slack_message("Alert silenced", content['alert_str'])
+                send_alert_slack(site_groups, slack_msg)
                 
                 
 
