@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 import logging
 import sys
+import pytz
 
 from django.conf import settings
 from django.db import IntegrityError,transaction
@@ -29,7 +30,6 @@ logger = logging.getLogger(__name__)
 def handle_task_failure(**kw):
     message = 'error occured in task: %s message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
     logger.error("CELERY TASK FAILURE:%s"%(message))
-    print "ERROR in task %s"%message
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
@@ -97,7 +97,6 @@ def generate_auto_rules(site_id):
 
 @shared_task
 def get_BOM_data():
-    print "Getting started getting the bom point "
     # Get all sites that have vrm id
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
     logger.info("Running VRM data collection")
@@ -109,6 +108,13 @@ def get_BOM_data():
             if v_client.IS_INITIALIZED:
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
+
+                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
+                        date = parse(date, ignoretz=True)
+ 
+                        tz = pytz.timezone(site.time_zone)
+                        date = tz.localize(date, is_dst=None)
+
                         #This data is already localazied
                         logger.debug("got raw date %s with timezone %s"%(
                             sys_data['VE.Bus state']['timestamp'],
@@ -148,22 +154,17 @@ def get_BOM_data():
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
 
-                        print "BoM Data saved"
                         # Alert if check(data_point) fails
 
         except IntegrityError, e:
-            print "There is a duplicate"
             logger.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
-            print "The exceptions is ",
-            print Exception
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e)
             pass
 
-    print " DONe no sites"
 
 def _check_data_pont(data_point_arr):
         """
@@ -387,6 +388,7 @@ def find_chunks(input_list,key):
             count = count + 1
             if i == (len(input_list)-2):
             # We are at end of list
+
                 result_list.append(section)
         else:
             count = 0
@@ -558,11 +560,12 @@ def rmc_status_update():
     sites = Sesh_Site.objects.all()
     for site in sites:
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
+
         logger.debug("getting status from site %s"%site)
         if latest_dp:
             #localize to time of site
             localized = timezone.localtime(latest_dp.time)
-            last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+            last_contact = time_utils.get_timesince_seconds(latest_dp.time, site.time_zone)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
 
