@@ -782,13 +782,16 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            SI_unit = get_measurement_unit(choice)
+            SI_units = BoM_Data_Point.SI_UNITS
+            SI_unit = SI_units.get(choice,'V')		
+           # SI_unit = get_measurement_unit(choice)
+            print SI_unit
             # creating an influx instance
             client = Influx()
-
+            
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
-
+   
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])

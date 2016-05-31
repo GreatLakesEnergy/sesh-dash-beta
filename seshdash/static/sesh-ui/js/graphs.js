@@ -2,6 +2,7 @@
 var csrftoken = getCookie('csrftoken');
 
 /* Time Series Graph Generation */
+/*
 function time_series_graph() {
                  measurement_value = $('#measurements_dropdown').val();
                  time_value = $('#time_dropdown').val();
@@ -67,19 +68,20 @@ function time_series_graph() {
 
     $(".graph-loader-time-series").hide();
 }
-
+*/
 /* Function For Daily DataPoints Graph Generation */
 function daily_data_points_graph() {
    drop_choice1 = $("#drop1").val();
    drop_choice2 = $("#drop2").val();
-   time = "24h";
-  message = ('Daily ' + drop_choice1 + '  With  ' + drop_choice2);
-  $("#title-message").html(message);
+   time_value = $('#time_dropdown').val();
+   var title = $('#time_dropdown').find(":selected").text();
+   message = (title +" " + drop_choice1 + '  With  ' + drop_choice2);
+   $("#title-message").html(message);
 
    $("#dynamic_graph").hide();
    $(".graph-loader").show();
 
-  $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time , 'active_site_id':active_site_id},function(data){
+  $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time_value , 'active_site_id':active_site_id},function(data){
 
         var response = JSON.parse(data);
 
@@ -102,7 +104,7 @@ function daily_data_points_graph() {
             zoomType: 'xy'
         },
         title: {
-            text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
+            text: title + " " + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
         },
         xAxis: [{
             crosshair: true,
@@ -177,7 +179,7 @@ function daily_data_points_graph() {
 
 
 $(document).ready(function(){
- time_series_graph()
+ //time_series_graph()
 
  daily_data_points_graph()
 
@@ -186,7 +188,7 @@ $(document).ready(function(){
 
 /* Update Time Series Graph on Click */
 $("#update-button").click(function(){
-  time_series_graph()
+  //time_series_graph()
 });
 
 

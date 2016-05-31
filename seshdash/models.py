@@ -253,7 +253,30 @@ class BoM_Data_Point(models.Model):
     #TODO relay will likely need to be it's own model
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
-    
+   
+    """		
+    SI units		
+    """		
+    SI_UNITS = {		
+         "id": '',		
+         "soc":"%",		
+         "battery_voltage": "V",		
+         "AC_Voltage_in" : "V",		
+         "AC_Voltage_out" : "V",		
+         "AC_input" : "V",		
+         "AC_output" : "V",		
+         "AC_Load_in" : "V",		
+         "AC_Load_out" : "V",		
+         "pv_production" : "W",		
+         "main_on" : "V",		
+         "relay_state": "",		
+         "trans" : "",		
+         "genset_state" : "V",		
+         "site" : "",		
+         "AC_output_absolute" : "V",
+         "cloud_cover":"Okta",		
+         } 
+   
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
