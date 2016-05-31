@@ -854,5 +854,3 @@ def add_site(request):
         form = SiteForm()
     return render(request, 'seshdash/settings.html', {'form_add':form,'sites':sites})
 
-def influx_error_message(request):
-    return render(request ,'seshdash/influx_error_message.html')
