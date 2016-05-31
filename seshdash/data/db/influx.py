@@ -246,9 +246,13 @@ class Influx:
         db = self.db
         if database:
            db = database
+    
+        print "Using database: ",
+        print db
 
         measurement_dict = {}
         for measurement in measurement_list:
+            print "For %s in measurement dict " % measurement
             try:
                 measurement_dict[measurement] = self.get_latest_measurement_point_site(site, measurement)[0]
             except IndexError, e:
