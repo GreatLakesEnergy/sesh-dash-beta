@@ -26,11 +26,11 @@
 
                  <div id="Edit_site" class="tab-pane fade in active">
 
-                      <div class="site-list">
+                      <div class="site-list" >
 
                            <h3>Available Sesh Sites</h3>
 
-                           <table class="table table-striped table-bordered table-hover">
+                           <table class="table table-striped table-bordered table-hover" >
                                   <tr>
 
                                      <th> SITES </th>
@@ -38,11 +38,11 @@
                                   </tr>
 
                                   <tr>
-                                      {% for key,value in sites.items %}
+                                      {% for site in sites %}
                                       <tr>
 
 
-                                             <th class="sites-available"><a href="/edit_site/{{ key }}">{{ value }}</a></th>
+                                        <th class="sites-available"><a href="/edit_site/{{ site.id }}">{{ site.site_name }}</a></th>
 
                                       </tr>
 
@@ -50,11 +50,6 @@
                                  </tr>
 
                           </table>
-                          <button id="button-add-site" class="btn btn-default">
-
-                            <a data-toggle="tab" href="#Add_site">Add new site</a>
-
-                          </button>
                       </div>
 
                       <div class="edit-sites">
@@ -64,14 +59,22 @@
 
                                                {% csrf_token %}
 
-                                               {{form_edit.as_table}}
+                                               {% if form_edit.as_table|length > 1 %}
 
-                                               {{ form_edit.media }}
-
-                                        </table>
-                                        <button type="submit" class="btn btn-primary button-save">SAVE </button>
-
+                                                   {{ form_edit.as_table }}
+                                                        <input type="text" value="{{site_Id}}" name="site_Id" hidden>
+                                                <tr>
+                                                   <td>
+                                                       <button type="submit" class="btn btn-primary button-save">SAVE </button>
+                                                   </td>
+                                                </tr>
+                                                {% else %}
+                                               {% endif %}
+                                          </table>
                                 </form>
+
+
+
 
                       </div>
                   </div>
@@ -84,19 +87,13 @@
 
                                                {% csrf_token %}
 
-                                               {{form_add.as_table}}
+                                               {{ form_add.as_table }}
 
                                                {{ form_add.media }}
 
                                         </table>
 
                                         <button type="submit" class="btn btn-default">SAVE </button>
-
-                                        <button class="btn btn-default btn-back">
-
-                                                <a data-toggle="tab" href="#Edit_site"> Back </a>
-
-                                        </button>
                                 </form>
                   </div>
 
