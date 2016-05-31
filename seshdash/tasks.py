@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 def handle_task_failure(**kw):
     message = 'error occured in task: %s message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
     logger.error("CELERY TASK FAILURE:%s"%(message))
-    print "ERROR in task %s"%message
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
@@ -98,7 +97,6 @@ def generate_auto_rules(site_id):
 
 @shared_task
 def get_BOM_data():
-    print "Getting started getting the bom point "
     # Get all sites that have vrm id
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
     logger.info("Running VRM data collection")
@@ -156,16 +154,12 @@ def get_BOM_data():
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
 
-                        print "BoM Data saved"
                         # Alert if check(data_point) fails
 
         except IntegrityError, e:
-            print "There is a duplicate"
             logger.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
-            print "The exceptions is ",
-            print Exception
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e)
@@ -394,6 +388,7 @@ def find_chunks(input_list,key):
             count = count + 1
             if i == (len(input_list)-2):
             # We are at end of list
+
                 result_list.append(section)
         else:
             count = 0
@@ -565,22 +560,13 @@ def rmc_status_update():
     sites = Sesh_Site.objects.all()
     for site in sites:
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
-        print "Got the latest data point: ",
-        print "The time is ",
-        print latest_dp.time
 
         logger.debug("getting status from site %s"%site)
         if latest_dp:
             #localize to time of site
             localized = timezone.localtime(latest_dp.time)
-            print "The localized time is ",
-            print localized
             last_contact = time_utils.get_timesince_seconds(latest_dp.time, site.time_zone)
-            print "The last contact is ",
-            print last_contact
             tn = timezone.localtime(timezone.now())
-            print "The time to be saved on the rmc status is ",
-            print tn
             last_contact_min = last_contact / 60
             rmc_status = RMC_status(site = site,
                                     rmc = site.rmc_account,

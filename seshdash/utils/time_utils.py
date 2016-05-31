@@ -94,13 +94,11 @@ def localize(nv_datetime,tz):
             # Try to convert to datetime
             time = datetime(nv_datetime)
         except Exception, e:
-            print "Failed to convert to datetime"
             return nv_datetime
     # Is our datetime object  naive?
     if nv_datetime.tzinfo is not None and nv_datetime.tzinfo.utcoffset(nv_datetime) is not None:
         return nv_datetime
     localtz = timezone(tz)
-    print "The time has been converted to a localtime"
     dt_aware = localtz.localize(nv_datetime)
     return dt_aware
 
@@ -132,8 +130,6 @@ def epoch_to_datetime(seconds_time, tz=None):
     if tz:
         tz = _clean_tz(tz)
         time = localize(time,tz)
-        print "the localized time in time utils is:  ",
-        print time
 
 
     #return strftime('%Y-%m-%dT%XZ',time)
@@ -196,10 +192,6 @@ def get_timesince_seconds(time, tz=None):
 
     #loc = timezone(settings.TIME_ZONE)
     #now = loc.localize(now)
-    print "Now is : ",
-    print now
-    print "Time is: ",
-    print time
     diff =  now - time
     return int(diff.total_seconds())
 
