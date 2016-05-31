@@ -69,3 +69,46 @@ def get_measurement_verbose_name(measurement):
 
 def get_measurement_unit(measurement):
     return Daily_Data_Point.UNITS_DICTIONARY[measurement]
+
+
+def get_model_field_names(model):
+    """ 
+    This function returns the field names of fields
+    in a given model
+    """
+    fields = model._meta.get_fields()
+
+    field_arr = []
+
+    for field in fields:
+        field_arr.append(field.name)
+
+    return field_arr
+
+
+def get_status_card_items(site):
+    """
+    Returns the list of items to be displayed in the status card
+    """
+    status_card = site.status_card
+
+    if not status_card:
+        logging.error('No status card linked to the site')
+        return []
+
+    status_card_fields = Status_Card._meta.get_fields()
+    status_card_items = []
+  
+    for field in status_card_fields:
+        status_card_items.append(getattr(status_card, field.name))
+
+    # removing the non char items
+    for i, item in enumerate(status_card_items):
+        if type(item) != unicode:
+            status_card_items.pop(i)
+
+    for i, item in enumerate(status_card_items):
+        if type(item) == int:
+            status_card_items.pop(i)
+
+    return status_card_items

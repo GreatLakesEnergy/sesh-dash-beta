@@ -96,8 +96,20 @@ class Status_Card(models.Model):
      """
    
      ROW_CHOICES = (
+         ('AC_Load_in', 'AC Load in'),
+         ('AC_Load_out', 'AC Load out'),
+         ('AC_Voltage_in', 'AC Voltage in'),
+         ('AC_Voltage_out', 'AC Voltage out'),
+         ('AC_input', 'AC input'),
+         ('AC_output', 'AC output' ),
+         ('AC_output_absolute', 'AC output absolute'),
          ('battery_voltage', 'Battery Voltage'),
+         ('genset_state', 'Genset state'),
+         ('main_on', 'Main on'),
+         ('pv_production', 'PV production'),
+         ('relay_state', 'Relay state'),
          ('soc', 'State of Charge'),
+         ('trans', 'Trans'),
      )
 
 
