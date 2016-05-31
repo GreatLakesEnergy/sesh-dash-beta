@@ -31,7 +31,6 @@ class RMCTestCase(TestCase):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
         self.location = Geoposition(52.5,24.3)
 
-        self.test_rmc_account = Sesh_RMC_Account.objects.create(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
 
         self.site = Sesh_Site.objects.create(site_name=u"Test_aggregate",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
@@ -43,10 +42,10 @@ class RMCTestCase(TestCase):
                                              system_voltage=12,
                                              number_of_panels=12,
                                              vrm_site_id=213,
-                                             rmc_account=self.test_rmc_account,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
                                              has_grid=True)
+        self.test_rmc_account = Sesh_RMC_Account.objects.create(site = self.site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
 
         self.data_point = Data_Point.objects.create(site=self.site,
                                                 soc=10,
