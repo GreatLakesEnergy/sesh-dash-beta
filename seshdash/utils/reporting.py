@@ -67,6 +67,7 @@ def prepare_report(site, duration="week"):
     aggeragete_data["title"] = subject
     aggeragete_data["site_name"] = site.site_name
     aggeragete_data["duration"] = duration + "ly"
+    aggeragete_data["date"] = now
     aggeragete_data["generator_stat"] = "NA" #TODO
     # TODO fix this
     aggeragete_data["url_to_dash"] = 'http://sesh.gle.solar/site/<site_name>'
