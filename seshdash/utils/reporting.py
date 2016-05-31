@@ -69,7 +69,7 @@ def prepare_report(site, duration="week"):
     aggeragete_data["duration"] = duration + "ly"
     aggeragete_data["generator_stat"] = "NA" #TODO
     # TODO fix this
-    aggeragete_data["url_to_dash"] = 'http://sesh-dev1.cloudapp.net:3030/site/<site_name>'
+    aggeragete_data["url_to_dash"] = 'http://sesh.gle.solar/site/<site_name>'
 
 
     # TODO hack alert
