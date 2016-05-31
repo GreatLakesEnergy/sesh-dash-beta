@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 def handle_task_failure(**kw):
     message = 'error occured in task: %s message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
     logger.error("CELERY TASK FAILURE:%s"%(message))
-    print "ERROR in task %s"%message
     if not settings.DEBUG:
         import rollbar
         trace = sys.exc_info()
@@ -98,7 +97,6 @@ def generate_auto_rules(site_id):
 
 @shared_task
 def get_BOM_data():
-    print "Getting started getting the bom point "
     # Get all sites that have vrm id
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
     logger.info("Running VRM data collection")
@@ -156,16 +154,12 @@ def get_BOM_data():
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
 
-                        print "BoM Data saved"
                         # Alert if check(data_point) fails
 
         except IntegrityError, e:
-            print "There is a duplicate"
             logger.debug("Duplicate entry skipping data point")
             pass
         except Exception ,e:
-            print "The exceptions is ",
-            print Exception
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e)
@@ -394,6 +388,7 @@ def find_chunks(input_list,key):
             count = count + 1
             if i == (len(input_list)-2):
             # We are at end of list
+
                 result_list.append(section)
         else:
             count = 0
