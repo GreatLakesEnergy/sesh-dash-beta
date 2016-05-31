@@ -42,7 +42,7 @@ def alert_generator():
         site_groups = get_groups_with_perms(site)
 
         # Get datapoint and real value
-        data_point, real_value = get_alert_check_value(site, rule)
+        data_point, real_value = get_alert_check_value(rule)
 
 
         if data_point is not None and real_value is not None:
@@ -50,18 +50,18 @@ def alert_generator():
                 alert_obj = alert_factory(site, rule, data_point)
 
                 # if alert_obj is created
-                if alert_obj is not None: 
+                if alert_obj is not None:
                     content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                     mails, sms_numbers = get_recipients_for_site(site)
-                    
+
                     # reporting
                     alert_obj.emailSent = send_mail("Alert Mail", mails, content)
                     alert_obj.smsSent = send_sms(sms_numbers, content)
-                    slack_msg = get_slack_message("Alert Silenced", content['alert_str'])
-                    alert_obj.slackSent = send_alert_slack(site_groups, slack_msg)                   
-   
+                    slack_msg = get_slack_alert_msg("Alert Triggered", alert_obj)
+                    alert_obj.slackSent = send_alert_slack(site_groups, slack_msg)
+
                     alert_obj.save()
-                 
+
 
 
 def send_alert_slack(site_groups, content):
@@ -78,10 +78,10 @@ def send_alert_slack(site_groups, content):
         if sesh_organisation.send_slack:
             channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
             slack = Slack(sesh_organisation.slack_token)  # instantiate the api for the organisation
-       
+
             for channel in channels:
                 response = slack.send_message_to_channel(channel.name, content)
-             
+
                 if not response:
                     logging.error('Failed to send message for %s in %s' % (sesh_organisation, channel))
                     return False
@@ -92,19 +92,34 @@ def send_alert_slack(site_groups, content):
     return True
 
 
-def get_slack_message(subject, message):
+def get_slack_alert_msg(subject, alert):
     """
-    For easy concatenation and generation of slack messages
+    Function to generate alert messages provided the
+    subject and the alert obj
     """
-    slack_message = subject
-    slack_message += '\n '
-    slack_message += message
-    return slack_message
+    msg = ''
+    data_point, value = get_alert_check_value(alert.alert)
+
+    msg += subject
+    msg += '\n'
+    msg += 'rule: ' + str(alert.alert)
+    msg += '\n'
+    msg += 'found: ' + str(value)
+    msg += '\n'
+    msg += 'At site: ' + str(alert.site)
+
+    return msg
 
 
 
-def get_alert_check_value(site, rule):
-    """ Returns the value to check for alert from latest data point """
+
+
+def get_alert_check_value(rule):
+    """
+    Returns the value to check for alert from latest data point
+    This are the latest data point referring to a rule for a specific site
+    """
+    site = rule.site
 
     if is_mysql_rule(rule):
         model, field_name = rule.check_field.split('#')
@@ -223,13 +238,13 @@ def get_recipients_for_site(site):
     for user in users:
         if user.seshuser:
             mails.append(user.email)
-           
+
         if user.seshuser and user.seshuser.on_call and user.seshuser.send_sms and user.seshuser.phone_number:
             sms_numbers.append(user.seshuser.phone_number)
 
     return mails, sms_numbers
- 
-       
+
+
 def alert_factory(site, rule, data_point):
     """ Creating an alert object """
 
@@ -368,11 +383,12 @@ def get_alert_point_value(alert, point=None):
 
 
 def alert_status_check():
-    """ 
-    Checks if the alert is still valid and silences it if it is invalid 
+    """
+    Checks if the alert is still valid and silences it if it is invalid
     """
     unsilenced_alerts = get_unsilenced_alerts()
     logger.debug("Running alert status check")
+
     if unsilenced_alerts:
         for alert in unsilenced_alerts:
             site = alert.site
@@ -391,10 +407,10 @@ def alert_status_check():
                 logger.debug("Alert is still valid")
             else:
                 # Silencing the alert and generating email content
+                logger.debug("Alert is not valid, silencing alert")
                 alert.isSilence = True
                 alert.save()
-                data_point = get_alert_point(alert)
-                data_point_value = get_alert_point_value(alert, data_point)
+                data_point, data_point_value = get_alert_check_value(alert.alert) 
 
                 # Handle no data point getting returned
                 if not data_point_value:
@@ -409,8 +425,5 @@ def alert_status_check():
                 # Reporting
                 send_mail('Alert Silenced', content, mails)
                 send_sms(content, sms_numbers)
-                slack_msg = get_slack_message("Alert silenced", content['alert_str'])
+                slack_msg = get_slack_alert_msg("Alert silenced", alert)
                 send_alert_slack(site_groups, slack_msg)
-                
-                
-
