@@ -2,6 +2,10 @@
 from seshdash.models import *
 from seshdash.models import Sesh_Site
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 def get_model_from_string(model_name):
     model = eval(model_name)
     return model
@@ -93,7 +97,7 @@ def get_status_card_items(site):
     status_card = site.status_card
 
     if not status_card:
-        logging.error('No status card linked to the site')
+        logger.error('No status card linked to the site')
         return []
 
     status_card_fields = Status_Card._meta.get_fields()

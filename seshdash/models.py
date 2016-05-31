@@ -113,11 +113,9 @@ class Status_Card(models.Model):
      )
 
 
-     row1 = models.CharField(max_length=30, choices=ROW_CHOICES)
-     row2 = models.CharField(max_length=30, choices=ROW_CHOICES)
-     row3 = models.CharField(max_length=30, choices=ROW_CHOICES)
-     row4 = models.CharField(max_length=30, choices=ROW_CHOICES)
-     row5 = models.CharField(max_length=30, choices=ROW_CHOICES)
+     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, default='soc')
+     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, default='battery_voltage')
+     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output_absolute')
 
 
      def __str__(self):
