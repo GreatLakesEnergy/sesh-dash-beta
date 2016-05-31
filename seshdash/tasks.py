@@ -560,7 +560,7 @@ def rmc_status_update():
     """
     sites = Sesh_Site.objects.all()
     for site in sites:
-
+        # TODO get latest DP from influx
         latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
         logger.debug("getting status from site %s"%site)
         if latest_dp:

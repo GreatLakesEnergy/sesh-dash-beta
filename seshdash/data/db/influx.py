@@ -228,12 +228,12 @@ class Influx:
         return list(self._influx_client.query(query,database=db).get_points())
 
 
-    def get_latest_measurement_point_site(self, site, measurement_name, database=None):
+    def get_latest_measurement_point_site(self, site, measurement_name, site_id=None, database=None):
          """ Returns the latest point of a site for a measurement """
          db = self.db
          if database:
              db = database
-
+         # TODO make this work with Site_id for API
          query = "SELECT * FROM %s WHERE site_name='%s' ORDER BY time DESC LIMIT 1" % (measurement_name, site.site_name)
          logger.debug(query)
          return list(self._influx_client.query(query,database=db).get_points())
