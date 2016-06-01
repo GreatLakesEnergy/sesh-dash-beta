@@ -568,7 +568,7 @@ def rmc_status_update():
         logger.debug("getting status from site %s with dp %s"%(site,latest_dp))
         if latest_dp:
             #localize to time of site
-            #localized = timezone.localtime(latest_dp['time'])
+            localized = timezone.localtime(latest_dp['time'])
             dp_time = time_utils.convert_influx_time_string(latest_dp['time'])
             last_contact = time_utils.get_timesince_seconds(dp_time)
             tn = timezone.localtime(timezone.now())
