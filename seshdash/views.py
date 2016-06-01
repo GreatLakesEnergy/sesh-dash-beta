@@ -1,5 +1,6 @@
 #Django libs
 from django.shortcuts import render, get_object_or_404, render_to_response
+from guardian.decorators import permission_required_or_403
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
@@ -103,12 +104,12 @@ def index(request,site_id=0):
             measurements.append(measurement['name'])
   
     context_dict['measurements']= measurements
+   
     current_site = Sesh_Site.objects.filter(id=site_id)
     user = request.user
     checker = ObjectPermissionChecker(user)
+    
     permitted = 'view_Sesh_Site' in checker.get_perms(current_site[0])
-    print "Permission"
-    print permitted
     context_dict['permitted'] = permitted
     return render(request,'seshdash/main-dash.html',context_dict)
 
@@ -817,6 +818,7 @@ def graphs(request):
 
 #function to editing existing sites
 @login_required
+@permission_required_or_403('auth.view_Sesh_Site')
 def edit_site(request,site_Id=1):
    context_dict = {}   
    sites =  _get_user_sites(request)
@@ -843,6 +845,7 @@ def edit_site(request,site_Id=1):
 
 # function of adding new site
 @login_required
+@permission_required_or_403('auth.view_Sesh_Site')
 def add_site(request):
     #fetching list of sites for the user
     sites =  _get_user_sites(request)
