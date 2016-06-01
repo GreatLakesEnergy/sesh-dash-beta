@@ -786,12 +786,8 @@ def graphs(request):
             SI_unit = SI_units.get(choice,'V')		
             # creating an influx instance
             client = Influx()
-            # for cloud_cover
-            if choice == 'cloud_cover':
-                values = client.get_measurement_bucket('cloud_cover',time_bucket,'site_name',current_site,{'days':5})
-            else:
-                # using an influx query to get measurements values with their time-stamps
-                values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
+            # using an influx query to get measurements values with their time-stamps
+            values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
    
             #looping into values
             for value in values:
