@@ -60,3 +60,9 @@ class RMCStatus(GuardedModelAdmin):
     pass
 
 
+@admin.register(Status_Card)
+class StatusCard(GuardedModelAdmin):
+    list_display = ('row1','row2','row3','sesh_site')
+    list_filter = ('sesh_site',)
+    pass
+
