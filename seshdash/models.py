@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from django.core.exceptions import ValidationError
 
+
 # Create your models here.
 class VRM_Account(models.Model):
     """
@@ -61,6 +62,40 @@ class Slack_Channel(models.Model):
         return self.name
 
 
+class Status_Card(models.Model):
+     """ 
+     Contains the rows to be displayed in the 
+     status card
+     """
+   
+     ROW_CHOICES = (
+         ('AC_Load_in', 'AC Load in'),
+         ('AC_Load_out', 'AC Load out'),
+         ('AC_Voltage_in', 'AC Voltage in'),
+         ('AC_Voltage_out', 'AC Voltage out'),
+         ('AC_input', 'AC input'),
+         ('AC_output', 'AC output' ),
+         ('AC_output_absolute', 'AC output absolute'),
+         ('battery_voltage', 'Battery Voltage'),
+         ('genset_state', 'Genset state'),
+         ('main_on', 'Main on'),
+         ('pv_production', 'PV production'),
+         ('relay_state', 'Relay state'),
+         ('soc', 'State of Charge'),
+         ('trans', 'Trans'),
+     )
+
+
+     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, default='soc')
+     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, default='battery_voltage')
+     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output_absolute')
+
+
+     def __str__(self):
+         return "For site: " + self.sesh_site.site_name
+
+
+
 class Sesh_Site(models.Model):
     """
     Model for each PV SESH installed site
@@ -83,10 +118,22 @@ class Sesh_Site(models.Model):
     has_grid = models.BooleanField(default=False)
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
-    #rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
+    status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True)
 
     def __str__(self):
         return self.site_name
+
+    
+    def save(self, *args, **kwargs):
+        # Creating a defaults status card
+        if self.pk is None:
+            status_card = Status_Card.objects.create()
+            super(Sesh_Site, self).save(*args, **kwargs)
+            self.status_card = status_card
+            self.save()
+        else:
+            super(Sesh_Site, self).save(*args, **kwargs)
+    
 
     #Row based permissioning using django guardian not every user should be able to see all sites
 
@@ -161,7 +208,7 @@ class Alert_Rule(models.Model):
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
-        return "If %s is %s %s" %(self.get_check_field_display(), self.get_operator_display() ,self.value)
+        return "If %s is %s %s" % (self.get_check_field_display(), self.get_operator_display() ,self.value)
 
     class Meta:
          verbose_name = 'System Alert Rule'
@@ -181,13 +228,14 @@ class Sesh_Alert(models.Model):
     point_model = models.CharField(max_length=40, default="BoM_Data_Point")
     point_id = models.CharField(max_length=40)
 
-    # def __str__(self):  # Patrick: Commenting out due to errors with FK
+    # def __str__(self):  # 
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
 
-        # TODO make this print useful information
+       # TODO make this print useful information
        return str(self.alert)
+                                           
 
     class Meta:
         verbose_name = 'System Alert'
@@ -290,6 +338,7 @@ class Daily_Data_Point(models.Model):
         "genset_state" : "V",
         "site" : "",
         "AC_output_absolute" : "W",
+        "minutes_last_contact" : "min",
         "daily_battery_charge": "W",
         "daily_grid_outage_n": "minute",
         "daily_grid_outage_t": "",
@@ -316,6 +365,7 @@ class Daily_Data_Point(models.Model):
         "trans": " Trans",
         "genset_state": "Genset State",
         "AC_output_absolute": "AC Output absolute",
+        "minutes_last_contact": "Minutes last Contact",
         "daily_battery_charge": "Daily Battery Charge",
         "daily_grid_outage_n": "Daily Grid Outage N",
         "daily_grid_outage_t": "Daily Grid Outage T",
