@@ -119,7 +119,7 @@ class Status_Card(models.Model):
 
 
      def __str__(self):
-         return "row_one: " + self.row1
+         return "For site: " + self.sesh_site.site_name
 
 
 
