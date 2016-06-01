@@ -161,7 +161,7 @@ function daily_data_points_graph() {
 
         }, {
             name: drop_choice2,
-            type: 'spline',
+            type: 'column',
             data: dropdown2_values,
             tooltip: {
                 valueSuffix: SI_unit2

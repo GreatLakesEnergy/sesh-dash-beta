@@ -29,8 +29,9 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 				              {% for value in measurements %}
                                      {% if value = "cloud_cover"%}
                                          <option value="{{value}}" selected="selected"> {{value}}</option>
+                                     {% else %}
+                                         <option value="{{value}}">{{value}}</option>
                                      {% endif %}
-				                     <option value="{{value}}">{{value}}</option>
 				                     {% endfor %}
 			          </select>
 			    </div>
@@ -41,8 +42,10 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 				             {% for value in measurements %}
                                 {% if value = "pv_production"%}
                                       <option value="{{value}}" selected="selected"> {{value}}</option>
+                                {% else %}
+                                      <option value="{{value}}">{{value}}</option>
                                 {% endif %}
-				             <option value="{{value}}">{{value}}</option>
+
 				             {% endfor %}
 			         </select>
 			    </div>
