@@ -15,7 +15,7 @@ from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils.alert import alert_generator, alert_status_check
 from seshdash.utils.reporting import prepare_report
-from seshdash.data.db.influx import Influx
+from seshdash.data.db.influx import Influx, get_latest_point_site
 
 # Time related
 from datetime import datetime, date, timedelta
@@ -561,12 +561,14 @@ def rmc_status_update():
     sites = Sesh_Site.objects.all()
     for site in sites:
         # TODO get latest DP from influx
-        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
-        logger.debug("getting status from site %s"%site)
+        #latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
+        latest_dp = get_latest_point_site(site,'status')
+        logger.debug("getting status from site %s with dp %s"%(site,latest_dp))
         if latest_dp:
             #localize to time of site
-            localized = timezone.localtime(latest_dp.time)
-            last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+            #localized = timezone.localtime(latest_dp['time'])
+            dp_time = time_utils.convert_influx_time_string(latest_dp['time'])
+            last_contact = time_utils.get_timesince_seconds(dp_time)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
 
@@ -576,7 +578,7 @@ def rmc_status_update():
                                     rmc = rmc,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
-            logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))
+            logger.debug("rmc status logger now: %s last_contact: %s "%(tn,dp_time))
             logger.debug("saving status %s "%rmc_status)
             rmc_status.save()
         else:
