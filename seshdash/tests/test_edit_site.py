@@ -70,12 +70,19 @@ class AddTestCase(TestCase):
 
 
         assign_perm("view_Sesh_Site",self.test_user,self.site)
+        assign_perm("change_sesh_site",self.test_user,self.site)
+        assign_perm("add_sesh_site",self.test_user,self.site)
+        assign_perm("delete_sesh_site",self.test_user,self.site)
+
 
         generate_auto_rules(self.site.pk)
+        
+        User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
+
 
     def test_edit_site(self):
         f = Client()
-        f.login(username = "patrick",password = "cdakcjocajica")
+        f.login(username = "frank",password = "password")
         data={'site_name':u'kibuye',
                               'comission_date':datetime(2015,12,11,22,0),
                               'location_city':u'kigali',
@@ -96,10 +103,16 @@ class AddTestCase(TestCase):
         # checking created site
         sites = Sesh_Site.objects.all()
         self.assertEqual(len(sites),2)
-
+     
         # submit form
         response = f.post('/edit_site',data)
         self.assertEqual(response.status_code,200)
+ 
+        #checking aonther user
+        r = Client()
+        r.login(username="patrick",password="cdakcjocajica")
+        response = r.post('/edit_site',data)
+        self.assertEqual(response.status_code,403)
 
         #checking if a valid id is passed
         response = f.get('/edit_site/2')
@@ -110,7 +123,7 @@ class AddTestCase(TestCase):
 
     def test_add_site(self):
         f = Client()
-        f.login(username = "patrick",password = "cdakcjocajica")
+        f.login(username = "frank",password = "password")
         data={'site_name':u'kibuye',
                               'comission_date':datetime(2015,12,11,22,0),
                               'location_city':u'kigali',
@@ -130,6 +143,12 @@ class AddTestCase(TestCase):
         self.assertEqual(len(sites),1)
         response = f.post('/add_site', data)
         self.assertEqual(response.status_code, 200)
+ 
+        #checking aonther user
+        r = Client()
+        r.login(username="patrick",password="cdakcjocajica")
+        response = r.post('/edit_site',data)
+        self.assertEqual(response.status_code,403)
 
         # test status card created
         site = Sesh_Site.objects.last()
