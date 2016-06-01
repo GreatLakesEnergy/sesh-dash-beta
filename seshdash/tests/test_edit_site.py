@@ -51,7 +51,7 @@ class AddTestCase(TestCase):
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
         #create sesh rmc account
-        self.test_rmc_account = Sesh_RMC_Account(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+        self.test_rmc_account = Sesh_RMC_Account(site = self.site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
         self.test_rmc_account.save()
 
         #create rmc status
@@ -107,3 +107,26 @@ class AddTestCase(TestCase):
         # checking if a wrong id is passed
         response = f.get('/edit_site/5')
         self.assertEqual(response.status_code,404)
+
+    def test_add_site(self):
+        f = Client()
+        f.login(username = "patrick",password = "cdakcjocajica")
+        data={'site_name':u'kibuye',
+                              'comission_date':datetime(2015,12,11,22,0),
+                              'location_city':u'kigali',
+                              'location_country':u'rwanda',
+                              'time_zone':'Africa/Kigali',
+                              'position_0':36,
+                              'position_1':42,
+                              'installed_kw':2,
+                              'system_voltage':4,
+                              'number_of_panels':100,
+                              'battery_bank_capacity':1200}
+        form = SiteForm(data)
+        # testing form is valid
+        self.assertTrue(form.is_valid())
+        # checking created site
+        sites = Sesh_Site.objects.all()
+        self.assertEqual(len(sites),1)
+        response = f.post('/add_site', data)
+        self.assertEqual(response.status_code, 200)

@@ -204,8 +204,7 @@ def import_site(request):
                 # if RMC site
                 # Handle RMC account info
                 #print "rmc request recieved is rmc request getting form ready"
-                site_forms_factory = inlineformset_factory(Sesh_RMC_Account,
-                                                           Sesh_Site,
+                site_forms_factory = modelformset_factory( Sesh_Site,
                                                            form=SiteRMCForm,
                                                            extra=1,
                                                            can_delete=False
@@ -238,7 +237,7 @@ def _aggregate_imported_data(sites):
 
 def _validate_form(form,context_dict):
     """
-    Validate forms basedo no form input
+    Validate forms based on form input
     """
     if form.is_valid():
         logger.debug("getting ready to save form %s")
@@ -294,6 +293,11 @@ def handle_create_site(request):
         # Initiate standard alarms
         generate_auto_rules(site.pk)
 
+        # if site is an RMC site generate RMC API key
+        # TODO show the api key in settings
+        rmc = Sesh_RMC_Account(site=site, api_key=rmc_tools.generate_rmc_api_key())
+        rmc.save()
+
     # Initiate download if requred
     _download_data(request)
 
@@ -304,11 +308,12 @@ def _create_site_rmc(request):
     """
     Create site for RMC account
     """
-    rmc = Sesh_RMC_Account(api_key=rmc_tools.generate_rmc_api_key())
-    rmc.save()
-    site_forms_factory = inlineformset_factory(Sesh_RMC_Account, Sesh_Site, form=SiteRMCForm,exclude=('delete',))
+    #rmc = Sesh_RMC_Account(api_key=rmc_tools.generate_rmc_api_key())
+    #rmc.save()
+    site_forms_factory = modelformset_factory(Sesh_Site, form=SiteRMCForm,exclude=('delete',))
     # Create RMC account associated with it
-    form = site_forms_factory(request.POST, instance=rmc)
+    #form = site_forms_factory(request.POST, instance=rmc)
+    form = site_forms_factory(request.POST)
     return form
 
 
@@ -348,10 +353,10 @@ def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):
 
 
 #testing out some nvd3 graphs
-#TODO move graphing functions to different library
+#TODO move graphing functions to different library remove this
 def linebar(xdata,ydata,ydata2,label_1,label_2,chart_container,data):
     """
-    lineplusbarchart page
+    lineplusbarchart page test
     """
     #start_time = int(time.mktime(datetime.datetime(2012, 6, 1).timetuple()) * 1000)
     #nb_element = 100
@@ -450,35 +455,12 @@ def get_user_data(user,site_id,sites):
 
     weather_data = Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past,five_day_future]).order_by('date')
 
-    #granular pv data
-    #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[2]]).order_by('time')
-
-    #daily pv data
-    #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
-
-    #BOM data
-
-   # bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
-
     bom_data = BoM_Data_Point.objects.filter(site=site).order_by('-time')
 
     bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],now]).order_by('-id')
-    pprint( bom_data.first())
-
-    #NOTE remvong JSON versions of data for now as it's not necassary
-    #weather_data_json = serialize_objects(weather_data)
-    #power_data_json = serialize_objects(power_data)
-    #bom_data_json = serialize_objects(power_data)
-
     context_data['site_weather'] = weather_data
     #context_data['site_power'] = power_data
     context_data['bom_data'] = bom_data
-
-    #NOTE remvong JSON versions of data for now as it's not necassary
-    #context_data_json['site_weather'] = weather_data_json
-    #context_data_json['site_power'] = power_data_json
-    #context_data_json['bom_data'] = bom_data_json
-
     context_data['alerts'] = display_alerts(site_id)
 
     return context_data,context_data_json
@@ -493,6 +475,7 @@ def jsonify_dict(context_dict,content_json):
 """
 BEGIN Turn django objects in JSON
 """
+
 def serialize_objects(objects, format_ = 'json'):
     return serializers.serialize('json',objects)
 
@@ -532,18 +515,13 @@ def get_high_chart_data(user,site_id,sites):
      site = Sesh_Site.objects.get(pk=site_id)
      context_high_data = {}
      if not user.has_perm('seshdash.view_Sesh_Site',site):
-        print "user doesn't have permission to view site %s"%site_id
+        logger.warning( "user doesn't have permission to view site %s"%site_id)
         #TODO return 403 permission denied
         return context_high_data
 
      now = timezone.localtime(timezone.now())
      five_day_past2 = now - timedelta(days=5)
      five_day_future2 = now + timedelta(days=6)
-
-    # Getting climat conditions
-
-     #high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
-     #context_high_data['high_cloud_cover']=high_cloud_cover
 
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
@@ -574,7 +552,7 @@ def get_high_chart_data(user,site_id,sites):
     # initiating the context_high_data Object
      context_high_data['high_date']= high_date_data
      context_high_data['high_pv_production']= high_pv_production
-     print (context_high_data['high_pv_production'])
+     #print (context_high_data['high_pv_production'])
      return context_high_data
 
 def display_alerts(site_id):
