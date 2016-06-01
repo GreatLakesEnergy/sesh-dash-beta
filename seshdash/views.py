@@ -677,8 +677,8 @@ def silence_alert(request):
 @login_required
 def get_latest_bom_data(request):
     """
-      Returns the latest information of a site to be displayed in the status card
-      The data is got from the influx db
+    Returns the latest information of a site to be displayed in the status card
+    The data is got from the influx db
     """
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
@@ -709,8 +709,6 @@ def get_latest_bom_data(request):
         logger.warning("No further points %s"%latest_points)
         pass
 
-    print "The returned data is : ",
-    print latest_point_data
 
     return HttpResponse(json.dumps(latest_point_data))
 

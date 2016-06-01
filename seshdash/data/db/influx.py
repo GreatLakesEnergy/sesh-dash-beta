@@ -107,15 +107,15 @@ class Influx:
             return list(result_set_gen)
         except InfluxDBServerError,e:
             logger.error("Error running query on server %s"% str(e))
-            print "error on server %s"% str(e)
+            logger.debug("error on server %s" % str(e))
             raise Exception
         except InfluxDBClientError,e:
             logger.error("Error running  query %s"%str(e))
-            print "error %s"% str(e)
+            logger.debug("error %s"% str(e))
             raise Exception
         except Exception,e:
             logger.error("influxdb unkown error %s" %str(e))
-            print "unkown error %s"% str(e)
+            logger.debug("unkown error %s"% str(e))
             raise Exception
         return result_set_gen
 
@@ -165,13 +165,13 @@ class Influx:
                 logger.debug("Result %s"%result)
         except InfluxDBServerError,e:
             logger.warning("INFLUX Error running query on server %s %s"%(e,data_point_list))
-            print e
+            logger.debug(e)
         except InfluxDBClientError,e:
             logger.warning("INFLUX Error running  query %s %s"%(e,data_point_list))
-            print e
+            logger.debug(e)
         except Exception,e:
             logger.warning("INFLUX unkown error %s %s"%(e,data_point))
-            print e
+            logger.debug(e)
 
         return True
 
@@ -247,12 +247,9 @@ class Influx:
         if database:
            db = database
     
-        print "Using database: ",
-        print db
 
         measurement_dict = {}
         for measurement in measurement_list:
-            print "For %s in measurement dict " % measurement
             try:
                 measurement_dict[measurement] = self.get_latest_measurement_point_site(site, measurement)[0]
             except IndexError, e:
