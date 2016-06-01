@@ -146,10 +146,22 @@ class Sesh_Site(models.Model):
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
-    status_card = models.OneToOneField(Status_Card, default=None, blank=True, null=True)
+    status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True)
 
     def __str__(self):
         return self.site_name
+
+    
+    def save(self, *args, **kwargs):
+        # Creating a defaults status card
+        if self.pk is None:
+            status_card = Status_Card.objects.create()
+            super(Sesh_Site, self).save(*args, **kwargs)
+            self.status_card = status_card
+            self.save()
+        else:
+            super(Sesh_Site, self).save(*args, **kwargs)
+    
 
     #Row based permissioning using django guardian not every user should be able to see all sites
 
