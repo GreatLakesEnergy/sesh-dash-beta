@@ -1,6 +1,5 @@
 #Django libs
 from django.shortcuts import render, get_object_or_404, render_to_response
-from guardian.decorators import permission_required_or_403
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
@@ -16,6 +15,9 @@ from django.forms import modelformset_factory, inlineformset_factory, formset_fa
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
+
+#Guardian decorator
+from guardian.decorators import permission_required_or_403
 
 #Import Models and Forms
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point
