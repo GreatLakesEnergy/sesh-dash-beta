@@ -87,6 +87,6 @@ class RMCTestCase(TestCase):
 
         sleep(2)
         dps = dps.first()
-        self.assertEqual(dps.minutes_last_contact, 10)
+        self.assertEqual(dps.minutes_last_contact, 60)
 
 
