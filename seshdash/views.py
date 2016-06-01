@@ -102,11 +102,14 @@ def index(request,site_id=0):
     if measurements_value is not None:
         for measurement in measurements_value:
             measurements.append(measurement['name'])
-
+  
     context_dict['measurements']= measurements
+    current_site = Sesh_Site.objects.filter(id=site_id)
     user = request.user
     checker = ObjectPermissionChecker(user)
-    permitted = 'view_Sesh_Site' in checker.get_perms(sites[0])
+    permitted = 'view_Sesh_Site' in checker.get_perms(current_site[0])
+    print "Permission"
+    print permitted
     context_dict['permitted'] = permitted
     return render(request,'seshdash/main-dash.html',context_dict)
 
