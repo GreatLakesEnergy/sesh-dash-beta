@@ -130,3 +130,7 @@ class AddTestCase(TestCase):
         self.assertEqual(len(sites),1)
         response = f.post('/add_site', data)
         self.assertEqual(response.status_code, 200)
+
+        # test status card created
+        site = Sesh_Site.objects.last()
+        self.assertNotEqual(site.status_card, None)
