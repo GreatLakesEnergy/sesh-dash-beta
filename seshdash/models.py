@@ -175,13 +175,19 @@ class Sesh_RMC_Account(models.Model):
 class Alert_Rule(models.Model):
     """
     Basic Alert rule model
-    TODO think about how to make this more power/generic
+
+    Alerts are defined through field choices.
+    if an alert is defined as <model-name>#<field> this will be checking the MYSQL db
+    if an alert is simple  <field-name> it will be queried in influx
+
+
     """
     OPERATOR_CHOICES = (
         ("eq" , "equals"),
         ("lt" , "less than"),
         ("gt" , "greater than"),
         )
+
     FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
                      ('BoM_Data_Point#soc','System State of Charge'),
                      ('BoM_Data_Point#AC_output','AC Loads'),
