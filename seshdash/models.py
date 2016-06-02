@@ -62,6 +62,40 @@ class Slack_Channel(models.Model):
         return self.name
 
 
+class Status_Card(models.Model):
+     """ 
+     Contains the rows to be displayed in the 
+     status card
+     """
+   
+     ROW_CHOICES = (
+         ('AC_Load_in', 'AC Load in'),
+         ('AC_Load_out', 'AC Load out'),
+         ('AC_Voltage_in', 'AC Voltage in'),
+         ('AC_Voltage_out', 'AC Voltage out'),
+         ('AC_input', 'AC input'),
+         ('AC_output', 'AC output' ),
+         ('AC_output_absolute', 'AC output absolute'),
+         ('battery_voltage', 'Battery Voltage'),
+         ('genset_state', 'Genset state'),
+         ('main_on', 'Main on'),
+         ('pv_production', 'PV production'),
+         ('relay_state', 'Relay state'),
+         ('soc', 'State of Charge'),
+         ('trans', 'Trans'),
+     )
+
+
+     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, default='soc')
+     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, default='battery_voltage')
+     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output_absolute')
+
+
+     def __str__(self):
+         return "For site: " + self.sesh_site.site_name
+
+
+
 class Sesh_Site(models.Model):
     """
     Model for each PV SESH installed site
@@ -84,10 +118,22 @@ class Sesh_Site(models.Model):
     has_grid = models.BooleanField(default=False)
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
-    #rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
+    status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True)
 
     def __str__(self):
         return self.site_name
+
+    
+    def save(self, *args, **kwargs):
+        # Creating a defaults status card
+        if self.pk is None:
+            status_card = Status_Card.objects.create()
+            super(Sesh_Site, self).save(*args, **kwargs)
+            self.status_card = status_card
+            self.save()
+        else:
+            super(Sesh_Site, self).save(*args, **kwargs)
+    
 
     #Row based permissioning using django guardian not every user should be able to see all sites
 

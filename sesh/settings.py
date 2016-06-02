@@ -83,13 +83,16 @@ FORECAST_KEY = config.get('api','forecast_key')
 SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
 # use template twoo
-USE_TEMPLATE_TWO = eval(config.get('templates', 'USE_TEMPLATE_TWO'))
+try:
+    USE_TEMPLATE_TWO = eval(config.get('templates', 'USE_TEMPLATE_TWO'))
+    # for switching to template two
+    if USE_TEMPLATE_TWO:
+        TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates_two')
+except:
+    logger.debug("No templates block in the settings local")
+    pass
 
 
-
-# for switching to template two
-if USE_TEMPLATE_TWO:
-    TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates_two')
    
 
 
