@@ -190,24 +190,32 @@ class Influx:
         self._influx_client.drop_database(name)
 
 
-    def insert_point(self, site, measurement_name, value):
+    def insert_point(self, site, measurement_name, value, time=None, tags=None):
         """ Write points to the database """
+
+
         json_body = [
-                {
-                "measurement": measurement_name,
-                "tags": {
-                    "site_name": site.site_name,
-                    "site_id": site.id,
-                    "source": 'sesh_dash'
-                },
-                "fields":{
-                    "value": value
+                    {
+                    "measurement": measurement_name,
+                    "tags": {
+                        "site_name": site.site_name,
+                        "site_id": site.id,
+                        "source": 'sesh_dash'
+                    },
+                    "fields":{
+                        "value": value
+                    }
                 }
-            }
-        ]
+            ]
+        # override default tags
+        if tags:
+            json_body[0]['tags'] = tags
+
+        if time:
+            json_body[0]['time'] = time.isoformat()
 
         value_returned = self._influx_client.write_points(json_body)
-        logging.debug("inserting point into DB %s %s"%(json_body, value_returned))
+        logger.debug("inserting point into DB %s %s %s"%(self.db,json_body, value_returned))
 
         return value_returned
 
@@ -228,19 +236,24 @@ class Influx:
         return list(self._influx_client.query(query,database=db).get_points())
 
 
-    def get_latest_measurement_point_site(self, site, measurement_name, database=None):
+    def get_latest_measurement_point_site(self, site, measurement_name, site_id=None, database=None):
          """ Returns the latest point of a site for a measurement """
          db = self.db
          if database:
              db = database
-
+         # TODO make this work with Site_id for API
          query = "SELECT * FROM %s WHERE site_name='%s' ORDER BY time DESC LIMIT 1" % (measurement_name, site.site_name)
+         logger.debug("Querying DB %s"%db)
          logger.debug(query)
-         return list(self._influx_client.query(query,database=db).get_points())
+         result = list(self._influx_client.query(query,database=db).get_points())
+         logger.debug("got result %s"%result)
+         return result
 
     # Helper classes to the interface
     def get_measurements_latest_point(self, site, measurement_list, database=None):
-        """ Returns a list of elements containing the latest points of provided measurements """
+        """
+        Returns a list of elements containing the latest points of provided measurements
+        """
 
         # Handling the db to be used
         db = self.db
@@ -257,8 +270,6 @@ class Influx:
                 pass
 
         return measurement_dict
-
-
 
 
 # Helper classes to the interface
@@ -293,13 +304,13 @@ def get_point(measurement_name, point_id, db=None):
     return point
 
 
-def insert_point(site, measurement_name, value, db=None):
+def insert_point(site, measurement_name, value, db=None, time=None, tags=None):
     """ Inserts a point into the db provided the name and the site """
     i = Influx()
     if db is not None:
         i = Influx(database=db)
 
-    value = i.insert_point(site, measurement_name, float(value))
+    value = i.insert_point(site, measurement_name, float(value), time=time, tags=tags)
 
 
 

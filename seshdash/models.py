@@ -175,13 +175,19 @@ class Sesh_RMC_Account(models.Model):
 class Alert_Rule(models.Model):
     """
     Basic Alert rule model
-    TODO think about how to make this more power/generic
+
+    Alerts are defined through field choices.
+    if an alert is defined as <model-name>#<field> this will be checking the MYSQL db
+    if an alert is simple  <field-name> it will be queried in influx
+
+
     """
     OPERATOR_CHOICES = (
         ("eq" , "equals"),
         ("lt" , "less than"),
         ("gt" , "greater than"),
         )
+
     FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
                      ('BoM_Data_Point#soc','System State of Charge'),
                      ('BoM_Data_Point#AC_output','AC Loads'),
@@ -301,7 +307,30 @@ class BoM_Data_Point(models.Model):
     #TODO relay will likely need to be it's own model
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
-
+   
+    """		
+    SI units		
+    """		
+    SI_UNITS = {		
+         "id": '',		
+         "soc":"%",		
+         "battery_voltage": "V",		
+         "AC_Voltage_in" : "V",		
+         "AC_Voltage_out" : "V",		
+         "AC_input" : "V",		
+         "AC_output" : "V",		
+         "AC_Load_in" : "V",		
+         "AC_Load_out" : "V",		
+         "pv_production" : "W",		
+         "main_on" : "V",		
+         "relay_state": "",		
+         "trans" : "",		
+         "genset_state" : "V",		
+         "site" : "",		
+         "AC_output_absolute" : "V",
+         "cloud_cover":"Okta",		
+         } 
+   
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 

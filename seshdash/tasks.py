@@ -16,7 +16,7 @@ from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils.alert import alert_generator, alert_status_check
 from seshdash.utils.reporting import prepare_report
-from seshdash.data.db.influx import Influx
+from seshdash.data.db.influx import Influx, get_latest_point_site
 
 # Time related
 from datetime import datetime, date, timedelta
@@ -55,6 +55,9 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
             for val in to_exclude:
                 #if to_exclude  in model_data_dict.keys():
                 model_data_dict.pop(val)
+
+        #Add our status will be used for RMC_Status
+        model_data_dict['status'] = 1
 
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
@@ -111,7 +114,7 @@ def get_BOM_data():
 
                         date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
                         date = parse(date, ignoretz=True)
- 
+
                         tz = pytz.timezone(site.time_zone)
                         date = tz.localize(date, is_dst=None)
 
@@ -559,13 +562,14 @@ def rmc_status_update():
     """
     sites = Sesh_Site.objects.all()
     for site in sites:
-        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
-
-        logger.debug("getting status from site %s"%site)
+        # TODO get latest DP from influx
+        #latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
+        latest_dp = get_latest_point_site(site,'status')
+        logger.debug("getting status from site %s with dp %s"%(site,latest_dp))
         if latest_dp:
             #localize to time of site
-            localized = timezone.localtime(latest_dp.time)
-            last_contact = time_utils.get_timesince_seconds(latest_dp.time, site.time_zone)
+            dp_time = time_utils.convert_influx_time_string(latest_dp['time'],tz=site.time_zone)
+            last_contact = time_utils.get_timesince_seconds(dp_time, tz=site.time_zone)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
 
@@ -575,7 +579,7 @@ def rmc_status_update():
                                     rmc = rmc,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
-            logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))
+            logger.debug("rmc status logger now: %s last_contact: %s "%(tn,dp_time))
             logger.debug("saving status %s "%rmc_status)
             rmc_status.save()
         else:

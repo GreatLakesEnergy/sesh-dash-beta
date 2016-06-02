@@ -3,6 +3,7 @@ from dateutil.parser import parse
 from time import localtime,strftime
 from django.conf import settings
 from  pytz import timezone
+from django.utils import timezone as timezone_dt
 from tzwhere import tzwhere
 
 
@@ -13,7 +14,7 @@ def get_epoch(tz=None):
     now = datetime.now()
     if tz:
         tz = _clean_tz(tz)
-        now = timezone.now(tz)
+        now = timezone_dt.now(tz)
     epoch = datetime(1970,1,1)
     diff = now - epoch
     diff = str(diff.total_seconds())
@@ -26,7 +27,7 @@ def get_yesterday(tz=None):
     now = datetime.date(datetime.now())
     if tz:
         tz = _clean_tz(tz)
-        now = timezone.now(tz)
+        now = timezone_dt.now(tz)
 
     one_day = timedelta(days=1)
     return now - one_day
@@ -186,7 +187,7 @@ def get_timesince_seconds(time, tz=None):
     """
     Get timesince and time provided
     """
-    now = datetime.now()
+    now = timezone_dt.now()
     if tz:
         now = timezone(tz).localize(datetime.now())
 
@@ -200,7 +201,7 @@ def get_timesince(time, tz=None):
     now = datetime.now()
     if tz:
         tz = _clean_tz(tz)
-        now = timezone.now(tz)
+        now = timezone_dt.now(tz)
 
     loc = timezone(settings.TIME_ZONE)
     now = loc.localize(now)
@@ -237,9 +238,14 @@ def get_date_dashed(date):
     return date_string
 
 
-def convert_influx_time_string(date_string):
+def convert_influx_time_string(date_string, tz=None):
     """ Converts influx style strings to datetime """
-    return parse(date_string)
+    parsed = parse(date_string)
+
+    if tz:
+        parsed =parsed.astimezone(timezone(tz))
+
+    return parsed
 
 def get_timesince_influx(date_string):
     date_obj = convert_influx_time_string(date_string)

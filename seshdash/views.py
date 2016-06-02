@@ -750,7 +750,7 @@ def graphs(request):
         active_id = request.POST.get('active_site_id','')
         active_site = Sesh_Site.objects.filter(id=active_id)
         time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
-        time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
+        time_bucket_dict = {'24h':'1h','7d':'1d','30d':'5d'}
 
         # Checking for a valid site_id
         if active_site != []:
@@ -762,13 +762,13 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            SI_unit = get_measurement_unit(choice)
+            SI_units = BoM_Data_Point.SI_UNITS
+            SI_unit = SI_units.get(choice,'V')		
             # creating an influx instance
             client = Influx()
-
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
-
+   
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
