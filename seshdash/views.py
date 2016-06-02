@@ -213,8 +213,7 @@ def import_site(request):
                 # if RMC site
                 # Handle RMC account info
                 #print "rmc request recieved is rmc request getting form ready"
-                site_forms_factory = inlineformset_factory(Sesh_RMC_Account,
-                                                           Sesh_Site,
+                site_forms_factory = modelformset_factory( Sesh_Site,
                                                            form=SiteRMCForm,
                                                            extra=1,
                                                            can_delete=False
