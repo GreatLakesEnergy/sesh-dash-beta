@@ -107,8 +107,10 @@
                         <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
+                        {% if permitted == True %}
                         <li><a href="/admin"><i class="fa fa-gear fa-fw"></i> Settings</a>
                         </li>
+                        {% endif %}
                         <li class="divider"></li>
                         <li><a href="/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                         </li>
@@ -150,10 +152,11 @@
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
-
-                        <li>
-                            <a id="site_settings" href="/add_site"> <i class="glyphicon glyphicon-cog"></i> Site-Settings</a>
-                        </li>
+                        {% if permitted == True %}
+                           <li>
+                               <a id="site_settings" href="/add_site"> <i class="glyphicon glyphicon-cog"></i> Site-Settings</a>
+                           </li>
+                        {% endif%}
 
                     </ul>
 

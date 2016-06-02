@@ -105,7 +105,7 @@ class LoginTestCase(TestCase):
                                     Sesh_Site,
                                     form = SiteForm,
                                     can_delete = False,
-                                    exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','time_zone'),
+                                    exclude = ('Delete','vrm_account','vrm_site_id','time_zone'),
                                     extra = 1
                                     )
 
