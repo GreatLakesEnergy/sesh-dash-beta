@@ -1,9 +1,7 @@
 var csrftoken = getCookie('csrftoken');
-/*
- * Barchart for energy production
-*/
 
-      /* Auto compete on search*/
+
+/* Auto compete on search*/
 var i;
 var textid;
 var textinput;

@@ -59,9 +59,9 @@ $(document).ready(function(){
           //linking each table row to it's corresponding site
            $('.clickable-row').click(function(){
                window.location.href =$(this).data("href");
-            });
-          });
-        });
+           });
+     });
+});
 
 
 
