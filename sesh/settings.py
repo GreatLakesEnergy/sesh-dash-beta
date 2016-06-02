@@ -14,12 +14,14 @@ from __future__ import absolute_import
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import sys
+import logging
 from celery.schedules import crontab
 from datetime import timedelta
 from ConfigParser import RawConfigParser
 import djcelery
 
 djcelery.setup_loader()
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.join(BASE_DIR,'seshdash')
@@ -82,6 +84,66 @@ FORECAST_KEY = config.get('api','forecast_key')
 # slack key
 SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
+
+LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
+
+#logging
+#Make sure logging folder exists
+
+if not os.path.exists(LOG_DIR):
+    # Create log dir
+    print "LOG DIR %s doesn't exist creating"%LOG_DIR
+    os.mkdir(LOG_DIR)
+
+
+
+
+# Logging configurations
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': LOGGING_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+
+        },
+        'file':{
+           'level': 'DEBUG',
+           'class': 'logging.FileHandler',
+           'filename':os.path.join(LOG_DIR, "all.log"),
+           'formatter': 'verbose',
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+        'seshdash': {
+            'handlers': ['console', 'file'],
+            'level': LOGGING_LEVEL,
+        },
+        'sesh.settings': {
+            'handlers': ['console','file'],
+            'level': LOGGING_LEVEL,
+        }
+    }
+
+}
+
+
+logger = logging.getLogger(__name__)
+
+
 # use template twoo
 try:
     USE_TEMPLATE_TWO = eval(config.get('templates', 'USE_TEMPLATE_TWO'))
@@ -89,7 +151,7 @@ try:
     if USE_TEMPLATE_TWO:
         TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates_two')
 except:
-    logger.debug("No templates block in the settings local")
+    logger.critical("No templates block in the settings local")
     pass
 
 
@@ -184,54 +246,6 @@ EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #email_templates_dir = os.path.join(template_dir,'email')
 FROM_EMAIL = config.get('mail','FROM_EMAIL')
-
-
-LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
-
-#logging
-# Make sure logging folder exists
-
-if not os.path.exists(LOG_DIR):
-    # Create log dir
-    print "LOG DIR %s doesn't exist creating"%LOG_DIR
-    os.mkdir(LOG_DIR)
-
-LOGGING = {
-    'version': 1,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
-        },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': LOGGING_LEVEL,
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-
-        },
-        'file':{
-           'level': 'DEBUG',
-           'class': 'logging.FileHandler',
-           'filename':os.path.join(LOG_DIR, "all.log"),
-           'formatter': 'verbose',
-        },
-    },
-
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-        },
-        'seshdash': {
-            'handlers': ['console', 'file'],
-            'level': LOGGING_LEVEL,
-        }
-    }
-
-}
 
 
 # Error reporting

@@ -168,9 +168,9 @@ ul li {
 					<td>
 						<h1>SESH {{ content.title }} </h1>
 						<p>Hi there {{username}} ,</p>
-						<p>Here is your <i>energy usage</i> for last {{ content.duration }}</p>
+						<p>Here is your <i>energy usage</i>  for  {{ content.date }}</p>
 						
-						<h2>Last {{ content.duration }} </h2>
+						<h2>{{ content.duration }}  repor:</h2>
 						<li><p> Total energy used was {{ content.total_consumption| floatformat}} KWh </p> </li>
 						<li><p> Total energy produced was {{ content.total_pv | floatformat }} KWh</p> </li>
 						<li><p> Energy used from grid was {{ content.grid_used | floatformat }} KWh</p> </li>

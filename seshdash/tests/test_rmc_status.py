@@ -18,7 +18,7 @@ from geoposition import Geoposition
 
 
 # To Test
-from seshdash.data.db.influx import Influx
+from seshdash.data.db.influx import Influx, insert_point, get_measurements_latest_point
 from django.conf import settings
 from seshdash.tasks import get_aggregate_daily_data, rmc_status_update
 
@@ -30,6 +30,19 @@ class RMCTestCase(TestCase):
 
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
         self.location = Geoposition(52.5,24.3)
+        self._influx_db_name = 'test_db'
+
+        self.i = Influx(database=self._influx_db_name)
+
+        try:
+            self.i.create_database(self._influx_db_name)
+            #Generate random data  points for 24h
+        except:
+           self.i.delete_database(self._influx_db_name)
+           sleep(1)
+           self.i.create_database(self._influx_db_name)
+           pass
+
 
 
         self.site = Sesh_Site.objects.create(site_name=u"Test_aggregate",
@@ -47,29 +60,21 @@ class RMCTestCase(TestCase):
                                              has_grid=True)
         self.test_rmc_account = Sesh_RMC_Account.objects.create(site = self.site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
 
-        self.data_point = Data_Point.objects.create(site=self.site,
-                                                soc=10,
-                                                battery_voltage=20,
-                                                time=timezone.now()-timedelta(minutes=10),
-                                                AC_input=0.0,
-                                                AC_output=15.0,
-                                                AC_Load_in=0.0,
-                                                AC_Load_out=-0.7)
+        timestamp = timezone.localtime(timezone.now()) - timedelta(minutes=60)
+        #print ""
+        #print timestamp
+        #timestamp = timezone.now()
+        self.i.insert_point(self.site,'status', 1, time = timestamp)
 
-        self.data_point = Data_Point.objects.create(site=self.site,
-                                                soc=10,
-                                                battery_voltage=20,
-                                                time=timezone.now()-timedelta(minutes=50),
-                                                AC_input=0.0,
-                                                AC_output=15.0,
-                                                AC_Load_in=0.0,
-                                                AC_Load_out=-0.7)
-
-
+        sleep(1)
         self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
+
+    def tearDown(self):
+        #self.i.delete_database(self._influx_db_name)
+        pass
 
     def test_rmc_stat(self):
         """
@@ -82,6 +87,6 @@ class RMCTestCase(TestCase):
 
         sleep(2)
         dps = dps.first()
-        self.assertEqual(dps.minutes_last_contact, 10)
+        self.assertEqual(dps.minutes_last_contact, 60)
 
 
