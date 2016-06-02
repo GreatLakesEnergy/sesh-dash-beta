@@ -186,7 +186,7 @@ def get_timesince_seconds(time, tz=None):
     """
     Get timesince and time provided
     """
-    now = datetime.now()
+    now = timezone.now()
     if tz:
         now = timezone(tz).localize(datetime.now())
 

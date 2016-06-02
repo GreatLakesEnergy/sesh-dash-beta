@@ -569,7 +569,7 @@ def rmc_status_update():
         if latest_dp:
             #localize to time of site
             dp_time = time_utils.convert_influx_time_string(latest_dp['time'],tz=site.time_zone)
-            last_contact = time_utils.get_timesince_seconds(dp_time)
+            last_contact = time_utils.get_timesince_seconds(dp_time, tz=site.time_zone)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
 
