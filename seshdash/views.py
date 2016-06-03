@@ -862,4 +862,5 @@ def add_site(request):
     #on page load
     else:
         form = SiteForm()
+       
     return render(request, 'seshdash/settings.html', {'form_add':form,'sites':sites})
