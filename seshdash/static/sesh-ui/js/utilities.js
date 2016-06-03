@@ -1,7 +1,7 @@
 /* This is a Javascript Utilities File Where all Helper Functions Are Kept */
 
 
-/*function to auto-generate a CRSF cookie */  
+/*function to auto-generate a CRSF cookie */
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -18,12 +18,10 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+var csrftoken = getCookie(csrftoken);
+/*ALerts Notification modal */
 
-var csrftoken = getCookie('csrftoken');
-
-
-//Alert Icon notification
-$(document).ready(function(){
+    $(document).ready(function(){
     alertId = $(this).attr('classid');
 
     // getting alerts site and number from the server
@@ -62,6 +60,5 @@ $(document).ready(function(){
            });
      });
 });
-
 
 
