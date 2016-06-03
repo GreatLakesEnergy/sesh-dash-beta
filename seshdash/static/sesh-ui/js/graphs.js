@@ -10,8 +10,7 @@ function daily_data_points_graph() {
    message = (title +" " + drop_choice1 + '  With  ' + drop_choice2);
    $("#title-message").html(message);
 
-   //$("#dynamic_graph").hide();
-  $(".graph-loader").hide();
+   $("#dynamic_graph").hide();
 
   $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time_value , 'active_site_id':active_site_id},function(data){
 
@@ -103,8 +102,8 @@ function daily_data_points_graph() {
 
 });
 
-    //$("#dynamic_graph").show();
-    //$(".graph-loader").hide();
+    $("#dynamic_graph").show();
+    $(".graph-loader").hide();
 }
 
 
