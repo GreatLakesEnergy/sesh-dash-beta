@@ -1,74 +1,6 @@
 
 var csrftoken = getCookie('csrftoken');
 
-/* Time Series Graph Generation */
-/*
-function time_series_graph() {
-                 measurement_value = $('#measurements_dropdown').val();
-                 time_value = $('#time_dropdown').val();
-
-                 $("#time_series").hide();
-
-                 $(".graph-loader-time-series").show();
-
-    $.post('/graphs',{csrfmiddlewaretoken:csrftoken,'choice':[measurement_value],'time':time_value,'active_site_id':active_site_id},function(data){
-                 var response = JSON.parse(data)
-                graph_data_values = response[measurement_value][0]
-                 si_units = response[measurement_value][1]
-                 for (i=0;i<graph_data_values.length;i++){
-                 graph_data_values[i][0]=graph_data_values[i][0]*1000
-                 }
-
-
-         $('#time_series_graph').highcharts({
-           chart : {
-                zoomtype : 'x'
-           },
-           title : {
-                text: 'Time Series Graph '
-           },
-           xAxis : {
-                  type : 'datetime'
-                  },
-           yAxis : [{
-                   labels : {
-                         format : '{value}'+ si_units,
-                         style : {
-                               color : Highcharts.getOptions().colors[1]
-                         },
-                     },
-                   title : {
-                         text : measurement_value,
-                   },
-
-           }],
-           legend : {
-                layout : 'vertical',
-                align : 'left',
-                x:40,
-                varticalAlign: 'top',
-                y :-350,
-                floating:true,
-           },
-           series :[{
-                 name : measurement_value,
-                 type : 'spline',
-                 data :graph_data_values,
-                 tooltip : {
-
-                        valueSuffix : si_units
-                 },
-            }],
-
-
-          });
-     });
-
-    $("#time_series").show();
-
-    $(".graph-loader-time-series").hide();
-}
-*/
 /* Function For Daily DataPoints Graph Generation */
 function daily_data_points_graph() {
    drop_choice1 = $("#drop1").val();
@@ -78,8 +10,8 @@ function daily_data_points_graph() {
    message = (title +" " + drop_choice1 + '  With  ' + drop_choice2);
    $("#title-message").html(message);
 
-   $("#dynamic_graph").hide();
-   $(".graph-loader").show();
+   //$("#dynamic_graph").hide();
+  $(".graph-loader").hide();
 
   $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time_value , 'active_site_id':active_site_id},function(data){
 
@@ -171,30 +103,20 @@ function daily_data_points_graph() {
 
 });
 
-    $("#dynamic_graph").show();
-    $(".graph-loader").hide();
+    //$("#dynamic_graph").show();
+    //$(".graph-loader").hide();
 }
 
 
 
 
 $(document).ready(function(){
- //time_series_graph()
 
  daily_data_points_graph()
 
  });
 
-
-/* Update Time Series Graph on Click */
-$("#update-button").click(function(){
-  //time_series_graph()
-});
-
-
 /* Update Daily Data Point Graph on Click */
 $("#dynamic_graph_button").click(function(){
   daily_data_points_graph()
 });
-
-
