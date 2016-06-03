@@ -44,20 +44,21 @@ var csrftoken = getCookie(csrftoken);
                                '<td>'+ alertData[i].site +  '</td>' +
                                '<td id="site-counter">'+ alertData[i].counter + '</td>' +
                                '</tr>';
-                   }
           }
 
-          out.append(element);
+         out.append(element);
 
          //appending table into the notification dropdown box
          $('#pop').html(sum_of_counters);
+
          if (sum_of_counters > 0){
              $('#pop').show();
           }
+          //linking each table row to it's corresponding site
+           $('.clickable-row').click(function(){
+               window.location.href =$(this).data("href");
+           });
+     });
+});
 
-                //linking each table row to it's corresponding site
-                $('.clickable-row').click(function(){
-                   window.location.href =$(this).data("href");
-                 });
-             });
-        });
+
