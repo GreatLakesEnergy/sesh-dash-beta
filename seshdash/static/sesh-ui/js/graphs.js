@@ -82,20 +82,22 @@ function daily_data_points_graph() {
             backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
         },
         series: [{
+
+           name: drop_choice2,
+           type: 'column',
+           data: dropdown2_values,
+           tooltip: {
+                   valueSuffix: SI_unit2
+            }
+
+        }, {
+
             name: drop_choice1 ,
             type: 'spline',
             yAxis: 1,
             data: dropdown1_values,
             tooltip: {
-                valueSuffix: SI_unit1
-            }
-
-        }, {
-            name: drop_choice2,
-            type: 'column',
-            data: dropdown2_values,
-            tooltip: {
-                valueSuffix: SI_unit2
+                    valueSuffix: SI_unit1
             }
         }]
     });
