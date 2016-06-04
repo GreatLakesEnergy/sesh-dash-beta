@@ -143,7 +143,7 @@ class Sesh_Site(models.Model):
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
-
+      
 
 class Sesh_RMC_Account(models.Model):
     """
