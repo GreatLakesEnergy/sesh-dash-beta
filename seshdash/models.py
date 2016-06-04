@@ -100,7 +100,7 @@ class Sesh_Site(models.Model):
     """
     Model for each PV SESH installed site
     """
-    site_name = models.CharField(max_length=100)
+    site_name = models.CharField(max_length=100, unique = True)
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
@@ -143,7 +143,7 @@ class Sesh_Site(models.Model):
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
-
+      
 
 class Sesh_RMC_Account(models.Model):
     """
