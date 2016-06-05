@@ -83,9 +83,8 @@ class AlertTestCase(TestCase):
         self.test_rmc_account.save()
 
         #create rmc status
-        self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
+        self.test_rmc_status = RMC_status.objects.create(site=self.site,
                                                         ip_address='127.0.0.1',
-                                                        site=self.site,
                                                         minutes_last_contact=100,
                                                         signal_strength=27,
                                                         data_sent_24h=12,
@@ -142,9 +141,8 @@ class AlertTestCase(TestCase):
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
 
-        self.new_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
+        self.new_rmc_status = RMC_status.objects.create(site=self.site,
                                                         ip_address='127.0.0.1',
-                                                        site=self.site,
                                                         minutes_last_contact=1,
                                                         signal_strength=27,
                                                         data_sent_24h=12,
