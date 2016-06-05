@@ -55,7 +55,7 @@ class AddTestCase(TestCase):
         self.test_rmc_account.save()
 
         #create rmc status
-        self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
+        self.test_rmc_status = RMC_status.objects.create(site=self.site,
                                                         ip_address='127.0.0.1',
                                                         minutes_last_contact=100,
                                                         signal_strength=27,
@@ -76,7 +76,7 @@ class AddTestCase(TestCase):
 
 
         generate_auto_rules(self.site.pk)
-        
+
         User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
 
 
@@ -103,11 +103,11 @@ class AddTestCase(TestCase):
         # checking created site
         sites = Sesh_Site.objects.all()
         self.assertEqual(len(sites),2)
-     
+
         # submit form
         response = f.post('/edit_site',data)
         self.assertEqual(response.status_code,200)
- 
+
         #checking aonther user
         r = Client()
         r.login(username="patrick",password="cdakcjocajica")
@@ -143,7 +143,7 @@ class AddTestCase(TestCase):
         self.assertEqual(len(sites),1)
         response = f.post('/add_site', data)
         self.assertEqual(response.status_code, 200)
- 
+
         #checking aonther user
         r = Client()
         r.login(username="patrick",password="cdakcjocajica")
