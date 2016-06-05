@@ -143,7 +143,6 @@ class AlertTestCase(TestCase):
 
         self.new_rmc_status = RMC_status.objects.create(site=self.site,
                                                         ip_address='127.0.0.1',
-                                                        site=self.site,
                                                         minutes_last_contact=1,
                                                         signal_strength=27,
                                                         data_sent_24h=12,
