@@ -257,7 +257,7 @@ class RMC_status(models.Model):
     target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
 
     def clean(self):
-        if not self.rmc and not self.site:
+        if not self.site:
             raise ValidationError("RMC status object requires either rmc account or sesh site reference")
 
     class Meta:

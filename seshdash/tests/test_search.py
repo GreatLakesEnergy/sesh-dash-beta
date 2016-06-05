@@ -56,15 +56,6 @@ class SearchTestCase(TestCase):
         self.test_rmc_account = Sesh_RMC_Account(site=self.site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
         self.test_rmc_account.save()
 
-        #create rmc status
-        self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
-                                                        ip_address='127.0.0.1',
-                                                        minutes_last_contact=100,
-                                                        signal_strength=27,
-                                                        data_sent_24h=12,
-                                                        time=datetime.now())
-        self.test_rmc_status.save()
-
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
         self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
