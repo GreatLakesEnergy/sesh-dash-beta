@@ -32,7 +32,7 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit, get_status_card_items
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -691,7 +691,7 @@ def get_latest_bom_data(request):
 
 
     # The measurement list contains attributes to be displayed in the status card,
-    measurement_list = ['soc','battery_voltage','AC_output_absolute']
+    measurement_list = get_status_card_items(site)
     latest_points = get_measurements_latest_point(site, measurement_list)
 
 
@@ -768,7 +768,7 @@ def graphs(request):
 
     # if ajax request
     if request.method == 'POST':
-
+       
         # variables declaration
         results = {}
         time_delta_dict = {}
