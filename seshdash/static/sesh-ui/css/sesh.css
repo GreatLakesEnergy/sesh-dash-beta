@@ -3,6 +3,8 @@
 }*/
 body {
  font-family: "Roboto", sans-serif;
+ padding-bottom:0;
+ margin-bottom:0;
 }
 
 
@@ -279,3 +281,14 @@ div.awesomplete > ul {
   cursor: pointer;
 
 }
+/* styling the footer */
+.footer{
+    background:padding-top: 15px;
+    background: #AAB2B7;
+    margin-top: 20px;
+}
+
+.footer p{
+   margin-top:10px;
+}
+
