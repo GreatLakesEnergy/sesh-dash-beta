@@ -117,7 +117,7 @@ def get_status_card_items(site):
 
     # Removing the int items the int item
     for i, item in enumerate(status_card_items):
-        if type(item) == int:
+        if type(item) == int or type(item) == long:
             status_card_items.pop(i)
 
     return status_card_items
