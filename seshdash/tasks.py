@@ -57,7 +57,7 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
                 model_data_dict.pop(val)
 
         #Add our status will be used for RMC_Status
-        model_data_dict['status'] = 1
+        model_data_dict['status'] = 1.0
 
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
@@ -112,11 +112,11 @@ def get_BOM_data():
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
 
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
-                        date = parse(date, ignoretz=True)
+                        #date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
+                        #date = parse(date, ignoretz=True)
 
-                        tz = pytz.timezone(site.time_zone)
-                        date = tz.localize(date, is_dst=None)
+                        #tz = pytz.timezone(site.time_zone)
+                        #date = tz.localize(date, is_dst=None)
 
                         #This data is already localazied
                         logger.debug("got raw date %s with timezone %s"%(
@@ -124,10 +124,9 @@ def get_BOM_data():
                             site.time_zone
                             ))
                         date = time_utils.epoch_to_datetime(float(sys_data['VE.Bus state']['timestamp']) , tz=site.time_zone)
-                        logger.debug("saving before localize  BOM data point with time %s"%date)
+                        #logger.debug("saving before localize  BOM data point with time %s"%date)
                         logger.debug("saving BOM data point with time %s"%date)
                         mains = False
-                        logger.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
                             mains = True
@@ -162,6 +161,8 @@ def get_BOM_data():
         except IntegrityError, e:
             logger.debug("Duplicate entry skipping data point")
             pass
+        except KeyError,  e:
+            logger.warning("Sites %s is missing key while getting vrm data%s"%(site,e))
         except Exception ,e:
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
@@ -576,7 +577,6 @@ def rmc_status_update():
             # Get RMC account
             rmc = Sesh_RMC_Account.objects.get(site=site)
             rmc_status = RMC_status(site = site,
-                                    rmc = rmc,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
             logger.debug("rmc status logger now: %s last_contact: %s "%(tn,dp_time))
