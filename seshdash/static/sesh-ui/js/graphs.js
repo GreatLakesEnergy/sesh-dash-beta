@@ -3,7 +3,7 @@ var csrftoken = getCookie('csrftoken');
 
 /* Function For Daily DataPoints Graph Generation */
 function daily_data_points_graph() {
-
+  
    drop_choice1 = $("#drop1").val();
    drop_choice2 = $("#drop2").val();
    time_value = $('#time_dropdown').val();
@@ -12,7 +12,7 @@ function daily_data_points_graph() {
    $("#title-message").html(message);
 
    $("#dynamic_graph").hide();
-   $(".graph-loader").show();
+
 
   $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time_value , 'active_site_id':active_site_id},function(data){
 
