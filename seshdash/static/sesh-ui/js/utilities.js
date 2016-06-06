@@ -18,7 +18,7 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-var csrftoken = getCookie(csrftoken);
+var csrftoken = getCookie('csrftoken');
 /*ALerts Notification modal */
 
     $(document).ready(function(){
@@ -60,5 +60,3 @@ var csrftoken = getCookie(csrftoken);
            });
      });
 });
-
-

@@ -768,7 +768,7 @@ def graphs(request):
 
     # if ajax request
     if request.method == 'POST':
-
+       
         # variables declaration
         results = {}
         time_delta_dict = {}
