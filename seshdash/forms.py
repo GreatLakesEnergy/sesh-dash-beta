@@ -14,19 +14,19 @@ class SiteForm(ModelForm):
         widgets = {'comission_date':forms.DateInput()}
 
 
-    def clean(self,**kwargs):
-        """
-        add timezone based on location
-        """
-        # super(SiteForm, self).save(**kwargs)
-        cleaned_data = super(SiteForm, self).clean()
-        pos =self.cleaned_data.get('position')
-        timezone = get_timezone_from_geo(pos[0], pos[1])
-        self.instance.time_zone = timezone
-        self.instance.comission_date = localize(self.instance.comission_date, timezone)
-
-        #super(SiteForm, self).save(**kwargs)
-        return cleaned_data
+#    def clean(self,**kwargs):
+#        """
+#        add timezone based on location
+#        """
+#       # super(SiteForm, self).save(**kwargs)
+#        cleaned_data = super(SiteForm, self).clean()
+#        pos =self.cleaned_data.get('position')
+#        timezone = get_timezone_from_geo(pos[0], pos[1])
+#        self.instance.time_zone = timezone
+#        self.instance.comission_date = localize(self.instance.comission_date, timezone)
+#
+#        #super(SiteForm, self).save(**kwargs)
+#        return cleaned_data
 
 
 
@@ -35,15 +35,15 @@ class SiteRMCForm(ModelForm):
     required_css_class = "info"
 
 
-    def clean(self):
-        """
-        Add timezone based on location
-        """
-        cleaned_data = super(SiteRMCForm, self).clean()
-        pos = cleaned_data.get('position')
-        timezone = get_timezone_from_geo(pos[0], pos[1])
-        self.cleaned_data['time_zone'] = timezone
-        return cleaned_data
+#    def clean(self):
+#        """
+#        Add timezone based on location
+#        """
+#        cleaned_data = super(SiteRMCForm, self).clean()
+#        pos = cleaned_data.get('position')
+#        timezone = get_timezone_from_geo(pos[0], pos[1])
+#        self.cleaned_data['time_zone'] = timezone
+#        return cleaned_data
 
 
     class Meta:
