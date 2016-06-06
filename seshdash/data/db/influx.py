@@ -236,7 +236,7 @@ class Influx:
         try:
             return list(self._influx_client.query(query,database=db).get_points())
         except Exception, e:
-            logger.debug("INFLUX error %s" %e)
+            logger.error("INFLUX error %s" %e)
        
 
     def get_latest_measurement_point_site(self, site, measurement_name, site_id=None, database=None):
