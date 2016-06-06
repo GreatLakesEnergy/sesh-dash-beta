@@ -118,8 +118,9 @@ class LoginTestCase(TestCase):
         sites = Sesh_Site.objects.all()
         self.assertEqual(len(sites),1)
 
-        site = sites[0]
-        self.assertEqual(site.time_zone,'Asia/Baghdad')
+        # Removing not used anymore #PR 251
+        #site = sites[0]
+        #self.assertEqual(site.time_zone,'Asia/Baghdad')
 
 
 
