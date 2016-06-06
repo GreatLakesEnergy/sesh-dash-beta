@@ -37,6 +37,7 @@ from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
+from seshdash.utils.permission_utils import get_permissions
 
 import json,time,random
 
@@ -106,13 +107,10 @@ def index(request,site_id=0):
             measurements.append(measurement['name'])
   
     context_dict['measurements']= measurements
-   
-    current_site = Sesh_Site.objects.filter(id=site_id)
+    # user permissions
     user = request.user
-    checker = ObjectPermissionChecker(user)
-    
-    permitted = 'view_Sesh_Site' in checker.get_perms(current_site[0])
-    context_dict['permitted'] = permitted
+    permission = get_permissions(user)
+    context_dict['permitted'] = permission
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -751,6 +749,12 @@ def historical_data(request):
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
         active_site = sites[0]
         context_dict = {}
+       
+        #checking user permissions      
+        user = request.user
+        permission = get_permissions(user)
+        context_dict['permitted'] = permission
+
         context_dict['sites'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
@@ -848,6 +852,11 @@ def edit_site(request,site_Id=1):
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
 def add_site(request):
+    context_dict = {}
+    #checking permissions
+    user = request.user
+    permission = get_permissions(user)
+
     #fetching list of sites for the user
     sites =  _get_user_sites(request)
     # on ajax
@@ -862,4 +871,10 @@ def add_site(request):
     #on page load
     else:
         form = SiteForm()
-    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':sites})
+   
+    context_dict['permitted'] = permission
+    context_dict['sites'] = sites
+    context_dict['form_add'] = form
+
+       
+    return render(request, 'seshdash/settings.html', context_dict)
