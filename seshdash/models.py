@@ -63,11 +63,11 @@ class Slack_Channel(models.Model):
 
 
 class Status_Card(models.Model):
-     """ 
-     Contains the rows to be displayed in the 
+     """
+     Contains the rows to be displayed in the
      status card
      """
-   
+
      ROW_CHOICES = (
          ('AC_Load_in', 'AC Load in'),
          ('AC_Load_out', 'AC Load out'),
@@ -123,7 +123,7 @@ class Sesh_Site(models.Model):
     def __str__(self):
         return self.site_name
 
-    
+
     def save(self, *args, **kwargs):
         # Creating a defaults status card
         if self.pk is None:
@@ -133,7 +133,7 @@ class Sesh_Site(models.Model):
             self.save()
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
-    
+
 
     #Row based permissioning using django guardian not every user should be able to see all sites
 
@@ -228,14 +228,14 @@ class Sesh_Alert(models.Model):
     point_model = models.CharField(max_length=40, default="BoM_Data_Point")
     point_id = models.CharField(max_length=40)
 
-    # def __str__(self):  # 
+    # def __str__(self):  #
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
 
        # TODO make this print useful information
        return str(self.alert)
-                                           
+
 
     class Meta:
         verbose_name = 'System Alert'
@@ -246,7 +246,8 @@ class RMC_status(models.Model):
     """
     Table containing status information for each RMC unit
     """
-    rmc = models.ForeignKey(Sesh_RMC_Account, blank=True, null=True)
+    # Removing due to infinitae migration error
+    #rmc_account = models.OneToOneField(Sesh_RMC_Account,on_delete=models.CASCADE, related_name="rmc_status")
     site = models.ForeignKey(Sesh_Site, blank=True, null=True)
     ip_address = models.GenericIPAddressField(default=None, null=True)
     minutes_last_contact = models.IntegerField(default=None)
@@ -256,7 +257,7 @@ class RMC_status(models.Model):
     target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
 
     def clean(self):
-        if not self.rmc and not self.site:
+        if not self.site:
             raise ValidationError("RMC status object requires either rmc account or sesh site reference")
 
     class Meta:
@@ -307,30 +308,30 @@ class BoM_Data_Point(models.Model):
     #TODO relay will likely need to be it's own model
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
-   
-    """		
-    SI units		
-    """		
-    SI_UNITS = {		
-         "id": '',		
-         "soc":"%",		
-         "battery_voltage": "V",		
-         "AC_Voltage_in" : "V",		
-         "AC_Voltage_out" : "V",		
-         "AC_input" : "V",		
-         "AC_output" : "V",		
-         "AC_Load_in" : "V",		
-         "AC_Load_out" : "V",		
-         "pv_production" : "W",		
-         "main_on" : "V",		
-         "relay_state": "",		
-         "trans" : "",		
-         "genset_state" : "V",		
-         "site" : "",		
+
+    """
+    SI units
+    """
+    SI_UNITS = {
+         "id": '',
+         "soc":"%",
+         "battery_voltage": "V",
+         "AC_Voltage_in" : "V",
+         "AC_Voltage_out" : "V",
+         "AC_input" : "V",
+         "AC_output" : "V",
+         "AC_Load_in" : "V",
+         "AC_Load_out" : "V",
+         "pv_production" : "W",
+         "main_on" : "V",
+         "relay_state": "",
+         "trans" : "",
+         "genset_state" : "V",
+         "site" : "",
          "AC_output_absolute" : "V",
-         "cloud_cover":"Okta",		
-         } 
-   
+         "cloud_cover":"Okta",
+         }
+
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
