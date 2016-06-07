@@ -118,7 +118,7 @@ class Sesh_Site(models.Model):
     has_grid = models.BooleanField(default=False)
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
-    status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True)
+    status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.site_name
