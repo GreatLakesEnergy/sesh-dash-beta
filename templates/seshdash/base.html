@@ -236,13 +236,17 @@
     <!-- mapbox javascript -->
     <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
 
-    <script src ='{%static  'sesh-ui/js/graphs.js' %}' > </script>
 
    {% block seshjs %}
+        <!-- graph js -->       
+        <script src ='{%static  'sesh-ui/js/graphs.js' %}' > </script>
+
         <!-- sesh javascript -->
         <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
+
         <!-- Sesh React -->
         <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
+
         <!-- Maps configuration -->
         <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
 

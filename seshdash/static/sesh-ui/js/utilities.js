@@ -21,9 +21,8 @@ function getCookie(name) {
 var csrftoken = getCookie('csrftoken');
 /*ALerts Notification modal */
 
-    $(document).ready(function(){
+ $(document).ready(function(){
     alertId = $(this).attr('classid');
-
     // getting alerts site and number from the server
     var jsonData = {"alertId" : alertId,
                       csrfmiddlewaretoken: csrftoken};
