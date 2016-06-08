@@ -144,20 +144,6 @@ LOGGING = {
 logger = logging.getLogger(__name__)
 
 
-# use template twoo
-try:
-    USE_TEMPLATE_TWO = eval(config.get('templates', 'USE_TEMPLATE_TWO'))
-    # for switching to template two
-    if USE_TEMPLATE_TWO:
-        TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates_two')
-except:
-    logger.critical("No templates block in the settings local")
-    pass
-
-
-   
-
-
 # Temp folder for misc files
 
 try:
@@ -284,22 +270,6 @@ INSTALLED_APPS = (
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
-            'jquery#2.2.1',
-            'jquery-ui#1.11.4',
-            'mapbox.js#2.4.0',
-            'd3#3.5.16',
-            'nvd3#1.7.1',
-            'moment#2.11.2',
-            'highcharts-release#4.2.4',
-            'bootstrap#3.3.6',
-            'font-awesome#4.6.1',
-            'metisMenu#2.5.0',
-            'morrisjs#0.5.1',
-            'raphael#2.2.0',
-            'react#0.14.8',
-            'babel#d54d59ff74',
-            'awesomplete#1.1.0',
-            'pace#1.0.2',
             )
 
 ANONYMOUS_USER_ID = -1
