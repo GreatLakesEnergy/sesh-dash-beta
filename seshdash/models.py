@@ -83,12 +83,14 @@ class Status_Card(models.Model):
          ('relay_state', 'Relay state'),
          ('soc', 'State of Charge'),
          ('trans', 'Trans'),
+         ('last_contact', 'Last Contact'),
      )
 
 
      row1 = models.CharField(max_length=30, choices=ROW_CHOICES, default='soc')
      row2 = models.CharField(max_length=30, choices=ROW_CHOICES, default='battery_voltage')
      row3 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output_absolute')
+     row4 = models.CharField(max_length=30, choices=ROW_CHOICES, default='last_contact')
 
 
      def __str__(self):

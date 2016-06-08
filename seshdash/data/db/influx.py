@@ -270,6 +270,7 @@ class Influx:
                 measurement_dict[measurement] = self.get_latest_measurement_point_site(site, measurement)[0]
             except IndexError, e:
                 logger.debug('No points for %s ' % measurement)
+                print "No points for %s " % measurement
                 pass
 
         return measurement_dict
