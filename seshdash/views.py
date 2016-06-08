@@ -695,24 +695,30 @@ def get_latest_bom_data(request):
     latest_points = get_measurements_latest_point(site, measurement_list)
 
 
+    print "The measurement list is: ",
+    print measurement_list
+
+    print "The points are: ",
+    print latest_points
+ 
     latest_point_data = []
 
     # If the points exist and the points returned are equal to the items in measurement list
-    if len(latest_points) == len(measurement_list):
-        for measurement, point in latest_points.items():
-            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
-                                      "value":str(round(latest_points[measurement]['value'], 2))
-                                              + get_measurement_unit(measurement)
-                             })
+    for measurement, point in latest_points.items():
+        latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                  "value":str(round(latest_points[measurement]['value'], 2))
+                                          + get_measurement_unit(measurement)
+                         })
 
-    # adding data from the rmc_status
-    try:
-        # TODO letest_point should only return one point
-        latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
-        logger.debug("RMC status card %s"%latest_points)
-    except StopIteration:
-        logger.warning("No further points %s"%latest_points)
-        pass
+    if 'last_contact' in measurement_list:
+        # adding data from the rmc_status
+        try:
+            # TODO letest_point should only return one point
+            latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
+            logger.debug("RMC status card %s"%latest_points)
+        except StopIteration:
+            logger.warning("No further points %s"%latest_points)
+            pass
 
     return HttpResponse(json.dumps(latest_point_data))
 
