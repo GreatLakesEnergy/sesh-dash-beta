@@ -8,12 +8,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
+from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
+
+#Guardian decorator
+from guardian.decorators import permission_required_or_403
 
 #Import Models and Forms
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point
@@ -28,12 +32,12 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name, get_measurement_unit, get_status_card_items
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit, get_status_card_items
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
+from seshdash.utils.permission_utils import get_permissions
 
 import json,time,random
 
@@ -98,13 +102,15 @@ def index(request,site_id=0):
 
     measurements =[]
 
-
-    for measurement in measurements_value:
-        measurements.append(measurement['name'])
-
+    if measurements_value is not None:
+        for measurement in measurements_value:
+            measurements.append(measurement['name'])
+  
     context_dict['measurements']= measurements
-
-
+    # user permissions
+    user = request.user
+    permission = get_permissions(user)
+    context_dict['permitted'] = permission
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -238,7 +244,7 @@ def _aggregate_imported_data(sites):
 
 def _validate_form(form,context_dict):
     """
-    Validate forms based on form input
+    Validate forms basedo no form input
     """
     if form.is_valid():
         logger.debug("getting ready to save form %s")
@@ -294,11 +300,6 @@ def handle_create_site(request):
         # Initiate standard alarms
         generate_auto_rules(site.pk)
 
-        # if site is an RMC site generate RMC API key
-        # TODO show the api key in settings
-        rmc = Sesh_RMC_Account(site=site, api_key=rmc_tools.generate_rmc_api_key())
-        rmc.save()
-
     # Initiate download if requred
     _download_data(request)
 
@@ -309,12 +310,11 @@ def _create_site_rmc(request):
     """
     Create site for RMC account
     """
-    #rmc = Sesh_RMC_Account(api_key=rmc_tools.generate_rmc_api_key())
-    #rmc.save()
-    site_forms_factory = modelformset_factory(Sesh_Site, form=SiteRMCForm,exclude=('delete',))
+    rmc = Sesh_RMC_Account(api_key=rmc_tools.generate_rmc_api_key())
+    rmc.save()
+    site_forms_factory = inlineformset_factory(Sesh_RMC_Account, Sesh_Site, form=SiteRMCForm,exclude=('delete',))
     # Create RMC account associated with it
-    #form = site_forms_factory(request.POST, instance=rmc)
-    form = site_forms_factory(request.POST)
+    form = site_forms_factory(request.POST, instance=rmc)
     return form
 
 
@@ -354,10 +354,10 @@ def prep_time_series(data,field_1_y,field_2_date,field_2_y=None):
 
 
 #testing out some nvd3 graphs
-#TODO move graphing functions to different library remove this
+#TODO move graphing functions to different library
 def linebar(xdata,ydata,ydata2,label_1,label_2,chart_container,data):
     """
-    lineplusbarchart page test
+    lineplusbarchart page
     """
     #start_time = int(time.mktime(datetime.datetime(2012, 6, 1).timetuple()) * 1000)
     #nb_element = 100
@@ -456,12 +456,35 @@ def get_user_data(user,site_id,sites):
 
     weather_data = Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past,five_day_future]).order_by('date')
 
+    #granular pv data
+    #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[2]]).order_by('time')
+
+    #daily pv data
+    #power_data  = PV_Production_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]],data_duration=datetime.timedelta(days=1)).order_by('time')
+
+    #BOM data
+
+   # bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],last_5_days[4]]).order_by('time')
+
     bom_data = BoM_Data_Point.objects.filter(site=site).order_by('-time')
 
     bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],now]).order_by('-id')
+    pprint( bom_data.first())
+
+    #NOTE remvong JSON versions of data for now as it's not necassary
+    #weather_data_json = serialize_objects(weather_data)
+    #power_data_json = serialize_objects(power_data)
+    #bom_data_json = serialize_objects(power_data)
+
     context_data['site_weather'] = weather_data
     #context_data['site_power'] = power_data
     context_data['bom_data'] = bom_data
+
+    #NOTE remvong JSON versions of data for now as it's not necassary
+    #context_data_json['site_weather'] = weather_data_json
+    #context_data_json['site_power'] = power_data_json
+    #context_data_json['bom_data'] = bom_data_json
+
     context_data['alerts'] = display_alerts(site_id)
 
     return context_data,context_data_json
@@ -476,7 +499,6 @@ def jsonify_dict(context_dict,content_json):
 """
 BEGIN Turn django objects in JSON
 """
-
 def serialize_objects(objects, format_ = 'json'):
     return serializers.serialize('json',objects)
 
@@ -516,13 +538,18 @@ def get_high_chart_data(user,site_id,sites):
      site = Sesh_Site.objects.get(pk=site_id)
      context_high_data = {}
      if not user.has_perm('seshdash.view_Sesh_Site',site):
-        logger.warning( "user doesn't have permission to view site %s"%site_id)
+        print "user doesn't have permission to view site %s"%site_id
         #TODO return 403 permission denied
         return context_high_data
 
      now = timezone.localtime(timezone.now())
      five_day_past2 = now - timedelta(days=5)
      five_day_future2 = now + timedelta(days=6)
+
+    # Getting climat conditions
+
+     #high_cloud_cover = list(Site_Weather_Data.objects.filter(site=site,date__range=[five_day_past2,five_day_future2]).values_list('cloud_cover', flat=True).order_by('date'))
+     #context_high_data['high_cloud_cover']=high_cloud_cover
 
      # Getting climat Dates and the Pv Daily production
      # Getting  Dates  Site_Weather_Data is where i can find the date interval for dynamic initialization
@@ -553,7 +580,7 @@ def get_high_chart_data(user,site_id,sites):
     # initiating the context_high_data Object
      context_high_data['high_date']= high_date_data
      context_high_data['high_pv_production']= high_pv_production
-     #print (context_high_data['high_pv_production'])
+     print (context_high_data['high_pv_production'])
      return context_high_data
 
 def display_alerts(site_id):
@@ -655,8 +682,8 @@ def silence_alert(request):
 @login_required
 def get_latest_bom_data(request):
     """
-    Returns the latest information of a site to be displayed in the status card
-    The data is got from the influx db
+      Returns the latest information of a site to be displayed in the status card
+      The data is got from the influx db
     """
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
@@ -666,7 +693,7 @@ def get_latest_bom_data(request):
     # The measurement list contains attributes to be displayed in the status card,
     measurement_list = get_status_card_items(site)
     latest_points = get_measurements_latest_point(site, measurement_list)
-    
+
 
     latest_point_data = []
 
@@ -686,7 +713,6 @@ def get_latest_bom_data(request):
     except StopIteration:
         logger.warning("No further points %s"%latest_points)
         pass
-
 
     return HttpResponse(json.dumps(latest_point_data))
 
@@ -723,6 +749,12 @@ def historical_data(request):
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
         active_site = sites[0]
         context_dict = {}
+       
+        #checking user permissions      
+        user = request.user
+        permission = get_permissions(user)
+        context_dict['permitted'] = permission
+
         context_dict['sites'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
@@ -736,7 +768,7 @@ def graphs(request):
 
     # if ajax request
     if request.method == 'POST':
-
+       
         # variables declaration
         results = {}
         time_delta_dict = {}
@@ -791,6 +823,7 @@ def graphs(request):
 
 #function to editing existing sites
 @login_required
+@permission_required_or_403('auth.view_Sesh_Site')
 def edit_site(request,site_Id=1):
    context_dict = {}   
    sites =  _get_user_sites(request)
@@ -817,7 +850,13 @@ def edit_site(request,site_Id=1):
 
 # function of adding new site
 @login_required
+@permission_required_or_403('auth.view_Sesh_Site')
 def add_site(request):
+    context_dict = {}
+    #checking permissions
+    user = request.user
+    permission = get_permissions(user)
+
     #fetching list of sites for the user
     sites =  _get_user_sites(request)
     # on ajax
@@ -832,4 +871,10 @@ def add_site(request):
     #on page load
     else:
         form = SiteForm()
-    return render(request, 'seshdash/settings.html', {'form_add':form,'sites':sites})
+   
+    context_dict['permitted'] = permission
+    context_dict['sites'] = sites
+    context_dict['form_add'] = form
+
+       
+    return render(request, 'seshdash/settings.html', context_dict)

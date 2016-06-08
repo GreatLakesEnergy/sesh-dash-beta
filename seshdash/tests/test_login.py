@@ -105,7 +105,7 @@ class LoginTestCase(TestCase):
                                     Sesh_Site,
                                     form = SiteForm,
                                     can_delete = False,
-                                    exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','time_zone'),
+                                    exclude = ('Delete','vrm_account','vrm_site_id','time_zone'),
                                     extra = 1
                                     )
 
@@ -118,8 +118,9 @@ class LoginTestCase(TestCase):
         sites = Sesh_Site.objects.all()
         self.assertEqual(len(sites),1)
 
-        site = sites[0]
-        self.assertEqual(site.time_zone,'Asia/Baghdad')
+        # Removing not used anymore #PR 251
+        #site = sites[0]
+        #self.assertEqual(site.time_zone,'Asia/Baghdad')
 
 
 
