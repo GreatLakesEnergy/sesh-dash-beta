@@ -32,7 +32,7 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit, get_status_card_items
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit,get_status_card_items
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -698,12 +698,11 @@ def get_latest_bom_data(request):
     latest_point_data = []
 
     # If the points exist and the points returned are equal to the items in measurement list
-    if len(latest_points) == len(measurement_list):
-        for measurement, point in latest_points.items():
-            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
-                                      "value":str(round(latest_points[measurement]['value'], 2))
-                                              + get_measurement_unit(measurement)
-                             })
+    for measurement, point in latest_points.items():
+        latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                  "value":str(round(latest_points[measurement]['value'], 2))
+                                          + get_measurement_unit(measurement)
+                         })
 
     # adding data from the rmc_status
     try:
