@@ -20,7 +20,7 @@ from django import forms
 from guardian.decorators import permission_required_or_403
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point, RMC_status
 from django.db.models import Avg
 from django.db.models import Sum
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
@@ -689,17 +689,10 @@ def get_latest_bom_data(request):
     site_id = request.POST.get('siteId')
     site = Sesh_Site.objects.filter(id=site_id).first()
 
-
     # The measurement list contains attributes to be displayed in the status card,
     measurement_list = get_status_card_items(site)
+
     latest_points = get_measurements_latest_point(site, measurement_list)
-
-
-    print "The measurement list is: ",
-    print measurement_list
-
-    print "The points are: ",
-    print latest_points
  
     latest_point_data = []
 
@@ -711,14 +704,15 @@ def get_latest_bom_data(request):
                          })
 
     if 'last_contact' in measurement_list:
-        # adding data from the rmc_status
-        try:
-            # TODO letest_point should only return one point
-            latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
-            logger.debug("RMC status card %s"%latest_points)
-        except StopIteration:
-            logger.warning("No further points %s"%latest_points)
-            pass
+        # Adding the last contact from the rmc status
+        rmc_latest = RMC_status.objects.filter(site=site).last()
+        if rmc_latest:
+            last_contact = rmc_latest.minutes_last_contact
+            last_contact_seconds = last_contact * 60
+            last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
+            latest_point_data.append({"item":"Last Contact", "value": last_contact})
+        else:
+            logger.debug("No rmc_status points for site ")
 
     return HttpResponse(json.dumps(latest_point_data))
 

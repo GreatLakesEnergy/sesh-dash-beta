@@ -128,7 +128,7 @@ function getLatestBoMData(){
             siteId: active_site_id,
         },
         statusCardLoader = $('.status-card-loader');
-   
+
 
     $.post('/get-latest-bom-data', bomJsonData, function(data){
         data = JSON.parse(data);
