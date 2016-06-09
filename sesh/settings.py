@@ -270,6 +270,21 @@ INSTALLED_APPS = (
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
+                        'jquery',
+                        'jquery-ui',
+                        'pace',
+                        'bootstrap',
+                        'switchery',
+                        'jquery.uniform',
+                        'classie',
+                        'waves',
+                        'blockui',
+                        'jquery-slimscroll',
+                        'uniform',
+                        'Font-Awesome',
+                        'simple-line-icons',
+                        'offcanvasmenueffects',
+                        '3d-bold-navigation',
             )
 
 ANONYMOUS_USER_ID = -1
