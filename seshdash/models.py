@@ -136,6 +136,11 @@ class Sesh_Site(models.Model):
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
 
+    def delete(self):
+        # Delete the site and its associated status card
+        status_card = self.status_card
+        status_card.delete()
+        super(Sesh_Site, self).delete()
 
     #Row based permissioning using django guardian not every user should be able to see all sites
 
