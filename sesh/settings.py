@@ -285,6 +285,15 @@ BOWER_INSTALLED_APPS = (
                         'simple-line-icons',
                         'offcanvasmenueffects',
                         '3d-bold-navigation',
+                        'Blueprint-SlidePushMenus',
+                        'weather-icons',
+                        'metrojs',
+                        'toastr',
+                        'jquery-waypoints',
+                        'counterup',
+                        'jquery-flot',
+                        'curvedlines',
+                        'jquery.counterup'
             )
 
 ANONYMOUS_USER_ID = -1

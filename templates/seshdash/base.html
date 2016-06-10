@@ -1,22 +1,74 @@
-<! DOCTYPE html>
-   <html>
-       <head>
-            <!-- Style Section -->
+<!DOCTYPE html>
+<html lang='en'>
+   <head>
+       <title>Sesh Dashboard (beta)</title>
+
+     <!--STYLE -->
+     {% load static %}
+
+     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
+
+     <link href='{% static 'PACE/themes/blue/pace-theme-flash.css' %}' rel='stylesheet'>
+     <link href='{% static 'bootstrap/dist/css/bootstrap.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'Waves/dist/waves.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'switchery/dist/switchery.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'simple-line-icons/css/simple-line-icons.css' %}' rel='stylesheet'>
+     <link href='{% static 'offcanvasmenueffects/css/menu_cornerbox.css' %}' rel='stylesheet'>
+     <link href='{% static '3d-bold-navigation/css/style.css' %}' rel='stylesheet'>
+     <link href='{% static 'Blueprint-SlidePushMenus/css/component.css' %}' rel='stylesheet'>
+     <link href='{% static 'weather-icons/css/weather-icons.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'toastr/toastr.min.css' %}' rel='stylesheet'>
+     <!--Theme style -->
+
+     <link href='{% static 'sesh-ui/css/modern/modern.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'sesh-ui/css/modern/themes/green.css' %}' rel='stylesheet'>
+     <link href='{% static 'sesh-ui/css/modern/custom.css' %}' rel='stylesheet'>
+
+     <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
+     <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
+     <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
 
 
-            <title>Sesh Dashboard (beta)</title>
-       </head>
-       <body>
-           {% block nav %}
-           {% endblock %}
 
-           {% block sidebar %}
-           {% endblock %}
+   </head>
+   <body>
+      {% block nav %}
+      {% endblock %}
 
-           {% block content %}
-           {% endblock %}
+      {% block sidebar %}
+      {% endblock %}
 
-       </body>
-            <!-- Script Section -->
-            
-   </html>
+      {% block content %}
+      {% endblock %}
+
+   </body>
+   <!-- Script Section -->
+      <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
+      <script src='{% static 'PACE/pace.min.js' %}'></script>
+      <script src='{% static 'blockUI/jquery.blockUI.js' %}'></script>
+      <script src='{% static 'bootstrap/dist/js/bootsrap.min.js' %}'></script>
+      <script src='{% static 'jquery-slimscroll/jquery.slimscroll.min.js' %}'></script>
+      <script src='{% static 'switchery/switchery.js' %}'></script>
+      <script src='{% static 'jquery.uniform/dist/jquery.uniform.min.js' %}'></script>
+      <script src='{% static 'offcanvasmenueffects/js/classie.js' %}'></script>
+      <script src='{% static 'offcanvasmenueffects/js/main.js' %}'></script>
+      <script src='{% static 'Waves/dist/waves.min.js' %}'></script>
+      <script src='{% static '3d-bold-navigation/js/main.js' %}'></script>
+      <script src='{% static 'waypoints/lib/jquery.waypoints.min.js' %}'></script>
+      <script src='{% static 'jquery.counterup/jquery.counterup.min.js' %}'></script>
+      <script src='{% static 'toastr/toastr.min.js' %}'></script>
+      <script src='{% static 'Flot/jquery.flot.js' %}'></script>
+      <script src='{% static 'Flot/jquery.flot.time.js' %}'></script>
+      <script src='{% static 'Flot/jquery.flot.symbol.js' %}'></script>
+      <script src='{% static 'Flot/jquery.flot.resize.js' %}'></script>
+      <script src='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.js' %}'></script>
+      <script src='{% static 'flot.curvedlines/curvedlines.js' %}'></script>
+
+      <!--Modern Scripts -->
+      <script src='{% static 'sesh-ui/js/modern/modern.min.js' %}'></script>
+      <script src='{% static 'sesh-ui/js/modern/pages/dashboard.js' %}'></script>
+
+
+</html>
