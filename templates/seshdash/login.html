@@ -38,7 +38,8 @@
                             <div class="login-box">
                                 <a href="#" class="logo-name text-lg text-center">Sesh Dash Board (beta)</a>
                                 <p class="text-center m-t-md">Please login into your account.</p>
-                                <form class="m-t-md" action="/login/">
+                                <form class="m-t-md" action="/login/" method="post">
+                                    {% csrf_token %}
                                     <div class="form-group">
                                         <input type="text" name="inputEmail" class="form-control" placeholder="Email or Username" required>
                                     </div>
