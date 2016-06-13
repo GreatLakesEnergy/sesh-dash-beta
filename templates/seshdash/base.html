@@ -25,6 +25,8 @@
      <link href='{% static 'sesh-ui/css/modern/modern.min.css' %}' rel='stylesheet'>
      <link href='{% static 'sesh-ui/css/modern/themes/green.css' %}' rel='stylesheet'>
      <link href='{% static 'sesh-ui/css/modern/custom.css' %}' rel='stylesheet'>
+     <!-- Shortcut icon -->
+     <link rel="shortcut icon" type="image/x-icon" href='{% static 'images/gle.jpg' %}' />
 
      <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
      <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
@@ -38,15 +40,16 @@
       {% endblock %}
 
       {% block sidebar %}
+  
+      {% endblock %}
+
+      {% block dash_1 %}
       {% endblock %}
 
       {% block content %}
       {% endblock %}
 
       {% block index %}
-      {% endblock %}
-
-      {% block dash_1 %}
       {% endblock %}
 
       {% block header %}
