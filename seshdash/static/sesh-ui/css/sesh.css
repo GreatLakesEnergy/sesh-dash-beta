@@ -7,3 +7,7 @@ dashboard
 .page-sidebar.sidebar {
   min-height: 100vh;
 }
+
+.slimScrollDiv {
+  height: 90%!important;
+}
