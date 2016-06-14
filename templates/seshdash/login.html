@@ -1,42 +1,18 @@
-<! DOCTYPE html >
+{% extends 'seshdash/base.html' %}
+{% block sidebar %}
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
 
-<html>
-   <head>
-    <title> Sesh Dashboard(beta) | Login </title>
-     <meta charset ="UTF-8">
-
-     <!--STYLE -->
-     {% load static %}
-
-     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
-     
-     <link href='{% static 'PACE/themes/blue/pace-theme-flash.css' %}' rel='stylesheet'> 
-     <link href='{% static 'bootstrap/dist/css/bootstrap.min.css' %}' rel='stylesheet'>
-     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel='stylesheet'> 
-     <link href='{% static 'Waves/dist/waves.min.css' %}' rel='stylesheet'>
-     <link href='{% static 'switchery/dist/switchery.min.css' %}' rel='stylesheet'>
-     <link href='{% static 'simple-line-icons/css/simple-line-icons.css' %}' rel='stylesheet'>
-     <link href='{% static 'offcanvasmenueffects/css/menu_cornerbox.css' %}' rel='stylesheet'>
-     <link href='{% static '3d-bold-navigation/css/style.css' %}' rel='stylesheet'>
-
-
-     <link href='{% static 'sesh-ui/css/modern/modern.min.css' %}' rel='stylesheet'>
-     <link href='{% static 'sesh-ui/css/modern/themes/green.css' %}' rel='stylesheet'>
-     <link href='{% static 'sesh-ui/css/modern/custom.css' %}' rel='stylesheet'>
-
-     <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
-     <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
-
-   </head>
-                    
-    <body class="page-login">
+    <div class="page-login">
         <main class="page-content">
             <div class="page-inner">
                 <div id="main-wrapper">
                     <div class="row">
                         <div class="col-md-3 center">
                             <div class="login-box">
-                                <a href="#" class="logo-name text-lg text-center">Sesh Dash Board (beta)</a>
+                                <a href="/" class="logo-name text-lg text-center">Sesh DashBoard <i>beta</i></a>
                                 <p class="text-center m-t-md">Please login into your account.</p>
                                 <form class="m-t-md" action="/login/" method="post">
                                     {% csrf_token %}
@@ -48,6 +24,7 @@
                                     </div>
                                     <button type="submit" class="btn btn-success btn-block">Login</button>
                                 <p class="text-center m-t-xs text-sm">2016 &copy; Made In Rwanda by GLE With Love.</p>
+
                             </div>
                         </div>
                     </div><!-- Row -->
@@ -55,21 +32,6 @@
             </div><!-- Page Inner -->
         </main><!-- Page Content -->
 
-
-    <!--Scripts -->
-    <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
-    <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
-    <script src='{% static 'PACE/pace.min.js' %}'></script> 
-    <script src='{% static 'blockUI/jquery.blockUI.js' %}'></script> 
-    <script src='{% static 'bootstrap/dist/js/bootstrap.min.js' %}'></script> 
-    <script src='{% static 'jquery-slimscroll/jquery.slimscroll.min.js' %}'></script>
-    <script src='{% static 'switchery/switchery.js' %}'></script>
-    <script src='{% static 'offcanvasmenueffects/js/classie.js' %}'></script>  
-    <script src='{% static 'Waves/dist/waves.min.js' %}'></script>
-    <script src='{% static 'sesh-ui/js/modern/modern.min.js' %}'></script>
-
-
-
-
  </body>
 </html>
+{% endblock %}

@@ -7,10 +7,10 @@
      {% load static %}
 
      <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
-     
-     <link href='{% static 'PACE/themes/blue/pace-theme-flash.css' %}' rel='stylesheet'> 
+
+     <link href='{% static 'PACE/themes/blue/pace-theme-flash.css' %}' rel='stylesheet'>
      <link href='{% static 'bootstrap/dist/css/bootstrap.min.css' %}' rel='stylesheet'>
-     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel='stylesheet'> 
+     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel='stylesheet'>
      <link href='{% static 'Waves/dist/waves.min.css' %}' rel='stylesheet'>
      <link href='{% static 'switchery/dist/switchery.min.css' %}' rel='stylesheet'>
      <link href='{% static 'simple-line-icons/css/simple-line-icons.css' %}' rel='stylesheet'>
@@ -20,12 +20,13 @@
      <link href='{% static 'weather-icons/css/weather-icons.min.css' %}' rel='stylesheet'>
      <link href='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.css' %}' rel='stylesheet'>
      <link href='{% static 'toastr/toastr.min.css' %}' rel='stylesheet'>
-
-     <!--Theme style -->     
+     <!--Theme style -->
 
      <link href='{% static 'sesh-ui/css/modern/modern.min.css' %}' rel='stylesheet'>
      <link href='{% static 'sesh-ui/css/modern/themes/green.css' %}' rel='stylesheet'>
      <link href='{% static 'sesh-ui/css/modern/custom.css' %}' rel='stylesheet'>
+     <!-- Shortcut icon -->
+     <link rel="shortcut icon" type="image/x-icon" href='{% static 'images/gle.jpg' %}' />
 
      <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
      <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
@@ -36,16 +37,26 @@
    </head>
    <body>
       {% block nav %}
+       {% include "seshdash/top_nav.html" %}
       {% endblock %}
 
       {% block sidebar %}
+       {% include "seshdash/side-bar.html" %}
       {% endblock %}
- 
+
+      {% block dash_1 %}
+      {% endblock %}
+
       {% block content %}
       {% endblock %}
- 
+
+      {% block index %}
+      {% endblock %}
+
+      {% block header %}
+      {% endblock %}
    </body>
-   <!-- Script Section --> 
+   <!-- Script Section -->
       <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
       <script src='{% static 'PACE/pace.min.js' %}'></script>
       <script src='{% static 'blockUI/jquery.blockUI.js' %}'></script>
@@ -328,4 +339,3 @@
 =======
 >>>>>>> 16f3cf5fd8759626baec700827122ab1222c99d2
 </html>
-
