@@ -16,6 +16,7 @@ from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
 
+
 #Guardian decorator
 from guardian.decorators import permission_required_or_403
 
@@ -32,7 +33,8 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit, get_status_card_items
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
+                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -407,6 +409,9 @@ def login_user(request):
     """
     Login motions for user logginng into system
     """
+    print "About to login: ",
+    print "GOt: ",
+    print request.POST
     context_dict = {}
     #is the user already logged in?
     if request.user.is_authenticated():
