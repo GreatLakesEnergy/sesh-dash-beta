@@ -48,7 +48,10 @@
        {% include "seshdash/side-bar.html" %}
       {% endblock %}
 
-      {% block dash_1 %}
+      {% block header %}
+      {% endblock %}
+
+      {% block dash %}
       {% endblock %}
 
       {% block content %}
@@ -57,8 +60,6 @@
       {% block index %}
       {% endblock %}
 
-      {% block header %}
-      {% endblock %}
    </body>
    <!-- Script Section -->
       <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
