@@ -11,3 +11,7 @@ dashboard
 .slimScrollDiv {
   height: 90%!important;
 }
+.page-header{
+  margin-top: 71px;
+  text-align: center;
+}
