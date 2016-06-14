@@ -32,7 +32,11 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
+<<<<<<< HEAD
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit, get_status_card_items
+=======
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit,get_status_card_items
+>>>>>>> 16f3cf5fd8759626baec700827122ab1222c99d2
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -691,6 +695,11 @@ def get_latest_bom_data(request):
 
     # The measurement list contains attributes to be displayed in the status card,
     measurement_list = get_status_card_items(site)
+<<<<<<< HEAD
+=======
+    latest_points = get_measurements_latest_point(site, measurement_list)
+
+>>>>>>> 16f3cf5fd8759626baec700827122ab1222c99d2
 
     latest_points = get_measurements_latest_point(site, measurement_list)
  
@@ -703,6 +712,7 @@ def get_latest_bom_data(request):
                                           + get_measurement_unit(measurement)
                          })
 
+<<<<<<< HEAD
     if 'last_contact' in measurement_list:
         # Adding the last contact from the rmc status
         rmc_latest = RMC_status.objects.filter(site=site).last()
@@ -713,6 +723,16 @@ def get_latest_bom_data(request):
             latest_point_data.append({"item":"Last Contact", "value": last_contact})
         else:
             logger.debug("No rmc_status points for site ")
+=======
+    # adding data from the rmc_status
+    try:
+        # TODO letest_point should only return one point
+        latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
+        logger.debug("RMC status card %s"%latest_points)
+    except StopIteration:
+        logger.warning("No further points %s"%latest_points)
+        pass
+>>>>>>> 16f3cf5fd8759626baec700827122ab1222c99d2
 
     return HttpResponse(json.dumps(latest_point_data))
 
