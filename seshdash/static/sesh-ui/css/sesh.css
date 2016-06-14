@@ -1,0 +1,9 @@
+/*
+Main styling for the sesh
+dashboard
+*/
+
+/* Overiding the modern theme styling section */
+.page-sidebar.sidebar {
+  min-height: 100vh;
+}
