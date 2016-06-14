@@ -37,10 +37,11 @@
    </head>
    <body>
       {% block nav %}
+       {% include "seshdash/top_nav.html" %}
       {% endblock %}
 
       {% block sidebar %}
-  
+       {% include "seshdash/side-bar.html" %}
       {% endblock %}
 
       {% block dash_1 %}
