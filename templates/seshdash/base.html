@@ -45,20 +45,25 @@
 
    </head>
    <body>
-      {% block nav %}
-       {% include "seshdash/top_nav.html" %}
-      {% endblock %}
-
-      {% block sidebar %}
-       {% include "seshdash/side-bar.html" %}
-      {% endblock %}
-
-      {% block main %}
-      {% endblock %}
+     <main class="page-content content-wrap">
+       <div class="nav-bar">
+         {% block nav %}
+            {% include "seshdash/top_nav.html" %}
+         {% endblock %}
+       </div>
+       <div class="side-bar">
+         {% block sidebar %}
+            {% include "seshdash/side-bar.html" %}
+         {% endblock %}
+       </div>
+       <div class="main-content">
+         {% block main %}
+         {% endblock %}
+       </div>
 
       {% block content %}
       {% endblock %}
-
+    </main>
 
    </body>
    <!-- Script Section -->

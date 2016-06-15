@@ -6,12 +6,9 @@ dashboard
 /* Overiding the modern theme styling section */
 .page-sidebar.sidebar {
   min-height: 100vh;
+  height: 100%;
 }
 
 .slimScrollDiv {
   height: 90%!important;
-}
-.page-header{
-  margin-top: 71px;
-  text-align: center;
 }
