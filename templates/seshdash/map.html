@@ -1,34 +1,22 @@
-<div class="col-lg-9 col-md-12">
+<div class="col-lg-12 col-md-12">
     <div class="panel panel-white">
-        <div class="row">
-            <div class="col-sm-8">
-                <div class="visitors-chart">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">Visitors</h4>
-                    </div>
-                    <div class="panel-body">
-                        <div id="flotchart1"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-4">
-                <div class="stats-info">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">Browser Stats</h4>
-                    </div>
-                    <div class="panel-body">
-                        <ul class="list-unstyled">
-                            <li>Google Chrome<div class="text-success pull-right">32%<i class="fa fa-level-up"></i></div></li>
-                            <li>Firefox<div class="text-success pull-right">25%<i class="fa fa-level-up"></i></div></li>
-                            <li>Internet Explorer<div class="text-success pull-right">16%<i class="fa fa-level-up"></i></div></li>
-                            <li>Safari<div class="text-danger pull-right">13%<i class="fa fa-level-down"></i></div></li>
-                            <li>Opera<div class="text-danger pull-right">7%<i class="fa fa-level-down"></i></div></li>
-                            <li>Mobile &amp; tablet<div class="text-success pull-right">4%<i class="fa fa-level-up"></i></div></li>
-                            <li>Others<div class="text-success pull-right">3%<i class="fa fa-level-up"></i></div></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+         {% block maps %}
+          <div class="panels-container">
+               <div class="col-lg-12">
+                     <div class="panel panel-default">
+                          <div class="panel-heading">
+                               <!-- TODO make this a variable -->
+                               <i class="fa fa-map-marker fa-fw"></i>
+                                         site map
+                          </div>
+                          <div class="panel-body">
+                               <!-- TODO movestyle to css -->
+                               <div id="map">
+                               </div>
+                          </div>
+                     </div>
+               </div>
+          </div>
+         {% endblock %}
     </div>
 </div>

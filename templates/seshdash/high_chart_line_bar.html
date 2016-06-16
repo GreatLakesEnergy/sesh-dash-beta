@@ -1,0 +1,109 @@
+
+<!---
+This is the High chart of Daily PV Production with Cloud cover forecast In High Chart
+
+
+-->
+
+
+{% block graphs %}
+    <div class="col-lg-12" id="dynamic_graphss">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <!-- TODO make this a variable -->
+                <i class="fa fa-bar-chart-o fa-fw" ></i>
+                <span id="title-message" ></span>
+            </div>
+            <div class="panel-body">
+                    <div  id="containerhigh">
+                    </div>
+
+                     <!--Loader-->
+                    <div class="graph-loader">
+                         <div class="spinner">
+
+                              <div class="rect1"></div>
+
+                              <div class="rect2"></div>
+
+                              <div class="rect3"></div>
+
+                              <div class="rect4"></div>
+
+                              <div class="rect5"></div>
+                        </div>
+                  </div>
+
+            </div>
+
+            <div class="panel-footer">
+
+		    <div class="row" id ="dynamic_graph_container">
+			     <div id="x-axis" class="col-md-3">
+			          <p>Select option</p>
+			          <select class="form-control" id="drop1" value="cloud_cover">
+				              {{ measurements }}
+				              {% for value in measurements %}
+                                     {% if value = "cloud_cover"%}
+                                         <option value="{{value}}" selected="selected"> {{value}}</option>
+                                     {% else %}
+                                         <option value="{{value}}">{{value}}</option>
+                                     {% endif %}
+				                     {% endfor %}
+			          </select>
+			    </div>
+			    <div id="y-axis" class="col-md-3">
+			         <p>Select another option</p>
+			         <select class="form-control" id="drop2" >
+				             {{ measurements }}
+				             {% for value in measurements %}
+                                {% if value = "pv_production"%}
+                                      <option value="{{value}}" selected="selected"> {{value}}</option>
+                                {% else %}
+                                      <option value="{{value}}">{{value}}</option>
+                                {% endif %}
+
+				             {% endfor %}
+			         </select>
+			    </div>
+                <div class="col-md-3" >
+                     <div class ="filter-form" id ="time-range">
+                          <div class ="data-sort-container">
+                               <p>Choose a time range </p>
+                               <select class ="form-control" id ="time_dropdown">
+                                       <option class="drop-options" value ="24h">Daily</option>
+                                       <option class="drop-options" value ="7d" selected="selected">Weekly</option>
+                                       <option class="drop-options" value ="30d">Monthly</option>
+                               </select>
+                          </div>
+                     </div>
+               </div>
+               <div class="col-md-3">
+                     <button type="button" class="btn btn-primary" id = 'dynamic_graph_button'>update graph </button>
+               </div>
+		    </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!--The javascript which call  to get_high_chart() to draw how chart and the function is in the sesh_dashboard.js -->
+
+    <script language="JavaScript">
+
+        date = [
+                {% for date2 in high_chart.high_date %}
+                              '{{date2}}' ,
+                 {%endfor%}
+
+
+                ];
+
+
+
+    </script>
+
+
+
+    {% endblock %}
