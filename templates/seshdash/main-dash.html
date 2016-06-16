@@ -13,6 +13,17 @@
   <div id="main-wrapper">
     <div class="row">
         <div>
+          <div>
+            {% block header %}
+            <h2 class="page-header page-title">
+            	{% if message %}
+            		Site creation was a {{ message }}
+            	{% else %}
+            		Welcome {{ user }}, viewing dashboard for {{active_site.site_name}}
+            	{% endif %}
+            </h2>
+                {% endblock %}
+          <div>
              {% block map %}
              {% include "seshdash/map.html" %}
              {% endblock %}

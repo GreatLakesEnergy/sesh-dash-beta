@@ -17,12 +17,9 @@
             <li><a href="/historical_data" class="waves-effect waves-button"><i class="fa fa-history fa-fw"></i><p>Historical</p></a></li>
             <li class="droplink"><a href="#" class="waves-effect waves-button"><span>Sites</span><span class="arrow"></span></a>
                 <ul class="sub-menu">
-                    <li><a href="inbox.html">Inbox</a></li>
-                    <li><a href="inbox-alt.html">Inbox Alt</a></li>
-                    <li><a href="message-view.html">View Message</a></li>
-                    <li><a href="message-view-alt.html">View Message Alt</a></li>
-                    <li><a href="compose.html">Compose</a></li>
-                    <li><a href="compose-alt.html">Compose Alt</a></li>
+                  {% for site in sites %}
+                    <li><a href="/dash/{{ site.id }}">{{site.site_name}}</a></li>
+                  {% endfor %}
                 </ul>
             </li>
             <li><a href="/add_site" class="waves-effect waves-button"><i class="glyphicon glyphicon-cog"></i><p>Edit-Site</p></a></li>

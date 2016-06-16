@@ -8,7 +8,12 @@ dashboard
   min-height: 100vh;
   height: 100%;
 }
-
+.page-title{
+  text-align: center;
+}
+.page-inner{
+  padding: 0px;
+}
 .slimScrollDiv {
   height: 90%!important;
 }
