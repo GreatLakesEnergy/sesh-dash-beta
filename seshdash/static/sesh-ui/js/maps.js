@@ -1,7 +1,7 @@
 L.mapbox.accessToken = 'pk.eyJ1IjoiYXRpbGV2IiwiYSI6IjYxNDcxZWM4ZjE1NDYzYzgzNjU0OTEzYjI4NDI1YzRiIn0.zqkFtrbhpNbeTNiIqTxBZQ';
 
-var lat = active_site_coords["lat"]
-var lon = active_site_coords["lon"]
+var lat = -1.9705786;
+var lon = 30.10442880000005;
 var map = L.mapbox.map('map', 'mapbox.streets')
     .setView([lat, lon], 15);
 

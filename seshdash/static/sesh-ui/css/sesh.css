@@ -1,3 +1,6 @@
+/*{
+  border: 1px solid black;
+}*/
 /*
 Main styling for the sesh
 dashboard
@@ -16,4 +19,7 @@ dashboard
 }
 .slimScrollDiv {
   height: 90%!important;
+}
+div.awesomplete > ul {
+    margin: 42px 0px;
 }

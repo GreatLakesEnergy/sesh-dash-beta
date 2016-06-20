@@ -20,6 +20,7 @@
      <link href='{% static 'weather-icons/css/weather-icons.min.css' %}' rel='stylesheet'>
      <link href='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.css' %}' rel='stylesheet'>
      <link href='{% static 'toastr/toastr.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'awesomplete/awesomplete.css' %}' rel='stylesheet'>
      <!--Theme style -->
 
      <link href='{% static 'sesh-ui/css/modern/modern.min.css' %}' rel='stylesheet'>
@@ -36,9 +37,8 @@
      <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
      <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
      <!-- maps -->
-     <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
      <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
-     <script src='{% static 'sesh-ui/js/maps.js' %}'></script>
+
 
 
 
@@ -63,7 +63,6 @@
 
        {% block content%}
        {% endblock %}
-
     </main>
    </body>
    <!-- Script Section -->
@@ -87,11 +86,13 @@
       <script src='{% static 'Flot/jquery.flot.resize.js' %}'></script>
       <script src='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.js' %}'></script>
       <script src='{% static 'flot.curvedlines/curvedLines.js' %}'></script>
-
+      <script src='{% static 'awesomplete/awesomplete.js' %}'></script>
       <!--Modern Scripts -->
       <script src='{% static 'sesh-ui/js/modern/modern.min.js' %}'></script>
       <script src='{% static 'sesh-ui/js/modern/pages/dashboard.js' %}'></script>
-
+      
+      <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
+      <script src='{% static 'sesh-ui/js/maps.js' %}'></script>
       <script src='{% static 'sesh-ui/js/sesh_dashboard.js' %}'></script>
 
 

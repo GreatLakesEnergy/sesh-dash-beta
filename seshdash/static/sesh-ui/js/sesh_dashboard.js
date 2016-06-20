@@ -26,34 +26,38 @@ var i,
     siteid = [],
     sitename = [];
 
-/* post request to retrieve all sitename and site id */
 $.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
     option = JSON.parse(data);
-    //console.log(option)
-    /* extracting site name array from response dict */
+
+    // site names
    for (i=0;i < option.length;i++){
     sitename.push(option[i].value)
    }
-   /* extracting site id array from response dict */
+
+   // site id
    for (i=0; i< option.length; i++){
     siteid.push(option[i].key)
    }
+
    var input = document.getElementById('search-site');
-   /* proving an array of options to be suggested when a user types using awesomplete plugin */
+
+   //array of options
    new Awesomplete(input,{list: sitename});
 });
 
 function AutoComplete() {
       textinput = $(".form-control").val();
       for (i=0;i<sitename.length;i++){
-           /* checking if entered value exists in a sitename array */
+
+           // checking  entered values
            if (sitename[i] == textinput){
                matched = true;
                for (i=0 ;i < option.length; i++){
-                /* finding the id of the entered sitename */
+                // finding id
                    if (option[i].value == textinput){
                        textid = option[i].key;
-                       /* Linking to the asked sitename`s page */
+                       alert(textid)
+                       // redirecting
                        window.location.replace("/dash/" + textid);
                    }
                }
