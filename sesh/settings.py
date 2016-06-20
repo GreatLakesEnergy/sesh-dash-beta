@@ -293,7 +293,8 @@ BOWER_INSTALLED_APPS = (
                         'counterup',
                         'jquery-flot',
                         'curvedlines',
-                        'jquery.counterup'
+                        'jquery.counterup',
+                        'awesomplete'
             )
 
 ANONYMOUS_USER_ID = -1
