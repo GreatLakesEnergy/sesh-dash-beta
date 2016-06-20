@@ -38,10 +38,12 @@
      <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
      <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
      <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
+
      <!--utilities-->
      <script src='{% static 'sesh-ui/js/utilities.js' %}' ></script>
    </head>
    <body>
+
      <main class="page-content content-wrap">
        <div class="nav-bar">
          {% block nav %}
@@ -57,12 +59,14 @@
          {% block main %}
          {% endblock %}
        </div>
-
-       {% block content%}
-       {% endblock %}
     </main>
    </body>
-   <!-- Script Section -->
+      <script type="text/javascript">
+            {% block javascript %}
+            {% endblock %}
+      </script>
+
+      <!-- Script Section -->
       <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
       <script src='{% static 'PACE/pace.min.js' %}'></script>
       <script src='{% static 'blockUI/jquery.blockUI.js' %}'></script>
@@ -89,8 +93,9 @@
       <script src='{% static 'sesh-ui/js/modern/pages/dashboard.js' %}'></script>
       <!-- Maps -->
       <script src='{% static 'mapbox.js/mapbox.js' %}'></script>
-      <script src='{% static 'sesh-ui/js/maps.js' %}'></script>
+
       <script src='{% static 'sesh-ui/js/sesh_dashboard.js' %}'></script>
+      <script src='{% static 'sesh-ui/js/maps.js' %}'></script>
 
 
 </html>

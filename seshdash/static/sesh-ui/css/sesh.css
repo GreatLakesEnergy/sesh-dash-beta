@@ -7,6 +7,9 @@ dashboard
 */
 
 /* Overiding the modern theme styling section */
+div#map {
+    height: 400px;
+}
 .page-sidebar.sidebar {
   min-height: 100vh;
   height: 100%;

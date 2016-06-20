@@ -12,8 +12,6 @@
   </div>
   <div id="main-wrapper">
     <div class="row">
-        <div>
-          <div>
             {% block header %}
             <h2 class="page-header page-title">
             	{% if message %}
@@ -68,20 +66,15 @@
                      {% include "seshdash/high_chart_line_bar.html" %}
                      {% endblock %}
                 </div>
-                </div>
-            </div>
+              </div>
         </div>
-    </div>
-  </div>
 </div><!-- Main Wrapper -->
-<div class="page-footer">
-   <p class="no-s">2016 &copy; Made in RWANDA with love by Great Lakes Energy.</p>
-</div>
 {% endblock %}
+
 {% block javascript %}
 		{% autoescape off %}
 		active_site_id = {{ site_id }};
 		site = {{ sites_json  }};
 		active_site_coords = {"lat":{{active_site.position.latitude}},"lon":{{active_site.position.longitude}} };
 		{% endautoescape %}
-		{% endblock %}
+{% endblock %}
