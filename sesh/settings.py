@@ -270,7 +270,7 @@ INSTALLED_APPS = (
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
-                        'jquery',
+                        'jquery#2.2.4',
                         'jquery-ui',
                         'pace',
                         'bootstrap',
