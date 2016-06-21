@@ -1,6 +1,5 @@
 
 var csrftoken = getCookie('csrftoken');
-
 /* Function For Daily DataPoints Graph Generation */
 function daily_data_points_graph() {
 
@@ -31,7 +30,7 @@ function daily_data_points_graph() {
         for (i=0;i<dropdown2_values.length;i++){
         dropdown2_values[i][0]=dropdown2_values[i][0] * 1000
         }
-
+      
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
