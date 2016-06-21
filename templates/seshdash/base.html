@@ -31,7 +31,7 @@
 
      <!--Sesh Styles-->
      <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
-
+     <link href='{% static 'sesh-ui/css/calendar-heatmap.css' %}' rel="stylesheet">
      <!-- Shortcut icon -->
      <link rel="shortcut icon" type="image/x-icon" href='{% static 'images/gle.jpg' %}' />
 
@@ -58,6 +58,8 @@
          {% block main %}
          {% endblock %}
        </div>
+       {% block content %}
+       {% endblock %}
     </main>
    </body>
       <script type="text/javascript">
@@ -98,6 +100,9 @@
       <script src='{% static 'sesh-ui/js/sesh_dashboard.js' %}'></script>
       <script src='{% static 'sesh-ui/js/maps.js' %}'></script>
       <script src='{% static 'sesh-ui/js/graphs.js' %}'></script>
+      <script src='{% static 'sesh-ui/js/calendar-heatmap.js' %}'></script>
 
+      {% block seshjs %}
+      {% endblock %}
 
 </html>
