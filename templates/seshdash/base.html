@@ -55,11 +55,14 @@
          {% endblock %}
        </div>
        <div class="main-content">
-         {% block main %}
-         {% endblock %}
+          <div class="row">
+             {% block main %}
+             {% endblock %}
+           </div>
        </div>
        {% block content %}
        {% endblock %}
+
     </main>
    </body>
       <script type="text/javascript">
@@ -97,12 +100,20 @@
       <!-- Maps -->
       <script src='{% static 'mapbox.js/mapbox.js' %}'></script>
 
-      <script src='{% static 'sesh-ui/js/sesh_dashboard.js' %}'></script>
-      <script src='{% static 'sesh-ui/js/maps.js' %}'></script>
-      <script src='{% static 'sesh-ui/js/graphs.js' %}'></script>
       <script src='{% static 'sesh-ui/js/calendar-heatmap.js' %}'></script>
 
       {% block seshjs %}
+
+        <!-- Sesh React -->
+        <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
+        <!-- graph js -->
+        <script src ='{%static  'sesh-ui/js/graphs.js' %}' > </script>
+
+        <!-- sesh javascript -->
+        <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
+
+        <!-- Maps configuration -->
+        <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
       {% endblock %}
 
 </html>

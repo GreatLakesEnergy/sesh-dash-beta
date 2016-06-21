@@ -402,7 +402,7 @@ def logout_user(request):
     Logout user
     """
     logout(request)
-    return render(request,'seshdash/logout.html')
+    return render(request,'seshdash/login.html')
 
 def login_user(request):
     """

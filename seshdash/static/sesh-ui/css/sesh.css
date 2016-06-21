@@ -31,3 +31,8 @@ button#dynamic_graph_button {
 div.awesomplete > ul {
     margin: 42px 0px;
 }
+h2.page-header {
+    text-align: center;
+    font-weight: 300;
+    color: aliceblue;
+}
