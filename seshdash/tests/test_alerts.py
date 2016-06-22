@@ -97,7 +97,8 @@ class AlertTestCase(TestCase):
 
         #create test user
         self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
-        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
+        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713', on_call=True,
+                                                       send_mail=True, send_sms=True)
 
         # Creating test group
         self.test_group = Group(name='test_group')
