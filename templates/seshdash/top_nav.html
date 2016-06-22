@@ -39,32 +39,11 @@
                         <a href="javascript:void(0);" class="waves-effect waves-button waves-classic show-search"><i class="fa fa-search"></i></a>
                     </li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle waves-effect waves-button waves-classic" data-toggle="dropdown"><i class="fa fa-bell"></i><span class="badge badge-success pull-right" id="alerts_counter"></span></a>
+                        <a href="#" class="dropdown-toggle waves-effect waves-button waves-classic" data-toggle="dropdown"><i class="fa fa-bell"></i><span class="badge badge-danger pull-right" id="alerts_counter" hidden></span></a>
                         <ul class="dropdown-menu title-caret dropdown-lg" role="menu">
                             <li><p class="drop-title">You have <span class="alerts_counter"></span> pending Alerts !</p></li>
                             <li class="dropdown-menu-list slimscroll tasks">
-                                <ul class="list-unstyled">
-                                    <li>
-                                        <a href="#">
-                                            <div class="task-icon badge badge-success"><i class="icon-user"></i></div>
-                                            <span class="badge badge-roundless badge-default pull-right">1min ago</span>
-                                            <p class="task-details">New user registered.</p>
-                                        </a>
-                                    </li>
-                                  <!--  <li>
-                                        <a href="#">
-                                            <div class="task-icon badge badge-danger"><i class="icon-energy"></i></div>
-                                            <span class="badge badge-roundless badge-default pull-right">24min ago</span>
-                                            <p class="task-details">Database error.</p>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <div class="task-icon badge badge-info"><i class="icon-heart"></i></div>
-                                            <span class="badge badge-roundless badge-default pull-right">1h ago</span>
-                                            <p class="task-details">Reached 24k likes</p>
-                                        </a>
-                                    </li> -->
+                                <ul class="list-unstyled" id="alert-notification-list">
                                 </ul>
                             </li>
                             <li class="drop-all"><a href="#" class="text-center">All Alerts</a></li>
