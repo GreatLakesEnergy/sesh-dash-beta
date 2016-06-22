@@ -48,7 +48,7 @@ var csrftoken = getCookie('csrftoken');
          out.append(element);
 
          //appending table into the notification dropdown box
-         $('#alerts_counter').html(sum_of_counters);
+         $('.alerts_counter ,#alerts_counter').html(sum_of_counters);
 
          if (sum_of_counters > 0){
              $('#pop').show();
