@@ -10,7 +10,6 @@ dashboard
 div#map {
     height: 400px;
 }
-
 button#dynamic_graph_button {
     margin-top: 30px;
 }
@@ -34,5 +33,8 @@ div.awesomplete > ul {
 h2.page-header {
     text-align: center;
     font-weight: 300;
-    color: aliceblue;
+    color: #2B384E;
+}
+div#create_site {
+    background: #F1F4F9;
 }

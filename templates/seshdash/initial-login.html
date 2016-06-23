@@ -1,5 +1,6 @@
 {% extends "seshdash/base.html" %}
 {% block main %}
+ <div class="page-inner">
    {% block header %}
 
 		  <h2 class="page-header">
@@ -8,22 +9,23 @@
    {% endblock %}
 
    {% block dash_1 %}
+     <div class="rmc-vrm">
       {% if not form_type %}
-            <!-- VRM import form -->
-            {% include  "seshdash/vrm-card.html" %}
+      <!-- RMC import form-->
+      {% include  "seshdash/rmc-card.html" %}
+          <!-- VRM import form -->
+          {% include  "seshdash/vrm-card.html" %}
 
-            <!-- RMC import form-->
-            {% include  "seshdash/rmc-card.html" %}
       {% else %}
             {{ site_forms.management_form }}
             {% include  "seshdash/create-site.html" %}
       {% endif %}
-
+     </div>
    {% endblock %}
 
    {% block javascript %}
    {% autoescape off %}
    {% endautoescape %}
    {% endblock %}
-
+ </div>
 {% endblock %}
