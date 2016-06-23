@@ -32,30 +32,33 @@ var csrftoken = getCookie('csrftoken');
           var alertData = JSON.parse(data);
 
           //declaring variables
-          var out= $("#alert-notification-table");
+          var out= $("#alert-notification-list");
           var element = '';
           var i;
           var sum_of_counters = 0;
 
           //looping through the json object appending to a table
           for(i=0 ; i<alertData.length ; i++){
-              sum_of_counters += alertData[i].counter;                                                                                      element += '<tr class ="clickable-row" data-href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
-                               '<td>'+ alertData[i].site +  '</td>' +
-                               '<td id="site-counter">'+ alertData[i].counter + '</td>' +
-                               '</tr>';
+              sum_of_counters += alertData[i].counter;                                                                                      element += '<li>'+
+                             '<a href="/dash/' +alertData[i].site_id+'#alerts-panel">' +
+                               '<div class="task-icon badge badge-danger">'+
+                                 '<i class="icon-energy">'+'</i>'+
+                                '</div>'+
+                                '<p class="task-details">' + '<strong>'+alertData[i].site +'</strong>'+ '</p>' +
+                                '<span class="badge badge-roundless badge-danger pull-right">' +
+                                  alertData[i].counter +
+                                '</span>' +
+                             '</a>'+
+                         '</li>';
           }
 
          out.append(element);
 
          //appending table into the notification dropdown box
-         $('#alerts_counter').html(sum_of_counters);
+         $('.alerts_counter ,#alerts_counter').html(sum_of_counters);
 
          if (sum_of_counters > 0){
-             $('#pop').show();
+             $('#alerts_counter').show();
           }
-          //linking each table row to it's corresponding site
-           $('.clickable-row').click(function(){
-               window.location.href =$(this).data("href");
-           });
      });
 });
