@@ -30,7 +30,7 @@ function daily_data_points_graph() {
         for (i=0;i<dropdown2_values.length;i++){
         dropdown2_values[i][0]=dropdown2_values[i][0] * 1000
         }
-      
+
         $('#containerhigh').highcharts({
                  chart: {
             zoomType: 'xy'
@@ -103,14 +103,14 @@ function daily_data_points_graph() {
         }]
     });
 
-});
+  });
     $(".graph-loader").hide();
     $("#dynamic_graph").show();
 
 }
 
 $(document).ready(function(){
-
+ alert("on page load is this")
  daily_data_points_graph()
 
  });
