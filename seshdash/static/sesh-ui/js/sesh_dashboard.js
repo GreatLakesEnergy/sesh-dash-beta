@@ -40,7 +40,6 @@ function AutoComplete() {
                 // finding id
                    if (option[i].value == textinput){
                        textid = option[i].key;
-                       alert(textid)
                        // redirecting
                        window.location.replace("/dash/" + textid);
                    }
@@ -61,6 +60,7 @@ $('.form-control').keypress(function(event){
     var keycode = (event.keyCode ? event.keyCode : event.which);
     var matched = false;
     if(keycode == '13'){
+       event.preventDefault();
        AutoComplete()
     }
 });
@@ -68,3 +68,26 @@ $('.form-control').keypress(function(event){
 $(".button-search").click(function(){
     AutoComplete()
 });
+
+// modifying toastr
+/*
+toastr["success"]("Checkout settings menu on left", "Welcome to Sesh Dashboard")
+
+toastr.options = {
+  "closeButton": false,
+  "debug": false,
+  "newestOnTop": false,
+  "progressBar": true,
+  "positionClass": "toast-top-right",
+  "preventDuplicates": false,
+  "onclick": null,
+  "showDuration": "3000",
+  "hideDuration": "1000",
+  "timeOut": "5000",
+  "extendedTimeOut": "1000",
+  "showEasing": "swing",
+  "hideEasing": "linear",
+  "showMethod": "fadeIn",
+  "hideMethod": "fadeOut"
+}
+*/

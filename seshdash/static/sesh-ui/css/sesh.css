@@ -39,6 +39,7 @@ h2.page-header {
 }
 div#create_site {
     background: #F1F4F9;
+    margin-top: 20px;
 }
 form.search-form {
     overflow: visible;
