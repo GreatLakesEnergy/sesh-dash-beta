@@ -1,10 +1,6 @@
 
 var csrftoken = getCookie('csrftoken');
 
-$(document).ready(function(){
-alert('Frank vipi');
-});
-
 /* Auto compete on search*/
 var i,
     textid,
