@@ -1,6 +1,10 @@
 
 var csrftoken = getCookie('csrftoken');
 
+$(document).ready(function(){
+alert('Frank vipi');
+});
+
 /* Auto compete on search*/
 var i,
     textid,
@@ -91,3 +95,6 @@ toastr.options = {
   "hideMethod": "fadeOut"
 }
 */
+$(document).ready(function(){
+alert('Frank vipi');
+});
