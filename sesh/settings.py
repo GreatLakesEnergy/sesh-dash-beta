@@ -295,6 +295,10 @@ BOWER_INSTALLED_APPS = (
                         'curvedlines',
                         'jquery.counterup',
                         'awesomplete#1.1.0',
+                        'd3',
+                        'moment',
+                        'mapbox.js',
+                        'highcharts',
             )
 
 ANONYMOUS_USER_ID = -1
