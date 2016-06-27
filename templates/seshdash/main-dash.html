@@ -1,4 +1,5 @@
 {% extends 'seshdash/base.html' %}
+{% load staticfiles %}
 {% block main %}
 <div class="page-inner">
   <div id="main-wrapper">
@@ -60,6 +61,10 @@
               </div>
         </div>
 </div><!-- Main Wrapper -->
+{% endblock %}
+{% block seshjs %}
+     <!-- Graphs -->
+     <script src='{% static 'sesh-ui/js/graphs.js' %}'> </script>
 {% endblock %}
 
 {% block javascript %}
