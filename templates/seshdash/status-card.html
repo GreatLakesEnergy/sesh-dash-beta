@@ -1,0 +1,27 @@
+
+
+    {% block status_card %}
+
+    <div class="col-lg-4">
+        <!-- TODO make the panel heading variable for color -->
+        <div class="panel panel-success">
+                <div class="panel-heading"> 
+                    <!-- TODO make this a variable -->
+                    <i class="fa fa-power-off fa-fw"></i>
+                    System Stats
+                </div>
+                    <!-- Status card loader -->
+                    <div class="status-card-loader">
+                        {% include 'seshdash/spinner.html' %}
+                    </div>
+
+                    <div class="panel-body">
+                        <div class="table-responsive" id="latest-bom-data">
+                            <table class="table table-hover">
+                                
+                            </table>
+                        </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

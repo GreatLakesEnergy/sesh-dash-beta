@@ -1,0 +1,53 @@
+{% extends 'seshdash/base.html' %}
+
+{% load staticfiles %}
+{% block main %}
+<div class="page-inner">
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+            {% block header %}
+
+                <h2 class="historical-header"> Historical Data </h2>
+
+            {% endblock %}
+            </div>
+        </div>
+
+       <div class="filter-form">
+         <div class="data-sort-container">
+            <p class="sort-help-text"> Select an option to sort by </p>
+            <select class="form-control" id="data-sort">
+                 {{ sort_dict }}
+                 {% for key, value in sort_dict.items %}
+                      <option value="{{key}}">{{value}}</option>
+                 {% endfor %}
+            </select>
+        </div>
+       </div>
+
+       <!-- Loader -->
+       <div class="historical-loader">
+           {% include 'seshdash/spinner.html' %}
+       </div>
+
+
+       <div class="chart-data-container">
+
+       </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{# Preventing sesh main dash js from running #}
+{% block seshjs %}
+
+     <script src='{% static 'sesh-ui/js/historical.js' %}'> </script>
+
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}

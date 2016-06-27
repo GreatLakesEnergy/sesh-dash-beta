@@ -270,7 +270,7 @@ INSTALLED_APPS = (
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
-                        'jquery',
+                        'jquery#2.2.4',
                         'jquery-ui',
                         'pace',
                         'bootstrap',
@@ -293,7 +293,14 @@ BOWER_INSTALLED_APPS = (
                         'counterup',
                         'jquery-flot',
                         'curvedlines',
-                        'jquery.counterup'
+                        'jquery.counterup',
+                        'awesomplete#1.1.0',
+                        'babel#d54d59ff74',
+                        'react',
+                        'd3',
+                        'moment',
+                        'mapbox.js',
+                        'highcharts',
             )
 
 ANONYMOUS_USER_ID = -1

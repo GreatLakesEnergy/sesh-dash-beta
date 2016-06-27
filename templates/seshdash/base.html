@@ -5,6 +5,7 @@
 
      <!--STYLE -->
      {% load static %}
+     <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
 
      <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
 
@@ -20,47 +21,52 @@
      <link href='{% static 'weather-icons/css/weather-icons.min.css' %}' rel='stylesheet'>
      <link href='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.css' %}' rel='stylesheet'>
      <link href='{% static 'toastr/toastr.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'awesomplete/awesomplete.css' %}' rel='stylesheet'>
+     <!-- maps -->
+     <link href='{% static 'mapbox.js/mapbox.css' %}' rel='stylesheet' />
      <!--Theme style -->
 
      <link href='{% static 'sesh-ui/css/modern/modern.min.css' %}' rel='stylesheet'>
      <link href='{% static 'sesh-ui/css/modern/themes/green.css' %}' rel='stylesheet'>
      <link href='{% static 'sesh-ui/css/modern/custom.css' %}' rel='stylesheet'>
 
-     <!--Ours -->
+     <!--Sesh Styles-->
      <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
-
+     <link href='{% static 'sesh-ui/css/calendar-heatmap.css' %}' rel="stylesheet">
      <!-- Shortcut icon -->
      <link rel="shortcut icon" type="image/x-icon" href='{% static 'images/gle.jpg' %}' />
-
-     <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
-     <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
-     <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
-
-
-
+     <!--utilities-->
+     <script src='{% static 'sesh-ui/js/utilities.js' %}' ></script>
    </head>
    <body>
-      {% block nav %}
-       {% include "seshdash/top_nav.html" %}
-      {% endblock %}
 
-      {% block sidebar %}
-       {% include "seshdash/side-bar.html" %}
-      {% endblock %}
+     <main class="page-content content-wrap">
+       <div class="nav-bar">
+         {% block nav %}
+            {% include "seshdash/top_nav.html" %}
+         {% endblock %}
+       </div>
+       <div class="side-bar">
+         {% block sidebar %}
+            {% include "seshdash/side-bar.html" %}
+         {% endblock %}
+       </div>
+       <div class="main-content">
+             {% block main %}
+             {% endblock %}
+       </div>
+       {% block content %}
+       {% endblock %}
 
-      {% block dash_1 %}
-      {% endblock %}
-
-      {% block content %}
-      {% endblock %}
-
-      {% block index %}
-      {% endblock %}
-
-      {% block header %}
-      {% endblock %}
+    </main>
    </body>
-   <!-- Script Section -->
+      <script type="text/javascript">
+            {% block javascript %}
+            {% endblock %}
+      </script>
+
+
+      <!-- Script Section -->
       <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
       <script src='{% static 'PACE/pace.min.js' %}'></script>
       <script src='{% static 'blockUI/jquery.blockUI.js' %}'></script>
@@ -69,22 +75,45 @@
       <script src='{% static 'switchery/dist/switchery.min.js' %}'></script>
       <script src='{% static 'jquery.uniform/dist/jquery.uniform.min.js' %}'></script>
       <script src='{% static 'offcanvasmenueffects/js/classie.js' %}'></script>
-      <script src='{% static 'offcanvasmenueffects/js/main.js' %}'></script>
+      <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
+      <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
       <script src='{% static 'Waves/dist/waves.min.js' %}'></script>
       <script src='{% static '3d-bold-navigation/js/main.js' %}'></script>
       <script src='{% static 'waypoints/lib/jquery.waypoints.min.js' %}'></script>
       <script src='{% static 'jquery.counterup/jquery.counterup.min.js' %}'></script>
       <script src='{% static 'toastr/toastr.min.js' %}'></script>
-      <script src='{% static 'Flot/jquery.flot.js' %}'></script>
-      <script src='{% static 'Flot/jquery.flot.time.js' %}'></script>
-      <script src='{% static 'Flot/jquery.flot.symbol.js' %}'></script>
-      <script src='{% static 'Flot/jquery.flot.resize.js' %}'></script>
       <script src='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.js' %}'></script>
-      <script src='{% static 'flot.curvedlines/curvedLines.js' %}'></script>
-
+      <script src='{% static 'awesomplete/awesomplete.js' %}'></script>
+      <script src='{% static 'babel/browser.min.js' %}'></script>
+      <script src='{% static 'react/react.min.js' %}'></script>
+      <script src='{% static 'react/react-dom.min.js' %}'></script>
+      <!-- high charts -->
+      <script src='{% static  'highcharts/highcharts.js' %}'  > </script>
       <!--Modern Scripts -->
       <script src='{% static 'sesh-ui/js/modern/modern.min.js' %}'></script>
-      <script src='{% static 'sesh-ui/js/modern/pages/dashboard.js' %}'></script>
+      <!-- Maps -->
+      <script src='{% static 'mapbox.js/mapbox.js' %}'></script>
+      <script src='{% static 'd3/d3.min.js' %}'></script>
+      <script src='{% static 'moment/moment.js' %}'></script>
+      <script src='{% static 'sesh-ui/js/calendar-heatmap.js' %}'></script>
 
+      {% block seshjs %}
+        <script src='{% static 'offcanvasmenueffects/js/main.js' %}'></script>
+        <script src='{% static 'flot.curvedlines/curvedLines.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.time.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.symbol.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.resize.js' %}'></script>
+        <script src='{% static 'sesh-ui/js/modern/pages/dashboard.js' %}'></script>
+        <!-- Sesh React -->
+        <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
+        <!-- graph js -->
+        <script src ='{%static  'sesh-ui/js/graphs.js' %}' > </script>
+
+        <!-- Maps configuration -->
+        <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
+      {% endblock %}
+      <!-- sesh javascript -->
+      <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
 
 </html>

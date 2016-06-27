@@ -1,9 +1,8 @@
 
 var csrftoken = getCookie('csrftoken');
-
 /* Function For Daily DataPoints Graph Generation */
 function daily_data_points_graph() {
-
+  
    drop_choice1 = $("#drop1").val();
    drop_choice2 = $("#drop2").val();
    time_value = $('#time_dropdown').val();
@@ -104,17 +103,19 @@ function daily_data_points_graph() {
         }]
     });
 
-});
+  });
     $(".graph-loader").hide();
     $("#dynamic_graph").show();
 
 }
-
+window.onload = daily_data_points_graph()
+/*
 $(document).ready(function(){
-
+ alert("on page load is this")
  daily_data_points_graph()
 
  });
+ */
 /* Update Daily Data Point Graph on Click */
 $("#dynamic_graph_button").click(function(){
 

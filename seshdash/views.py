@@ -107,12 +107,13 @@ def index(request,site_id=0):
     if measurements_value is not None:
         for measurement in measurements_value:
             measurements.append(measurement['name'])
-  
+
     context_dict['measurements']= measurements
     # user permissions
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
+    print context_dict['permitted']
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -403,15 +404,12 @@ def logout_user(request):
     Logout user
     """
     logout(request)
-    return render(request,'seshdash/logout.html')
+    return render(request,'seshdash/login.html')
 
 def login_user(request):
     """
     Login motions for user logginng into system
     """
-    print "About to login: ",
-    print "GOt: ",
-    print request.POST
     context_dict = {}
     #is the user already logged in?
     if request.user.is_authenticated():
@@ -698,7 +696,7 @@ def get_latest_bom_data(request):
     measurement_list = get_status_card_items(site)
 
     latest_points = get_measurements_latest_point(site, measurement_list)
- 
+
     latest_point_data = []
 
     # If the points exist and the points returned are equal to the items in measurement list
@@ -754,8 +752,8 @@ def historical_data(request):
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
         active_site = sites[0]
         context_dict = {}
-       
-        #checking user permissions      
+
+        #checking user permissions
         user = request.user
         permission = get_permissions(user)
         context_dict['permitted'] = permission
@@ -773,7 +771,7 @@ def graphs(request):
 
     # if ajax request
     if request.method == 'POST':
-       
+
         # variables declaration
         results = {}
         time_delta_dict = {}
@@ -800,12 +798,12 @@ def graphs(request):
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
             SI_units = BoM_Data_Point.SI_UNITS
-            SI_unit = SI_units.get(choice,'V')		
+            SI_unit = SI_units.get(choice,'V')
             # creating an influx instance
             client = Influx()
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
-   
+
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
@@ -830,20 +828,20 @@ def graphs(request):
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
 def edit_site(request,site_Id=1):
-   context_dict = {}   
+   context_dict = {}
    sites =  _get_user_sites(request)
    form_add = SiteForm()
 
    #creating an instance to populate a form
    instance = get_object_or_404(Sesh_Site, id=site_Id)
    form = SiteForm(instance=instance)
-  
+
    if request.method == 'POST':
        # creating new instance for POST
        site_Id = request.POST.get('site_Id','')
        instance = get_object_or_404(Sesh_Site, id=site_Id)
        form = SiteForm(request.POST or None, instance=instance)
-      
+
        #checking if the form is valid
        if form.is_valid():
            form = form.save()
@@ -876,10 +874,10 @@ def add_site(request):
     #on page load
     else:
         form = SiteForm()
-   
+
     context_dict['permitted'] = permission
     context_dict['sites'] = sites
     context_dict['form_add'] = form
 
-       
+
     return render(request, 'seshdash/settings.html', context_dict)
