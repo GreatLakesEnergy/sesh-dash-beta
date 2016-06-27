@@ -297,6 +297,8 @@ BOWER_INSTALLED_APPS = (
                         'awesomplete#1.1.0',
                         'babel#d54d59ff74',
                         'react',
+                        'd3',
+                        'moment',
                         'mapbox.js',
                         'highcharts',
             )

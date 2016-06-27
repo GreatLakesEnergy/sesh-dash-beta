@@ -112,6 +112,7 @@ def index(request,site_id=0):
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
+    print context_dict['permitted']
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():

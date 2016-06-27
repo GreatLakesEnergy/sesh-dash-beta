@@ -10,8 +10,9 @@
                   {% endfor %}
                 </ul>
             </li>
+            {% if permitted == True %}
             <li><a href="/add_site" class="waves-effect waves-button"><i class="glyphicon glyphicon-cog"></i><p>Edit-Site</p></a></li>
-
+            {% endif %}
         </ul>
     </div><!-- Page Sidebar Inner -->
 </div><!-- Page Sidebar -->
