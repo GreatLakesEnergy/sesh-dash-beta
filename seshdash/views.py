@@ -72,7 +72,7 @@ def index(request,site_id=0):
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-
+    print "at the top of the function"
     sites =  _get_user_sites(request)
 
     context_dict = {}
@@ -96,11 +96,11 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
-
+    print "trying to connect to influx"
     #Generate measurements in the time_series_graph
     client=Influx()
     measurements_value=client.get_measurements()
-
+    print "connected to influx"
     measurements =[]
 
     if measurements_value is not None:
@@ -112,7 +112,7 @@ def index(request,site_id=0):
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
-    print context_dict['permitted']
+    print "at the buttom of the function"
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -848,6 +848,10 @@ def edit_site(request,site_Id=1):
    context_dict['form_add']= form_add
    context_dict['site_Id']= site_Id
    context_dict['sites']=sites
+   # user permissions
+   user = request.user
+   permission = get_permissions(user)
+   context_dict['permitted'] = permission
    return render(request,'seshdash/settings.html', context_dict)
 
 # function of adding new site

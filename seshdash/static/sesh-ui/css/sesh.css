@@ -222,3 +222,6 @@ padding : 0px;
 .chart-data-container .panel-footer {
  padding: 0;
 }
+#switcher{
+  display: none;
+}
