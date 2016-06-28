@@ -222,6 +222,60 @@ padding : 0px;
 .chart-data-container .panel-footer {
  padding: 0;
 }
+tr.modal-toggle {
+ cursor: pointer;
+}
+
+.hidden {
+ display: none;
+}
+
+.alert-data-point-info h1,h2,h3,h4,h5,h6 {
+ text-align: center;
+}
+
+
+.chart-data-container {
+ width: 76%;
+ margin: auto;
+}
+
+.chart-container {
+ text-align: center;
+}
+
+.chart-container svg {
+ height: 150px;
+ padding: 18px 32px!important;
+}
+
+
+.chart-data-container .panel-footer {
+ padding: 0;
+}
+
+.hist-extra-info {
+ text-align: center;
+
+}
+
+
+.hist-extra-info .extra-info-entity {
+ border-right: 1px solid #e3e3e3;
+ padding: 10px 0;
+}
+
+
+.hist-extra-info .extra-info-entity:last-child {
+ border-right: 0;
+}
+
+.hist-extra-info .extra-info-entity h4 {
+  padding: 0 20px;
+  margin: 0;
+  font-size: 16px;
+}
+
 #switcher{
   display: none;
 }

@@ -52,8 +52,14 @@
          {% endblock %}
        </div>
        <div class="main-content">
+           <div class="page-inner">
              {% block main %}
              {% endblock %}
+
+             {% block footer %}
+             {% include "seshdash/footer.html" %}
+             {% endblock %}
+           </div>
        </div>
        {% block content %}
        {% endblock %}
