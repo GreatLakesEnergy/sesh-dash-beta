@@ -7,8 +7,6 @@ function daily_data_points_graph() {
    drop_choice2 = $("#drop2").val();
    time_value = $('#time_dropdown').val();
    var title = $('#time_dropdown').find(":selected").text();
-   message = (title +" " + drop_choice1 + '  With  ' + drop_choice2);
-   $("#title-message").html(message);
 
    $("#dynamic_graph").hide();
    $(".graph-loader").show();
@@ -36,7 +34,7 @@ function daily_data_points_graph() {
             zoomType: 'xy'
         },
         title: {
-            text: title + " " + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
+            text: title + " " + drop_choice1 + ' with ' + drop_choice2
         },
         xAxis: [{
             crosshair: true,
