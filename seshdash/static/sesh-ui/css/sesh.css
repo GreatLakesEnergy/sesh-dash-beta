@@ -9,6 +9,7 @@ dashboard
 /* Overiding the modern theme styling section */
 div#map {
     height: 400px;
+    z-index: 1;
 }
 button#dynamic_graph_button {
     margin-top: 30px;

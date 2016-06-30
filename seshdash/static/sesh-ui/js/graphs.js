@@ -2,7 +2,7 @@
 var csrftoken = getCookie('csrftoken');
 /* Function For Daily DataPoints Graph Generation */
 function daily_data_points_graph() {
-  
+
    drop_choice1 = $("#drop1").val();
    drop_choice2 = $("#drop2").val();
    time_value = $('#time_dropdown').val();
