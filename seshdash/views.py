@@ -32,7 +32,8 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit, get_status_card_items
+from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
+                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -71,7 +72,7 @@ def index(request,site_id=0):
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-
+    print "at the top of the function"
     sites =  _get_user_sites(request)
 
     context_dict = {}
@@ -95,22 +96,23 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
-
+    print "trying to connect to influx"
     #Generate measurements in the time_series_graph
     client=Influx()
     measurements_value=client.get_measurements()
-
+    print "connected to influx"
     measurements =[]
 
     if measurements_value is not None:
         for measurement in measurements_value:
             measurements.append(measurement['name'])
-  
+
     context_dict['measurements']= measurements
     # user permissions
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
+    print "at the buttom of the function"
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -401,7 +403,7 @@ def logout_user(request):
     Logout user
     """
     logout(request)
-    return render(request,'seshdash/logout.html')
+    return render(request,'seshdash/login.html')
 
 def login_user(request):
     """
@@ -693,7 +695,7 @@ def get_latest_bom_data(request):
     measurement_list = get_status_card_items(site)
 
     latest_points = get_measurements_latest_point(site, measurement_list)
- 
+
     latest_point_data = []
 
     # If the points exist and the points returned are equal to the items in measurement list
@@ -749,8 +751,8 @@ def historical_data(request):
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
         active_site = sites[0]
         context_dict = {}
-       
-        #checking user permissions      
+
+        #checking user permissions
         user = request.user
         permission = get_permissions(user)
         context_dict['permitted'] = permission
@@ -768,7 +770,7 @@ def graphs(request):
 
     # if ajax request
     if request.method == 'POST':
-       
+
         # variables declaration
         results = {}
         time_delta_dict = {}
@@ -795,12 +797,12 @@ def graphs(request):
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
             SI_units = BoM_Data_Point.SI_UNITS
-            SI_unit = SI_units.get(choice,'V')		
+            SI_unit = SI_units.get(choice,'V')
             # creating an influx instance
             client = Influx()
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
-   
+
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
@@ -825,20 +827,20 @@ def graphs(request):
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
 def edit_site(request,site_Id=1):
-   context_dict = {}   
+   context_dict = {}
    sites =  _get_user_sites(request)
    form_add = SiteForm()
 
    #creating an instance to populate a form
    instance = get_object_or_404(Sesh_Site, id=site_Id)
    form = SiteForm(instance=instance)
-  
+
    if request.method == 'POST':
        # creating new instance for POST
        site_Id = request.POST.get('site_Id','')
        instance = get_object_or_404(Sesh_Site, id=site_Id)
        form = SiteForm(request.POST or None, instance=instance)
-      
+
        #checking if the form is valid
        if form.is_valid():
            form = form.save()
@@ -846,6 +848,10 @@ def edit_site(request,site_Id=1):
    context_dict['form_add']= form_add
    context_dict['site_Id']= site_Id
    context_dict['sites']=sites
+   # user permissions
+   user = request.user
+   permission = get_permissions(user)
+   context_dict['permitted'] = permission
    return render(request,'seshdash/settings.html', context_dict)
 
 # function of adding new site
@@ -871,10 +877,10 @@ def add_site(request):
     #on page load
     else:
         form = SiteForm()
-   
+
     context_dict['permitted'] = permission
     context_dict['sites'] = sites
     context_dict['form_add'] = form
 
-       
+
     return render(request, 'seshdash/settings.html', context_dict)

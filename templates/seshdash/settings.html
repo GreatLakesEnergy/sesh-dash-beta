@@ -2,13 +2,9 @@
 
 {% load staticfiles %}
 
-{% block main_content %}
-
- <div id="page-wrapper">
-
+{% block main %}
+   <div id="page-wrapper">
       <div id="create_site" class="container">
-
-           <h2>Sesh Sites</h2>
 
            <ul class="nav nav-tabs">
 
@@ -16,46 +12,31 @@
 
                 <li><a data-toggle="tab" href="#Add_site">Add new site</a></li>
 
+               <!--
                 <li><a data-toggle="tab" href="#Change_settings">Change User Settings</a></li>
 
                 <li><a data-toggle="tab" href="#Add_Import">Add/Import</a></li>
-
+              -->
            </ul>
 
            <div class="tab-content">
 
                  <div id="Edit_site" class="tab-pane fade in active">
+                   {% csrf_token %}
 
+                   {% if form_edit.as_table|length > 1 %}
+                   {% else%}
                       <div class="site-list" >
-
-                           <h3>Available Sesh Sites</h3>
-
-                           <table class="table table-striped table-bordered table-hover" >
-                                  <tr>
-
-                                     <th> SITES </th>
-
-                                  </tr>
-
-                                  <tr>
-                                      {% for site in sites %}
-                                      <tr>
-
-
-                                        <th class="sites-available"><a href="/edit_site/{{ site.id }}">{{ site.site_name }}</a></th>
-
-                                      </tr>
-
-                                      {% endfor %}
-                                 </tr>
-
-                          </table>
+                        {% block table %}
+                        {% include "seshdash/table.html" %}
+                        {% endblock %}
                       </div>
+                   {% endif %}
 
                       <div class="edit-sites">
 
                                <form action="/edit_site" method="post" novalidate>
-                                        <table class="table table-striped table-bordered table-hover">
+                                        <table class="table">
 
                                                {% csrf_token %}
 
@@ -105,10 +86,9 @@
 
                  </div >
 
-
-
-      </div>
-
- </div>
- </div>
+     </div>
+    </div>
+  </div>
+{% endblock %}
+{% block seshjs %}
 {% endblock %}

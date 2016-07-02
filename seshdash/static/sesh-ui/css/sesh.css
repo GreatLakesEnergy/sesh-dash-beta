@@ -1,85 +1,57 @@
 /*{
   border: 1px solid black;
 }*/
-body {
- font-family: "Roboto", sans-serif;
- padding-bottom:0;
- margin-bottom:0;
+/*
+Main styling for the sesh
+dashboard
+*/
+
+/* Overiding the modern theme styling section */
+div#map {
+    height: 300px;
+    z-index: 1;
 }
-
-
-#page-wrapper {
- padding-bottom: 30px;
+button#dynamic_graph_button {
+    margin-top: 30px;
 }
-
-#map {
- width: 100%;
- height: 300px;
+h2.page-header.page-title {
+    margin-top: 0px;
 }
-
-.panel-body.system-alerts {
- height: 235px;
- overflow-y: scroll;
+.page-sidebar.sidebar {
+  min-height: 100vh;
+  height: 100%;
 }
-
-tr.modal-toggle {
- cursor: pointer;
+.page-title{
+  text-align: center;
 }
-
-.hidden {
- display: none;
+.page-inner{
+  padding: 0px;
 }
-
-.alert-data-point-info h1,h2,h3,h4,h5,h6 {
- text-align: center;
+.slimScrollDiv {
+  height: 90%!important;
 }
-
-
-.chart-data-container {
- width: 76%;
- margin: auto;
+div.awesomplete > ul {
+    margin: 42px 0px;
 }
-
-.chart-container {
- text-align: center;
+h2.page-header {
+    text-align: center;
+    font-weight: 300;
+    color: #2B384E;
 }
-
-.chart-container svg {
- height: 150px;
- padding: 18px 32px!important;
+div#create_site {
+    background: #F1F4F9;
+    margin-top: 20px;
 }
-
-
-.chart-data-container .panel-footer {
- padding: 0;
+form.search-form {
+    overflow: visible;
 }
-
-.hist-extra-info {
- text-align: center;
-
+div.awesomplete li:hover mark {
+    background: hsl(200, 40%, 80%);
 }
-
-
-.hist-extra-info .extra-info-entity {
- border-right: 1px solid #e3e3e3;
- padding: 10px 0;
+div.awesomplete mark {
+      background: hsl(200, 40%, 80%);
 }
-
-
-.hist-extra-info .extra-info-entity:last-child {
- border-right: 0;
-}
-
-.hist-extra-info .extra-info-entity h4 {
-  padding: 0 20px;
-  margin: 0;
-  font-size: 16px;
-}
-
-/* Historical Data */
-
-/* Loader */
-
+/* spinner */
 .spinner {
   margin: 100px auto;
   width: 50px;
@@ -89,8 +61,8 @@ tr.modal-toggle {
 }
 
 .spinner > div {
-  background-color: #aaa;
-  height: 170%;
+  background-color: #333;
+  height: 100%;
   width: 6px;
   display: inline-block;
 
@@ -112,6 +84,7 @@ tr.modal-toggle {
   -webkit-animation-delay: -0.9s;
   animation-delay: -0.9s;
 }
+
 .spinner .rect5 {
   -webkit-animation-delay: -0.8s;
   animation-delay: -0.8s;
@@ -131,9 +104,6 @@ tr.modal-toggle {
     -webkit-transform: scaleY(1.0);
   }
 }
-
-
-
 .historicalLoader {
   display: none;
 }
@@ -233,62 +203,80 @@ padding : 0px;
 
 #site-counter{
    padding-left: 100px;
-       }
-
-div.awesomplete > ul {
-    margin: 42px 0px;
 }
-.btn-default{
-    margin-bottom: 5px;
-}
-.error {
-  border:2px solid #CA2F2F;
-  box-shadow: 10px red;
-}
-.page-header {
-    font-weight: 300;
+/* Calender heatmap */
+.chart-data-container {
+ width: 76%;
+ margin: auto;
 }
 
-/* graphs styling */
-#update-button{
-  margin-top:18px;
-}
-#update_container{
-  margin-top: 66px;
-  margin-bottom:-11px;
-}
-#dynamic_graph_container{
-    padding:20px;
-    margin-bottom: -13px;
-}
-#dynamic_graph_button {
-    margin-top: 29px;
-}
-#dynamic_graph{
-  margin-bottom: 30px;
-}
-#create_site{
-  max-width: 900px;
-}
-.graph-loader{
-  /*margin-top: 500px;*/
+.chart-container {
+ text-align: center;
 }
 
-.btn-back{
-  margin-left: 50px;
-}
-.ui-sortable-handle:hover {
-  cursor: pointer;
-
-}
-/* styling the footer */
-.footer{
-    background:padding-top: 15px;
-    background: #AAB2B7;
-    margin-top: 20px;
+.chart-container svg {
+ height: 150px;
+ padding: 18px 32px!important;
 }
 
-.footer p{
-   margin-top:10px;
+
+.chart-data-container .panel-footer {
+ padding: 0;
+}
+tr.modal-toggle {
+ cursor: pointer;
 }
 
+.hidden {
+ display: none;
+}
+
+.alert-data-point-info h1,h2,h3,h4,h5,h6 {
+ text-align: center;
+}
+
+
+.chart-data-container {
+ width: 76%;
+ margin: auto;
+}
+
+.chart-container {
+ text-align: center;
+}
+
+.chart-container svg {
+ height: 150px;
+ padding: 18px 32px!important;
+}
+
+
+.chart-data-container .panel-footer {
+ padding: 0;
+}
+
+.hist-extra-info {
+ text-align: center;
+
+}
+
+
+.hist-extra-info .extra-info-entity {
+ border-right: 1px solid #e3e3e3;
+ padding: 10px 0;
+}
+
+
+.hist-extra-info .extra-info-entity:last-child {
+ border-right: 0;
+}
+
+.hist-extra-info .extra-info-entity h4 {
+  padding: 0 20px;
+  margin: 0;
+  font-size: 16px;
+}
+
+#switcher{
+  display: none;
+}

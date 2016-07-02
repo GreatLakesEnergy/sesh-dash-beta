@@ -43,7 +43,7 @@ function calendarHeatmap() {
     tooltipEnabled = value;
     return chart;
   };
-  
+
   chart.tooltipUnit = function (value) {
     if (!arguments.length) { return tooltipUnit; }
     tooltipUnit = value;

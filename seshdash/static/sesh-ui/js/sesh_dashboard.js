@@ -1,112 +1,74 @@
+
 var csrftoken = getCookie('csrftoken');
 
-
 /* Auto compete on search*/
-var i;
-var textid;
-var textinput;
-var option;
-var matched;
-var siteid = [];
-var sitename = [];
-/* post request to retrieve all sitename and site id */
+var i,
+    textid,
+    textinput,
+    option,
+    matched,
+    siteid = [],
+    sitename = [];
+
 $.post("/search",{csrfmiddlewaretoken: csrftoken},function(data){
     option = JSON.parse(data);
-    //console.log(option)
-    /* extracting site name array from response dict */
+
+    // site names
    for (i=0;i < option.length;i++){
     sitename.push(option[i].value)
    }
-   /* extracting site id array from response dict */
+
+   // site id
    for (i=0; i< option.length; i++){
     siteid.push(option[i].key)
    }
-   var input = document.getElementById('search');
-   /* proving an array of options to be suggested when a user types using awesomplete plugin */
+
+   var input = document.getElementById('search-site');
+
+   //array of options
    new Awesomplete(input,{list: sitename});
 });
-/* checking if ENTER button is pressed */
+
+function AutoComplete() {
+      textinput = $(".form-control").val();
+      for (i=0;i<sitename.length;i++){
+
+           // checking  entered values
+           if (sitename[i] == textinput){
+               matched = true;
+               for (i=0 ;i < option.length; i++){
+                // finding id
+                   if (option[i].value == textinput){
+                       textid = option[i].key;
+                       // redirecting
+                       window.location.replace("/dash/" + textid);
+                   }
+               }
+            { break; }
+
+            }
+      }
+
+     if (!matched){
+         document.getElementById("search").className = document.getElementById("search").className + " error";
+     }
+
+}
+
+/*if ENTER pressed */
 $('.form-control').keypress(function(event){
     var keycode = (event.keyCode ? event.keyCode : event.which);
     var matched = false;
     if(keycode == '13'){
-        textinput = $(".form-control").val();
-        for (i=0;i<sitename.length;i++){
-            /* checking if entered value exists in a sitename array */
-             if (sitename[i] == textinput){
-                  matched = true;
-                  for (i=0 ;i < option.length; i++){
-                    /* finding the id of the entered sitename */
-                       if (option[i].value == textinput){
-                             textid = option[i].key;
-                             /* Linking to the asked sitename`s page */
-                             window.location.replace("/dash/" + textid);
-                        }
-                  }
-             { break; }
-             }
-        }
-        if (!matched){
-          document.getElementById("search").className = document.getElementById("search").className + " error";
-        }
+       event.preventDefault();
+       AutoComplete()
     }
 });
-/* search button */
+
 $(".button-search").click(function(){
-        textinput = $(".form-control").val();
-        for (i=0;i<sitename.length;i++){
-            /* checking if entered value exists in a sitename array */
-             if (sitename[i] == textinput){
-                  matched = true;
-                  for (i=0 ;i < option.length; i++){
-                    /* finding the id of the entered sitename */
-                       if (option[i].value == textinput){
-                             textid = option[i].key;
-                             /* Linking to the asked sitename`s page */
-                             window.location.replace("/dash/" + textid);
-                        }
-                  }
-             { break; }
-
-             }
-        }
-        if (!matched){
-          document.getElementById("search").className = document.getElementById("search").className + " error";
-        }
+    AutoComplete()
 });
 
-function ready_graph_data(data,x_value,y_value){
-    var graph_data = [];
-    for (var i=0; i < data.length; i++)
-    {
-         var data_point = {y:data[i]["fields"][x_value],a:data[i]["fields"][y_value]};
-     graph_data.push(data_point);
-    }
-    return graph_data;
-  }
-
-
-// energy production graph
-/* NOTE commenting out for now, switching out nvd3 graphs
-Morris.Bar({
-      element: 'energy-production-last-5-days',
-      data: ready_graph_data(power_data,'time','w_production'),
-  xkey: 'y',
-  ykeys: ['a'],
-  labels: ['wh']
-});
-
-//cloudcover forecast
-Morris.Bar({
-  element: 'cloud-cover-forecast',
-  data: ready_graph_data(weather_data,'date','cloud_cover'),
-  xLabels : 'day',
-  xkey: 'y',
-  ykeys: ['a'],
-  labels: ['Cloud Cover %']
-});
-*/
-//nano bar
 /* Alerts modal toggle script */
 
   var  modal = $('#alert-modal'),
@@ -185,17 +147,4 @@ Morris.Bar({
                modal.modal('hide');
           });
       });
-      // Draggable panels
-      // INFO: Uses the jquery ui sortable method
-      var panelsContainer = $('.panels-container');
-
-      panelsContainer.sortable({
-          handle: '.panel-heading'
-      });
 }
-  if ($(".button-save").length){
-    $(".site-list").hide();
-  }
-  else{
-    $(".site-list").show();
-  }

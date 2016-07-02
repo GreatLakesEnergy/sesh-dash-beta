@@ -1,0 +1,18 @@
+<div class="page-sidebar sidebar">
+    <div class="page-sidebar-inner slimscroll">
+        <ul class="menu accordion-menu">
+            <li><a href="/" class="waves-effect waves-button"><span class="menu-icon glyphicon glyphicon-home"></span><p>Dashboard</p></a></li>
+            <li><a href="/historical_data" class="waves-effect waves-button"><i class="fa fa-history fa-f"></i><p>Historical</p></a></li>
+            <li class="droplink open active"><a href="#" class="waves-effect waves-button"><span>Sites</span><span class="arrow"></span></a>
+                <ul class="sub-menu">
+                  {% for site in sites %}
+                    <li><a href="/dash/{{ site.id }}">{{site.site_name}}</a></li>
+                  {% endfor %}
+                </ul>
+            </li>
+            {% if permitted == True %}
+            <li><a href="/add_site" class="waves-effect waves-button"><i class="glyphicon glyphicon-cog"></i><p>Edit-Site</p></a></li>
+            {% endif %}
+        </ul>
+    </div><!-- Page Sidebar Inner -->
+</div><!-- Page Sidebar -->

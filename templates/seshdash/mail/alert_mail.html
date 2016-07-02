@@ -5,36 +5,31 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>SESH Email Report for {{site_name}} </title>
 <style>
-/* ------------------------------------- 
-		GLOBAL 
+/* -------------------------------------
+		GLOBAL
 ------------------------------------- */
-* { 
+* {
 	margin:0;
 	padding:0;
-	font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif; 
+	font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
 	font-size: 100%;
 	line-height: 1.6;
 }
-
-img { 
-	max-width: 100%; 
+img {
+	max-width: 100%;
 }
-
 body {
-	-webkit-font-smoothing:antialiased; 
-	-webkit-text-size-adjust:none; 
-	width: 100%!important; 
+	-webkit-font-smoothing:antialiased;
+	-webkit-text-size-adjust:none;
+	width: 100%!important;
 	height: 100%;
 }
-
-
-/* ------------------------------------- 
-		ELEMENTS 
+/* -------------------------------------
+		ELEMENTS
 ------------------------------------- */
-a { 
+a {
 	color: #348eda;
 }
-
 .btn-primary, .btn-secondary {
 	text-decoration:none;
 	color: #FFF;
@@ -47,62 +42,49 @@ a {
 	display: inline-block;
 	border-radius: 25px;
 }
-
 .btn-secondary{
 	background: #aaa;
 }
-
-.last { 
+.last {
 	margin-bottom: 0;
 }
-
 .first{
 	margin-top: 0;
 }
-
-
-/* ------------------------------------- 
-		BODY 
+/* -------------------------------------
+		BODY
 ------------------------------------- */
-table.body-wrap { 
+table.body-wrap {
 	width: 100%;
 	padding: 20px;
 }
-
 table.body-wrap .container{
 	border: 1px solid #f0f0f0;
 }
-
-
-/* ------------------------------------- 
-		FOOTER 
+/* -------------------------------------
+		FOOTER
 ------------------------------------- */
-table.footer-wrap { 
-	width: 100%;	
+table.footer-wrap {
+	width: 100%;
 	clear:both!important;
 }
-
 .footer-wrap .container p {
 	font-size:12px;
 	color:#666;
-	
-}
 
+}
 table.footer-wrap a{
 	color: #999;
 }
-
-
-/* ------------------------------------- 
-		TYPOGRAPHY 
+/* -------------------------------------
+		TYPOGRAPHY
 ------------------------------------- */
 h1,h2,h3{
 	font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; line-height: 1.1; margin-bottom:15px; color:#000;
 	margin: 40px 0 10px;
 	line-height: 1.2;
-	font-weight:200; 
+	font-weight:200;
 }
-
 h1 {
 	font-size: 36px;
 }
@@ -112,23 +94,19 @@ h2 {
 h3 {
 	font-size: 22px;
 }
-
-p, ul { 
-	margin-bottom: 10px; 
-	font-weight: normal; 
+p, ul {
+	margin-bottom: 10px;
+	font-weight: normal;
 	font-size:14px;
 }
-
 ul li {
 	margin-left:5px;
 	list-style-position: inside;
 }
-
-/* --------------------------------------------------- 
+/* ---------------------------------------------------
 		RESPONSIVENESS
-		Nuke it from orbit. It's the only way to be sure. 
+		Nuke it from orbit. It's the only way to be sure.
 ------------------------------------------------------ */
-
 /* Set a max-width, and make it display as block so it will automatically stretch to that width, but will also shrink down on a phone or something */
 .container {
 	display:block!important;
@@ -136,27 +114,23 @@ ul li {
 	margin:0 auto!important; /* makes it centered */
 	clear:both!important;
 }
-
 /* This should also be a block element, so that it will fill 100% of the .container */
 .content {
 	padding:20px;
 	max-width:600px;
 	margin:0 auto;
-	display:block; 
+	display:block;
 }
-
 /* Let's make sure tables in the content area are 100% wide */
-.content table { 
-	width: 100%; 
+.content table {
+	width: 100%;
 }
 .text-danger {
     color: #a94442;
 }
-
-
 </style>
 </head>
- 
+
 <body bgcolor="#f6f6f6">
 
 <!-- body -->
@@ -173,18 +147,18 @@ ul li {
 						<h1>SESH ALERT: {{ content.site }} </h1>
 						<p>Hi there {{ username }} ,</p>
                         Alert was <strong>
-                                  {% if content.alert.isSilence %} 
+                                  {% if content.alert.isSilence %}
                                        silenced
                                   {% else %}
                                        triggered
                                   {% endif %}
                                   </strong>
-                                 
+
                                   at {{ time }}
                         for site: {{ content.site }} <br><br>
-                        
+
                         {{ content.alert_str }}  <br>
-                         
+
                         {{ alert.isSilence }}
                         Alert status: {% if content.alert.isSilence %}
                                           inactive
@@ -201,7 +175,7 @@ ul li {
 			</table>
 			</div>
 			<!-- /content -->
-									
+
 		</td>
 		<td></td>
 	</tr>
@@ -213,7 +187,7 @@ ul li {
 	<tr>
 		<td></td>
 		<td class="container">
-			
+
 			<!-- content -->
 			<div class="content">
 				<table>
@@ -225,7 +199,7 @@ ul li {
 					</tr>
 				</table>
 			</div><!-- /content -->
-				
+
 		</td>
 		<td></td>
 	</tr>

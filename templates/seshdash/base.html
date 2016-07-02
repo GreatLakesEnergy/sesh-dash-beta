@@ -1,258 +1,130 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
+   <head>
+       <title>Sesh Dashboard (beta)</title>
 
-<head>
+     <!--STYLE -->
+     {% load static %}
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,500,700,300,300italic' rel='stylesheet' type='text/css'>
+     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
 
-    {% load nvd3_tags %}
+     <link href='{% static 'PACE/themes/blue/pace-theme-flash.css' %}' rel='stylesheet'>
+     <link href='{% static 'bootstrap/dist/css/bootstrap.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'Waves/dist/waves.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'switchery/switchery.css' %}' rel='stylesheet'>
+     <link href='{% static 'simple-line-icons/css/simple-line-icons.css' %}' rel='stylesheet'>
+     <link href='{% static 'offcanvasmenueffects/css/menu_cornerbox.css' %}' rel='stylesheet'>
+     <link href='{% static '3d-bold-navigation/css/style.css' %}' rel='stylesheet'>
+     <link href='{% static 'Blueprint-SlidePushMenus/css/component.css' %}' rel='stylesheet'>
+     <link href='{% static 'weather-icons/css/weather-icons.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'toastr/toastr.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'awesomplete/awesomplete.css' %}' rel='stylesheet'>
+     <!-- maps -->
+     <link href='{% static 'mapbox.js/mapbox.css' %}' rel='stylesheet' />
+     <!--Theme style -->
 
+     <link href='{% static 'sesh-ui/css/modern/modern.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'sesh-ui/css/modern/themes/green.css' %}' rel='stylesheet'>
+     <link href='{% static 'sesh-ui/css/modern/custom.css' %}' rel='stylesheet'>
 
-    {% load static %}
+     <!--Sesh Styles-->
+     <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
+     <link href='{% static 'sesh-ui/css/calendar-heatmap.css' %}' rel="stylesheet">
+     <!-- Shortcut icon -->
+     <link rel="shortcut icon" type="image/x-icon" href='{% static 'images/gle.jpg' %}' />
+     <!--utilities-->
+     <script src='{% static 'sesh-ui/js/utilities.js' %}' ></script>
+   </head>
+   <body>
 
-    <!-- jQuery TODO moving this here for debugging needs to be here for nvd3 to work -->
-    <script src='{% static 'jquery/dist/jquery.js' %}'></script>
-    <!--Auto complete plugins -->
-    <script src='{% static 'awesomplete/awesomplete.js'%}'></script>
-    <!-- mapbox-->
-    <link href='{% static 'mapbox.js/mapbox.css' %}' rel='stylesheet' />
-    <!-- Autocomplete css -->
-    <link href='{% static 'awesomplete/awesomplete.css' %}' rel="stylesheet">
-    <!-- bootstrap   -->
-    <link href='{% static 'bootstrap/dist/css/bootstrap.css' %}' rel="stylesheet">
+     <main class="page-content content-wrap">
+       <div class="nav-bar">
+         {% block nav %}
+            {% include "seshdash/top_nav.html" %}
+         {% endblock %}
+       </div>
+       <div class="side-bar">
+         {% block sidebar %}
+            {% include "seshdash/side-bar.html" %}
+         {% endblock %}
+       </div>
+       <div class="main-content">
+         {% block main-content%}
+           <div class="page-inner">
+             {% block main %}
+             {% endblock %}
 
-    <!--PACE -->
-    <link href ='{% static 'PACE/themes/blue/pace-theme-minimal.css' %}' rel="stylesheet">
+             {% block footer %}
+             {% include "seshdash/footer.html" %}
+             {% endblock %}
+           </div>
+           {% endblock %}
+       </div>
+       {% block content %}
+       {% endblock %}
 
-
-    <!-- MetisMenu CSS -->
-    <link href='{% static 'metisMenu/dist/metisMenu.css' %}' rel="stylesheet">
-
-    <!-- Timeline CSS -->
-    <link href='{% static 'sesh-ui/css/timeline.css' %}' rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link href='{% static 'sesh-ui/css/sb-admin-2.css' %}' rel="stylesheet">
-    <!-- SESH CSS -->
-    <link href='{% static 'sesh-ui/css/sesh.css' %}' rel="stylesheet">
-
-    <!-- Calendar heatmap css -->
-    <link href='{% static 'sesh-ui/css/calendar-heatmap.css' %}' rel="stylesheet">
-
-    <!-- Custom Fonts -->
-    <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel="stylesheet" type="text/css">
-
-
-    <!--utilities-->
-    <script src='{% static 'sesh-ui/js/utilities.js' %}' ></script>
-
-
-
-  <title>SESH Dashboard (beta)</title>
-
-</head>
-  <body>
-       <div id="wrapper">
-
-            {% block top_navbar %}
-            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/">SESH Dashboard <i>beta</i></a>
-            </div>
-            <ul class="nav navbar-top-links navbar-right">
-                <li class="dropdown">
-                    <a class="dropdown-toggle" id ="cont" data-toggle="dropdown" href="#" >
-                         <div hidden id ="pop"></div>
-                        <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-alerts" id ="play">
-                        <li>
-                       <div class = "form-box">
-                        <div class ="form-top">
-                          Alerts
-                          </div>
-                        <div class="form-bottom">
-                        <div class ="table-responsive">
-                          <table class = "table table-striped table-hover">
-                           <thead>
-                             <tr>
-                               <th>Site Name </th>
-                               <th>Number of alerts </th>
-                             </tr>
-                           </thead>
-
-                           <tbody id ="alert-notification-table">
-                           </tbody>
-                          </table>
-                         </div>
-                         </div>
-                        </div>
-                        </li>
-                   </ul>
-               </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-user">
-                        {% if permitted == True %}
-                        <li><a href="/admin"><i class="fa fa-gear fa-fw"></i> Settings</a>
-                        </li>
-                        {% endif %}
-                        <li class="divider"></li>
-                        <li><a href="/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
-                        </li>
-                    </ul>
-                    <!-- /.dropdown-user -->
-                </li>
-          </ul>
+    </main>
+   </body>
+      <script type="text/javascript">
+            {% block javascript %}
             {% endblock %}
-
-            {% block side_navbar %}
-                       <div class="navbar-default sidebar" role="navigation">
-                <div class="sidebar-nav navbar-collapse">
-                    <ul class="nav" id="side-menu">
-                        <li class="sidebar-search">
-                            <div class="input-group custom-search-form" id="form-searching">
-                                <input type="text" id="search" class="form-control" placeholder="Search...">
-                                <span class="input-group-btn">
-                                <button class="btn btn-default button-search" type="button">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </span>
-                            </div>
-                            <!-- /input-group -->
-                        </li>
-                        <li>
-                            <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
-                        </li>
-                        <li>
-                            <a href='/historical_data'><i class="fa fa-history fa-fw"></i> Historical Data </a>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Sites<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                {% for site in sites %}
-                                <li>
-                                <a href="/dash/{{ site.id }}">{{ site.site_name }}</a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        {% if permitted == True %}
-                           <li>
-                               <a id="site_settings" href="/add_site"> <i class="glyphicon glyphicon-cog"></i> Site-Settings</a>
-                           </li>
-                        {% endif%}
-
-                    </ul>
-
-                </div>
-                <!-- /.sidebar-collapse -->
-            </div>
-            <!-- /.navbar-static-side -->
-            {% endblock %}
-            </nav>
-        {% block  main_content %}
-            <div id="page-wrapper">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <!--   user info here {{ user }} -->
-                        {% block header %}
-                            <h2 class="page-header">Welcome {{ user }}</h2>
-                        {% endblock %}
-                    </div>
-                    <!-- /.col-lg-12 -->
-                    {% block dash_1 %}
-
-                    {% endblock %}
-                </div>
-                <!-- /.row -->
-            </div>
-        </div>
-        {% endblock %}
+      </script>
 
 
-    {% block page_footer %}
-        {% include 'seshdash/footer.html' %}
-    {% endblock %}
-   
+      <!-- Script Section -->
+      <!--Modern Scripts -->
+      <script src='{% static 'sesh-ui/js/modern/modern.js' %}'></script>
 
-    {% block footer %}
+      <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
+      <script src='{% static 'PACE/pace.min.js' %}'></script>
+      <script src='{% static 'blockUI/jquery.blockUI.js' %}'></script>
+      <script src='{% static 'bootstrap/dist/js/bootstrap.min.js' %}'></script>
+      <script src='{% static 'jquery-slimscroll/jquery.slimscroll.min.js' %}'></script>
+      <script src='{% static 'switchery/dist/switchery.min.js' %}'></script>
+      <script src='{% static 'jquery.uniform/dist/jquery.uniform.min.js' %}'></script>
+      <script src='{% static 'offcanvasmenueffects/js/classie.js' %}'></script>
+      <script src='{% static 'offcanvasmenueffects/js/snap.svg-min.js' %}'></script>
+      <script src='{% static '3d-bold-navigation/js/modernizr.js' %}'></script>
+      <script src='{% static 'Waves/dist/waves.min.js' %}'></script>
+      <script src='{% static '3d-bold-navigation/js/main.js' %}'></script>
+      <script src='{% static 'waypoints/lib/jquery.waypoints.min.js' %}'></script>
+      <script src='{% static 'jquery.counterup/jquery.counterup.min.js' %}'></script>
+      <script src='{% static 'toastr/toastr.min.js' %}'></script>
+      <script src='{% static 'metrojs/release/MetroJs.Full/MetroJs.min.js' %}'></script>
+      <script src='{% static 'awesomplete/awesomplete.js' %}'></script>
+      <script src='{% static 'babel/browser.min.js' %}'></script>
+      <script src='{% static 'react/react.min.js' %}'></script>
+      <script src='{% static 'react/react-dom.min.js' %}'></script>
+      <!-- high charts -->
+      <script src='{% static 'highcharts/highcharts.js' %}'  > </script>
 
-    <script type="text/javascript">
-    {% block javascript %}
-    {% endblock %}
-    </script>
+      <!-- Maps -->
+      <script src='{% static 'mapbox.js/mapbox.js' %}'></script>
+      <script src='{% static 'd3/d3.min.js' %}'></script>
+      <script src='{% static 'moment/moment.js' %}'></script>
+      <script src='{% static 'sesh-ui/js/calendar-heatmap.js' %}'></script>
 
-    <!-- Jquery Ui -->
-    <script src= '{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
-
-    <!-- PACE javascript -->
-    <script src = '{% static  'PACE/pace.min.js' %}' > </script>
-
-    <!-- Bootstrap Core JavaScript -TODO switch to min after-->
-    <script src='{% static 'bootstrap/dist/js/bootstrap.js' %}' ></script>
-
-    <!-- Metis Menu Plugin JavaScript -->
-    <script src='{% static 'metisMenu/dist/metisMenu.min.js' %}' ></script>
-
-    <!-- Morris Charts JavaScript -->
-    <script src='{% static 'raphael/raphael.min.js' %}' ></script>
-
-    <script src='{% static 'morris.js/morris.min.js' %}' ></script>
-
-    <!-- Custom Theme JavaScript -->
-    <script src='{% static  'sesh-ui/js/sb-admin-2.js' %}'  > </script>
-    <!-- ReactJS -->
-    <script src='{%static 'react/react.min.js' %}' ></script>
-    <!-- ReactDOM -->
-    <script src='{%static 'react/react-dom.min.js' %}'></script>
-
-    <!-- Babel txt intrepreter -->
-    <script src='{%static 'babel/browser.js' %}'></script>
-    <!-- high charts -->
-    <script src='{% static  'highcharts/highcharts.js' %}'  > </script>
-    <!-- d3js -->
-    <script src='{% static 'd3/d3.min.js' %}'> </script>
-    <!-- momentjs -->
-    <script src='{% static 'moment/min/moment.min.js' %}'> </script>
-
-    <!-- Calendar heatmap js -->
-    <script src='{% static 'sesh-ui/js/calendar-heatmap.js' %}' > </script>
-    <!-- mapbox javascript -->
-    <script src='{% static  'mapbox.js/mapbox.js' %}'  > </script>
-
-
-   {% block seshjs %}
-        <!-- graph js -->       
-        <script src ='{%static  'sesh-ui/js/graphs.js' %}' > </script>
-
-        <!-- sesh javascript -->
-        <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
-
+      {% block seshjs %}
+        <script src='{% static 'offcanvasmenueffects/js/main.js' %}'></script>
+        <script src='{% static 'flot.curvedlines/curvedLines.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.time.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.symbol.js' %}'></script>
+        <script src='{% static 'Flot/jquery.flot.resize.js' %}'></script>
+        <!--Modern Script -->
+        <script src='{% static 'sesh-ui/js/modern/pages/dashboard.js' %}'></script>
+        <!-- Graphs -->
+        <script src='{% static 'sesh-ui/js/graphs.js' %}'> </script>
         <!-- Sesh React -->
         <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
+      {% endblock %}
 
-        <!-- Maps configuration -->
-        <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
 
-    {% endblock %}
+      <!-- sesh javascript -->
+      <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
 
-   {% endblock %}
-  </body>
-  
 </html>
