@@ -100,12 +100,18 @@ def index(request,site_id=0):
     client=Influx()
     measurements_value=client.get_measurements()
     measurements =[]
+    measures = {}
 
     if measurements_value is not None:
         for measurement in measurements_value:
             measurements.append(measurement['name'])
 
-    context_dict['measurements']= measurements
+    for measure in measurements:
+        if measure == "soc" or measure == "pv_production" or measure == "AC_Load_in" or measure == "battery_voltage":
+            measurement = get_measurement_verbose_name(measure)
+            measures[measure]= measurement
+    print measures
+    context_dict['measurements']= measures
     # user permissions
     user = request.user
     permission = get_permissions(user)
@@ -744,6 +750,7 @@ def historical_data(request):
     # On page load
     else:
         sort_data_dict = get_model_verbose(Daily_Data_Point)
+        print sort_data_dict
         # Removing values that are not data historical values
         sort_data_dict.pop('id')
         sort_data_dict.pop('site')
@@ -758,7 +765,6 @@ def historical_data(request):
         user = request.user
         permission = get_permissions(user)
         context_dict['permitted'] = permission
-
         context_dict['sites'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site

@@ -382,6 +382,7 @@ class Daily_Data_Point(models.Model):
 
 
     MEASUREMENTS_VERBOSE_NAMES = {
+        "cloud_cover": "Cloud Cover",
         "soc":"State of Charge",
         "battery_voltage": "Battery Voltage",
         "AC_Voltage_in": "AC Voltage In",
