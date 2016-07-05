@@ -695,7 +695,6 @@ def get_latest_bom_data(request):
     measurement_list = get_status_card_items(site)
 
     latest_points = get_measurements_latest_point(site, measurement_list)
-    print 'latest_points are : %s' %latest_points
 
     latest_point_data = []
 
