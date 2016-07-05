@@ -1,5 +1,5 @@
 $( document ).ready(function() {
-
+  
     // Toggle Search
     $('.show-search').click(function(){
         $('.search-form').css('margin-top', '0');
