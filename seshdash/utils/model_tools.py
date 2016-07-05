@@ -13,7 +13,7 @@ def get_model_from_string(model_name):
 
 def get_measurement_from_rule(rule):
     """
-    Return the name of the measurement from 
+    Return the name of the measurement from
     the Alert_Rule checkfield
     """
     if len(rule.check_field.split('#')) == 2:
@@ -27,9 +27,9 @@ def get_measurement_from_rule(rule):
 """ Returns the first model reference from string """
 def get_model_first_reference(model_name, instance):
     # model_name must be a string
-  
-    """ 
-    model_set_attr = model_name.lower() + '_set' 
+
+    """
+    model_set_attr = model_name.lower() + '_set'
     ref = getattr(instance, model_set_attr)
     first_ref = ref.first()
     return first_ref
@@ -38,8 +38,8 @@ def get_model_first_reference(model_name, instance):
     model = eval(model_name)
     point = model.objects.filter(id=instance.point_id).first()
     return point
-   
- 
+
+
 def get_model_fields_names(model):
     """ Returns a list of field names """
     fields = model._meta.fields
@@ -53,12 +53,12 @@ def get_model_fields_names(model):
 def get_model_verbose(model):
     """ Returns a dictionary where keys are columns and values are verbose name """
     fields = model._meta.fields
-    
+
     verbose_dict = {}
 
     for field in fields:
         verbose_dict[field.name] = field.verbose_name
-    
+
     return verbose_dict
 
 def get_latest_instance(model):
@@ -76,7 +76,7 @@ def get_measurement_unit(measurement):
 
 
 def get_model_field_names(model):
-    """ 
+    """
     This function returns the field names of fields
     in a given model
     """
@@ -93,11 +93,10 @@ def get_model_field_names(model):
 def get_status_card_items(site):
     """
     Returns the list of items to be displayed in the status card
-    The items are the values of all the rows in the status card table that 
+    The items are the values of all the rows in the status card table that
     contain characters
     """
     status_card = site.status_card
-
     if not status_card:
         logger.error('No status card linked to the site')
         return []
@@ -105,7 +104,7 @@ def get_status_card_items(site):
     # Getting all the status card fields
     status_card_fields = Status_Card._meta.get_fields()
     status_card_items = []
-  
+
     # Getting the status card field values, Constructing the arr of the status card items of the site
     for field in status_card_fields:
         status_card_items.append(getattr(status_card, field.name))
