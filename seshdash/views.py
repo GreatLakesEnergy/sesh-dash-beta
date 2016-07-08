@@ -34,7 +34,7 @@ from pprint import pprint
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items
+                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -96,15 +96,15 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
-    #Generate measurements in the time_series_graph
-    client=Influx()
-    measurements_value=client.get_measurements()
-    measurements =[]
+    #Generating site measurements for a graph
+    current_site = Sesh_Site.objects.filter(id = site_id).first()
+    site_measurements = get_site_measurements(current_site)
 
-    if measurements_value is not None:
-        for measurement in measurements_value:
-            measurements.append(measurement['name'])
-
+    measurements ={}
+    for measurement in site_measurements:
+        measurement_verbose_name = get_measurement_verbose_name(measurement)
+        measurements[measurement] = measurement_verbose_name
+        print measurements
     context_dict['measurements']= measurements
     # user permissions
     user = request.user
@@ -690,11 +690,7 @@ def get_latest_bom_data(request):
     site = Sesh_Site.objects.filter(id=site_id).first()
 
     # The measurement list contains attributes to be displayed in the status card,
-    #try:
     measurement_list = get_status_card_items(site)
-    #except OperationalError as e:
-    #    logger.debug(e)
-    #    pass
 
     if measurement_list != 0:
         latest_points = get_measurements_latest_point(site, measurement_list)

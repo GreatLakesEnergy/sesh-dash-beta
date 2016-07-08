@@ -66,3 +66,8 @@ class StatusCard(GuardedModelAdmin):
     list_filter = ('sesh_site',)
     pass
 
+@admin.register(Site_Measurements)
+class SiteMeasurements(GuardedModelAdmin):
+    list_display = ('row1','row2','row3','row4','row5','row6','row7','row8','row9','row10','sesh_site')
+    list_filter = ('sesh_site',)
+    pass

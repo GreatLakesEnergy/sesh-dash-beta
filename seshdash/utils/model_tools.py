@@ -70,7 +70,11 @@ def get_latest_instance(model):
 
 
 def get_measurement_verbose_name(measurement):
-    return Daily_Data_Point.MEASUREMENTS_VERBOSE_NAMES[measurement]
+    try:
+        return Daily_Data_Point.MEASUREMENTS_VERBOSE_NAMES[measurement]
+    except KeyError ,e :
+        logger.error(e)
+        pass
 
 
 def get_measurement_unit(measurement):
@@ -108,7 +112,6 @@ def get_status_card_items(site):
         # Getting all the status card fields
         status_card_fields = Status_Card._meta.get_fields()
         status_card_items = []
-  
         # Getting the status card field values, Constructing the arr of the status card items of the site
         for field in status_card_fields:
             status_card_items.append(getattr(status_card, field.name))
@@ -130,3 +133,24 @@ def get_status_card_items(site):
     except Exception  ,e :
         looger.error(e)
         pass
+
+def get_site_measurements(site):
+
+    site_measurements = site.site_measurements
+    # getting all measurement fields
+    site_measurements_fields = site_measurements._meta.get_fields()
+    site_measurements_items = []
+    for field in site_measurements_fields:
+        site_measurements_items.append(getattr(site_measurements, field.name))
+
+    #removing non char items
+    for i,item in enumerate(site_measurements_items):
+        if type(item) != unicode:
+            site_measurements_items.pop(i)
+
+    #removing int items
+    for i, item in enumerate(site_measurements_items):
+        if type(item) == int or type(item) == long:
+            site_measurements_items.pop(i)
+
+    return site_measurements_items
