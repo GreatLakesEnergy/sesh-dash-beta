@@ -696,29 +696,30 @@ def get_latest_bom_data(request):
     #    logger.debug(e)
     #    pass
 
-    latest_points = get_measurements_latest_point(site, measurement_list)
+    if measurement_list != 0:
+        latest_points = get_measurements_latest_point(site, measurement_list)
 
-    latest_point_data = []
+        latest_point_data = []
 
-    # If the points exist and the points returned are equal to the items in measurement list
-    for measurement, point in latest_points.items():
-        latest_point_data.append({"item":get_measurement_verbose_name(measurement),
-                                  "value":str(round(latest_points[measurement]['value'], 2))
-                                          + get_measurement_unit(measurement)
-                         })
+        # If the points exist and the points returned are equal to the items in measurement list
+        for measurement, point in latest_points.items():
+            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                      "value":str(round(latest_points[measurement]['value'], 2))
+                                              + get_measurement_unit(measurement)
+                             })
 
-    if 'last_contact' in measurement_list:
-        # Adding the last contact from the rmc status
-        rmc_latest = RMC_status.objects.filter(site=site).last()
-        if rmc_latest:
-            last_contact = rmc_latest.minutes_last_contact
-            last_contact_seconds = last_contact * 60
-            last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
-            latest_point_data.append({"item":"Last Contact", "value": last_contact})
-        else:
-            logger.debug("No rmc_status points for site ")
+        if 'last_contact' in measurement_list:
+            # Adding the last contact from the rmc status
+            rmc_latest = RMC_status.objects.filter(site=site).last()
+            if rmc_latest:
+                last_contact = rmc_latest.minutes_last_contact
+                last_contact_seconds = last_contact * 60
+                last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
+                latest_point_data.append({"item":"Last Contact", "value": last_contact})
+            else:
+                logger.debug("No rmc_status points for site ")
 
-    return HttpResponse(json.dumps(latest_point_data))
+        return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
 
