@@ -142,12 +142,14 @@ def get_site_measurements(site):
     site_measurements_items = []
     for field in site_measurements_fields:
         site_measurements_items.append(getattr(site_measurements, field.name))
-
+    print "before non char"
+    print site_measurements_items
     #removing non char items
     for i,item in enumerate(site_measurements_items):
         if type(item) != unicode:
             site_measurements_items.pop(i)
-
+    print "after removing non char"
+    print site_measurements_items
     #removing int items
     for i, item in enumerate(site_measurements_items):
         if type(item) == int or type(item) == long:

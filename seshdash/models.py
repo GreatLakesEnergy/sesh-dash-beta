@@ -117,16 +117,16 @@ class Site_Measurements(models.Model):
          ('trans', 'Trans'),
          ('cloud_cover', 'Cloud Cover'),
     )
-    row1 = models.CharField(max_length=30, choices=ROW_CHOICES, default='soc')
-    row2 = models.CharField(max_length=30, choices=ROW_CHOICES, default='battery_voltage')
-    row3 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output_absolute')
-    row4 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_Load_in')
-    row5 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_Load_out')
-    row6 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_Voltage_in')
-    row7 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_Voltage_out')
-    row8 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_input')
-    row9 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output')
-    row10 = models.CharField(max_length=30, choices=ROW_CHOICES, default='cloud_cover')
+    row1 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='soc')
+    row2 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='battery_voltage')
+    row3 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output_absolute')
+    row4 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Load_in')
+    row5 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Load_out')
+    row6 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Voltage_in')
+    row7 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Voltage_out')
+    row8 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_input')
+    row9 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output')
+    row10 = models.CharField(max_length=30, choices=ROW_CHOICES, null= True, default='cloud_cover')
     row11 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
     row12 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
     row13 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
@@ -159,7 +159,7 @@ class Sesh_Site(models.Model):
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
-    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.SET_NULL)
+    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.site_name
