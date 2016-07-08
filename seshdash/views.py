@@ -15,6 +15,7 @@ from django.forms import modelformset_factory, inlineformset_factory, formset_fa
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
+from django.db import OperationalError
 
 #Guardian decorator
 from guardian.decorators import permission_required_or_403
@@ -72,7 +73,6 @@ def index(request,site_id=0):
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-    print "at the top of the function"
     sites =  _get_user_sites(request)
 
     context_dict = {}
@@ -96,11 +96,9 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
-    print "trying to connect to influx"
     #Generate measurements in the time_series_graph
     client=Influx()
     measurements_value=client.get_measurements()
-    print "connected to influx"
     measurements =[]
 
     if measurements_value is not None:
@@ -692,7 +690,11 @@ def get_latest_bom_data(request):
     site = Sesh_Site.objects.filter(id=site_id).first()
 
     # The measurement list contains attributes to be displayed in the status card,
+    #try:
     measurement_list = get_status_card_items(site)
+    #except OperationalError as e:
+    #    logger.debug(e)
+    #    pass
 
     if measurement_list != 0:
         latest_points = get_measurements_latest_point(site, measurement_list)

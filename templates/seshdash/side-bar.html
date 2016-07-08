@@ -4,9 +4,9 @@
             <li><a href="/" class="waves-effect waves-button"><span class="menu-icon glyphicon glyphicon-home"></span><p>Dashboard</p></a></li>
             <li><a href="/historical_data" class="waves-effect waves-button"><i class="fa fa-history fa-f"></i><p>Historical</p></a></li>
             <li class="droplink open active"><a href="#" class="waves-effect waves-button"><span>Sites</span><span class="arrow"></span></a>
-                <ul class="sub-menu">
+                <ul class="sub-menu site-list">
                   {% for site in sites %}
-                    <li><a href="/dash/{{ site.id }}">{{site.site_name}}</a></li>
+                    <li value="{{ site.id }}"><a href="/dash/{{ site.id }}">{{site.site_name}}</a></li>
                   {% endfor %}
                 </ul>
             </li>
