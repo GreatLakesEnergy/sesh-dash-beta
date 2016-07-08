@@ -104,13 +104,11 @@ def index(request,site_id=0):
     for measurement in site_measurements:
         measurement_verbose_name = get_measurement_verbose_name(measurement)
         measurements[measurement] = measurement_verbose_name
-        print measurements
     context_dict['measurements']= measurements
     # user permissions
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
-    print "at the buttom of the function"
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
