@@ -115,7 +115,6 @@ def get_status_card_items(site):
         # Getting the status card field values, Constructing the arr of the status card items of the site
         for field in status_card_fields:
             status_card_items.append(getattr(status_card, field.name))
-
         # removing the non char items from the arr
         for i, item in enumerate(status_card_items):
             if type(item) != unicode:
@@ -142,14 +141,12 @@ def get_site_measurements(site):
     site_measurements_items = []
     for field in site_measurements_fields:
         site_measurements_items.append(getattr(site_measurements, field.name))
-    print "before non char"
-    print site_measurements_items
+
     #removing non char items
     for i,item in enumerate(site_measurements_items):
         if type(item) != unicode:
             site_measurements_items.pop(i)
-    print "after removing non char"
-    print site_measurements_items
+
     #removing int items
     for i, item in enumerate(site_measurements_items):
         if type(item) == int or type(item) == long:

@@ -96,14 +96,22 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
+
     #Generating site measurements for a graph
     current_site = Sesh_Site.objects.filter(id = site_id).first()
+    # getting site measurements
     site_measurements = get_site_measurements(current_site)
 
     measurements ={}
+    # verbose names names for measurements
+    measurements_verbose_name = dict(Site_Measurements.ROW_CHOICES)
     for measurement in site_measurements:
-        measurement_verbose_name = get_measurement_verbose_name(measurement)
-        measurements[measurement] = measurement_verbose_name
+        try:
+            measurement_verbose_name = measurements_verbose_name[measurement]
+            measurements[measurement] = measurement_verbose_name
+        except KeyError, e:
+            logger.error(e)
+            pass
     context_dict['measurements']= measurements
     # user permissions
     user = request.user
