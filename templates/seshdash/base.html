@@ -5,6 +5,7 @@
 
      <!--STYLE -->
      {% load static %}
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <script src='{% static 'jquery/dist/jquery.min.js' %}'></script>
 
      <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
@@ -13,7 +14,7 @@
      <link href='{% static 'bootstrap/dist/css/bootstrap.min.css' %}' rel='stylesheet'>
      <link href='{% static 'font-awesome/css/font-awesome.min.css' %}' rel='stylesheet'>
      <link href='{% static 'Waves/dist/waves.min.css' %}' rel='stylesheet'>
-     <link href='{% static 'switchery/dist/switchery.min.css' %}' rel='stylesheet'>
+     <link href='{% static 'switchery/switchery.css' %}' rel='stylesheet'>
      <link href='{% static 'simple-line-icons/css/simple-line-icons.css' %}' rel='stylesheet'>
      <link href='{% static 'offcanvasmenueffects/css/menu_cornerbox.css' %}' rel='stylesheet'>
      <link href='{% static '3d-bold-navigation/css/style.css' %}' rel='stylesheet'>
@@ -52,8 +53,16 @@
          {% endblock %}
        </div>
        <div class="main-content">
+         {% block main-content%}
+           <div class="page-inner">
              {% block main %}
              {% endblock %}
+
+             {% block footer %}
+             {% include "seshdash/footer.html" %}
+             {% endblock %}
+           </div>
+           {% endblock %}
        </div>
        {% block content %}
        {% endblock %}
@@ -67,6 +76,9 @@
 
 
       <!-- Script Section -->
+      <!--Modern Scripts -->
+      <script src='{% static 'sesh-ui/js/modern/modern.js' %}'></script>
+
       <script src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
       <script src='{% static 'PACE/pace.min.js' %}'></script>
       <script src='{% static 'blockUI/jquery.blockUI.js' %}'></script>
@@ -88,9 +100,8 @@
       <script src='{% static 'react/react.min.js' %}'></script>
       <script src='{% static 'react/react-dom.min.js' %}'></script>
       <!-- high charts -->
-      <script src='{% static  'highcharts/highcharts.js' %}'  > </script>
-      <!--Modern Scripts -->
-      <script src='{% static 'sesh-ui/js/modern/modern.min.js' %}'></script>
+      <script src='{% static 'highcharts/highcharts.js' %}'  > </script>
+
       <!-- Maps -->
       <script src='{% static 'mapbox.js/mapbox.js' %}'></script>
       <script src='{% static 'd3/d3.min.js' %}'></script>
@@ -104,15 +115,14 @@
         <script src='{% static 'Flot/jquery.flot.time.js' %}'></script>
         <script src='{% static 'Flot/jquery.flot.symbol.js' %}'></script>
         <script src='{% static 'Flot/jquery.flot.resize.js' %}'></script>
+        <!--Modern Script -->
         <script src='{% static 'sesh-ui/js/modern/pages/dashboard.js' %}'></script>
+        <!-- Graphs -->
+        <script src='{% static 'sesh-ui/js/graphs.js' %}'> </script>
         <!-- Sesh React -->
         <script src='{% static  'sesh-ui/js/sesh_react.js' %}' type="text/babel"></script>
-        <!-- graph js -->
-        <script src ='{%static  'sesh-ui/js/graphs.js' %}' > </script>
-
-        <!-- Maps configuration -->
-        <script src='{% static  'sesh-ui/js/maps.js' %}'  > </script>
       {% endblock %}
+
       <!-- sesh javascript -->
       <script src='{% static  'sesh-ui/js/sesh_dashboard.js' %}'  ></script>
 

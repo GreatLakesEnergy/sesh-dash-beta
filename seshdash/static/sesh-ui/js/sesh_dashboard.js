@@ -1,10 +1,6 @@
 
 var csrftoken = getCookie('csrftoken');
 
-$(document).ready(function(){
-alert('Frank vipi');
-});
-
 /* Auto compete on search*/
 var i,
     textid,
@@ -152,3 +148,8 @@ $(".button-search").click(function(){
           });
       });
 }
+ $(".site-list > li").each(function(){
+   if ($(this).val() == active_site_id){
+     $(this).addClass("active");
+   }
+ });

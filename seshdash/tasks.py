@@ -561,10 +561,10 @@ def rmc_status_update():
     """
     Calculate BoM_Data_Point related RMC Status. RMC based status are calculated by kraken
     """
+    logger.debug("Getting rmc status")
     sites = Sesh_Site.objects.all()
     for site in sites:
         # TODO get latest DP from influx
-        #latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
         latest_dp = get_latest_point_site(site,'status')
         logger.debug("getting status from site %s with dp %s"%(site,latest_dp))
         if latest_dp:
@@ -575,7 +575,6 @@ def rmc_status_update():
             last_contact_min = last_contact / 60
 
             # Get RMC account
-            rmc = Sesh_RMC_Account.objects.get(site=site)
             rmc_status = RMC_status(site = site,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
