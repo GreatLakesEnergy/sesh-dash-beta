@@ -15,6 +15,7 @@ from django.forms import modelformset_factory, inlineformset_factory, formset_fa
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
+from django.db import OperationalError
 
 
 #Guardian decorator
@@ -73,7 +74,6 @@ def index(request,site_id=0):
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-
     sites =  _get_user_sites(request)
 
     context_dict = {}
@@ -97,11 +97,9 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
-
     #Generate measurements in the time_series_graph
     client=Influx()
     measurements_value=client.get_measurements()
-
     measurements =[]
 
     if measurements_value is not None:
@@ -113,7 +111,7 @@ def index(request,site_id=0):
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
-    print context_dict['permitted']
+    print "at the buttom of the function"
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -705,31 +703,36 @@ def get_latest_bom_data(request):
     site = Sesh_Site.objects.filter(id=site_id).first()
 
     # The measurement list contains attributes to be displayed in the status card,
+    #try:
     measurement_list = get_status_card_items(site)
+    #except OperationalError as e:
+    #    logger.debug(e)
+    #    pass
 
-    latest_points = get_measurements_latest_point(site, measurement_list)
+    if measurement_list != 0:
+        latest_points = get_measurements_latest_point(site, measurement_list)
 
-    latest_point_data = []
+        latest_point_data = []
 
-    # If the points exist and the points returned are equal to the items in measurement list
-    for measurement, point in latest_points.items():
-        latest_point_data.append({"item":get_measurement_verbose_name(measurement),
-                                  "value":str(round(latest_points[measurement]['value'], 2))
-                                          + get_measurement_unit(measurement)
-                         })
+        # If the points exist and the points returned are equal to the items in measurement list
+        for measurement, point in latest_points.items():
+            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                      "value":str(round(latest_points[measurement]['value'], 2))
+                                              + get_measurement_unit(measurement)
+                             })
 
-    if 'last_contact' in measurement_list:
-        # Adding the last contact from the rmc status
-        rmc_latest = RMC_status.objects.filter(site=site).last()
-        if rmc_latest:
-            last_contact = rmc_latest.minutes_last_contact
-            last_contact_seconds = last_contact * 60
-            last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
-            latest_point_data.append({"item":"Last Contact", "value": last_contact})
-        else:
-            logger.debug("No rmc_status points for site ")
+        if 'last_contact' in measurement_list:
+            # Adding the last contact from the rmc status
+            rmc_latest = RMC_status.objects.filter(site=site).last()
+            if rmc_latest:
+                last_contact = rmc_latest.minutes_last_contact
+                last_contact_seconds = last_contact * 60
+                last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
+                latest_point_data.append({"item":"Last Contact", "value": last_contact})
+            else:
+                logger.debug("No rmc_status points for site ")
 
-    return HttpResponse(json.dumps(latest_point_data))
+        return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
 
@@ -861,6 +864,10 @@ def edit_site(request,site_Id=1):
    context_dict['form_add']= form_add
    context_dict['site_Id']= site_Id
    context_dict['sites']=sites
+   # user permissions
+   user = request.user
+   permission = get_permissions(user)
+   context_dict['permitted'] = permission
    return render(request,'seshdash/settings.html', context_dict)
 
 # function of adding new site
