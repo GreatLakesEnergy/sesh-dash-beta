@@ -111,7 +111,6 @@ def index(request,site_id=0):
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
-    print "at the buttom of the function"
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -157,19 +156,12 @@ def import_site(request):
     """
     Initial login to gather VRM and Account information
     """
-    print "In the import site "
     context_dict = {}
     template = 'seshdash/initial-login.html'
     if request.method == "POST":
-            print "The request is post"
-            print "If this is a post, we need to get the form to display"
             #check if post is VRM Account form
             #print "got post"
-            #print request.POST.keys()
-            print "This is the form type: ",
-            print request.POST.get('form_type', 'There is no form type')
             if request.POST.get('form_type',None) == 'vrm':
-                print "The form type is a vrm"
                 form = VRMForm(request.POST)
                 if not form.is_valid():
                     context_dict['VRM_form'] = form
@@ -215,24 +207,19 @@ def import_site(request):
                     context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data,
                                                                     instance=VRM)
 
-                    print "The site forms are: ",
-                    print len(context_dict['site_forms'])
             else:
                 # if RMC site
                 # Handle RMC account info
                 #print "rmc request recieved is rmc request getting form ready"
-                print "This is an rmc "
                 site_forms_factory = modelformset_factory( Sesh_Site,
                                                            form=SiteRMCForm,
                                                            extra=1,
                                                            can_delete=False
                                                            )
                 form = site_forms_factory()
-                print form.as_p()
                 context_dict['site_forms'] = form
                 context_dict['form_type'] = 'rmc'
     else:
-        print "The request is not a post request "
         context_dict['VRM_form'] = _create_vrm_login_form()
 
     return render(request,template,context_dict)
@@ -551,7 +538,6 @@ def get_high_chart_data(user,site_id,sites):
      site = Sesh_Site.objects.get(pk=site_id)
      context_high_data = {}
      if not user.has_perm('seshdash.view_Sesh_Site',site):
-        print "user doesn't have permission to view site %s"%site_id
         #TODO return 403 permission denied
         return context_high_data
 
@@ -593,7 +579,6 @@ def get_high_chart_data(user,site_id,sites):
     # initiating the context_high_data Object
      context_high_data['high_date']= high_date_data
      context_high_data['high_pv_production']= high_pv_production
-     print (context_high_data['high_pv_production'])
      return context_high_data
 
 def display_alerts(site_id):
