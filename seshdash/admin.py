@@ -8,6 +8,7 @@ from .models import *
 class Sesh_SiteAdmin(GuardedModelAdmin):
     list_display = ('site_name','location_city','installed_kw','battery_bank_capacity','comission_date')
     list_filter = ('installed_kw','location_city', 'installed_kw')
+    exclude = ('status_card',)
 
 @admin.register(BoM_Data_Point)
 class BoM_Data_PointAdmin(GuardedModelAdmin):

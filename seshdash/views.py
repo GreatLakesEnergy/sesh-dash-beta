@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 from django import forms
 from django.db import OperationalError
 
+
 #Guardian decorator
 from guardian.decorators import permission_required_or_403
 
@@ -160,7 +161,6 @@ def import_site(request):
     if request.method == "POST":
             #check if post is VRM Account form
             #print "got post"
-            #print request.POST.keys()
             if request.POST.get('form_type',None) == 'vrm':
                 form = VRMForm(request.POST)
                 if not form.is_valid():
@@ -206,6 +206,7 @@ def import_site(request):
 
                     context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data,
                                                                     instance=VRM)
+
             else:
                 # if RMC site
                 # Handle RMC account info
@@ -537,7 +538,6 @@ def get_high_chart_data(user,site_id,sites):
      site = Sesh_Site.objects.get(pk=site_id)
      context_high_data = {}
      if not user.has_perm('seshdash.view_Sesh_Site',site):
-        print "user doesn't have permission to view site %s"%site_id
         #TODO return 403 permission denied
         return context_high_data
 
@@ -579,7 +579,6 @@ def get_high_chart_data(user,site_id,sites):
     # initiating the context_high_data Object
      context_high_data['high_date']= high_date_data
      context_high_data['high_pv_production']= high_pv_production
-     print (context_high_data['high_pv_production'])
      return context_high_data
 
 def display_alerts(site_id):
