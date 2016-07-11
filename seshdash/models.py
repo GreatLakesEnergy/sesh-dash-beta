@@ -96,7 +96,45 @@ class Status_Card(models.Model):
      def __str__(self):
          return "For site: " + self.sesh_site.site_name
 
+class Site_Measurements(models.Model):
+    """
+    Contains measurements to be displayed in graphs dropdowns
+    """
+    ROW_CHOICES = (
+         ('AC_Load_in', 'AC Load in'),
+         ('AC_Load_out', 'AC Load out'),
+         ('AC_Voltage_in', 'AC Voltage in'),
+         ('AC_Voltage_out', 'AC Voltage out'),
+         ('AC_input', 'AC input'),
+         ('AC_output', 'AC output' ),
+         ('AC_output_absolute', 'AC output absolute'),
+         ('battery_voltage', 'Battery Voltage'),
+         ('genset_state', 'Genset state'),
+         ('main_on', 'Main on'),
+         ('pv_production', 'PV production'),
+         ('relay_state', 'Relay state'),
+         ('soc', 'State of Charge'),
+         ('trans', 'Trans'),
+         ('cloud_cover', 'Cloud Cover'),
+    )
+    row1 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='soc')
+    row2 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='battery_voltage')
+    row3 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output_absolute')
+    row4 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Load_in')
+    row5 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Load_out')
+    row6 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Voltage_in')
+    row7 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Voltage_out')
+    row8 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_input')
+    row9 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output')
+    row10 = models.CharField(max_length=30, choices=ROW_CHOICES, null= True, default='cloud_cover')
+    row11 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
+    row12 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
+    row13 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
+    row14 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
+    row15 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
 
+    def __str__(self):
+        return self.sesh_site.site_name
 
 class Sesh_Site(models.Model):
     """
@@ -121,6 +159,7 @@ class Sesh_Site(models.Model):
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
+    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.site_name
@@ -130,8 +169,10 @@ class Sesh_Site(models.Model):
         # Creating a defaults status card
         if self.pk is None:
             status_card = Status_Card.objects.create()
+            site_measurements = Site_Measurements.objects.create()
             super(Sesh_Site, self).save(*args, **kwargs)
             self.status_card = status_card
+            self.site_measurements = site_measurements
             self.save()
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
@@ -139,6 +180,8 @@ class Sesh_Site(models.Model):
     def delete(self, *args, **kwargs):
         # Delete the site and its associated status card
         status_card = self.status_card
+        site_measurements = self.site_measurements
+        site_measurements.delete()
         status_card.delete()
         super(Sesh_Site, self).delete(*args, **kwargs)
 
@@ -404,7 +447,8 @@ class Daily_Data_Point(models.Model):
         "daily_no_of_alerts": "Daily Number of Alerts",
         "daily_power_cons_pv": "Daily Power Cons Pv",
         "daily_power_consumption_total": "Daily Power Consumption Total",
-        "daily_pv_yield": "Daily Pv Yield"
+        "daily_pv_yield": "Daily Pv Yield",
+        "cloud_cover": "Cloud Cover",
     }
 
 

@@ -5,6 +5,8 @@ function daily_data_points_graph() {
 
    drop_choice1 = $("#drop1").val();
    drop_choice2 = $("#drop2").val();
+   measurement1 = $("#drop1 option:selected").html();
+   measurement2 = $("#drop2 option:selected").html();
    time_value = $('#time_dropdown').val();
    var title = $('#time_dropdown').find(":selected").text();
 
@@ -34,7 +36,7 @@ function daily_data_points_graph() {
             zoomType: 'xy'
         },
         title: {
-            text: title + " " + drop_choice1 + ' with ' + drop_choice2
+            text: title + " " + measurement1 + ' with ' + measurement2
         },
         xAxis: [{
             crosshair: true,
@@ -48,14 +50,14 @@ function daily_data_points_graph() {
                 }
             },
             title: {
-                text: drop_choice2,
+                text: measurement2,
                 style: {
                     color: Highcharts.getOptions().colors[1]
                 }
             }
         }, { // Secondary yAxis
             title: {
-                text: drop_choice1,
+                text: measurement1,
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -82,7 +84,7 @@ function daily_data_points_graph() {
         },
         series: [{
 
-           name: drop_choice2,
+           name: measurement2,
            type: 'column',
            data: dropdown2_values,
            tooltip: {
@@ -91,7 +93,7 @@ function daily_data_points_graph() {
 
         }, {
 
-            name: drop_choice1 ,
+            name: measurement1 ,
             type: 'spline',
             yAxis: 1,
             data: dropdown1_values,
