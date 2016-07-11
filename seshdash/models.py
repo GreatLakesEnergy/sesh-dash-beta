@@ -139,7 +139,6 @@ class Sesh_Site(models.Model):
     def delete(self, *args, **kwargs):
         # Delete the site and its associated status card
         status_card = self.status_card
-        print "Deleting associated status card"
         status_card.delete()
         super(Sesh_Site, self).delete(*args, **kwargs)
 
