@@ -6,7 +6,7 @@
             <li class="droplink open active"><a href="#" class="waves-effect waves-button"><span>Sites</span><span class="arrow"></span></a>
                 <ul class="sub-menu site-list">
                   {% for site in sites %}
-                    <li value="{{ site.id }}"><a href="/dash/{{ site.id }}">{{site.site_name}}</a></li>
+                    <li value="{{ site.id }}"><a href="/dash/{{ site.id }}">{{site.site_name}}</a> <span class="fi-battery-empty"></span></li>
                   {% endfor %}
                 </ul>
             </li>
