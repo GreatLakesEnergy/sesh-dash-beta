@@ -1,8 +1,10 @@
 # Import django errors
 from django.db.utils import OperationalError
-
 # Import all the neccessary models
 from seshdash.models import *
+from seshdash.data.db.influx import get_latest_point_site
+#import wearher data function
+from seshdash.api.forecast import ForecastAPI
 
 import logging
 
@@ -134,7 +136,9 @@ def get_status_card_items(site):
         pass
 
 def get_site_measurements(site):
-
+    """
+    return measurements of a specific site
+    """
     site_measurements = site.site_measurements
     # getting all measurement fields
     site_measurements_fields = site_measurements._meta.get_fields()
@@ -153,3 +157,63 @@ def get_site_measurements(site):
             site_measurements_items.pop(i)
 
     return site_measurements_items
+
+def get_quick_status(sites):
+    """
+    returns battery state and future forecast
+    """
+    key = "8eefab4d187a39b993ca9c875fef6159"
+
+    #battery rules limits
+    battery_limit = Status_Rule.battery_rules.keys()
+    battery_limit.sort()
+
+    #weather rules limits
+    weather_limit = Status_Rule.weather_rules.keys()
+    weather_limit.sort()
+
+    results = []
+
+    #getting latest_points
+    for site in sites:
+        site_dict = {}
+
+        site_dict['site'] = site
+        #site coordinates
+        lat = site.position.latitude
+        lng = site.position.longitude
+
+        #forecast instance
+        instance = ForecastAPI(key,lat,lng)
+
+        weather_data = instance.get_7_day_cloudCover()
+        weather_data_values = weather_data.values()
+        average_weather_data = sum(weather_data_values)/len(weather_data_values)
+
+        battery_latest_dict = get_latest_point_site(site,'battery_voltage')
+        battery_latest_point = int(battery_latest_dict['value'])
+
+        #finding battery_voltage color
+        if battery_latest_point in range(0,battery_limit[0]):
+            color = Status_Rule.battery_rules[battery_limit[0]]
+            site_dict['battery']= color
+
+        elif battery_latest_point in range(battery_limit[0],battery_limit[1]):
+            color = Status_Rule.battery_rules[battery_limit[1]]
+            site_dict['battery'] = color
+
+        else:
+            color = Status_Rule.battery_rules[battery_limit[2]]
+            site_dict['battery'] = color
+
+        #finding weather_data color
+        if average_weather_data < weather_limit[0]:
+            color = Status_Rule.weather_rules[weather_limit[0]]
+            site_dict['weather'] = color
+        else:
+            color = Status_Rule.weather_rules[weather_limit[1]]
+            site_dict['weather'] = color
+        #appending to results list
+        results.append(site_dict)
+
+    return results

@@ -280,3 +280,6 @@ tr.modal-toggle {
 #switcher{
   display: none;
 }
+span.quick-status {
+    padding: inherit;
+}
