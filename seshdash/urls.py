@@ -26,6 +26,8 @@ urlpatterns = [
             url(r'^graphs', views.graphs),
             url(r'^edit_site$',views.edit_site, name='edit_site'),
             url(r'^edit_site/([0-9]{1,5})$',views.edit_site),
-            url(r'^add_site',views.add_site, name='add_site'),
+            url(r'^add_site$', views.site_add_edit, name='site_add_edit'),
+            url(r'^add_rmc_site',views.add_rmc_site, name='add_rmc_site'),
+            url(r'^add_rmc_account', views.add_rmc_account, name='add_rmc_account'),
             ]
 

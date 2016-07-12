@@ -117,6 +117,7 @@ class Site_Measurements(models.Model):
          ('trans', 'Trans'),
          ('cloud_cover', 'Cloud Cover'),
     )
+
     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='soc')
     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='battery_voltage')
     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output_absolute')

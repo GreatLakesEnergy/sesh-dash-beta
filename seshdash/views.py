@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
+from django.shortcuts import redirect
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
@@ -851,33 +852,58 @@ def edit_site(request,site_Id=1):
    context_dict['permitted'] = permission
    return render(request,'seshdash/settings.html', context_dict)
 
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def site_add_edit(request):
+    """
+    This views renders the page for editing and
+    adding new rmc sites
+    """
+    context_dict = {}
+    sites = _get_user_sites(request)
+    context_dict['sites'] = sites
+    context_dict['VRM_form'] = _create_vrm_login_form()
+    return render(request, 'seshdash/settings.html', context_dict)
+    
+
+
 # function of adding new site
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
-def add_site(request):
+def add_rmc_site(request):
+    """
+    This adds an rmc site to 
+    the database
+    """
     context_dict = {}
-    #checking permissions
-    user = request.user
-    permission = get_permissions(user)
 
-    #fetching list of sites for the user
-    sites =  _get_user_sites(request)
-    # on ajax
     if request.method == 'POST':
-
         form = SiteForm(request.POST)
 
         if form.is_valid():
             form = form.save()
             form = SiteForm()
+            return redirect('add_rmc_account')
+        else:
+            return HttpResponse(form.errors)
 
-    #on page load
     else:
         form = SiteForm()
 
-    context_dict['permitted'] = permission
-    context_dict['sites'] = sites
-    context_dict['form_add'] = form
+    context_dict['form'] = form
+    return render(request, 'seshdash/add_rmc_site.html', context_dict)
 
 
-    return render(request, 'seshdash/settings.html', context_dict)
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def add_rmc_account(request):
+    """
+    This view is for adding a new rmc account
+    to the database and associate it with a site
+    """
+    context_dict = {}
+    context_dict['form'] = RMCForm()
+    return render(request, 'seshdash/add_rmc_account.html', context_dict)

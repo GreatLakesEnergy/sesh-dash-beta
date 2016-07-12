@@ -61,20 +61,27 @@
                   </div>
 
                   <div id="Add_site" class="tab-pane fade">
-                                 <form action="/add_site" method="post" novalidate>
                                        <h3> Add a new Sesh Site</h3>
 
-                                        <table class="table table-striped table-bordered table-hover">
 
-                                               {% csrf_token %}
+                                            <div class="rmc-vrm row">
 
-                                               {{ form_add.as_table }}
+                                              <div class="col-md-6">
+                                                   {% include 'seshdash/rmc-card.html' %}
+                                              </div>
 
-                                               {{ form_add.media }}
 
-                                        </table>
+                                              <div class="col-md-6">
+                                                   {% include 'seshdash/vrm-card.html' %}
+                                              </div>
 
+                                            </div>
+
+
+
+                                        <!--
                                         <button type="submit" class="btn btn-default">SAVE </button>
+                                        -->
                                 </form>
                   </div>
 

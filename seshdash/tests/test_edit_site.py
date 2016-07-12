@@ -22,25 +22,13 @@ from datetime import datetime
 from seshdash.utils import alert
 from django.utils import timezone
 
+
 class AddTestCase(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
         self.location = Geoposition(52.5,24.3)
-        self.site = Sesh_Site.objects.create(site_name=u"Test site",
-                                             comission_date=timezone.datetime(2015, 12, 11, 22, 0),
-                                             location_city=u"kigali",
-                                             location_country=u"rwanda",
-                                             vrm_account = self.VRM,
-                                             installed_kw=123.0,
-                                             position=self.location,
-                                             system_voltage=24,
-                                             number_of_panels=12,
-                                             vrm_site_id=213,
-                                             battery_bank_capacity=12321,
-                                             has_genset=True,
-                                             has_grid=True)
 
         self.data_point = Data_Point.objects.create(site=self.site,
                                                     soc=10,
