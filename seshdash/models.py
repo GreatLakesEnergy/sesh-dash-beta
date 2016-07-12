@@ -542,3 +542,58 @@ class Site_Weather_Data(models.Model):
     class Meta:
         verbose_name = 'Weather Data'
         unique_together = ('site','date')
+
+
+class Sensor_EmonTx(models.Model):
+     """ 		
+     Table representative for the emon tx
+     """
+     site = models.ForeignKey(Sesh_Site)
+     power1 = models.CharField(max_length=40)
+     power2 = models.CharField(max_length=40)
+     power3 = models.CharField(max_length=40)
+     power4 = models.CharField(max_length=40)
+     vrms = models.CharField(max_length=40)
+     temp1 = models.CharField(max_length=40)
+     temp2 = models.CharField(max_length=40)
+     temp3 = models.CharField(max_length=40)
+     temp4 = models.CharField(max_length=40)
+     temp5 = models.CharField(max_length=40)
+     temp6 = models.CharField(max_length=40)
+     pulse = models.CharField(max_length=40)
+
+     def __str__(self):
+         return "Emon tx sensor for " + self.site.site_name
+
+
+
+class Sensor_EmonTh(models.Model):
+     """
+     Table Representive structure fo the emon th
+     """
+     site = models.ForeignKey(Sesh_Site)
+     temperature = models.CharField(max_length=40)
+     external_temperature = models.CharField(max_length=40)
+     humidity = models.CharField(max_length=40)
+     battery = models.CharField(max_length=40)
+
+     def __str__(self):
+         return "Emon th sensor for " +  self.site.site_name
+
+
+
+class Sensor_BMV(models.Model):
+    """
+    Mapping for the bmv
+    """
+    site = models.ForeignKey(Sesh_Site)
+    soc = models.CharField(max_length=40)
+    ce = models.CharField(max_length=40)
+    ttg = models.CharField(max_length=40)
+    v = models.CharField(max_length=40)
+    i = models.CharField(max_length=40)
+    relay = models.CharField(max_length=40)
+    alarm = models.CharField(max_length=40)
+
+    def __str__(self):
+        return "BMV sensor for " + self.site.site_name

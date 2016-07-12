@@ -886,8 +886,6 @@ def add_rmc_site(request):
             form = form.save()
             form = SiteForm()
             return redirect('add_rmc_account')
-        else:
-            return HttpResponse(form.errors)
 
     else:
         form = SiteForm()
