@@ -280,3 +280,10 @@ tr.modal-toggle {
 #switcher{
   display: none;
 }
+
+
+.remove-sensor {
+  color: #C75555;
+  top: 7px;
+  cursor: pointer;
+}

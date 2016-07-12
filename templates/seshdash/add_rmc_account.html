@@ -14,9 +14,30 @@
         <!-- The panel body -->
         <div class="panel-body">
 
-            <form class="" method="post" action="{% url 'add_rmc_site' %}">
+            <form class="" method="post" action="{% url 'add_rmc_account' site_id %}">
                 {% csrf_token %}
                 {{form|bootstrap}}
+
+                <div class="sensor-list-container">
+                    
+                    <div class="row">
+
+                        <div class="form-group sensor-container col-xs-11">
+                             <select class="sensor form-control" name="sensor">
+                                {% for sensor in sensors_list %}
+                                    <option name="{{sensor}}">{{sensor}}</option>
+                                {% endfor %}}
+                            </select>
+                        </div>
+                      
+                        <div class="col-xs-1">
+                            <span class="glyphicon glyphicon-remove remove-sensor" ></span>
+                        </div>
+
+                    </div>
+
+                </div>
+                <a class="add-another-sensor" href="#">Add another sensor</a><br><br>
 
                 <input type="submit" class="btn btn-primary" value="Create RMC Account">
             </form>

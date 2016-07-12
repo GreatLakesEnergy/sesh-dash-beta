@@ -152,4 +152,27 @@ $(".button-search").click(function(){
   if ($(this).val() == active_site_id){
       $(this).addClass("active");
    }
+
  });
+
+
+// Handling the sensor adding on create rmc site-list
+var sensorContainers = $('.sensor-container'),
+    firstContainer = sensorContainers.first(),
+    sensorListContainer = $('.sensor-list-container');
+    addSensor = $('.add-another-sensor'),
+    removeSensor = $('.remove-sensor');
+
+
+sensorHTMLStructure = firstContainer.parent().parent().html();
+
+addSensor.click(function(){
+  sensorListContainer.append(sensorHTMLStructure)
+  removeSensor = $('.remove-sensor');
+
+  removeSensor.click(function(){
+    console.log("Clicked");
+    $(this).parent().parent().remove();
+  })
+
+});

@@ -544,23 +544,30 @@ class Site_Weather_Data(models.Model):
         unique_together = ('site','date')
 
 
+
+SENSORS_LIST = {
+    'Emon Tx',
+    'Emon Th',
+    'BMV'
+}
+
 class Sensor_EmonTx(models.Model):
      """ 		
      Table representative for the emon tx
      """
      site = models.ForeignKey(Sesh_Site)
-     power1 = models.CharField(max_length=40)
-     power2 = models.CharField(max_length=40)
-     power3 = models.CharField(max_length=40)
-     power4 = models.CharField(max_length=40)
-     vrms = models.CharField(max_length=40)
-     temp1 = models.CharField(max_length=40)
-     temp2 = models.CharField(max_length=40)
-     temp3 = models.CharField(max_length=40)
-     temp4 = models.CharField(max_length=40)
-     temp5 = models.CharField(max_length=40)
-     temp6 = models.CharField(max_length=40)
-     pulse = models.CharField(max_length=40)
+     power1 = models.CharField(max_length=40, default="ac_power1")
+     power2 = models.CharField(max_length=40, default="pv_production")
+     power3 = models.CharField(max_length=40, default="consumption")
+     power4 = models.CharField(max_length=40, default="grid_in")
+     vrms = models.CharField(max_length=40, default="AC_Voltage_out")
+     temp1 = models.CharField(max_length=40, blank=True, null=True)
+     temp2 = models.CharField(max_length=40, blank=True, null=True)
+     temp3 = models.CharField(max_length=40, blank=True, null=True)
+     temp4 = models.CharField(max_length=40, blank=True, null=True)
+     temp5 = models.CharField(max_length=40, blank=True, null=True)
+     temp6 = models.CharField(max_length=40, blank=True, null=True)
+     pulse = models.CharField(max_length=40, blank=True, null=True)
 
      def __str__(self):
          return "Emon tx sensor for " + self.site.site_name
@@ -572,9 +579,9 @@ class Sensor_EmonTh(models.Model):
      Table Representive structure fo the emon th
      """
      site = models.ForeignKey(Sesh_Site)
-     temperature = models.CharField(max_length=40)
-     external_temperature = models.CharField(max_length=40)
-     humidity = models.CharField(max_length=40)
+     temperature = models.CharField(max_length=40, default="soc")
+     external_temperature = models.CharField(max_length=40, default="battery_voltage")
+     humidity = models.CharField(max_length=40, default="battery_load")
      battery = models.CharField(max_length=40)
 
      def __str__(self):
@@ -587,13 +594,13 @@ class Sensor_BMV(models.Model):
     Mapping for the bmv
     """
     site = models.ForeignKey(Sesh_Site)
-    soc = models.CharField(max_length=40)
-    ce = models.CharField(max_length=40)
-    ttg = models.CharField(max_length=40)
-    v = models.CharField(max_length=40)
-    i = models.CharField(max_length=40)
-    relay = models.CharField(max_length=40)
-    alarm = models.CharField(max_length=40)
+    soc = models.CharField(max_length=40, default="temp_fridge")
+    ce = models.CharField(max_length=40, default="temp_ambient")
+    ttg = models.CharField(max_length=40, default="humidity")
+    v = models.CharField(max_length=40, default="battery_voltage")
+    i = models.CharField(max_length=40, default="tempreature")
+    relay = models.CharField(max_length=40, null=True, blank=True)
+    alarm = models.CharField(max_length=40, null=True, blank=True)
 
     def __str__(self):
         return "BMV sensor for " + self.site.site_name

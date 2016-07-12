@@ -5,7 +5,7 @@ from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.shortcuts import redirect
@@ -37,6 +37,9 @@ from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, g
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements
+
+from seshdash.models import SENSORS_LIST
+
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -884,8 +887,7 @@ def add_rmc_site(request):
 
         if form.is_valid():
             form = form.save()
-            form = SiteForm()
-            return redirect('add_rmc_account')
+            return HttpResponseRedirect(reverse('add_rmc_account', args=[form.id]))
 
     else:
         form = SiteForm()
@@ -897,11 +899,24 @@ def add_rmc_site(request):
 
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
-def add_rmc_account(request):
+def add_rmc_account(request, site_id):
     """
     This view is for adding a new rmc account
     to the database and associate it with a site
     """
     context_dict = {}
-    context_dict['form'] = RMCForm()
+    form = RMCForm()
+    print "The request is: ",
+    print request.POST
+
+    if request.method == 'POST':
+        form = RMCForm(request.POST)
+        
+        if form.is_valid():
+            return HttpResponse("The form is valid")
+        
+        
+    context_dict['form'] = form
+    context_dict['site_id'] = site_id
+    context_dict['sensors_list'] = SENSORS_LIST
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
