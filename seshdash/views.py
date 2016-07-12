@@ -112,7 +112,7 @@ def index(request,site_id=0):
     context_dict['measurements']= measurements
 
     #sites witth weather and battery status
-    sites_stats = get_quick_status(user_sites)
+    sites_stats = get_quick_status(sites)
     context_dict['sites_stats'] = sites_stats
 
     # user permissions
@@ -759,6 +759,7 @@ def historical_data(request):
         context_dict = {}
 
         #sites witth weather and battery status
+        user_sites =  _get_user_sites(request)
         sites_stats = get_quick_status(user_sites)
         context_dict['sites_stats'] = sites_stats
 
