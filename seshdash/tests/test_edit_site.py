@@ -30,6 +30,19 @@ class AddTestCase(TestCase):
 
         self.location = Geoposition(52.5,24.3)
 
+        self.site = Sesh_Site.objects.create(
+                        site_name='test',
+                        comission_date=timezone.now(),
+                        location_city='Kigali',
+                        location_country='Rwanda',
+                        position=Geoposition(12,1),
+                        installed_kw=25,
+                        system_voltage=45,
+                        number_of_panels=45,
+                        battery_bank_capacity=450,
+                   )
+                        
+
         self.data_point = Data_Point.objects.create(site=self.site,
                                                     soc=10,
                                                     battery_voltage=20,
