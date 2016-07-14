@@ -29,5 +29,6 @@ urlpatterns = [
             url(r'^add_site$', views.site_add_edit, name='site_add_edit'),
             url(r'^add_rmc_site$',views.add_rmc_site, name='add_rmc_site'),
             url(r'^add_rmc_account/([0-9]{1,5})$', views.add_rmc_account, name='add_rmc_account'),
+            url(r'^get_rmc_config$', views.get_rmc_config, name='get_rmc_config'),
             ]
 

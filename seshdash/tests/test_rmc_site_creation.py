@@ -35,6 +35,13 @@ class TestAddRMCSite(TestCase):
                         battery_bank_capacity=450,
                     )
 
+        self.rmc_account = Sesh_RMC_Account.objects.create(
+                               site=self.site,
+                               api_key='testing',
+                               api_key_numeric='123456789987654321',
+                           )
+
+
     def test_add_rmc_site(self):
         """
         Test Rmc site
@@ -91,4 +98,18 @@ class TestAddRMCSite(TestCase):
         self.assertEqual(Sensor_BMV.objects.all().count(), 1)
         self.assertEqual(Sensor_EmonTx.objects.last().site, self.site)
 
+
+    def test_get_rmc_config(self):
+        """
+        Testing the generation of the rmc config file for a 
+        given file
+        """
+
+        response = self.client.post('/get_rmc_config', {'api_key': 'testing'})
+
+        print "The response is : ",
+        print response
+
+        print "The status code is: ",
+        print response.status_code
 

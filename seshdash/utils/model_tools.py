@@ -169,3 +169,17 @@ def associate_sensors_to_site(sensors_list, site):
             sensor_instance = Sensor_BMV.objects.create(site=site)
 
 
+def get_associated_sensors(site):
+    """
+    Returns the associated sensors for
+    a given site
+    """
+    sensors_list = []
+    
+    for model in [Sensor_EmonTx, Sensor_EmonTh, Sensor_BMV]:
+        sensors = model.objects.filter(site=site)
+
+        for sensor in sensors:
+            sensors_list.append(sensor)
+
+    return sensors_list

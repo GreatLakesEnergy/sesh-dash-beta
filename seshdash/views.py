@@ -37,7 +37,7 @@ from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, g
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
-                                       associate_sensors_to_site
+                                       associate_sensors_to_site, get_associated_sensors
 
 from seshdash.models import SENSORS_LIST
 
@@ -925,3 +925,24 @@ def add_rmc_account(request, site_id):
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
+
+
+
+def get_rmc_config(request):
+    """
+    View to return the config file for a given rmc given
+    an api key for the rmc account
+    """
+    api_key = request.POST.get('api_key', '')
+   
+    rmc_account = Sesh_RMC_Account.objects.filter(api_key=api_key).first()
+    
+    if not rmc_account:
+        logger.debug("There is no rmc account associated with the api key")
+        logger.debug("Make sure you rmc site is configured on the server") 
+        return HttpResponse("Invalid api key or not configured")
+
+    site = rmc_account.site
+    associated_sensors = get_associated_sensors(site)
+ 
+    return HttpResponse("Found api key: " + str(api_key))
