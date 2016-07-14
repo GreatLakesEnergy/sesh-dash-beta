@@ -855,14 +855,21 @@ def edit_site(request,site_Id=1):
        #checking if the form is valid
        if form.is_valid():
            form = form.save()
+
+   # user permissions
+   user = request.user
+   permission = get_permissions(user)
+
+   #fetching list of sites for the user
+   user_sites =  _get_user_sites(request)
+   sites_stats = get_quick_status(user_sites)
+
    context_dict['form_edit']= form
    context_dict['form_add']= form_add
    context_dict['site_Id']= site_Id
    context_dict['sites']=sites
-   # user permissions
-   user = request.user
-   permission = get_permissions(user)
    context_dict['permitted'] = permission
+   context_dict['sites_stats'] = sites_stats
    return render(request,'seshdash/settings.html', context_dict)
 
 # function of adding new site

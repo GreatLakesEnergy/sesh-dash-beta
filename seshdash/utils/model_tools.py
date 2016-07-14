@@ -158,12 +158,10 @@ def get_site_measurements(site):
 
     return site_measurements_items
 
-def get_quick_status(sites):
+def get_quick_status(user_sites):
     """
     returns battery state and future forecast
     """
-    key = "8eefab4d187a39b993ca9c875fef6159"
-
     #battery rules limits
     battery_limit = Status_Rule.battery_rules.keys()
     battery_limit.sort()
@@ -175,7 +173,7 @@ def get_quick_status(sites):
     results = []
 
     #getting latest_points
-    for site in sites:
+    for site in user_sites:
         site_dict = {}
 
         site_dict['site'] = site
@@ -183,14 +181,19 @@ def get_quick_status(sites):
         lat = site.position.latitude
         lng = site.position.longitude
 
-        #forecast instance
-        instance = ForecastAPI(key,lat,lng)
+        #site weather_data
+        site_weather_data = Site_Weather_Data.objects.filter(site= site)
+        cloud_cover = []
+        for weather_data in site_weather_data:
+            cloud_cover.append(weather_data.cloud_cover)
 
-        weather_data = instance.get_7_day_cloudCover()
-        weather_data_values = weather_data.values()
-        average_weather_data = sum(weather_data_values)/len(weather_data_values)
-
-        battery_latest_dict = get_latest_point_site(site,'battery_voltage')
+        #pop out the prevoius days
+        cloud_cover.pop(0)
+        #pop out current
+        cloud_cover.pop(0)
+        
+        average_cloud_cover = sum(cloud_cover)/len(cloud_cover)
+        battery_latest_dict = get_latest_point_site(site,'soc')
         battery_latest_point = int(battery_latest_dict['value'])
 
         #finding battery_voltage color
@@ -207,7 +210,7 @@ def get_quick_status(sites):
             site_dict['battery'] = color
 
         #finding weather_data color
-        if average_weather_data < weather_limit[0]:
+        if average_cloud_cover < weather_limit[0]:
             color = Status_Rule.weather_rules[weather_limit[0]]
             site_dict['weather'] = color
         else:
