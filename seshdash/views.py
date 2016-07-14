@@ -945,4 +945,4 @@ def get_rmc_config(request):
     site = rmc_account.site
     associated_sensors = get_associated_sensors(site)
  
-    return HttpResponse("Found api key: " + str(api_key))
+    return render(request, 'seshdash/rmc_config.conf', {})
