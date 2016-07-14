@@ -32,9 +32,7 @@ def handle_task_failure(**kw):
     logger.error("CELERY TASK FAILURE:%s"%(message))
     if not settings.DEBUG:
         import rollbar
-        trace = sys.exc_info()
-        kw['trace'] = trace
-        rollbar.report_message(message=message,extra_data=kw)
+        rollbar.report_exc_info(message=message,extra_data=kw)
 
 
 def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
