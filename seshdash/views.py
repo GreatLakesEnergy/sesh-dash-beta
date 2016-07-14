@@ -36,7 +36,8 @@ from pprint import pprint
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements
+                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
+                                       associate_sensors_to_site
 
 from seshdash.models import SENSORS_LIST
 
@@ -904,16 +905,20 @@ def add_rmc_account(request, site_id):
     This view is for adding a new rmc account
     to the database and associate it with a site
     """
+    site = Sesh_Site.objects.filter(id=site_id).first()
+
     context_dict = {}
     form = RMCForm()
-    print "The request is: ",
-    print request.POST
 
     if request.method == 'POST':
         form = RMCForm(request.POST)
         
         if form.is_valid():
-            return HttpResponse("The form is valid")
+            rmc_account = form.save(commit=False)
+            rmc_account.site = site  # Assigning the site to the account
+            rmc_account.save()
+            associate_sensors_to_site(request.POST.getlist('sensor'), site)
+            return redirect('index')
         
         
     context_dict['form'] = form
