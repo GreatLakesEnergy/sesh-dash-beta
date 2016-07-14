@@ -5,7 +5,7 @@ from seshdash.models import *
 from seshdash.data.db.influx import get_latest_point_site
 #import wearher data function
 from seshdash.api.forecast import ForecastAPI
-
+from django.utils import timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -169,6 +169,8 @@ def get_quick_status(user_sites):
     #weather rules limits
     weather_limit = Status_Rule.weather_rules.keys()
     weather_limit.sort()
+    # current time
+    now = timezone.now()
 
     results = []
 
@@ -185,13 +187,11 @@ def get_quick_status(user_sites):
         site_weather_data = Site_Weather_Data.objects.filter(site= site)
         cloud_cover = []
         for weather_data in site_weather_data:
-            cloud_cover.append(weather_data.cloud_cover)
-
-        #pop out the prevoius days
-        cloud_cover.pop(0)
-        #pop out current
-        cloud_cover.pop(0)
-        
+            if weather_data.date > now:
+                cloud_cover.append(weather_data.cloud_cover)
+        print "future cloud_cover"
+        print cloud_cover
+        print len(cloud_cover)
         average_cloud_cover = sum(cloud_cover)/len(cloud_cover)
         battery_latest_dict = get_latest_point_site(site,'soc')
         battery_latest_point = int(battery_latest_dict['value'])
