@@ -166,7 +166,7 @@ def get_BOM_data():
         except Exception ,e:
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
-            handle_task_failure(message = message, exception=e)
+            handle_task_failure(message = message, exception=e, name='get_BOM_data' )
             pass
 
 
@@ -233,7 +233,7 @@ def get_historical_BoM(site_pk,start_at):
                     message = "error with creating data point  data exception %s"%(e)
                     logger.debug(message)
                     logger.exception( message )
-                    handle_task_failure(message = message)
+                    handle_task_failure(message = message, name= 'get_Hitorical_bom')
                     pass
 
         logger.debug("saved %s BoM data points"%count)
