@@ -189,10 +189,8 @@ def get_quick_status(user_sites):
         for weather_data in site_weather_data:
             if weather_data.date > now:
                 cloud_cover.append(weather_data.cloud_cover)
-        print "future cloud_cover"
-        print cloud_cover
-        print len(cloud_cover)
-        average_cloud_cover = sum(cloud_cover)/len(cloud_cover)
+    
+        average_cloud_cover = sum(cloud_cover)/float(len(cloud_cover))
         battery_latest_dict = get_latest_point_site(site,'soc')
         battery_latest_point = int(battery_latest_dict['value'])
 
