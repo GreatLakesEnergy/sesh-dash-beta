@@ -105,9 +105,6 @@ class TestAddRMCSite(TestCase):
         given file
         """
 
-        response = self.client.post('/get_rmc_config', {'api_key': 'testing'})
+        response = self.client.get('/get_rmc_config', {'api_key': 'testing'})
 
-
-        print "The status code is: ",
-        print response.status_code
 

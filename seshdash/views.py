@@ -933,7 +933,7 @@ def get_rmc_config(request):
     View to return the config file for a given rmc given
     an api key for the rmc account
     """
-    api_key = request.POST.get('api_key', '')
+    api_key = request.GET.get('api_key', '')
    
     rmc_account = Sesh_RMC_Account.objects.filter(api_key=api_key).first()
     
