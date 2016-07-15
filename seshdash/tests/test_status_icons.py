@@ -1,6 +1,5 @@
 from django.test import TestCase, Client
 from django.test.utils import override_settings
-
 #models
 from seshdash.models import Site_Weather_Data,VRM_Account,Sesh_Site,Status_Rule,BoM_Data_Point
 
@@ -17,10 +16,13 @@ class StatusTestCase(TestCase):
     def setUp(self):
 
         self.db_name = 'test_db'
+        self.Client = Influx()
         try:
             self.Client = Influx(database = self.db_name)
         except:
             self.Client.create_database(self.db_name)
+            self.Client = Influx(database = self.db_name)
+            pass
 
         self.vrm = VRM_Account.objects.create(vrm_user_id='user@user.user',vrm_password='password')
         self.location = Geoposition(-1.5,29.5)
@@ -51,6 +53,7 @@ class StatusTestCase(TestCase):
         User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
 
     def test_status(self):
+
         #insert_point in influx
         self.Client.insert_point(self.site,'soc',20.0)
         sites = Sesh_Site.objects.all()
