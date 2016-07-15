@@ -20,7 +20,9 @@ class StatusTestCase(TestCase):
         try:
             self.Client = Influx(database = self.db_name)
         except:
+
             self.Client.create_database(self.db_name)
+            sleep(1)
             self.Client = Influx(database = self.db_name)
             pass
 
