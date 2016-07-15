@@ -186,11 +186,11 @@ def get_quick_status(user_sites):
         if battery_latest_dict is not None:
             battery_latest_point = battery_latest_dict['value']
             #finding battery_voltage color
-            if battery_latest_point in range(0,battery_limit[0]):
+            if battery_latest_point < battery_limit[0]:
                 color = Status_Rule.battery_rules[battery_limit[0]]
                 site_dict['battery']= color
 
-            elif battery_latest_point in range(battery_limit[0],battery_limit[1]):
+            elif battery_latest_point > battery_limit[0] and battery_latest_point < battery_limit[1]:
                 color = Status_Rule.battery_rules[battery_limit[1]]
                 site_dict['battery'] = color
 
