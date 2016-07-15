@@ -15,7 +15,13 @@ from seshdash.data.db.influx import Influx
 class StatusTestCase(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
-        self.Client = Influx(database='test_db')
+
+        self.db_name = 'test_db'
+        try:
+            self.Client = Influx(database = self.db_name)
+        except:
+            self.Client.create_database(self.db_name)
+
         self.vrm = VRM_Account.objects.create(vrm_user_id='user@user.user',vrm_password='password')
         self.location = Geoposition(-1.5,29.5)
         #create Sesh_Site
@@ -41,32 +47,12 @@ class StatusTestCase(TestCase):
                                                              cloud_cover = 1,
                                                              sunrise = timezone.now(),
                                                              sunset = timezone.now())
-        #creating BoM_Data_Point to send to influx
-        self.bom_data_Points = BoM_Data_Point.objects.create(
-                                                             site = self.site,
-                                                             time = timezone.datetime(2016,12,12,12,12),
-                                                             soc = 15.0,
-                                                             battery_voltage = 10.0,
-                                                             AC_Voltage_in = 30.0,
-                                                             AC_Voltage_out = 30.0,
-                                                             AC_input = 30.0,
-                                                             AC_output = 23.0,
-                                                             AC_output_absolute = 45.0,
-                                                             AC_Load_in = 23.0,
-                                                             AC_Load_out = 45.6,
-                                                             pv_production = 34.5,
-                                                             inverter_state = 'good',
-                                                             main_on = False,
-                                                             genset_state = 0,
-                                                             relay_state = 0,
-                                                             trans = 0)
 
         User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
 
     def test_status(self):
         #insert_point in influx
         self.Client.insert_point(self.site,'soc',20.0)
-
         sites = Sesh_Site.objects.all()
         response = get_quick_status(sites)
         self.assertEqual(response[0]['battery'],'red')

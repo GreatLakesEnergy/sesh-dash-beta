@@ -183,8 +183,6 @@ def get_quick_status(user_sites):
         site_dict['site'] = site
 
         battery_latest_dict = get_latest_point_site(site,'soc')
-        print "for site:" + str(site.site_name)
-        print battery_latest_dict
         if battery_latest_dict is not None:
             battery_latest_point = battery_latest_dict['value']
             #finding battery_voltage color
@@ -218,5 +216,5 @@ def get_quick_status(user_sites):
                 site_dict['weather'] = color
         #appending to results list
         results.append(site_dict)
-    print results
+    
     return results
