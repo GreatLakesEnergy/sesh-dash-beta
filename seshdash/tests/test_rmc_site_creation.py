@@ -35,6 +35,8 @@ class TestAddRMCSite(TestCase):
                         battery_bank_capacity=450,
                     )
 
+        self.emonth = Sensor_EmonTh.objects.create(site=self.site)
+
         self.rmc_account = Sesh_RMC_Account.objects.create(
                                site=self.site,
                                api_key='testing',
@@ -107,4 +109,5 @@ class TestAddRMCSite(TestCase):
 
         response = self.client.get('/get_rmc_config', {'api_key': 'testing'})
 
-
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get('Content-Type'), 'text/plain')

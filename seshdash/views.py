@@ -17,7 +17,7 @@ from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
 from django.db import OperationalError
-
+from django.template.loader import get_template
 
 #Guardian decorator
 from guardian.decorators import permission_required_or_403
@@ -37,7 +37,7 @@ from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, g
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
-                                       associate_sensors_to_site, get_associated_sensors
+                                       associate_sensors_to_site, get_all_associated_sensors, get_config_sensors
 
 from seshdash.models import SENSORS_LIST
 
@@ -933,8 +933,10 @@ def get_rmc_config(request):
     View to return the config file for a given rmc given
     an api key for the rmc account
     """
+    context_dict = {}
     api_key = request.GET.get('api_key', '')
-   
+    context_dict['api_key'] = api_key   
+
     rmc_account = Sesh_RMC_Account.objects.filter(api_key=api_key).first()
     
     if not rmc_account:
@@ -943,6 +945,12 @@ def get_rmc_config(request):
         return HttpResponse("Invalid api key or not configured")
 
     site = rmc_account.site
-    associated_sensors = get_associated_sensors(site)
+    associated_sensors = get_all_associated_sensors(site)
+
+    configuration, bmv_number = get_config_sensors(associated_sensors)
+    context_dict['configuration']  = configuration
+    context_dict['bmv_number'] = bmv_number
  
-    return render(request, 'seshdash/rmc_config.conf', {})
+    conf = get_template('seshdash/configs/rmc_config.conf') 
+
+    return HttpResponse(conf.render(context_dict), content_type='text/plain')

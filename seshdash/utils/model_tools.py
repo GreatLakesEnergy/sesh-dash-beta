@@ -1,3 +1,5 @@
+from django.template.loader import get_template
+
 # Import django errors
 from django.db.utils import OperationalError
 
@@ -169,7 +171,7 @@ def associate_sensors_to_site(sensors_list, site):
             sensor_instance = Sensor_BMV.objects.create(site=site)
 
 
-def get_associated_sensors(site):
+def get_all_associated_sensors(site):
     """
     Returns the associated sensors for
     a given site
@@ -183,3 +185,68 @@ def get_associated_sensors(site):
             sensors_list.append(sensor)
 
     return sensors_list
+
+
+def get_config_sensors(sensors):
+    """
+    Function to generate the configuration for all of the
+    sensors
+    """
+    # Initializing 
+    configuration = ""
+    emonth_range = [5, 6, 7, 8]
+    emonth_index = 0
+    emontx_range = [20, 21, 22]
+    emontx_index = 0
+    bmv_range = [29]
+    bmv_index = 0
+ 
+    bmv_number = None # Setting the bmv number so that it can be used in the initial bmv config, This is because we can only have on bmv per site
+
+
+    for sensor in sensors:
+        
+        if type(sensor) is Sensor_EmonTh: 
+            try:
+                number = emonth_range[emonth_index]
+                t = get_template('seshdash/configs/emon_th.conf')
+                text = t.render({'number': number, 'sensor_number': (emonth_index + 1) })
+                emonth_index = emonth_index + 1
+            except IndexError:
+                print "Emon ths sensors out of range, Improperly configured"
+                logger.debug("Emon ths sensors out of range, Improperly configured")
+                continue
+                
+
+        elif type(sensor) is Sensor_EmonTx:
+            try:
+                number = emontx_range[emontx_index]
+                t = get_template('seshdash/configs/emon_tx.conf')
+                text = t.render({'number': number, 'sensor_number': (emontx_index + 1) })
+                emontx_index = emontx_index + 1 
+            except IndexError:
+                logger.debug("Emon txs sensors out of range, Impoperly configured")
+                continue
+
+        elif type(sensor) is Sensor_BMV:
+            try:
+                number = bmv_range[bmv_index]
+                bmv_number = number
+                t = get_template('seshdash/configs/bmv.conf')
+                text = t.render({'number': number, 'sensor_number': (bmv_index + 1) })
+                bmv_index = bmv_index + 1
+            except IndexError:
+                logger.debug("Bmv txs sensors out of range, Improperly configured")
+                continue
+
+        else:
+            logger.debug("Invalid sensor")
+            raise Exception("Invalid sensor")
+
+        configuration = configuration + text
+
+    return configuration, bmv_number
+
+
+
+         
