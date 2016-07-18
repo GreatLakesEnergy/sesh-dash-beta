@@ -490,6 +490,7 @@ def get_aggregate_daily_data(date=None):
             agg_dict['aggregate_data_grid'] = get_aggregate_data (site, 'AC_input', clause='positive',start=date_to_fetch)[0]
             agg_dict['aggregate_data_grid_data'] = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
 
+            # Calculate outage data
             logger.debug("aggregate date for grid %s "%agg_dict['aggregate_data_grid_data'])
             aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
             aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
@@ -518,6 +519,11 @@ def get_aggregate_daily_data(date=None):
                 pass
             except Exception,e:
                 logger.exception('Unkown error occured aggregatin data')
+                message = "error with creating data point  data exception %s"%(e)
+                logger.debug(message)
+                logger.exception( message )
+                handle_task_failure(message = message, name= 'get_aggregate_daily_data')
+
                 pass
             #send to influx
             send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
