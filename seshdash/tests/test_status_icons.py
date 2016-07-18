@@ -18,12 +18,11 @@ class StatusTestCase(TestCase):
         self.db_name = 'test_db'
         self.Client = Influx()
         try:
-            self.Client = Influx(database = self.db_name)
-        except:
-
             self.Client.create_database(self.db_name)
+        except:
+            self.Client.delete_database(self.db_name)
             sleep(1)
-            self.Client = Influx(database = self.db_name)
+            self.Client.create_database(self.db_name)
             pass
 
         self.vrm = VRM_Account.objects.create(vrm_user_id='user@user.user',vrm_password='password')
