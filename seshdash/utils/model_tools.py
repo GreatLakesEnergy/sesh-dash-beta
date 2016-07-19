@@ -192,15 +192,19 @@ def get_config_sensors(sensors):
     Function to generate the configuration for all of the
     sensors
     """
-    # Initializing 
     configuration = ""
-    emonth_range = [5, 6, 7, 8]
-    emonth_index = 0
-    emontx_range = [20, 21, 22]
-    emontx_index = 0
-    bmv_range = [29]
+
+    # Initializing 
+    EMONTH_RANGE = [5, 6, 7, 8]
+    EMONTX_RANGE = [20, 21, 22]
+    BMV_RANGE = [29]
+
+
+    
     bmv_index = 0
- 
+    emonth_index = 0
+    emontx_index = 0
+
     bmv_number = None # Setting the bmv number so that it can be used in the initial bmv config, This is because we can only have on bmv per site
 
 
@@ -208,24 +212,23 @@ def get_config_sensors(sensors):
         
         if type(sensor) is Sensor_EmonTh: 
             try:
-                number = emonth_range[emonth_index]
+                number = EMONTH_RANGE[emonth_index]
                 t = get_template('seshdash/configs/emon_th.conf')
                 text = t.render({'number': number, 'sensor_number': (emonth_index + 1) })
                 emonth_index = emonth_index + 1
             except IndexError:
-                print "Emon ths sensors out of range, Improperly configured"
-                logger.debug("Emon ths sensors out of range, Improperly configured")
+                logger.error("Emon ths sensors out of range, Improperly configured")
                 continue
                 
 
         elif type(sensor) is Sensor_EmonTx:
             try:
-                number = emontx_range[emontx_index]
+                number = EMONTX_RANGE[emontx_index]
                 t = get_template('seshdash/configs/emon_tx.conf')
                 text = t.render({'number': number, 'sensor_number': (emontx_index + 1) })
                 emontx_index = emontx_index + 1 
             except IndexError:
-                logger.debug("Emon txs sensors out of range, Impoperly configured")
+                logger.error("Emon txs sensors out of range, Impoperly configured")
                 continue
 
         elif type(sensor) is Sensor_BMV:
@@ -236,11 +239,11 @@ def get_config_sensors(sensors):
                 text = t.render({'number': number, 'sensor_number': (bmv_index + 1) })
                 bmv_index = bmv_index + 1
             except IndexError:
-                logger.debug("Bmv txs sensors out of range, Improperly configured")
+                logger.error("Bmv txs sensors out of range, Improperly configured")
                 continue
 
         else:
-            logger.debug("Invalid sensor")
+            logger.error("Invalid sensor")
             raise Exception("Invalid sensor")
 
         configuration = configuration + text
