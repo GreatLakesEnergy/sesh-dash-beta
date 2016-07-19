@@ -143,6 +143,12 @@ def get_site_measurements(site):
     return measurements of a specific site
     """
     site_measurements = site.site_measurements
+
+    #if no measurements
+    if site_measurements is None:
+        new_measurements = Site_Measurements.objects.create()
+        site_measurements = new_measurements
+
     # getting all measurement fields
     site_measurements_fields = site_measurements._meta.get_fields()
     site_measurements_items = []
@@ -216,5 +222,5 @@ def get_quick_status(user_sites):
                 site_dict['weather'] = color
         #appending to results list
         results.append(site_dict)
-    
+
     return results
