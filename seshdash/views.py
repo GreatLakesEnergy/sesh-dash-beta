@@ -842,12 +842,12 @@ def edit_site(request,site_Id=1):
    sites =  _get_user_sites(request)
    form_add = SiteForm()
    site = Sesh_Site.objects.filter(id = site_Id).first()
-
+   '''
    if site.vrm_site_id:
 
        vrm_form = VRMForm()
        context_dict['VRMForm'] = vrm_form
-
+   '''
    #creating an instance to populate a form
    instance = get_object_or_404(Sesh_Site, id=site_Id)
    form = SiteForm(instance=instance)
