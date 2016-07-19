@@ -118,6 +118,27 @@ $(document).ready(function(){
  */
 /* Update Daily Data Point Graph on Click */
 $("#dynamic_graph_button").click(function(){
-
+  Pace.restart();
+  /*
+  paceOptions = {
+  initialRate:0.7,
+  minTime:1750,
+  maxProgressPerFrame:2,
+  ghostTime: 120000
+ }
+*/
+paceOptions = {
+ catchupTime : 10000,
+ maxProgressPerFrame:1,
+ ghostTime: Number.MAX_SAFE_INTEGER,
+   checkInterval :{
+     checkInterval: 50000
+   },
+   eventLag : {
+     minSamples: 5,
+     sampleCount: 30000000,
+     lagThreshold: 0.5
+   }
+}
   daily_data_points_graph()
 });

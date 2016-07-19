@@ -237,7 +237,7 @@ class Influx:
             return list(self._influx_client.query(query,database=db).get_points())
         except Exception, e:
             logger.error("INFLUX error %s" %e)
-       
+
 
     def get_latest_measurement_point_site(self, site, measurement_name, site_id=None, database=None):
          """ Returns the latest point of a site for a measurement """
@@ -262,12 +262,12 @@ class Influx:
         db = self.db
         if database:
            db = database
-    
+
 
         measurement_dict = {}
         for measurement in measurement_list:
             try:
-                # If duplicate points are found they are overidden 
+                # If duplicate points are found they are overidden
                 measurement_dict[measurement] = self.get_latest_measurement_point_site(site, measurement)[0]
             except IndexError, e:
                 logger.debug('No points for %s ' % measurement)
@@ -289,7 +289,7 @@ def get_latest_point_site(site, measurement_name, db=None):
     if len(point) > 0:
         point = point[0]
     else:
-        logger.error('No influx data points for the site')
+        print 'No influx data points for the site'
         return None
 
     return point

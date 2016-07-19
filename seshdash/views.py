@@ -102,8 +102,10 @@ def index(request,site_id=0):
     # Create an object of the get_high_chart_date
     context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
+
     #Generating site measurements for a graph
     current_site = Sesh_Site.objects.filter(id = site_id).first()
+
     #getting site measurements
     site_measurements = get_site_measurements(current_site)
     measurements ={}
@@ -112,10 +114,16 @@ def index(request,site_id=0):
         measurement_verbose_name = get_measurement_verbose_name(measurement)
         measurements[measurement] = measurement_verbose_name
     context_dict['measurements']= measurements
+
+    #sites witth weather and battery status
+    sites_stats = get_quick_status(sites)
+    context_dict['sites_stats'] = sites_stats
+
     # user permissions
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
+
     return render(request,'seshdash/main-dash.html',context_dict)
 
 def _create_vrm_login_form():
@@ -754,6 +762,11 @@ def historical_data(request):
         active_site = sites[0]
         context_dict = {}
 
+        #sites witth weather and battery status
+        user_sites =  _get_user_sites(request)
+        sites_stats = get_quick_status(user_sites)
+        context_dict['sites_stats'] = sites_stats
+
         #checking user permissions
         user = request.user
         permission = get_permissions(user)
@@ -846,14 +859,21 @@ def edit_site(request,site_Id=1):
        #checking if the form is valid
        if form.is_valid():
            form = form.save()
+
+   # user permissions
+   user = request.user
+   permission = get_permissions(user)
+
+   #fetching list of sites for the user
+   user_sites =  _get_user_sites(request)
+   sites_stats = get_quick_status(user_sites)
+
    context_dict['form_edit']= form
    context_dict['form_add']= form_add
    context_dict['site_Id']= site_Id
    context_dict['sites']=sites
-   # user permissions
-   user = request.user
-   permission = get_permissions(user)
    context_dict['permitted'] = permission
+   context_dict['sites_stats'] = sites_stats
    return render(request,'seshdash/settings.html', context_dict)
 
 

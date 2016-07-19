@@ -87,4 +87,7 @@ class SensorEmonTh(GuardedModelAdmin):
 @admin.register(Sensor_BMV)
 class SensorBMV(GuardedModelAdmin):
     list_filter = ('site',)
+
+@admin.register(Status_Rule)
+class StatusRule(GuardedModelAdmin):
     pass

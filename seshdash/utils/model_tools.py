@@ -2,11 +2,15 @@ from django.template.loader import get_template
 
 # Import django errors
 from django.db.utils import OperationalError
-
 # Import all the neccessary models
 from seshdash.models import *
+from seshdash.data.db.influx import get_latest_point_site
+#import wearher data function
+from seshdash.api.forecast import ForecastAPI
+from django.utils import timezone
 
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -136,8 +140,16 @@ def get_status_card_items(site):
         pass
 
 def get_site_measurements(site):
-
+    """
+    return measurements of a specific site
+    """
     site_measurements = site.site_measurements
+
+    #if no measurements
+    if site_measurements is None:
+        new_measurements = Site_Measurements.objects.create()
+        site_measurements = new_measurements
+
     # getting all measurement fields
     site_measurements_fields = site_measurements._meta.get_fields()
     site_measurements_items = []
@@ -253,3 +265,60 @@ def get_config_sensors(sensors):
 
 
          
+def get_quick_status(user_sites):
+    """
+    returns battery state and future forecast
+    """
+    #battery rules limits
+    battery_limit = Status_Rule.battery_rules.keys()
+    battery_limit.sort()
+
+    #weather rules limits
+    weather_limit = Status_Rule.weather_rules.keys()
+    weather_limit.sort()
+    # current time
+    now = timezone.now()
+
+    results = []
+
+    #getting latest_points
+    for site in user_sites:
+        site_dict = {}
+        site_dict['site'] = site
+
+        battery_latest_dict = get_latest_point_site(site,'soc')
+        if battery_latest_dict is not None:
+            battery_latest_point = battery_latest_dict['value']
+            #finding battery_voltage color
+            if battery_latest_point < battery_limit[0]:
+                color = Status_Rule.battery_rules[battery_limit[0]]
+                site_dict['battery']= color
+
+            elif battery_latest_point > battery_limit[0] and battery_latest_point < battery_limit[1]:
+                color = Status_Rule.battery_rules[battery_limit[1]]
+                site_dict['battery'] = color
+
+            else:
+                color = Status_Rule.battery_rules[battery_limit[2]]
+                site_dict['battery'] = color
+
+        #site weather_data
+        site_weather_data = Site_Weather_Data.objects.filter(site= site)
+        cloud_cover = []
+        for weather_data in site_weather_data:
+            if weather_data.date > now:
+                cloud_cover.append(weather_data.cloud_cover)
+        if len(cloud_cover) is not 0:
+            average_cloud_cover = sum(cloud_cover)/len(cloud_cover)
+
+            #finding weather_data color
+            if average_cloud_cover < weather_limit[0]:
+                color = Status_Rule.weather_rules[weather_limit[0]]
+                site_dict['weather'] = color
+            else:
+                color = Status_Rule.weather_rules[weather_limit[1]]
+                site_dict['weather'] = color
+        #appending to results list
+        results.append(site_dict)
+
+    return results

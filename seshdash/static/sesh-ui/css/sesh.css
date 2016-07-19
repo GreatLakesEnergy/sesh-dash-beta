@@ -287,3 +287,7 @@ tr.modal-toggle {
   top: 7px;
   cursor: pointer;
 }
+
+span.quick-status {
+    padding: inherit;
+}

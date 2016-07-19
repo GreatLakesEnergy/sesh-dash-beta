@@ -13,6 +13,9 @@ from seshdash.utils.time_utils import get_time_interval_array
 # models
 from seshdash.models import Sesh_Site, Daily_Data_Point
 
+# weather
+from seshdash.tasks import get_weather_data
+
 def get_random_int():
     val =  random() * 100
     return int(val)
@@ -133,4 +136,8 @@ def generate_test_data_daily_points():
     for site in sites:
         create_test_data_daily_points(site.id)
 
-
+def create_weather_data():
+    """
+    creating weather_data for next 5 days
+    """
+    get_weather_data()
