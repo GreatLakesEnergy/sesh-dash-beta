@@ -65,5 +65,4 @@ class StatusTestCase(TestCase):
     def test_get_measurements(self):
         site_measurements = get_site_measurements(self.site)
         measurements = Site_Measurements.objects.all()
-        print site_measurements
         self.assertEqual(len(measurements),1)

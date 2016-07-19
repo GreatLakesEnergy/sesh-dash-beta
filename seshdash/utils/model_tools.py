@@ -149,9 +149,7 @@ def get_site_measurements(site):
         site.site_measurements = Site_Measurements.objects.create()
         site.save()
         site_measurements = site.site_measurements
-
-    print "site measurements"
-    print site_measurements
+        
     # getting all measurement fields
     site_measurements_fields = site_measurements._meta.get_fields()
     site_measurements_items = []
