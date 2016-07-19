@@ -174,13 +174,18 @@ def associate_sensors_to_site(sensors_list, site):
     This associates a list of sensors to a 
     a given site
     """
-    for sensor in sensors_list:
-        if sensor == 'Emon Tx':
-            sensor_instance = Sensor_EmonTx.objects.create(site=site)
-        elif sensor == 'Emon Th':
-            sensor_instance = Sensor_EmonTh.objects.create(site=site)
-        elif sensor == 'BMV':
-            sensor_instance = Sensor_BMV.objects.create(site=site)
+
+    if is_sensor_list_valid(sensors_list):
+        for sensor in sensors_list:
+            if sensor == 'Emon Tx':
+                sensor_instance = Sensor_EmonTx.objects.create(site=site)
+            elif sensor == 'Emon Th':
+                sensor_instance = Sensor_EmonTh.objects.create(site=site)
+            elif sensor == 'BMV':
+                sensor_instance = Sensor_BMV.objects.create(site=site)
+ 
+    else:
+        raise Exception("Sensors list is not valid")
 
 
 def get_all_associated_sensors(site):

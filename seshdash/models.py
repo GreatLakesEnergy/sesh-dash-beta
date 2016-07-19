@@ -556,6 +556,7 @@ class Sensor_EmonTx(models.Model):
      Table representative for the emon tx
      """
      site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField()
      power1 = models.CharField(max_length=40, default="ac_power1")
      power2 = models.CharField(max_length=40, default="pv_production")
      power3 = models.CharField(max_length=40, default="consumption")
@@ -579,6 +580,7 @@ class Sensor_EmonTh(models.Model):
      Table Representive structure fo the emon th
      """
      site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField()
      temperature = models.CharField(max_length=40, default="soc")
      external_temperature = models.CharField(max_length=40, default="battery_voltage")
      humidity = models.CharField(max_length=40, default="battery_load")
@@ -594,6 +596,7 @@ class Sensor_BMV(models.Model):
     Mapping for the bmv
     """
     site = models.ForeignKey(Sesh_Site)
+    node_id = models.IntegerField()
     soc = models.CharField(max_length=40, default="temp_fridge")
     ce = models.CharField(max_length=40, default="temp_ambient")
     ttg = models.CharField(max_length=40, default="humidity")
