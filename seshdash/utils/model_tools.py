@@ -168,6 +168,35 @@ def get_site_measurements(site):
 
     return site_measurements_items
 
+def is_sensor_list_valid(sensors_list):
+    """
+    This will check if the number of sensors given
+    to be created for a site are not many
+    """
+    emonths_number = 0
+    emontxs_number = 0
+    bmvs_number = 0
+
+    for sensor in sensors_list:
+        print "Validating the sensors list: ",
+        print sensors_list
+        if sensor == 'Emon Tx':
+            emonths_number += 1
+            if emonths_number > 4:
+                raise Exception("Many Emonths for site")
+        if sensor == 'Emon Th':
+            emontxs_number += 1
+            if emontxs_number > 3:
+                raise Exception("Many Emontx for site")
+        if sensor == 'BMV':
+            bmvs_number += 1
+            if bmvs_number < 1:
+                raise Exception("Many BMVs for site")
+
+    print "The sensors list is valid"
+    return True 
+
+
 
 def associate_sensors_to_site(sensors_list, site):
     """
@@ -211,13 +240,6 @@ def get_config_sensors(sensors):
     """
     configuration = ""
 
-    # Initializing 
-    EMONTH_RANGE = [5, 6, 7, 8]
-    EMONTX_RANGE = [20, 21, 22]
-    BMV_RANGE = [29]
-
-
-    
     bmv_index = 0
     emonth_index = 0
     emontx_index = 0
@@ -228,36 +250,20 @@ def get_config_sensors(sensors):
     for sensor in sensors:
         
         if type(sensor) is Sensor_EmonTh: 
-            try:
-                number = EMONTH_RANGE[emonth_index]
-                t = get_template('seshdash/configs/emon_th.conf')
-                text = t.render({'number': number, 'sensor_number': (emonth_index + 1) })
-                emonth_index = emonth_index + 1
-            except IndexError:
-                logger.error("Emon ths sensors out of range, Improperly configured")
-                continue
-                
+           t = get_template('seshdash/configs/emon_th.conf')
+           text = t.render({'number': sensor.node_id, 'sensor_number': (emonth_index + 1) })
+           emonth_index = emonth_index + 1
 
         elif type(sensor) is Sensor_EmonTx:
-            try:
-                number = EMONTX_RANGE[emontx_index]
-                t = get_template('seshdash/configs/emon_tx.conf')
-                text = t.render({'number': number, 'sensor_number': (emontx_index + 1) })
-                emontx_index = emontx_index + 1 
-            except IndexError:
-                logger.error("Emon txs sensors out of range, Impoperly configured")
-                continue
+           t = get_template('seshdash/configs/emon_tx.conf')
+           text = t.render({'number': sensor.node_id, 'sensor_number': (emontx_index + 1) })
+           emontx_index = emontx_index + 1 
 
         elif type(sensor) is Sensor_BMV:
-            try:
-                number = bmv_range[bmv_index]
-                bmv_number = number
-                t = get_template('seshdash/configs/bmv.conf')
-                text = t.render({'number': number, 'sensor_number': (bmv_index + 1) })
-                bmv_index = bmv_index + 1
-            except IndexError:
-                logger.error("Bmv txs sensors out of range, Improperly configured")
-                continue
+            bmv_number = sensor.node_id
+            t = get_template('seshdash/configs/bmv.conf')
+            text = t.render({'number': sensor.node_id, 'sensor_number': (bmv_index + 1) })
+            bmv_index = bmv_index + 1
 
         else:
             logger.error("Invalid sensor")

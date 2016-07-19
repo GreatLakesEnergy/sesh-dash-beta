@@ -35,7 +35,7 @@ class TestAddRMCSite(TestCase):
                         battery_bank_capacity=450,
                     )
 
-        self.emonth = Sensor_EmonTh.objects.create(site=self.site)
+        self.emonth = Sensor_EmonTh.objects.create(site=self.site, node_id=5)
 
         self.rmc_account = Sesh_RMC_Account.objects.create(
                                site=self.site,
@@ -79,6 +79,8 @@ class TestAddRMCSite(TestCase):
     
         url = '/add_rmc_account/' + str(self.site.id)
 
+
+        
         response = self.client.post(url, {
                            'api_key': 'testing12345',
                            'api_key_numeric': '987654321123456789',
