@@ -541,3 +541,19 @@ class Site_Weather_Data(models.Model):
     class Meta:
         verbose_name = 'Weather Data'
         unique_together = ('site','date')
+
+class Status_Rule(models.Model):
+    """
+    battery_voltage rules and pv pv_production rules
+    """
+    battery_rules = {
+                     50 : "red",
+                     70 : "yellow",
+                     100: "green"
+                    }
+    weather_rules = {
+               0.7 : "green",
+               1 : "yellow"
+               }
+    def __str__(self):
+        return self.battery_rules + self.pv_rules

@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
+from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User, Site_Weather_Data
 from django.contrib.auth.models import User
 
 #Forms
@@ -50,6 +50,14 @@ class AddTestCase(TestCase):
                                                     AC_output=15.0,
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
+        #creating weather data model
+        self.site_weather = Site_Weather_Data.objects.create(site = self.site,
+                                                             date = timezone.datetime(2016, 10, 10, 10, 10),
+                                                             temp = 0,
+                                                             condition = "none",
+                                                             cloud_cover = 0.2,
+                                                             sunrise = timezone.now(),
+                                                             sunset = timezone.now())
         #create sesh rmc account
         self.test_rmc_account = Sesh_RMC_Account(site = self.site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
         self.test_rmc_account.save()
