@@ -59,7 +59,7 @@ class RMCForm(ModelForm):
 
     class Meta:
         model = Sesh_RMC_Account
-        exclude = ('Delete',)
+        exclude = ('Delete','site',)
 
 
 class VRMForm(ModelForm):
