@@ -72,5 +72,3 @@ class VRMForm(ModelForm):
         widgets = {
                   'vrm_password': forms.PasswordInput(),
                    }
-
-
