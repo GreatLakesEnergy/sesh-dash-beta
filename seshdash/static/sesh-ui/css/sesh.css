@@ -284,10 +284,20 @@ tr.modal-toggle {
 
 .remove-sensor {
   color: #C75555;
-  top: 7px;
   cursor: pointer;
 }
 
 span.quick-status {
-    padding: inherit;
+  padding: inherit;
+}
+
+.pos-glyphicon {
+  top: 7px;
+  padding: 0 10px;
+}
+
+
+.configure-form-container {
+  width: 40%;
+  padding: 20px;
 }

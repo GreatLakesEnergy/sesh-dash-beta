@@ -26,7 +26,7 @@ from guardian.decorators import permission_required_or_403
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point, RMC_status
 from django.db.models import Avg
 from django.db.models import Sum
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm, SensorEmonTxForm, SensorBMVForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -944,6 +944,9 @@ def add_rmc_account(request, site_id):
     context_dict['form'] = form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
+    context_dict['emonth_form'] = SensorEmonThForm()
+    context_dict['emontx_form'] = SensorEmonTxForm()
+    context_dict['bmv_form'] = SensorBMVForm()
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
 
 
@@ -974,3 +977,5 @@ def get_rmc_config(request):
     conf = get_template('seshdash/configs/rmc_config.conf') 
 
     return HttpResponse(conf.render(context_dict), content_type='text/plain')
+
+
