@@ -813,7 +813,7 @@ def graphs(request):
             client = Influx()
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
-            
+
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
@@ -840,8 +840,7 @@ def graphs(request):
 def edit_site(request,site_Id=1):
     context_dict = {}
     sites =  _get_user_sites(request)
-    print "user sites"
-    print sites
+
     form_add = SiteForm()
     site = Sesh_Site.objects.filter(id = site_Id).first()
 
@@ -864,8 +863,7 @@ def edit_site(request,site_Id=1):
             form = form.save()
             rmc_form = rmc_form.save()
     else:
-         print "site is function"
-         print site
+
          try:
              if site.vrm_account is None:
                  rmc_account = Sesh_RMC_Account.objects.filter(site=site).first()
