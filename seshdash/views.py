@@ -813,7 +813,7 @@ def graphs(request):
             client = Influx()
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
-
+            
             #looping into values
             for value in values:
                 data_values.append([value['time'],value['mean']])
