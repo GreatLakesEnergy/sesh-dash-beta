@@ -108,9 +108,15 @@ class AddTestCase(TestCase):
         # checking if site is valid
         self.assertTrue(form.is_valid())
         form.save()
+
         # checking created site
         sites = Sesh_Site.objects.all()
         self.assertEqual(len(sites),2)
+
+        site = sites.last()
+        #create sesh rmc account
+        self.test_rmc_account = Sesh_RMC_Account(site = site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+        self.test_rmc_account.save()
 
         # submit form
         response = f.post('/edit_site',data)
