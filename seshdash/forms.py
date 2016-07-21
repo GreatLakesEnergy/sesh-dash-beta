@@ -9,7 +9,7 @@ class SiteForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','time_zone','status_card','site_measurements')
+        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 

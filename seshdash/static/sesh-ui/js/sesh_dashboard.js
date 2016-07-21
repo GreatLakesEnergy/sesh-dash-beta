@@ -1,6 +1,10 @@
 
 var csrftoken = getCookie('csrftoken');
 
+if ($('#id_api_key').length > 0) {
+  $('#id_vrm_account').hide();
+}
+
 /* Auto compete on search*/
 var i,
     textid,
