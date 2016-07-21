@@ -840,8 +840,8 @@ def graphs(request):
 def edit_site(request,site_Id=1):
     context_dict = {}
     sites =  _get_user_sites(request)
-
     form_add = SiteForm()
+    rmc_form = RMCForm()
     site = Sesh_Site.objects.filter(id = site_Id).first()
 
     if request.method == 'POST':
@@ -872,7 +872,7 @@ def edit_site(request,site_Id=1):
                  #creating rmc form instance
                  rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
                  rmc_form = RMCForm(instance = rmc_instance)
-                 context_dict['RMCForm'] = rmc_form
+
          except AttributeError ,e :
              logger.error("no sesh site")
              pass
@@ -890,6 +890,7 @@ def edit_site(request,site_Id=1):
     sites_stats = get_quick_status(user_sites)
 
     context_dict['form_edit']= form
+    context_dict['RMCForm'] = rmc_form
     context_dict['form_add']= form_add
     context_dict['site_Id']= site_Id
     context_dict['sites']=sites
