@@ -37,7 +37,7 @@ from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, g
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
-                                       associate_sensors_to_site, get_all_associated_sensors, get_config_sensors
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set
 
 from seshdash.models import SENSORS_LIST
 
@@ -927,26 +927,43 @@ def add_rmc_account(request, site_id):
     """
     site = Sesh_Site.objects.filter(id=site_id).first()
 
+    # sensors formset factories
+    emonThFormSetFactory = formset_factory(SensorEmonThForm)
+    emonTxFormSetFactory = formset_factory(SensorEmonTxForm)
+    bmvFormSetFactory = formset_factory(SensorBMVForm)
+
+    # formsets
+    emonth_form_set = emonThFormSetFactory(prefix="emonth")
+    emontx_form_set = emonTxFormSetFactory(prefix="emontx")
+    bmv_form_set = bmvFormSetFactory(prefix="bmv")
+
+
     context_dict = {}
     form = RMCForm()
 
     if request.method == 'POST':
+
         form = RMCForm(request.POST)
-        
+        emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
+        emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")        
+        bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
+
+        sensors_sets =  [emonth_form_set, emontx_form_set, bmv_form_set]
+
         if form.is_valid():
             rmc_account = form.save(commit=False)
             rmc_account.site = site  
             rmc_account.save()
-            associate_sensors_to_site(request.POST.getlist('sensor'), site)
+            associate_sensors_sets_to_site(sensors_sets, site)
             return redirect('index')
         
         
     context_dict['form'] = form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
-    context_dict['emonth_form'] = SensorEmonThForm()
-    context_dict['emontx_form'] = SensorEmonTxForm()
-    context_dict['bmv_form'] = SensorBMVForm()
+    context_dict['emonth_form'] = emonThFormSetFactory(prefix="emonth")
+    context_dict['emontx_form'] = emonTxFormSetFactory(prefix="emontx")
+    context_dict['bmv_form'] = bmvFormSetFactory(prefix="bmv")
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
 
 

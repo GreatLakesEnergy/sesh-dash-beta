@@ -208,7 +208,7 @@ function InitializeSensors() {
 
 function HandleRemoveSensor(removeSensorButton) {
     // Handles the deletion of a sensor in adding rmc account
-    removeSensorButton.parent().parent().remove();
+    removeSensorButton.parent().parent().parent().remove();
 }
 
 

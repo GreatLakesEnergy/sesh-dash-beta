@@ -556,9 +556,9 @@ class Sensor_EmonTx(models.Model):
      Table representative for the emon tx
      """
      NODE_ID_CHOICES = (
-                         ('20', 20),
-                         ('21', 21),
-                         ('22', 22),
+                         (20, 20),
+                         (21, 21),
+                         (22, 22),
                      )
 
      site = models.ForeignKey(Sesh_Site)
@@ -586,10 +586,10 @@ class Sensor_EmonTh(models.Model):
      Table Representive structure fo the emon th
      """
      NODE_ID_CHOICES = (
-                    ('5', 5),
-                    ('6', 6),
-                    ('7', 7),
-                    ('8', 8),
+                    (5, 5),
+                    (6, 6),
+                    (7, 7),
+                    (8, 8),
                )
 
      site = models.ForeignKey(Sesh_Site)
@@ -597,7 +597,7 @@ class Sensor_EmonTh(models.Model):
      temperature = models.CharField(max_length=40, default="soc")
      external_temperature = models.CharField(max_length=40, default="battery_voltage")
      humidity = models.CharField(max_length=40, default="battery_load")
-     battery = models.CharField(max_length=40)
+     battery = models.CharField(max_length=40, null=True, blank=True)
 
      def __str__(self):
          return "Emon th sensor for " +  self.site.site_name
@@ -609,7 +609,7 @@ class Sensor_BMV(models.Model):
     Mapping for the bmv
     """
     NODE_ID_CHOICES = (
-                        ('29', 29),
+                        (29, 29),
                     )
 
     site = models.ForeignKey(Sesh_Site)

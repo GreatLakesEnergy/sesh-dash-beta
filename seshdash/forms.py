@@ -80,7 +80,7 @@ class SensorEmonThForm(ModelForm):
      """
      class Meta:
          model = Sensor_EmonTh
-         exclude = ('',)
+         exclude = ('site',)
 
 class SensorEmonTxForm(ModelForm):
     """
@@ -88,7 +88,7 @@ class SensorEmonTxForm(ModelForm):
     """
     class Meta:
         model = Sensor_EmonTx
-        exclude = ('',)
+        exclude = ('site',)
 
 
 class SensorBMVForm(ModelForm):
@@ -97,4 +97,4 @@ class SensorBMVForm(ModelForm):
     """
     class Meta:
         model = Sensor_BMV
-        exclude = ('',)
+        exclude = ('site',)

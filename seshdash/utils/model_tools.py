@@ -198,24 +198,6 @@ def is_sensor_list_valid(sensors_list):
 
 
 
-def associate_sensors_to_site(sensors_list, site):
-    """
-    This associates a list of sensors to a 
-    a given site
-    """
-
-    if is_sensor_list_valid(sensors_list):
-        for sensor in sensors_list:
-            if sensor == 'Emon Tx':
-                sensor_instance = Sensor_EmonTx.objects.create(site=site)
-            elif sensor == 'Emon Th':
-                sensor_instance = Sensor_EmonTh.objects.create(site=site)
-            elif sensor == 'BMV':
-                sensor_instance = Sensor_BMV.objects.create(site=site)
- 
-    else:
-        raise Exception("Sensors list is not valid")
-
 
 def get_all_associated_sensors(site):
     """
@@ -333,3 +315,28 @@ def get_quick_status(user_sites):
         results.append(site_dict)
 
     return results
+
+
+
+def associate_sensors_sets_to_site(sensor_sets, site):
+    """
+    Function to associate sensors sets to site
+    """
+    for sensor_set in sensor_sets:
+        try:
+            if sensor_set.is_valid():
+                save_sensor_set(sensor_set, site)
+        except ValidationError:
+            logger.debug("sensor not set for site")
+
+
+def save_sensor_set(sensor_set, site):
+    """
+    For saving a set of sensors and a
+    associating it with the right site
+    """
+    for sensor in sensor_set:
+        sensor_instance = sensor.save(commit=False)
+        sensor_instance.site = site
+        sensor.save()
+
