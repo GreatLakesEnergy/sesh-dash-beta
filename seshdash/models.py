@@ -116,6 +116,14 @@ class Site_Measurements(models.Model):
          ('soc', 'State of Charge'),
          ('trans', 'Trans'),
          ('cloud_cover', 'Cloud Cover'),
+         ("daily_battery_charge","Daily Battery Charge"),
+         ("daily_grid_outage_n", "Daily Grid Outage N"),
+         ("daily_grid_outage_t", "Daily Grid Outage T"),
+         ("daily_grid_usage", "Daily Grid Usage"),
+         ("daily_no_of_alerts", "Daily Number of Alerts"),
+         ("daily_power_cons_pv", "Daily Power Cons Pv"),
+         ("daily_power_consumption_total", "Daily Power Consumption Total"),
+         ("daily_pv_yield", "Daily Pv Yield"),
     )
 
     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='soc')
@@ -160,7 +168,7 @@ class Sesh_Site(models.Model):
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
-    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.CASCADE)
+    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.site_name
