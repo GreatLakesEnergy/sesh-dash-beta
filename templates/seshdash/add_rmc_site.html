@@ -1,0 +1,29 @@
+{% extends 'seshdash/base.html' %}
+
+{% load bootstrap %}
+
+{% block main %}
+
+    <div id="main-wrapper">
+      <div class="panel panel-primary">
+          <!-- Panel heading -->
+          <div class="panel-heading text-center">
+              Add an rmc site
+          </div>
+
+          <!-- The panel body -->
+          <div class="panel-body">
+
+              <form class="" method="post" action="{% url 'add_rmc_site' %}">
+                  {% csrf_token %}
+                  {{form|bootstrap}}
+
+                  <input type="submit" class="btn btn-primary" value="Create Site">
+              </form>
+
+          </div>
+
+      </div>
+    </div>
+
+{% endblock %}

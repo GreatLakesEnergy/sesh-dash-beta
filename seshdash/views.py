@@ -5,9 +5,10 @@ from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
+from django.shortcuts import redirect
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
@@ -16,7 +17,7 @@ from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django import forms
 from django.db import OperationalError
-
+from django.template.loader import get_template
 
 #Guardian decorator
 from guardian.decorators import permission_required_or_403
@@ -25,7 +26,7 @@ from guardian.decorators import permission_required_or_403
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point, RMC_status
 from django.db.models import Avg
 from django.db.models import Sum
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm, SensorEmonTxForm, SensorBMVForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -34,9 +35,12 @@ from pprint import pprint
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name, get_measurement_unit,\
-                                       get_status_card_items,get_site_measurements,get_quick_status
+from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
+                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set
+
+from seshdash.models import SENSORS_LIST
+
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
@@ -898,33 +902,123 @@ def edit_site(request,site_Id=1):
     context_dict['sites_stats'] = sites_stats
     return render(request,'seshdash/settings.html', context_dict)
 
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def site_add_edit(request):
+    """
+    This views renders the page for editing and
+    adding new rmc sites
+    """
+    context_dict = {}
+    sites = _get_user_sites(request)
+    context_dict['sites_stats'] = get_quick_status(sites)
+    context_dict['VRM_form'] = _create_vrm_login_form()
+    return render(request, 'seshdash/settings.html', context_dict)
+    
+
+
 # function of adding new site
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
-def add_site(request):
+def add_rmc_site(request):
+    """
+    This adds an rmc site to 
+    the database
+    """
     context_dict = {}
-    #checking permissions
-    user = request.user
-    permission = get_permissions(user)
 
-    #fetching list of sites for the user
-    user_sites =  _get_user_sites(request)
-    sites_stats = get_quick_status(user_sites)
-    # on ajax
     if request.method == 'POST':
-
         form = SiteForm(request.POST)
 
         if form.is_valid():
             form = form.save()
-            form = SiteForm()
+            return HttpResponseRedirect(reverse('add_rmc_account', args=[form.id]))
 
-    #on page load
     else:
         form = SiteForm()
 
-    context_dict['permitted'] = permission
-    context_dict['sites_stats'] = sites_stats
-    context_dict['form_add'] = form
+    context_dict['form'] = form
+    return render(request, 'seshdash/add_rmc_site.html', context_dict)
 
-    return render(request, 'seshdash/settings.html', context_dict)
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def add_rmc_account(request, site_id):
+    """
+    This view is for adding a new rmc account
+    to the database and associate it with a site
+    """
+    site = Sesh_Site.objects.filter(id=site_id).first()
+
+    # sensors formset factories
+    emonThFormSetFactory = formset_factory(SensorEmonThForm)
+    emonTxFormSetFactory = formset_factory(SensorEmonTxForm)
+    bmvFormSetFactory = formset_factory(SensorBMVForm)
+
+    # formsets
+    emonth_form_set = emonThFormSetFactory(prefix="emonth")
+    emontx_form_set = emonTxFormSetFactory(prefix="emontx")
+    bmv_form_set = bmvFormSetFactory(prefix="bmv")
+
+
+    context_dict = {}
+    form = RMCForm()
+
+    if request.method == 'POST':
+
+        form = RMCForm(request.POST)
+        emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
+        emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")        
+        bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
+
+        sensors_sets =  [emonth_form_set, emontx_form_set, bmv_form_set]
+
+        if form.is_valid():
+            rmc_account = form.save(commit=False)
+            rmc_account.site = site  
+            rmc_account.save()
+            associate_sensors_sets_to_site(sensors_sets, site)
+            return redirect('index')
+        
+        
+    context_dict['form'] = form
+    context_dict['site_id'] = site_id
+    context_dict['sensors_list'] = SENSORS_LIST
+    context_dict['emonth_form'] = emonThFormSetFactory(prefix="emonth")
+    context_dict['emontx_form'] = emonTxFormSetFactory(prefix="emontx")
+    context_dict['bmv_form'] = bmvFormSetFactory(prefix="bmv")
+    return render(request, 'seshdash/add_rmc_account.html', context_dict)
+
+
+
+def get_rmc_config(request):
+    """
+    View to return the config file for a given rmc given
+    an api key for the rmc account
+    """
+    context_dict = {}
+    api_key = request.GET.get('api_key', '')
+    context_dict['api_key'] = api_key   
+
+    rmc_account = Sesh_RMC_Account.objects.filter(api_key=api_key).first()
+    
+    if not rmc_account:
+        logger.debug("There is no rmc account associated with the api key")
+        logger.debug("Make sure you rmc site is configured on the server") 
+        return HttpResponse("Invalid api key or not configured")
+
+    site = rmc_account.site
+    associated_sensors = get_all_associated_sensors(site)
+
+    configuration, bmv_number = get_config_sensors(associated_sensors)
+    context_dict['configuration']  = configuration
+    context_dict['bmv_number'] = bmv_number
+ 
+    conf = get_template('seshdash/configs/rmc_config.conf') 
+
+    return HttpResponse(conf.render(context_dict), content_type='text/plain')
+
+

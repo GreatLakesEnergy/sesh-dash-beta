@@ -125,6 +125,7 @@ class Site_Measurements(models.Model):
          ("daily_power_consumption_total", "Daily Power Consumption Total"),
          ("daily_pv_yield", "Daily Pv Yield"),
     )
+
     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='soc')
     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='battery_voltage')
     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output_absolute')
@@ -549,6 +550,89 @@ class Site_Weather_Data(models.Model):
     class Meta:
         verbose_name = 'Weather Data'
         unique_together = ('site','date')
+
+
+
+SENSORS_LIST = {
+    'Emon Tx',
+    'Emon Th',
+    'BMV'
+}
+
+class Sensor_EmonTx(models.Model):
+     """ 		
+     Table representative for the emon tx
+     """
+     NODE_ID_CHOICES = (
+                         (20, 20),
+                         (21, 21),
+                         (22, 22),
+                     )
+
+     site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     power1 = models.CharField(max_length=40, default="ac_power1")
+     power2 = models.CharField(max_length=40, default="pv_production")
+     power3 = models.CharField(max_length=40, default="consumption")
+     power4 = models.CharField(max_length=40, default="grid_in")
+     vrms = models.CharField(max_length=40, default="AC_Voltage_out")
+     temp1 = models.CharField(max_length=40, blank=True, null=True)
+     temp2 = models.CharField(max_length=40, blank=True, null=True)
+     temp3 = models.CharField(max_length=40, blank=True, null=True)
+     temp4 = models.CharField(max_length=40, blank=True, null=True)
+     temp5 = models.CharField(max_length=40, blank=True, null=True)
+     temp6 = models.CharField(max_length=40, blank=True, null=True)
+     pulse = models.CharField(max_length=40, blank=True, null=True)
+
+     def __str__(self):
+         return "Emon tx sensor for " + self.site.site_name
+
+
+
+class Sensor_EmonTh(models.Model):
+     """
+     Table Representive structure fo the emon th
+     """
+     NODE_ID_CHOICES = (
+                    (5, 5),
+                    (6, 6),
+                    (7, 7),
+                    (8, 8),
+               )
+
+     site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     temperature = models.CharField(max_length=40, default="soc")
+     external_temperature = models.CharField(max_length=40, default="battery_voltage")
+     humidity = models.CharField(max_length=40, default="battery_load")
+     battery = models.CharField(max_length=40, null=True, blank=True)
+
+     def __str__(self):
+         return "Emon th sensor for " +  self.site.site_name
+
+
+
+class Sensor_BMV(models.Model):
+    """
+    Mapping for the bmv
+    """
+    NODE_ID_CHOICES = (
+                        (29, 29),
+                    )
+
+    site = models.ForeignKey(Sesh_Site)
+    node_id = models.IntegerField(default=0)
+    soc = models.CharField(max_length=40, default="temp_fridge")
+    ce = models.CharField(max_length=40, default="temp_ambient")
+    ttg = models.CharField(max_length=40, default="humidity")
+    v = models.CharField(max_length=40, default="battery_voltage")
+    i = models.CharField(max_length=40, default="tempreature")
+    relay = models.CharField(max_length=40, null=True, blank=True)
+    alarm = models.CharField(max_length=40, null=True, blank=True)
+
+    def __str__(self):
+        return "BMV sensor for " + self.site.site_name
+
 
 class Status_Rule(models.Model):
     """
