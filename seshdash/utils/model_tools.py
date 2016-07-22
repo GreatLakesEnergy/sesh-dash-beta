@@ -169,35 +169,6 @@ def get_site_measurements(site):
 
     return site_measurements_items
 
-def is_sensor_list_valid(sensors_list):
-    """
-    This will check if the number of sensors given
-    to be created for a site are not many
-    """
-    emonths_number = 0
-    emontxs_number = 0
-    bmvs_number = 0
-
-    for sensor in sensors_list:
-        print "Validating the sensors list: ",
-        print sensors_list
-        if sensor == 'Emon Tx':
-            emonths_number += 1
-            if emonths_number > 4:
-                raise Exception("Many Emonths for site")
-        if sensor == 'Emon Th':
-            emontxs_number += 1
-            if emontxs_number > 3:
-                raise Exception("Many Emontx for site")
-        if sensor == 'BMV':
-            bmvs_number += 1
-            if bmvs_number < 1:
-                raise Exception("Many BMVs for site")
-
-    print "The sensors list is valid"
-    return True 
-
-
 
 
 def get_all_associated_sensors(site):

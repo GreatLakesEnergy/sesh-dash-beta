@@ -12,6 +12,7 @@ from django.utils import timezone
 from geoposition import Geoposition
 
 from seshdash.models import Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV
+from seshdash.utils.model_tools import get_all_associated_sensors, get_config_sensors
 
 class TestAddRMCSite(TestCase):
     """
@@ -36,12 +37,15 @@ class TestAddRMCSite(TestCase):
                     )
 
 
+
         self.rmc_account = Sesh_RMC_Account.objects.create(
                                site=self.site,
                                api_key='testing',
                                api_key_numeric='123456789987654321',
                            )
 
+
+        self.emonth = Sensor_EmonTh.objects.create(site=self.site, node_id=5)
 
     def test_add_rmc_site(self):
         """
@@ -145,7 +149,7 @@ class TestAddRMCSite(TestCase):
         self.assertEqual(Sensor_EmonTx.objects.last().site, self.site)
 
         # Asserting the creation of the emon th sensor and it linking to the site
-        self.assertEqual(Sensor_EmonTh.objects.all().count(), 1)
+        self.assertEqual(Sensor_EmonTh.objects.all().count(), 2) # The added one plus one in the setUp
         self.assertEqual(Sensor_EmonTh.objects.all().last().site, self.site)
 
         # Asserting the creation of the bmv sensor and the linking to the site
@@ -159,6 +163,11 @@ class TestAddRMCSite(TestCase):
         """
 
         response = self.client.get('/get_rmc_config', {'api_key': 'testing'})
+
+        associated_sensors = get_all_associated_sensors(self.site)
+        configuration, victron_device_number = get_config_sensors(associated_sensors)
+
+        self.assertRegexpMatches(configuration, 'emonTH_1')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/plain')
