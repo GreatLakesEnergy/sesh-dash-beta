@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account
+from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV
 from seshdash.utils.time_utils import get_timezone_from_geo, localize
 
 class SiteForm(ModelForm):
@@ -72,3 +72,29 @@ class VRMForm(ModelForm):
         widgets = {
                   'vrm_password': forms.PasswordInput(),
                    }
+
+
+class SensorEmonThForm(ModelForm):
+     """ 
+     Emonth form
+     """
+     class Meta:
+         model = Sensor_EmonTh
+         exclude = ('site',)
+
+class SensorEmonTxForm(ModelForm):
+    """
+    Emontx form
+    """
+    class Meta:
+        model = Sensor_EmonTx
+        exclude = ('site',)
+
+
+class SensorBMVForm(ModelForm):
+    """
+    Bmv form
+    """
+    class Meta:
+        model = Sensor_BMV
+        exclude = ('site',)
