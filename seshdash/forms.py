@@ -28,6 +28,13 @@ class SiteForm(ModelForm):
 #        #super(SiteForm, self).save(**kwargs)
 #        return cleaned_data
 
+class EditSiteForm(ModelForm):
+    error_css_class = "warning"
+    required_css_class = "info"
+
+    class Meta:
+        model= Sesh_Site
+        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements','vrm_account',)
 
 
 class SiteRMCForm(ModelForm):
@@ -75,7 +82,7 @@ class VRMForm(ModelForm):
 
 
 class SensorEmonThForm(ModelForm):
-     """ 
+     """
      Emonth form
      """
      class Meta:
