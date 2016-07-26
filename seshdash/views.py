@@ -877,7 +877,23 @@ def edit_site(request,site_Id=1):
                  #creating rmc form instance
                  rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
                  rmc_form = RMCForm(instance = rmc_instance)
-                 context_dict['RMCForm'] = rmc_form
+
+                 #creating an instance to populate a form
+                 instance = get_object_or_404(Sesh_Site, id=site_Id)
+                 form = SiteForm(instance=instance)
+
+                 print "form type"
+                 print type(form)
+                 print type(rmc_form)
+
+                 formset = modelformset_factory( Sesh_Site,
+                                                 exclude=('vrm_account',),
+                                                 can_delete=False
+                                                    )
+                 site_formset = formset()
+                 print "formset type"
+                 print type(site_formset)
+                 context_dict['formset'] = site_formset
          except AttributeError ,e :
              logger.error("no sesh site")
              pass
