@@ -882,17 +882,14 @@ def edit_site(request,site_Id=1):
                  instance = get_object_or_404(Sesh_Site, id=site_Id)
                  form = SiteForm(instance=instance)
 
-                 print "form type"
-                 print type(form)
-                 print type(rmc_form)
+                 siteform = modelformset_factory( Sesh_Site,
+                                                  form=SiteForm,
+                                                  max_num= 1,
+                                                  exclude=('vrm_account','vrm_site_id','status_card','site_measurements',),
+                                                  can_delete=False)
 
-                 formset = modelformset_factory( Sesh_Site,
-                                                 exclude=('vrm_account',),
-                                                 can_delete=False
-                                                    )
-                 site_formset = formset()
-                 print "formset type"
-                 print type(site_formset)
+                 site_formset = siteform()
+
                  context_dict['formset'] = site_formset
          except AttributeError ,e :
              logger.error("no sesh site")
