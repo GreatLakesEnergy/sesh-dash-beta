@@ -45,6 +45,7 @@ class Sesh_User(models.Model):
          verbose_name = 'User'
          verbose_name_plural = 'Users'
 
+
 class Sesh_Organisation(models.Model):
     group = models.OneToOneField(Group)
     send_slack = models.BooleanField(default=False)
@@ -52,6 +53,7 @@ class Sesh_Organisation(models.Model):
 
     def __str__(self):
         return self.group.name
+
 
 class Slack_Channel(models.Model):
     organisation = models.ForeignKey(Sesh_Organisation, related_name='slack_channel')
@@ -571,18 +573,18 @@ class Sensor_EmonTx(models.Model):
 
      site = models.ForeignKey(Sesh_Site)
      node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
-     power1 = models.CharField(max_length=40, default="ac_power1")
-     power2 = models.CharField(max_length=40, default="pv_production")
-     power3 = models.CharField(max_length=40, default="consumption")
-     power4 = models.CharField(max_length=40, default="grid_in")
-     vrms = models.CharField(max_length=40, default="AC_Voltage_out")
-     temp1 = models.CharField(max_length=40, blank=True, null=True)
-     temp2 = models.CharField(max_length=40, blank=True, null=True)
-     temp3 = models.CharField(max_length=40, blank=True, null=True)
-     temp4 = models.CharField(max_length=40, blank=True, null=True)
-     temp5 = models.CharField(max_length=40, blank=True, null=True)
-     temp6 = models.CharField(max_length=40, blank=True, null=True)
-     pulse = models.CharField(max_length=40, blank=True, null=True)
+     index1 = models.CharField(max_length=40, default="ac_power1")
+     index2 = models.CharField(max_length=40, default="pv_production")
+     index3 = models.CharField(max_length=40, default="consumption")
+     index4 = models.CharField(max_length=40, default="grid_in")
+     index5 = models.CharField(max_length=40, default="AC_Voltage_out")
+     index6 = models.CharField(max_length=40, blank=True, null=True)
+     index7 = models.CharField(max_length=40, blank=True, null=True)
+     index8 = models.CharField(max_length=40, blank=True, null=True)
+     index9 = models.CharField(max_length=40, blank=True, null=True)
+     index10 = models.CharField(max_length=40, blank=True, null=True)
+     index11 = models.CharField(max_length=40, blank=True, null=True)
+     index12 = models.CharField(max_length=40, blank=True, null=True)
 
      def __str__(self):
          return "Emon tx sensor for " + self.site.site_name
@@ -602,10 +604,10 @@ class Sensor_EmonTh(models.Model):
 
      site = models.ForeignKey(Sesh_Site)
      node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
-     temperature = models.CharField(max_length=40, default="soc")
-     external_temperature = models.CharField(max_length=40, default="battery_voltage")
-     humidity = models.CharField(max_length=40, default="battery_load")
-     battery = models.CharField(max_length=40, null=True, blank=True)
+     index1 = models.CharField(max_length=40, default="tempreature")
+     index2 = models.CharField(max_length=40, default="external_tempreature")
+     index3 = models.CharField(max_length=40, default="humidity")
+     index4 = models.CharField(max_length=40, default="battery")
 
      def __str__(self):
          return "Emon th sensor for " +  self.site.site_name
@@ -621,14 +623,14 @@ class Sensor_BMV(models.Model):
                     )
 
     site = models.ForeignKey(Sesh_Site)
-    node_id = models.IntegerField(default=0)
-    soc = models.CharField(max_length=40, default="temp_fridge")
-    ce = models.CharField(max_length=40, default="temp_ambient")
-    ttg = models.CharField(max_length=40, default="humidity")
-    v = models.CharField(max_length=40, default="battery_voltage")
-    i = models.CharField(max_length=40, default="tempreature")
-    relay = models.CharField(max_length=40, null=True, blank=True)
-    alarm = models.CharField(max_length=40, null=True, blank=True)
+    node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+    index1 = models.CharField(max_length=40, default="soc")
+    index2 = models.CharField(max_length=40, default="ce")
+    index3 = models.CharField(max_length=40, default="ttg")
+    index4 = models.CharField(max_length=40, default="v")
+    index5 = models.CharField(max_length=40, default="i")
+    index6 = models.CharField(max_length=40, default="relay")
+    index7 = models.CharField(max_length=40, default="alarm")
 
     def __str__(self):
         return "BMV sensor for " + self.site.site_name
