@@ -150,7 +150,7 @@ def get_site_measurements(site):
         site.site_measurements = Site_Measurements.objects.create()
         site.save()
         site_measurements = site.site_measurements
-        
+
     # getting all measurement fields
     site_measurements_fields = site_measurements._meta.get_fields()
     site_measurements_items = []
@@ -167,6 +167,7 @@ def get_site_measurements(site):
         if type(item) == int or type(item) == long:
             site_measurements_items.pop(i)
 
+    logger.debug("Got measurements for site %s"%site_measurements_items)
     return site_measurements_items
 
 
@@ -177,7 +178,7 @@ def get_all_associated_sensors(site):
     a given site
     """
     sensors_list = []
-    
+
     for model in [Sensor_EmonTx, Sensor_EmonTh, Sensor_BMV]:
         sensors = model.objects.filter(site=site)
 
@@ -202,8 +203,8 @@ def get_config_sensors(sensors):
 
 
     for sensor in sensors:
-        
-        if type(sensor) is Sensor_EmonTh: 
+
+        if type(sensor) is Sensor_EmonTh:
            t = get_template('seshdash/configs/emon_th.conf')
            text = t.render({'number': sensor.node_id, 'sensor_number': (emonth_index + 1) })
            emonth_index = emonth_index + 1
@@ -211,7 +212,7 @@ def get_config_sensors(sensors):
         elif type(sensor) is Sensor_EmonTx:
            t = get_template('seshdash/configs/emon_tx.conf')
            text = t.render({'number': sensor.node_id, 'sensor_number': (emontx_index + 1) })
-           emontx_index = emontx_index + 1 
+           emontx_index = emontx_index + 1
 
         elif type(sensor) is Sensor_BMV:
             bmv_number = sensor.node_id
@@ -229,7 +230,7 @@ def get_config_sensors(sensors):
 
 
 
-         
+
 def get_quick_status(user_sites):
     """
     returns battery state and future forecast

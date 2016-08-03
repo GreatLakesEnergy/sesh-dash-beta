@@ -95,12 +95,6 @@ def index(request,site_id=0):
 
     context_dict = jsonify_dict(context_dict,content_json)
     #Generate date for dashboard  TODO use victron solar yield data using mock weather data for now
-    y_data,x_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
-    y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
-    #create graphs for PV dailt prod vs cloud cover
-
-    # Create an object of the get_high_chart_date
-    context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
 
     #Generating site measurements for a graph
@@ -811,8 +805,9 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            SI_units = BoM_Data_Point.SI_UNITS
-            SI_unit = SI_units.get(choice,'V')
+            #SI_units = BoM_Data_Point.SI_UNITS
+            #SI_unit = SI_units.get(choice,'V')
+            SI_unit = get_measurement_unit(choice)
             # creating an influx instance
             client = Influx()
             # using an influx query to get measurements values with their time-stamps
@@ -869,7 +864,7 @@ def edit_site(request,site_Id=1):
             if form.is_valid() and rmc_form.is_valid():
                 form = form.save()
                 rmc_form = rmc_form.save()
-                
+
             context_dict['RMCForm'] = rmc_form
         else:
 
