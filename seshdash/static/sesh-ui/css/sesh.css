@@ -280,6 +280,24 @@ tr.modal-toggle {
 #switcher{
   display: none;
 }
+
+
+.remove-sensor {
+  color: #C75555;
+  cursor: pointer;
+}
+
 span.quick-status {
-    padding: inherit;
+  padding: inherit;
+}
+
+.pos-glyphicon {
+  top: 7px;
+  padding: 0 10px;
+}
+
+
+.configure-form-container {
+  width: 40%;
+  padding: 20px;
 }

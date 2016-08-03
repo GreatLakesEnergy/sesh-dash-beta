@@ -45,6 +45,7 @@ class Sesh_User(models.Model):
          verbose_name = 'User'
          verbose_name_plural = 'Users'
 
+
 class Sesh_Organisation(models.Model):
     group = models.OneToOneField(Group)
     send_slack = models.BooleanField(default=False)
@@ -52,6 +53,7 @@ class Sesh_Organisation(models.Model):
 
     def __str__(self):
         return self.group.name
+
 
 class Slack_Channel(models.Model):
     organisation = models.ForeignKey(Sesh_Organisation, related_name='slack_channel')
@@ -116,7 +118,16 @@ class Site_Measurements(models.Model):
          ('soc', 'State of Charge'),
          ('trans', 'Trans'),
          ('cloud_cover', 'Cloud Cover'),
+         ("daily_battery_charge","Daily Battery Charge"),
+         ("daily_grid_outage_n", "Daily Grid Outage N"),
+         ("daily_grid_outage_t", "Daily Grid Outage T"),
+         ("daily_grid_usage", "Daily Grid Usage"),
+         ("daily_no_of_alerts", "Daily Number of Alerts"),
+         ("daily_power_cons_pv", "Daily Power Cons Pv"),
+         ("daily_power_consumption_total", "Daily Power Consumption Total"),
+         ("daily_pv_yield", "Daily Pv Yield"),
     )
+
     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='soc')
     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='battery_voltage')
     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output_absolute')
@@ -159,7 +170,7 @@ class Sesh_Site(models.Model):
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
-    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.CASCADE)
+    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.site_name
@@ -541,6 +552,89 @@ class Site_Weather_Data(models.Model):
     class Meta:
         verbose_name = 'Weather Data'
         unique_together = ('site','date')
+
+
+
+SENSORS_LIST = {
+    'Emon Tx',
+    'Emon Th',
+    'BMV'
+}
+
+class Sensor_EmonTx(models.Model):
+     """ 		
+     Table representative for the emon tx
+     """
+     NODE_ID_CHOICES = (
+                         (20, 20),
+                         (21, 21),
+                         (22, 22),
+                     )
+
+     site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     index1 = models.CharField(max_length=40, default="ac_power1")
+     index2 = models.CharField(max_length=40, default="pv_production")
+     index3 = models.CharField(max_length=40, default="consumption")
+     index4 = models.CharField(max_length=40, default="grid_in")
+     index5 = models.CharField(max_length=40, default="AC_Voltage_out")
+     index6 = models.CharField(max_length=40, blank=True, null=True)
+     index7 = models.CharField(max_length=40, blank=True, null=True)
+     index8 = models.CharField(max_length=40, blank=True, null=True)
+     index9 = models.CharField(max_length=40, blank=True, null=True)
+     index10 = models.CharField(max_length=40, blank=True, null=True)
+     index11 = models.CharField(max_length=40, blank=True, null=True)
+     index12 = models.CharField(max_length=40, blank=True, null=True)
+
+     def __str__(self):
+         return "Emon tx sensor for " + self.site.site_name
+
+
+
+class Sensor_EmonTh(models.Model):
+     """
+     Table Representive structure fo the emon th
+     """
+     NODE_ID_CHOICES = (
+                    (5, 5),
+                    (6, 6),
+                    (7, 7),
+                    (8, 8),
+               )
+
+     site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     index1 = models.CharField(max_length=40, default="tempreature")
+     index2 = models.CharField(max_length=40, default="external_tempreature")
+     index3 = models.CharField(max_length=40, default="humidity")
+     index4 = models.CharField(max_length=40, default="battery")
+
+     def __str__(self):
+         return "Emon th sensor for " +  self.site.site_name
+
+
+
+class Sensor_BMV(models.Model):
+    """
+    Mapping for the bmv
+    """
+    NODE_ID_CHOICES = (
+                        (29, 29),
+                    )
+
+    site = models.ForeignKey(Sesh_Site)
+    node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+    index1 = models.CharField(max_length=40, default="soc")
+    index2 = models.CharField(max_length=40, default="ce")
+    index3 = models.CharField(max_length=40, default="ttg")
+    index4 = models.CharField(max_length=40, default="v")
+    index5 = models.CharField(max_length=40, default="i")
+    index6 = models.CharField(max_length=40, default="relay")
+    index7 = models.CharField(max_length=40, default="alarm")
+
+    def __str__(self):
+        return "BMV sensor for " + self.site.site_name
+
 
 class Status_Rule(models.Model):
     """

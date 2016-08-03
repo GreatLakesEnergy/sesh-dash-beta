@@ -281,7 +281,7 @@ INSTALLED_APPS = (
     'geoposition',
     'djcelery',
     'django_extensions',
-
+    'bootstrapform'
 )
 
 #BOWER

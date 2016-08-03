@@ -1,4 +1,5 @@
-from __future__ import division
+from django.template.loader import get_template
+
 # Import django errors
 from django.db.utils import OperationalError
 # Import all the neccessary models
@@ -143,6 +144,13 @@ def get_site_measurements(site):
     return measurements of a specific site
     """
     site_measurements = site.site_measurements
+
+    #if no measurements
+    if site_measurements is None:
+        site.site_measurements = Site_Measurements.objects.create()
+        site.save()
+        site_measurements = site.site_measurements
+        
     # getting all measurement fields
     site_measurements_fields = site_measurements._meta.get_fields()
     site_measurements_items = []
@@ -161,6 +169,67 @@ def get_site_measurements(site):
 
     return site_measurements_items
 
+
+
+def get_all_associated_sensors(site):
+    """
+    Returns the associated sensors for
+    a given site
+    """
+    sensors_list = []
+    
+    for model in [Sensor_EmonTx, Sensor_EmonTh, Sensor_BMV]:
+        sensors = model.objects.filter(site=site)
+
+        for sensor in sensors:
+            sensors_list.append(sensor)
+
+    return sensors_list
+
+
+def get_config_sensors(sensors):
+    """
+    Function to generate the configuration for all of the
+    sensors
+    """
+    configuration = ""
+
+    bmv_index = 0
+    emonth_index = 0
+    emontx_index = 0
+
+    bmv_number = None # Setting the bmv number so that it can be used in the initial bmv config, This is because we can only have on bmv per site
+
+
+    for sensor in sensors:
+        
+        if type(sensor) is Sensor_EmonTh: 
+           t = get_template('seshdash/configs/emon_th.conf')
+           text = t.render({'number': sensor.node_id, 'sensor_number': (emonth_index + 1) })
+           emonth_index = emonth_index + 1
+
+        elif type(sensor) is Sensor_EmonTx:
+           t = get_template('seshdash/configs/emon_tx.conf')
+           text = t.render({'number': sensor.node_id, 'sensor_number': (emontx_index + 1) })
+           emontx_index = emontx_index + 1 
+
+        elif type(sensor) is Sensor_BMV:
+            bmv_number = sensor.node_id
+            t = get_template('seshdash/configs/bmv.conf')
+            text = t.render({'number': sensor.node_id, 'sensor_number': (bmv_index + 1) })
+            bmv_index = bmv_index + 1
+
+        else:
+            logger.error("Invalid sensor")
+            raise Exception("Invalid sensor")
+
+        configuration = configuration + text
+
+    return configuration, bmv_number
+
+
+
+         
 def get_quick_status(user_sites):
     """
     returns battery state and future forecast
@@ -216,5 +285,30 @@ def get_quick_status(user_sites):
                 site_dict['weather'] = color
         #appending to results list
         results.append(site_dict)
-    
+
     return results
+
+
+
+def associate_sensors_sets_to_site(sensor_sets, site):
+    """
+    Function to associate sensors sets to site
+    """
+    for sensor_set in sensor_sets:
+        try:
+            if sensor_set.is_valid():
+                save_sensor_set(sensor_set, site)
+        except ValidationError:
+            logger.debug("sensor not set for site")
+
+
+def save_sensor_set(sensor_set, site):
+    """
+    For saving a set of sensors and a
+    associating it with the right site
+    """
+    for sensor in sensor_set:
+        sensor_instance = sensor.save(commit=False)
+        sensor_instance.site = site
+        sensor.save()
+

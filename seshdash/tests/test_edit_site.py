@@ -22,25 +22,26 @@ from datetime import datetime
 from seshdash.utils import alert
 from django.utils import timezone
 
+
 class AddTestCase(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
 
         self.location = Geoposition(52.5,24.3)
-        self.site = Sesh_Site.objects.create(site_name=u"Test site",
-                                             comission_date=timezone.datetime(2015, 12, 11, 22, 0),
-                                             location_city=u"kigali",
-                                             location_country=u"rwanda",
-                                             vrm_account = self.VRM,
-                                             installed_kw=123.0,
-                                             position=self.location,
-                                             system_voltage=24,
-                                             number_of_panels=12,
-                                             vrm_site_id=213,
-                                             battery_bank_capacity=12321,
-                                             has_genset=True,
-                                             has_grid=True)
+
+        self.site = Sesh_Site.objects.create(
+                        site_name='test',
+                        comission_date=timezone.now(),
+                        location_city='Kigali',
+                        location_country='Rwanda',
+                        position=Geoposition(12,1),
+                        installed_kw=25,
+                        system_voltage=45,
+                        number_of_panels=45,
+                        battery_bank_capacity=450,
+                   )
+                        
 
         self.data_point = Data_Point.objects.create(site=self.site,
                                                     soc=10,
@@ -108,9 +109,15 @@ class AddTestCase(TestCase):
         # checking if site is valid
         self.assertTrue(form.is_valid())
         form.save()
+
         # checking created site
         sites = Sesh_Site.objects.all()
         self.assertEqual(len(sites),2)
+
+        site = sites.last()
+        #create sesh rmc account
+        self.test_rmc_account = Sesh_RMC_Account(site = site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+        self.test_rmc_account.save()
 
         # submit form
         response = f.post('/edit_site',data)

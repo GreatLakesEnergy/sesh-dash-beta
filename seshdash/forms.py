@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account
+from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV
 from seshdash.utils.time_utils import get_timezone_from_geo, localize
 
 class SiteForm(ModelForm):
@@ -9,7 +9,7 @@ class SiteForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','time_zone','status_card',)
+        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
@@ -28,6 +28,13 @@ class SiteForm(ModelForm):
 #        #super(SiteForm, self).save(**kwargs)
 #        return cleaned_data
 
+class EditSiteForm(ModelForm):
+    error_css_class = "warning"
+    required_css_class = "info"
+
+    class Meta:
+        model= Sesh_Site
+        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements','vrm_account',)
 
 
 class SiteRMCForm(ModelForm):
@@ -59,7 +66,7 @@ class RMCForm(ModelForm):
 
     class Meta:
         model = Sesh_RMC_Account
-        exclude = ('Delete',)
+        exclude = ('Delete','site',)
 
 
 class VRMForm(ModelForm):
@@ -74,3 +81,27 @@ class VRMForm(ModelForm):
                    }
 
 
+class SensorEmonThForm(ModelForm):
+     """
+     Emonth form
+     """
+     class Meta:
+         model = Sensor_EmonTh
+         exclude = ('site',)
+
+class SensorEmonTxForm(ModelForm):
+    """
+    Emontx form
+    """
+    class Meta:
+        model = Sensor_EmonTx
+        exclude = ('site',)
+
+
+class SensorBMVForm(ModelForm):
+    """
+    Bmv form
+    """
+    class Meta:
+        model = Sensor_BMV
+        exclude = ('site',)
