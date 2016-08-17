@@ -567,6 +567,10 @@ class Sensor_EmonTx(models.Model):
      def __str__(self):
          return "Emon tx sensor for " + self.site.site_name
 
+     def save(self, *args, **kwargs):
+         Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emontx')
+         super(Sensor_EmonTx, self).save(*args, **kwargs)
+
 
 
 class Sensor_EmonTh(models.Model):
@@ -589,6 +593,10 @@ class Sensor_EmonTh(models.Model):
 
      def __str__(self):
          return "Emon th sensor for " +  self.site.site_name
+
+     def save(self, *args, **kwargs):
+        Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
+        super(Sensor_EmonTh, self).save(*args, **kwargs)
 
 
 
@@ -613,6 +621,9 @@ class Sensor_BMV(models.Model):
     def __str__(self):
         return "BMV sensor for " + self.site.site_name
 
+    def save(self, *args, **kwargs):
+        Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
+        super(Sensor_BMV, self).save(*args, **kwargs)
 
 class Status_Rule(models.Model):
     """
@@ -629,3 +640,23 @@ class Status_Rule(models.Model):
                }
     def __str__(self):
         return self.battery_rules + self.pv_rules
+
+
+
+class Sensor_Mapping(models.Model):
+    """
+    To contain informations about the sensor mapping
+    of sensors node_ids and sites
+    
+    This helps in the writing of data to the database by 
+    the sesh-api-helper
+    """
+    site_id = models.IntegerField()
+    node_id = models.IntegerField()
+    sensor_type = models.CharField(max_length=40)
+
+    def __str__(self):
+        return "Site_id: " + str(self.site_id) + "node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
+
+    class Meta:
+        unique_together =  ('site_id', 'node_id', 'sensor_type')
