@@ -35,29 +35,26 @@
 
                       <div class="edit-sites">
 
-                               <form action="/edit_site" method="post" novalidate>
-                                        <table class="table">
+                        <form action="/edit_site" method="post" novalidate>
+                                 <table class="table">
 
-                                               {% csrf_token %}
+                                        {% csrf_token %}
 
-                                               {% if form_edit.as_table|length > 1 %}
+                                        {% if form_edit.as_table|length > 1 %}
 
-                                                   {{ form_edit.as_table }}
+                                            {{ form_edit.as_table }}
 
-                                                   {{ RMCForm.as_table }}
-                                                        <input type="text" value="{{site_Id}}" name="site_Id" hidden>
-                                                <tr>
-                                                   <td>
-                                                       <button type="submit" class="btn btn-primary button-save">SAVE </button>
-                                                   </td>
-                                                </tr>
-                                                {% else %}
-                                               {% endif %}
-                                          </table>
-                                </form>
-
-
-
+                                            {{ RMCForm.as_table }}
+                                                 <input type="text" value="{{site_Id}}" name="site_Id" hidden>
+                                         <tr>
+                                            <td>
+                                                <button type="submit" class="btn btn-primary button-save">SAVE </button>
+                                            </td>
+                                         </tr>
+                                         {% else %}
+                                        {% endif %}
+                                   </table>
+                         </form>
 
                       </div>
                   </div>

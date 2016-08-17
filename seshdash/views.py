@@ -26,7 +26,7 @@ from guardian.decorators import permission_required_or_403
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point, RMC_status
 from django.db.models import Avg
 from django.db.models import Sum
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm, SensorEmonTxForm, SensorBMVForm
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm, SensorEmonTxForm, SensorBMVForm, EditSiteForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -95,12 +95,6 @@ def index(request,site_id=0):
 
     context_dict = jsonify_dict(context_dict,content_json)
     #Generate date for dashboard  TODO use victron solar yield data using mock weather data for now
-    y_data,x_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
-    y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
-    #create graphs for PV dailt prod vs cloud cover
-
-    # Create an object of the get_high_chart_date
-    context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
 
     #Generating site measurements for a graph
@@ -811,8 +805,9 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            SI_units = BoM_Data_Point.SI_UNITS
-            SI_unit = SI_units.get(choice,'V')
+            #SI_units = BoM_Data_Point.SI_UNITS
+            #SI_unit = SI_units.get(choice,'V')
+            SI_unit = get_measurement_unit(choice)
             # creating an influx instance
             client = Influx()
             # using an influx query to get measurements values with their time-stamps
@@ -853,37 +848,51 @@ def edit_site(request,site_Id=1):
         # creating new instance for POST
         site_Id = request.POST.get('site_Id','')
         instance = get_object_or_404(Sesh_Site, id=site_Id)
-        form = SiteForm(request.POST or None, instance=instance)
 
         # RMC form on POST method
         site = Sesh_Site.objects.filter(id = site_Id).first()
         rmc_account = Sesh_RMC_Account.objects.filter(site=site).first()
-        rmc_account_pk = rmc_account.pk
-        rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
-        rmc_form = RMCForm(request.POST or None,instance=rmc_instance)
 
-        #checking if the form is valid
-        if form.is_valid() and rmc_form.is_valid():
-            form = form.save()
-            rmc_form = rmc_form.save()
+        if rmc_account:
+            rmc_account_pk = rmc_account.pk
+            rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
+            rmc_form = RMCForm(request.POST or None,instance=rmc_instance)
+
+            form = EditSiteForm(request.POST or None, instance=instance)
+
+            #checking if the form is valid
+            if form.is_valid() and rmc_form.is_valid():
+                form = form.save()
+                rmc_form = rmc_form.save()
+
+            context_dict['RMCForm'] = rmc_form
+        else:
+
+            form = SiteForm(request.POST or None, instance=instance)
+            #checking if the form is valid
+            if form.is_valid():
+                form = form.save()
     else:
-
-         try:
-             if site.vrm_account is None:
-                 rmc_account = Sesh_RMC_Account.objects.filter(site=site).first()
-                 rmc_account_pk = rmc_account.pk
-
-                 #creating rmc form instance
-                 rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
-                 rmc_form = RMCForm(instance = rmc_instance)
-
-         except AttributeError ,e :
-             logger.error("no sesh site")
-             pass
 
          #creating an instance to populate a form
          instance = get_object_or_404(Sesh_Site, id=site_Id)
          form = SiteForm(instance=instance)
+
+         try:
+             if site.vrm_account is None:
+
+                 #creating rmc form instance
+                 rmc_account = Sesh_RMC_Account.objects.filter(site=site).first()
+                 rmc_account_pk = rmc_account.pk
+                 rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
+                 rmc_form = RMCForm(instance = rmc_instance)
+
+                 #Sesh_Site instance
+                 form = EditSiteForm(instance=instance)
+                 context_dict['RMCForm'] = rmc_form
+         except AttributeError ,e :
+             logger.error("no sesh site")
+             pass
 
     # user permissions
     user = request.user
@@ -894,14 +903,12 @@ def edit_site(request,site_Id=1):
     sites_stats = get_quick_status(user_sites)
 
     context_dict['form_edit']= form
-    context_dict['RMCForm'] = rmc_form
     context_dict['form_add']= form_add
     context_dict['site_Id']= site_Id
     context_dict['sites']=sites
     context_dict['permitted'] = permission
     context_dict['sites_stats'] = sites_stats
     return render(request,'seshdash/settings.html', context_dict)
-
 
 
 @login_required
@@ -916,7 +923,7 @@ def site_add_edit(request):
     context_dict['sites_stats'] = get_quick_status(sites)
     context_dict['VRM_form'] = _create_vrm_login_form()
     return render(request, 'seshdash/settings.html', context_dict)
-    
+
 
 
 # function of adding new site
@@ -924,7 +931,7 @@ def site_add_edit(request):
 @permission_required_or_403('auth.view_Sesh_Site')
 def add_rmc_site(request):
     """
-    This adds an rmc site to 
+    This adds an rmc site to
     the database
     """
     context_dict = {}
@@ -971,19 +978,19 @@ def add_rmc_account(request, site_id):
 
         form = RMCForm(request.POST)
         emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
-        emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")        
+        emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
         bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
 
         sensors_sets =  [emonth_form_set, emontx_form_set, bmv_form_set]
 
         if form.is_valid():
             rmc_account = form.save(commit=False)
-            rmc_account.site = site  
+            rmc_account.site = site
             rmc_account.save()
             associate_sensors_sets_to_site(sensors_sets, site)
             return redirect('index')
-        
-        
+
+
     context_dict['form'] = form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
@@ -1001,13 +1008,13 @@ def get_rmc_config(request):
     """
     context_dict = {}
     api_key = request.GET.get('api_key', '')
-    context_dict['api_key'] = api_key   
+    context_dict['api_key'] = api_key
 
     rmc_account = Sesh_RMC_Account.objects.filter(api_key=api_key).first()
-    
+
     if not rmc_account:
         logger.debug("There is no rmc account associated with the api key")
-        logger.debug("Make sure you rmc site is configured on the server") 
+        logger.debug("Make sure you rmc site is configured on the server")
         return HttpResponse("Invalid api key or not configured")
 
     site = rmc_account.site
@@ -1016,9 +1023,7 @@ def get_rmc_config(request):
     configuration, bmv_number = get_config_sensors(associated_sensors)
     context_dict['configuration']  = configuration
     context_dict['bmv_number'] = bmv_number
- 
-    conf = get_template('seshdash/configs/rmc_config.conf') 
+
+    conf = get_template('seshdash/configs/rmc_config.conf')
 
     return HttpResponse(conf.render(context_dict), content_type='text/plain')
-
-
