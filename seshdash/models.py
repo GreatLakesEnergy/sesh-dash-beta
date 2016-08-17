@@ -651,3 +651,20 @@ class Status_Rule(models.Model):
                }
     def __str__(self):
         return self.battery_rules + self.pv_rules
+
+
+
+class Sensor_Mapping(models.Model):
+    """
+    To contain informations about the sensor mapping
+    of sensors node_ids and sites
+    
+    This helps in the writing of data to the database by 
+    the sesh-api-helper
+    """
+    site_id = models.IntegerField()
+    node_id = models.IntegerField()
+    sensor_type = models.CharField(max_length=40)
+
+    def __str__(self):
+        return "Site_id: " + str(self.site_id) + "node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
