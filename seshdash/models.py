@@ -148,7 +148,7 @@ class Site_Measurements(models.Model):
         return self.sesh_site.site_name
 
 
-class EmonPi(models.Model):
+class Sensor_EmonPi(models.Model):
     """
     This is the default base sensor for each site
     that is used in the rmc config
@@ -197,7 +197,7 @@ class Sesh_Site(models.Model):
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
     site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.SET_NULL)
-    emonpi = models.OneToOneField(EmonPi, editable=False)
+    emonpi = models.OneToOneField(Sensor_EmonPi, editable=False)
 
     def __str__(self):
         return self.site_name
@@ -208,7 +208,7 @@ class Sesh_Site(models.Model):
         if self.pk is None:
             self.status_card = Status_Card.objects.create()
             self.site_measurements = Site_Measurements.objects.create()
-            self.emonpi = EmonPi.objects.create()
+            self.emonpi = Sensor_EmonPi.objects.create()
             super(Sesh_Site, self).save(*args, **kwargs)
         else:
             super(Sesh_Site, self).save(*args, **kwargs)

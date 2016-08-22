@@ -224,7 +224,7 @@ def get_config_sensors(sensors):
             text = t.render({'number': sensor.node_id, 'sensor_number': (bmv_index + 1) })
             bmv_index = bmv_index + 1
 
-        elif type(sensor) is EmonPi:
+        elif type(sensor) is Sensor_EmonPi:
             t = get_template('seshdash/configs/emonpi.conf')
             text = t.render({'number': sensor.node_id})           
         else:
