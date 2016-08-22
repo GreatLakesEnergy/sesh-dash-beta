@@ -171,6 +171,7 @@ class TestAddRMCSite(TestCase):
         configuration, victron_device_number = get_config_sensors(associated_sensors)
 
         self.assertRegexpMatches(configuration, 'emonTH_1')
+        self.assertRegexpMatches(configuration, 'emonPi_')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/plain')

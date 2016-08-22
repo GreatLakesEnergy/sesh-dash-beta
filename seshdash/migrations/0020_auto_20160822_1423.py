@@ -11,16 +11,13 @@ def emonpis_for_sites(apps, schema_editor):
     This will create emonpis for sites that
     are already existing in the database
     """
-    print "About to generate the emopis for each site"
     Sesh_Site = apps.get_model('seshdash', 'Sesh_Site')
     sites = Sesh_Site.objects.all()
-    print "The sites are: %s" % (sites)
     EmonPi = apps.get_model('seshdash', 'EmonPi')
 
     for site in sites:
         site.emonpi = EmonPi.objects.create()
         site.save()
-        print site.emonpi
 
 def reverse_emonpis_for_sites(apps, schema_editor):
     """
