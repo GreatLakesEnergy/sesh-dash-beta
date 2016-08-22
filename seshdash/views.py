@@ -103,11 +103,13 @@ def index(request,site_id=0):
     #getting site measurements
     site_measurements = get_site_measurements(current_site)
     measurements ={}
+
     for measurement in site_measurements:
         #getting verbose names
         measurement_verbose_name = get_measurement_verbose_name(measurement)
         measurements[measurement] = measurement_verbose_name
     context_dict['measurements']= measurements
+
 
     #sites witth weather and battery status
     sites_stats = get_quick_status(sites)
@@ -805,8 +807,6 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            #SI_units = BoM_Data_Point.SI_UNITS
-            #SI_unit = SI_units.get(choice,'V')
             SI_unit = get_measurement_unit(choice)
             # creating an influx instance
             client = Influx()

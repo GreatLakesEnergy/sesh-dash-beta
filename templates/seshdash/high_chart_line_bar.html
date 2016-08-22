@@ -41,16 +41,17 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 		    <div class="row" id ="dynamic_graph_container">
 			     <div id="x-axis" class="col-md-3">
 			          <p>Select option</p>
+
 			          <select class="form-control" id="drop1" value="cloud_cover">
-				              {{ measurements }}
-				              {% for key,value in measurements.items %}
-                                     {% if key = "cloud_cover"%}
-                                         <option value="{{key}}" selected="selected"> {{value}}</option>
-                                     {% else %}
-                                         <option value="{{key}}">{{value}}</option>
-                                     {% endif %}
-				                     {% endfor %}
+				                  {% for key,value in measurements.items %}
+                                         {% if key == "cloud_cover"%}
+                                             <option value="{{key}}" selected="selected"> {{value}}</option>
+                                         {% else %}
+                                             <option value="{{key}}">{{value}}</option>
+                                         {% endif %}
+		                     {% endfor %}
 			          </select>
+
 			    </div>
 			    <div id="y-axis" class="col-md-3">
 			         <p>Select another option</p>
