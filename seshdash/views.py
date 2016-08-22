@@ -5,7 +5,7 @@ from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.shortcuts import redirect
@@ -1015,7 +1015,7 @@ def get_rmc_config(request):
     if not rmc_account:
         logger.debug("There is no rmc account associated with the api key")
         logger.debug("Make sure you rmc site is configured on the server")
-        return HttpResponse("Invalid api key or not configured")
+        return HttpResponseForbidden()
 
     site = rmc_account.site
     associated_sensors = get_all_associated_sensors(site)

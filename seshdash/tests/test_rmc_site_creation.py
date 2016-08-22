@@ -175,3 +175,8 @@ class TestAddRMCSite(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/plain')
+
+	# Testing for invalid apikeys
+        response = self.client.get('/get_rmc_config', {'api_key': 'incorrect'})
+        self.assertEqual(response.status_code, 403)
+  
