@@ -17,9 +17,5 @@ class Migration(migrations.Migration):
             old_name='EmonPi',
             new_name='Sensor_EmonPi',
         ),
-        migrations.AlterField(
-            model_name='sesh_site',
-            name='emonpi',
-            field=models.OneToOneField(editable=False, on_delete=django.db.models.deletion.CASCADE, to='seshdash.EmonPi'),
-        ),
+        
     ]
