@@ -28,7 +28,7 @@ from django.db.models import Avg
 from django.db.models import Sum
 
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
-                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm
+                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -840,76 +840,40 @@ def graphs(request):
 @permission_required_or_403('auth.view_Sesh_Site')
 def edit_site(request,site_Id=1):
     context_dict = {}
-    sites =  _get_user_sites(request)
-    form_add = SiteForm()
-    rmc_form = RMCForm()
-    site = Sesh_Site.objects.filter(id = site_Id).first()
+    site = get_object_or_404(Sesh_Site, id=site_Id)
+    rmc_account = Sesh_RMC_Account.objects.filter(site=site).first();
+
+    # If it is an rmc site create a rmc_form
+    if rmc_account:
+        site_form = SiteRMCForm(instance=site)
+        rmc_form = RMCForm(instance=rmc_account)
+        context_dict['RMCForm'] = rmc_form
+    else:
+        site_form = SiteVRMForm(instance=site)
+
 
     if request.method == 'POST':
-
-        # creating new instance for POST
-        site_Id = request.POST.get('site_Id','')
-        instance = get_object_or_404(Sesh_Site, id=site_Id)
-
-        # RMC form on POST method
-        site = Sesh_Site.objects.filter(id = site_Id).first()
-        rmc_account = Sesh_RMC_Account.objects.filter(site=site).first()
-
         if rmc_account:
-            rmc_account_pk = rmc_account.pk
-            rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
-            rmc_form = RMCForm(request.POST or None,instance=rmc_instance)
+            site_form = SiteRMCForm(request.POST, instance=site)
+            rmc_form = RMCForm(request.POST, instance=rmc_account)
 
-            form = EditSiteForm(request.POST or None, instance=instance)
-
-            #checking if the form is valid
-            if form.is_valid() and rmc_form.is_valid():
-                form = form.save()
-                rmc_form = rmc_form.save()
-
+            if site_form.is_valid() and rmc_form.is_valid():
+                site_form.save()
+                rmc_form.save()
+            
             context_dict['RMCForm'] = rmc_form
         else:
+            site_form = SiteVRMForm(request.POST, instance=site)
+            if site_form.is_valid():
+                site_form.save()
+    
 
-            form = SiteForm(request.POST or None, instance=instance)
-            #checking if the form is valid
-            if form.is_valid():
-                form = form.save()
-    else:
-
-         #creating an instance to populate a form
-         instance = get_object_or_404(Sesh_Site, id=site_Id)
-         form = SiteForm(instance=instance)
-
-         try:
-             if site.vrm_account is None:
-
-                 #creating rmc form instance
-                 rmc_account = Sesh_RMC_Account.objects.filter(site=site).first()
-                 rmc_account_pk = rmc_account.pk
-                 rmc_instance = get_object_or_404(Sesh_RMC_Account, pk = rmc_account_pk)
-                 rmc_form = RMCForm(instance = rmc_instance)
-
-                 #Sesh_Site instance
-                 form = EditSiteForm(instance=instance)
-                 context_dict['RMCForm'] = rmc_form
-         except AttributeError ,e :
-             logger.error("no sesh site")
-             pass
-
-    # user permissions
-    user = request.user
-    permission = get_permissions(user)
-
-    #fetching list of sites for the user
-    user_sites =  _get_user_sites(request)
-    sites_stats = get_quick_status(user_sites)
-
-    context_dict['form_edit']= form
-    context_dict['form_add']= form_add
-    context_dict['site_Id']= site_Id
-    context_dict['sites']=sites
-    context_dict['permitted'] = permission
-    context_dict['sites_stats'] = sites_stats
+    user_sites = _get_user_sites(request)
+    context_dict['VRM_form'] = VRMForm()
+    context_dict['site_form']= site_form
+    context_dict['sites']= user_sites
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request,'seshdash/settings.html', context_dict)
 
 
@@ -923,6 +887,7 @@ def site_add_edit(request):
     context_dict = {}
     sites = _get_user_sites(request)
     context_dict['sites_stats'] = get_quick_status(sites)
+    context_dict['sites'] = sites
     context_dict['VRM_form'] = _create_vrm_login_form()
     return render(request, 'seshdash/settings.html', context_dict)
 

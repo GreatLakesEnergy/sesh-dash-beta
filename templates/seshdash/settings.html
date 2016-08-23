@@ -1,100 +1,81 @@
 {% extends 'seshdash/base.html' %}
 
 {% load staticfiles %}
+{% load bootstrap %}
 
 {% block main %}
-   <div id="page-wrapper">
-      <div id="create_site" class="container">
 
-           <ul class="nav nav-tabs">
 
+    <div id="page-wrapper"> 
+     {# Tabs container #}
+        <div id="create_site" class="container">
+
+            {# Tab titles #}
+            <ul class="nav nav-tabs">
                 <li class="active"><a data-toggle="tab" href="#Edit_site" >Edit Existing site</a></li>
-
                 <li><a data-toggle="tab" href="#Add_site">Add new site</a></li>
+            </ul>
 
-               <!--
-                <li><a data-toggle="tab" href="#Change_settings">Change User Settings</a></li>
+            <div class="tab-content">
 
-                <li><a data-toggle="tab" href="#Add_Import">Add/Import</a></li>
-              -->
-           </ul>
+                {# Tab content -> Edit site #}
+                <div id="Edit_site" class="tab-pane fade in active">
+                    <form method="post" >
+                          {% csrf_token %}
 
-           <div class="tab-content">
 
-                 <div id="Edit_site" class="tab-pane fade in active">
-                   {% csrf_token %}
+                          {# Display a site form if it is there other wise display the sites #}
+                          {% if site_form %}
+                            {{ site_form|bootstrap }}
 
-                   {% if form_edit.as_table|length > 1 %}
-                   {% else%}
-                      <div class="site-list" >
-                        {% block table %}
-                        {% include "seshdash/table.html" %}
-                        {% endblock %}
+
+                            {# If there is an RMCForm display it #}
+                            {% if RMCForm %}
+                                {{ RMCForm|bootstrap }}
+                            {% endif %}
+
+                          {% else %}
+
+                            {% include 'seshdash/table.html' %}
+
+                          {% endif %}
+
+
+                          
+
+                          <button type="submit" class="btn btn-primary button-save">SAVE </button>
+                     </form>
+                 
+                </div>
+
+                {# Tab content -> Add site #}
+                <div id="Add_site" class="tab-pane fade">
+                    <h3> Add a new Sesh Site</h3>
+
+                    <div class="rmc-vrm row">
+
+                      <div class="col-md-6">
+                          {% include 'seshdash/rmc-card.html' %}
                       </div>
-                   {% endif %}
 
-                      <div class="edit-sites">
-
-                        <form action="/edit_site" method="post" novalidate>
-                                 <table class="table">
-
-                                        {% csrf_token %}
-
-                                        {% if form_edit.as_table|length > 1 %}
-
-                                            {{ form_edit.as_table }}
-
-                                            {{ RMCForm.as_table }}
-                                                 <input type="text" value="{{site_Id}}" name="site_Id" hidden>
-                                         <tr>
-                                            <td>
-                                                <button type="submit" class="btn btn-primary button-save">SAVE </button>
-                                            </td>
-                                         </tr>
-                                         {% else %}
-                                        {% endif %}
-                                   </table>
-                         </form>
-
+                      <div class="col-md-6">
+                           {% include 'seshdash/vrm-card.html' %}
                       </div>
-                  </div>
 
-                  <div id="Add_site" class="tab-pane fade">
-                                       <h3> Add a new Sesh Site</h3>
+                    </div>
 
+                </div>
 
-                                            <div class="rmc-vrm row">
-
-                                              <div class="col-md-6">
-                                                   {% include 'seshdash/rmc-card.html' %}
-                                              </div>
-
-
-                                              <div class="col-md-6">
-                                                   {% include 'seshdash/vrm-card.html' %}
-                                              </div>
-
-                                            </div>
-
-
-
-                                        <!--
-                                        <button type="submit" class="btn btn-default">SAVE </button>
-                                        -->
-                                </form>
-                  </div>
-
-                 <div id="Change_settings" class="tab-pane fade">
-
-                 </div>
-
-                 <div id="Add_Import" class="tab-pane fade">
-
-                 </div >
-
-     </div>
+            </div>
+        </div>
     </div>
-  </div>
+
+
 {% endblock %}
+
+
 {% block seshjs %}
+{% endblock %}
+
+{% block footer %}
 {% endblock %}
