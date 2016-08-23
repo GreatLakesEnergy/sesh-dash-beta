@@ -147,6 +147,32 @@ class Site_Measurements(models.Model):
     def __str__(self):
         return self.sesh_site.site_name
 
+
+class Sensor_EmonPi(models.Model):
+    """
+    This is the default base sensor for each site
+    that is used in the rmc config
+    """
+    node_id = models.IntegerField(default=5, editable=False)
+    index1 = models.CharField(max_length=40, default="power1")
+    index2 = models.CharField(max_length=40, default="power2")
+    index3 = models.CharField(max_length=40, default="power3")
+    index4 = models.CharField(max_length=40, default="power4")
+    index5 = models.CharField(max_length=40, default="v_battery_bank")
+    index6 = models.CharField(max_length=40, default="Vrms")
+    index7 = models.CharField(max_length=40, default="T1")
+    index8 = models.CharField(max_length=40, default="T2")
+    index9 = models.CharField(max_length=40, default="T3")
+    index10 = models.CharField(max_length=40, default="T4")
+    index11 = models.CharField(max_length=40, default="T5")
+    index12 = models.CharField(max_length=40, default="T6")
+    index13 = models.CharField(max_length=40, default="pulseCount")
+
+    def __str__(self):
+        return "Emon pi for site %s " % self.sesh_site.site_name
+    
+
+
 class Sesh_Site(models.Model):
     """
     Model for each PV SESH installed site
@@ -171,20 +197,19 @@ class Sesh_Site(models.Model):
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
     site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.SET_NULL)
+    emonpi = models.OneToOneField(Sensor_EmonPi, editable=False)
 
     def __str__(self):
         return self.site_name
 
 
     def save(self, *args, **kwargs):
-        # Creating a defaults status card
+        # If site is being created
         if self.pk is None:
-            status_card = Status_Card.objects.create()
-            site_measurements = Site_Measurements.objects.create()
+            self.status_card = Status_Card.objects.create()
+            self.site_measurements = Site_Measurements.objects.create()
+            self.emonpi = Sensor_EmonPi.objects.create()
             super(Sesh_Site, self).save(*args, **kwargs)
-            self.status_card = status_card
-            self.site_measurements = site_measurements
-            self.save()
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
 
@@ -539,6 +564,8 @@ SENSORS_LIST = {
     'BMV'
 }
 
+
+
 class Sensor_EmonTx(models.Model):
      """
      Table representative for the emon tx
@@ -578,7 +605,6 @@ class Sensor_EmonTh(models.Model):
      Table Representive structure fo the emon th
      """
      NODE_ID_CHOICES = (
-                    (5, 5),
                     (6, 6),
                     (7, 7),
                     (8, 8),

@@ -166,7 +166,7 @@ $(function(){
         addSensor = $('.add-another-sensor'),
         configureSensor = $('.configure-sensor'),
         removeSensor = $('.remove-sensor'),
-        sensorSelectorInputs = $('.sensor-selector');
+        sensorSelectorInputs = $('.sensor-selector.sensor-changeable');
 
 
     changeConfigureForm(sensorSelectorInputs.first(), sensorSelectorInputs.first().val()); // Adding a form to the first sensor
@@ -175,7 +175,7 @@ $(function(){
     InitializeSensors();
 
     // Getting the general structure of the container
-    sensorHTMLStructure = sensorListContainer.html();
+    sensorHTMLStructure = sensorListContainer.children('.sensor-form-structure')[0].outerHTML;
 
     addSensor.click(function(){
         sensorListContainer.append(sensorHTMLStructure);
@@ -197,7 +197,6 @@ function InitializeSensors() {
     });
 
     configureSensor.unbind().click(function(){
-        console.log($(this).parent().siblings('.configure-form-container').length);
         $(this).parent().parent().siblings('.configure-form-container').toggle();
     });
 
@@ -208,7 +207,7 @@ function InitializeSensors() {
 
 function HandleRemoveSensor(removeSensorButton) {
     // Handles the deletion of a sensor in adding rmc account
-    removeSensorButton.parent().parent().parent().remove();
+    removeSensorButton.closest('.sensor-container').remove();
 }
 
 
@@ -219,7 +218,10 @@ function HandleSensorSelectors(sensorSelector){
 }
 
 function changeConfigureForm(sensorSelectorInput, sensorType) {
-    // Replaces the content of the configure form container
+    /* Replaces the content of the configure form container
+        var sensorSelectorInput is used to determine the location to add the form and
+        var sensorType is used to determine the type of the form to add.
+    */
     var form;
 
     if (sensorType == 'Emon Th') {
@@ -233,6 +235,6 @@ function changeConfigureForm(sensorSelectorInput, sensorType) {
     }
 
     sensorSelectorInput.parent().parent().parent()
-                      .children('.configure-form-container').html(form);
+                      .children('.configure-form-container').html(form).hide();
 
 }

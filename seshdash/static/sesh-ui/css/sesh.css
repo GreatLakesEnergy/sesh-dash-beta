@@ -301,3 +301,7 @@ span.quick-status {
   width: 40%;
   padding: 20px;
 }
+
+.menu-button-container {
+  padding: 15px 20px;
+}

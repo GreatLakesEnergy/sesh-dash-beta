@@ -23,8 +23,8 @@ class RMCTestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
-
         self.location = Geoposition(52.5,24.3)
+
 
         self.site = Sesh_Site.objects.create(site_name=u"Test site",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
@@ -37,7 +37,8 @@ class RMCTestCase(TestCase):
                                              vrm_site_id=213,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
-                                             has_grid=True)
+                                             has_grid=True,
+                                            )
 
         #create sesh rmc account
         self.test_rmc_account = Sesh_RMC_Account.objects.create(api_key='lcda5c15ae5cdsac464zx8f49asc16a')

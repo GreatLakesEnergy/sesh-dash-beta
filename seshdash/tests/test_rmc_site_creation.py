@@ -11,7 +11,7 @@ from django.utils import timezone
 # Other libs
 from geoposition import Geoposition
 
-from seshdash.models import Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV, Sensor_Mapping
+from seshdash.models import Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Sensor_Mapping
 from seshdash.utils.model_tools import get_all_associated_sensors, get_config_sensors
 
 class TestAddRMCSite(TestCase):
@@ -135,7 +135,22 @@ class TestAddRMCSite(TestCase):
                            'bmv-0-index5': 'something',
                            'bmv-0-index6': 'things',
                            'bmv-0-index7': 'everything',
+                           'emonpi-index1': 'testing',
+                           'emonpi-index2': 'continue-testing',
+                           'emonpi-index3': 'continue-testing',
+                           'emonpi-index4': 'continue-testing',
+                           'emonpi-index5': 'continue-testing',
+                           'emonpi-index6': 'continue-testing',
+                           'emonpi-index7': 'continue-testing',
+                           'emonpi-index8': 'continue-testing',
+                           'emonpi-index9': 'continue-testing',
+                           'emonpi-index10': 'continue-testing',
+                           'emonpi-index11': 'continue-testing',
+                           'emonpi-index12': 'continue-testing',
+                           'emonpi-index13': 'continue-testing',
+
                    })
+
 
         # Testing the rediction to the page that is shown after a rmc account is added which is the index
         self.assertEqual(response.status_code, 302)
@@ -159,6 +174,11 @@ class TestAddRMCSite(TestCase):
         # Asserting the number of sensor mappings created
         self.assertEqual(Sensor_Mapping.objects.all().count(), 5)
 
+
+        # Testing editing emonpi sensor site
+        emonpi = Sensor_EmonPi.objects.filter(sesh_site=self.site).first()
+        self.assertEqual(emonpi.index1, 'testing')
+
     def test_get_rmc_config(self):
         """
         Testing the generation of the rmc config file for a
@@ -171,6 +191,12 @@ class TestAddRMCSite(TestCase):
         configuration, victron_device_number = get_config_sensors(associated_sensors)
 
         self.assertRegexpMatches(configuration, 'emonTH_1')
+        self.assertRegexpMatches(configuration, 'emonPi_')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/plain')
+
+	# Testing for invalid apikeys
+        response = self.client.get('/get_rmc_config', {'api_key': 'incorrect'})
+        self.assertEqual(response.status_code, 403)
+  

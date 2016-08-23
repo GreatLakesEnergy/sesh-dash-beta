@@ -136,7 +136,7 @@ def get_status_card_items(site):
         logger.error(e)
         pass
     except Exception  ,e :
-        looger.error(e)
+        logger.error(e)
         pass
 
 def get_site_measurements(site):
@@ -179,6 +179,10 @@ def get_all_associated_sensors(site):
     """
     sensors_list = []
 
+    if site.emonpi:
+        sensors_list.append(site.emonpi)
+
+
     for model in [Sensor_EmonTx, Sensor_EmonTh, Sensor_BMV]:
         sensors = model.objects.filter(site=site)
 
@@ -220,6 +224,9 @@ def get_config_sensors(sensors):
             text = t.render({'number': sensor.node_id, 'sensor_number': (bmv_index + 1) })
             bmv_index = bmv_index + 1
 
+        elif type(sensor) is Sensor_EmonPi:
+            t = get_template('seshdash/configs/emonpi.conf')
+            text = t.render({'number': sensor.node_id})           
         else:
             logger.error("Invalid sensor")
             raise Exception("Invalid sensor")

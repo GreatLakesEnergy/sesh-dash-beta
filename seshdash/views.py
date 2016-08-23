@@ -5,7 +5,7 @@ from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.shortcuts import redirect
@@ -26,7 +26,9 @@ from guardian.decorators import permission_required_or_403
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point, RMC_status
 from django.db.models import Avg
 from django.db.models import Sum
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm, SensorEmonTxForm, SensorBMVForm, EditSiteForm
+
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
+                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -970,28 +972,35 @@ def add_rmc_account(request, site_id):
     emontx_form_set = emonTxFormSetFactory(prefix="emontx")
     bmv_form_set = bmvFormSetFactory(prefix="bmv")
 
+    # emonpi form
+    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site.emonpi)
 
     context_dict = {}
-    form = RMCForm()
+    rmc_form = RMCForm()
 
     if request.method == 'POST':
 
-        form = RMCForm(request.POST)
+        rmc_form = RMCForm(request.POST)
+        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site.emonpi)
         emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
         emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
         bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
 
         sensors_sets =  [emonth_form_set, emontx_form_set, bmv_form_set]
 
-        if form.is_valid():
-            rmc_account = form.save(commit=False)
+        if rmc_form.is_valid():
+            rmc_account = rmc_form.save(commit=False)
             rmc_account.site = site
             rmc_account.save()
             associate_sensors_sets_to_site(sensors_sets, site)
+            if emonpi_form.is_valid():
+                emonpi_form.save()
+                
             return redirect('index')
 
 
-    context_dict['form'] = form
+    context_dict['rmc_form'] = rmc_form
+    context_dict['emonpi_form'] = emonpi_form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
     context_dict['emonth_form'] = emonThFormSetFactory(prefix="emonth")
@@ -1015,7 +1024,7 @@ def get_rmc_config(request):
     if not rmc_account:
         logger.debug("There is no rmc account associated with the api key")
         logger.debug("Make sure you rmc site is configured on the server")
-        return HttpResponse("Invalid api key or not configured")
+        return HttpResponseForbidden()
 
     site = rmc_account.site
     associated_sensors = get_all_associated_sensors(site)
