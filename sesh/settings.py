@@ -183,6 +183,13 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Kigali'
+CELERY_SEND_TASK_ERROR_EMAILS = True
+
+# Use this for emailing celery task failures
+ADMINS = (
+            ('Alp Tilev', 'alp@gle.solar'),
+            )
+
 CELERYBEAT_SCHEDULE = {
    'get_daily_weather_forecast': {
         'task': 'seshdash.tasks.get_weather_data',
@@ -220,16 +227,26 @@ CELERYBEAT_SCHEDULE = {
         'args': '',
        },
 }
-#authentication
+# Authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
-#mail
+
+
+# Email
 EMAIL_USE_TLS = True
 EMAIL_HOST = config.get('mail','EMAIL_HOST')
 EMAIL_PORT = config.get('mail','EMAIL_PORT')
 EMAIL_HOST_USER = config.get('mail','EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+
+# SETUP Celery Email
+# Email address used as sender (From field).
+SERVER_EMAIL = 'reports@gle.solar'
+
+
 #email_templates_dir = os.path.join(template_dir,'email')
 FROM_EMAIL = config.get('mail','FROM_EMAIL')
 

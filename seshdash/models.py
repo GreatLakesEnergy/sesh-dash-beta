@@ -211,8 +211,8 @@ class Sesh_RMC_Account(models.Model):
     API key used by SESH EMON node to communicate
     """
     site = models.OneToOneField(Sesh_Site, on_delete = models.CASCADE, primary_key = True)
-    api_key = models.CharField(max_length=130,default="")
-    api_key_numeric = models.CharField(max_length=130, default="")
+    api_key = models.CharField(max_length=130,default="", unique=True)
+    api_key_numeric = models.CharField(max_length=130, default="", unique=True)
 
     def __str__(self):
         return "alphanum:%s numeric:%s "%(self.api_key,self.api_key_numeric)
