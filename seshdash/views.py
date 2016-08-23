@@ -973,7 +973,7 @@ def add_rmc_account(request, site_id):
     bmv_form_set = bmvFormSetFactory(prefix="bmv")
 
     # emonpi form
-    emonpi_form = SensorEmonPiForm(prefix='emonpi')
+    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site.emonpi)
 
     context_dict = {}
     rmc_form = RMCForm()
@@ -981,17 +981,21 @@ def add_rmc_account(request, site_id):
     if request.method == 'POST':
 
         rmc_form = RMCForm(request.POST)
+        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site.emonpi)
         emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
         emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
         bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
 
         sensors_sets =  [emonth_form_set, emontx_form_set, bmv_form_set]
 
-        if form.is_valid():
-            rmc_account = form.save(commit=False)
+        if rmc_form.is_valid():
+            rmc_account = rmc_form.save(commit=False)
             rmc_account.site = site
             rmc_account.save()
             associate_sensors_sets_to_site(sensors_sets, site)
+            if emonpi_form.is_valid():
+                emonpi_form.save()
+                
             return redirect('index')
 
 

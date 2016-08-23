@@ -136,7 +136,7 @@ def get_status_card_items(site):
         logger.error(e)
         pass
     except Exception  ,e :
-        looger.error(e)
+        logger.error(e)
         pass
 
 def get_site_measurements(site):
