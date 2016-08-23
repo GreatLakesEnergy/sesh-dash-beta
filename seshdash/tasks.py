@@ -32,9 +32,7 @@ def handle_task_failure(**kw):
     logger.error("CELERY TASK FAILURE:%s"%(message))
     if not settings.DEBUG:
         import rollbar
-        trace = sys.exc_info()
-        kw['trace'] = trace
-        rollbar.report_message(message=message,extra_data=kw)
+        rollbar.report_exc_info(message=message,extra_data=kw)
 
 
 def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
@@ -166,7 +164,7 @@ def get_BOM_data():
         except Exception ,e:
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
-            handle_task_failure(message = message, exception=e)
+            handle_task_failure(message = message, exception=e, name='get_BOM_data' )
             pass
 
 
@@ -233,7 +231,7 @@ def get_historical_BoM(site_pk,start_at):
                     message = "error with creating data point  data exception %s"%(e)
                     logger.debug(message)
                     logger.exception( message )
-                    handle_task_failure(message = message)
+                    handle_task_failure(message = message, name= 'get_Hitorical_bom')
                     pass
 
         logger.debug("saved %s BoM data points"%count)
@@ -492,6 +490,7 @@ def get_aggregate_daily_data(date=None):
             agg_dict['aggregate_data_grid'] = get_aggregate_data (site, 'AC_input', clause='positive',start=date_to_fetch)[0]
             agg_dict['aggregate_data_grid_data'] = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
 
+            # Calculate outage data
             logger.debug("aggregate date for grid %s "%agg_dict['aggregate_data_grid_data'])
             aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
             aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
@@ -520,6 +519,11 @@ def get_aggregate_daily_data(date=None):
                 pass
             except Exception,e:
                 logger.exception('Unkown error occured aggregatin data')
+                message = "error with creating data point  data exception %s"%(e)
+                logger.debug(message)
+                logger.exception( message )
+                handle_task_failure(message = message, name= 'get_aggregate_daily_data')
+
                 pass
             #send to influx
             send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
