@@ -43,20 +43,9 @@ class SiteRMCForm(ModelForm):
     required_css_class = "info"
 
 
-#    def clean(self):
-#        """
-#        Add timezone based on location
-#        """
-#        cleaned_data = super(SiteRMCForm, self).clean()
-#        pos = cleaned_data.get('position')
-#        timezone = get_timezone_from_geo(pos[0], pos[1])
-#        self.cleaned_data['time_zone'] = timezone
-#        return cleaned_data
-
-
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','import_data','time_zone')
+        exclude = ('vrm_account','vrm_site_id','import_data', 'status_card', 'site_measurements')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
