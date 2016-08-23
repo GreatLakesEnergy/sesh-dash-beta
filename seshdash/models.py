@@ -128,21 +128,21 @@ class Site_Measurements(models.Model):
          ("daily_pv_yield", "Daily Pv Yield"),
     )
 
-    row1 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='soc')
-    row2 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='battery_voltage')
-    row3 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output_absolute')
-    row4 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Load_in')
-    row5 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Load_out')
-    row6 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Voltage_in')
-    row7 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_Voltage_out')
-    row8 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_input')
-    row9 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True, default='AC_output')
-    row10 = models.CharField(max_length=30, choices=ROW_CHOICES, null= True, default='cloud_cover')
-    row11 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
-    row12 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
-    row13 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
-    row14 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
-    row15 = models.CharField(max_length=30, choices=ROW_CHOICES, null=True)
+    row1 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='soc')
+    row2 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='battery_voltage')
+    row3 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_output_absolute')
+    row4 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Load_in')
+    row5 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Load_out')
+    row6 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Voltage_in')
+    row7 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Voltage_out')
+    row8 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_input')
+    row9 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_output')
+    row10 = models.CharField(max_length=30, choices=ROW_CHOICES, default='cloud_cover')
+    row11 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_pv_yield')
+    row12 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_battery_charge')
+    row13 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_power_consumption_total')
+    row14 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_power_cons_pv')
+    row15 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_grid_outage_n')
 
     def __str__(self):
         return self.sesh_site.site_name
@@ -370,29 +370,6 @@ class BoM_Data_Point(models.Model):
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
 
-    """
-    SI units
-    """
-    SI_UNITS = {
-         "id": '',
-         "soc":"%",
-         "battery_voltage": "V",
-         "AC_Voltage_in" : "V",
-         "AC_Voltage_out" : "V",
-         "AC_input" : "W",
-         "AC_output" : "W",
-         "AC_Load_in" : "A",
-         "AC_Load_out" : "A",
-         "pv_production" : "Wh",
-         "main_on" : "",
-         "relay_state": "",
-         "trans" : "",
-         "genset_state" : "",
-         "site" : "",
-         "AC_output_absolute" : "Wh",
-         "cloud_cover":"Okta",
-         }
-
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
@@ -416,6 +393,7 @@ class Daily_Data_Point(models.Model):
         "AC_output" : "W",
         "AC_Load_in" : "A",
         "AC_Load_out" : "A",
+        "cloud_cover":"%",
         "pv_production" : "W",
         "main_on" : "",
         "relay_state": "",
@@ -562,7 +540,7 @@ SENSORS_LIST = {
 }
 
 class Sensor_EmonTx(models.Model):
-     """ 		
+     """
      Table representative for the emon tx
      """
      NODE_ID_CHOICES = (
@@ -589,6 +567,10 @@ class Sensor_EmonTx(models.Model):
      def __str__(self):
          return "Emon tx sensor for " + self.site.site_name
 
+     def save(self, *args, **kwargs):
+         Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emontx')
+         super(Sensor_EmonTx, self).save(*args, **kwargs)
+
 
 
 class Sensor_EmonTh(models.Model):
@@ -611,6 +593,10 @@ class Sensor_EmonTh(models.Model):
 
      def __str__(self):
          return "Emon th sensor for " +  self.site.site_name
+
+     def save(self, *args, **kwargs):
+        Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
+        super(Sensor_EmonTh, self).save(*args, **kwargs)
 
 
 
@@ -635,6 +621,9 @@ class Sensor_BMV(models.Model):
     def __str__(self):
         return "BMV sensor for " + self.site.site_name
 
+    def save(self, *args, **kwargs):
+        Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
+        super(Sensor_BMV, self).save(*args, **kwargs)
 
 class Status_Rule(models.Model):
     """
@@ -651,3 +640,23 @@ class Status_Rule(models.Model):
                }
     def __str__(self):
         return self.battery_rules + self.pv_rules
+
+
+
+class Sensor_Mapping(models.Model):
+    """
+    To contain informations about the sensor mapping
+    of sensors node_ids and sites
+    
+    This helps in the writing of data to the database by 
+    the sesh-api-helper
+    """
+    site_id = models.IntegerField()
+    node_id = models.IntegerField()
+    sensor_type = models.CharField(max_length=40)
+
+    def __str__(self):
+        return "Site_id: " + str(self.site_id) + "node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
+
+    class Meta:
+        unique_together =  ('site_id', 'node_id', 'sensor_type')

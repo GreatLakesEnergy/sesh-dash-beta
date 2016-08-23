@@ -11,7 +11,7 @@ from django.utils import timezone
 # Other libs
 from geoposition import Geoposition
 
-from seshdash.models import Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV
+from seshdash.models import Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV, Sensor_Mapping
 from seshdash.utils.model_tools import get_all_associated_sensors, get_config_sensors
 
 class TestAddRMCSite(TestCase):
@@ -119,7 +119,7 @@ class TestAddRMCSite(TestCase):
                            'emonth-MAX_NUM_FORMS': '1000',
                            'emonth-TOTAL_FORMS': '1',
                            'emonth-INITIAL_FORMS': '0',
-                           'emonth-0-node_id': '5',
+                           'emonth-0-node_id': '6',
                            'emonth-0-index1': 'soc',
                            'emonth-0-index2': 'battery_voltage',
                            'emonth-0-index3': 'battery_load',
@@ -155,6 +155,9 @@ class TestAddRMCSite(TestCase):
         # Asserting the creation of the bmv sensor and the linking to the site
         self.assertEqual(Sensor_BMV.objects.all().count(), 1)
         self.assertEqual(Sensor_BMV.objects.all().last().site, self.site)
+
+        # Asserting the number of sensor mappings created
+        self.assertEqual(Sensor_Mapping.objects.all().count(), 5)
 
     def test_get_rmc_config(self):
         """
