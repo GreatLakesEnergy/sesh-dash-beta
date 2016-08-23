@@ -26,7 +26,9 @@ from guardian.decorators import permission_required_or_403
 from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point, RMC_status
 from django.db.models import Avg
 from django.db.models import Sum
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm, SensorEmonTxForm, SensorBMVForm, EditSiteForm
+
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
+                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -970,13 +972,15 @@ def add_rmc_account(request, site_id):
     emontx_form_set = emonTxFormSetFactory(prefix="emontx")
     bmv_form_set = bmvFormSetFactory(prefix="bmv")
 
+    # emonpi form
+    emonpi_form = SensorEmonPiForm(prefix='emonpi')
 
     context_dict = {}
-    form = RMCForm()
+    rmc_form = RMCForm()
 
     if request.method == 'POST':
 
-        form = RMCForm(request.POST)
+        rmc_form = RMCForm(request.POST)
         emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
         emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
         bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
@@ -991,7 +995,8 @@ def add_rmc_account(request, site_id):
             return redirect('index')
 
 
-    context_dict['form'] = form
+    context_dict['rmc_form'] = rmc_form
+    context_dict['emonpi_form'] = emonpi_form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
     context_dict['emonth_form'] = emonThFormSetFactory(prefix="emonth")

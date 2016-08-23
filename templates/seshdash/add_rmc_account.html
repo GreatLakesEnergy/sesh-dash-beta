@@ -18,38 +18,58 @@
 
             <form class="" method="post" action="{% url 'add_rmc_account' site_id %}">
                 {% csrf_token %}
-                {{form|bootstrap}}
+                {{rmc_form|bootstrap}}
 
                 <div class="sensor-list-container">
                     
 
-                    <div class="sensor-container " >
+                        <div class="sensor-container " >
+                            <div class="row emonpi-sensor">
+                                <div class="form-group col-xs-8">
+                                    <select class="sensor-selector form-control" name="sensor" class="disabled">
+                                        <option name="emonpi">EmonPi</option>
+                                    </select>
+                                </div>
 
-                        <div class="row">
+                                <div class="col-xs-4">
+                                    <span class="glyphicon glyphicon-cog configure-sensor pos-glyphicon"></span>
+                                </div>
 
-                            <div class="form-group col-xs-8">
-                                 <select class="sensor-selector form-control" name="sensor">
-                                    {% for sensor in sensors_list %}
-                                        <option name="{{sensor}}">{{sensor}}</option>
-                                    {% endfor %}}
-                                </select>
-                            </div>
-                      
-                            <div class="col-xs-4">
-                                <span class="glyphicon glyphicon-remove remove-sensor pos-glyphicon"></span>
-                                <span class="glyphicon glyphicon-cog configure-sensor pos-glyphicon"></span>
                             </div>
 
+                            <div class="row configure-form-container">
+                                {{ emonpi_form|bootstrap }}
+                            </div>
+        
                         </div>
-  
-                        <div class="row configure-form-container">
+
+                        <div class="sensor-container sensor-form-structure">
+                            <div class="row">
+
+                                <div class="form-group col-xs-8">
+                                     <select class="sensor-selector sensor-changeable form-control" name="sensor">
+                                        {% for sensor in sensors_list %}
+                                            <option name="{{sensor}}">{{sensor}}</option>
+                                        {% endfor %}}
+                                    </select>
+                                </div>
+                          
+                                <div class="col-xs-4">
+                                    <span class="glyphicon glyphicon-remove remove-sensor pos-glyphicon"></span>
+                                    <span class="glyphicon glyphicon-cog configure-sensor pos-glyphicon"></span>
+                                </div>
+
+                            </div>
+      
+                            <div class="row configure-form-container">
+                            </div>
                         </div>
 
                     </div>
 
                 </div>
 
-                <div class="">
+                <div class="menu-button-container">
                      <a class="add-another-sensor" href="#">Add another sensor</a><br><br>
 
                      <input type="submit" class="btn btn-primary" value="Create RMC Account">
@@ -64,6 +84,10 @@
 
 {% endblock %}
 
+
+{# Removing the footer from this page #}
+{% block footer %}
+{% endblock %}
 
 {% block seshjs %}
 
