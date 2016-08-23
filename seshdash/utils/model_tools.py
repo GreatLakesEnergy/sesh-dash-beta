@@ -179,6 +179,7 @@ def get_all_associated_sensors(site):
     """
     sensors_list = []
 
+    # Getting the emonpi configuration separately because it is OneToOneField related rather than ForeignKey
     if site.emonpi:
         sensors_list.append(site.emonpi)
 

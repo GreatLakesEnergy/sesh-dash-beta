@@ -65,6 +65,7 @@ class TestAddRMCSite(TestCase):
                            'system_voltage': '45',
                            'number_of_panels': '10',
                            'battery_bank_capacity': '400',
+                           'time_zone': 'Africa/Kigali',
                    })
 
 

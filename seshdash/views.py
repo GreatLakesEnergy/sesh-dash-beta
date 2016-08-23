@@ -939,14 +939,14 @@ def add_rmc_site(request):
     context_dict = {}
 
     if request.method == 'POST':
-        form = SiteForm(request.POST)
+        form = SiteRMCForm(request.POST)
 
         if form.is_valid():
             form = form.save()
             return HttpResponseRedirect(reverse('add_rmc_account', args=[form.id]))
 
     else:
-        form = SiteForm()
+        form = SiteRMCForm()
 
     context_dict['form'] = form
     return render(request, 'seshdash/add_rmc_site.html', context_dict)
