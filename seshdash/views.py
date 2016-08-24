@@ -860,6 +860,7 @@ def edit_site(request,site_Id=1):
             if site_form.is_valid() and rmc_form.is_valid():
                 site_form.save()
                 rmc_form.save()
+
             
             context_dict['RMCForm'] = rmc_form
         else:
