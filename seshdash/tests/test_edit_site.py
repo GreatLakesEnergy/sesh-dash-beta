@@ -35,7 +35,7 @@ class AddTestCase(TestCase):
                         comission_date=timezone.now(),
                         location_city='Kigali',
                         location_country='Rwanda',
-                        position=Geoposition(12,1),
+                        position=self.location,
                         installed_kw=25,
                         system_voltage=45,
                         number_of_panels=45,
@@ -43,45 +43,18 @@ class AddTestCase(TestCase):
                    )
                         
 
-        self.data_point = Data_Point.objects.create(site=self.site,
-                                                    soc=10,
-                                                    battery_voltage=20,
-                                                    time=timezone.now(),
-                                                    AC_input=0.0,
-                                                    AC_output=15.0,
-                                                    AC_Load_in=0.0,
-                                                    AC_Load_out=-0.7)
-        #creating weather data model
-        self.site_weather = Site_Weather_Data.objects.create(site = self.site,
-                                                             date = timezone.datetime(2016, 10, 10, 10, 10),
-                                                             temp = 0,
-                                                             condition = "none",
-                                                             cloud_cover = 0.2,
-                                                             sunrise = timezone.now(),
-                                                             sunset = timezone.now())
-        #create sesh rmc account
-        self.test_rmc_account = Sesh_RMC_Account(site = self.site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
-        self.test_rmc_account.save()
 
-        #create rmc status
-        self.test_rmc_status = RMC_status.objects.create(site=self.site,
-                                                        ip_address='127.0.0.1',
-                                                        minutes_last_contact=100,
-                                                        signal_strength=27,
-                                                        data_sent_24h=12,
-                                                        time=datetime.now())
-        self.test_rmc_status.save()
+        #create sesh rmc account
+        self.test_rmc_account = Sesh_RMC_Account.objects.create(site=self.site,
+                                                                api_key='lcda5c15ae5cdsac464zx8f49asc16a')
+
+
 
         #create test user
-        self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
+        self.test_user = User.objects.create_user("test_user", "alp@gle.solar", "cdakcjocajica")
         self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
         #assign a user to the sites
 
-
-        assign_perm("view_Sesh_Site",self.test_user,self.site)
-        assign_perm("change_sesh_site",self.test_user,self.site)
-        assign_perm("add_sesh_site",self.test_user,self.site)
-        assign_perm("delete_sesh_site",self.test_user,self.site)
 
 
         generate_auto_rules(self.site.pk)
@@ -90,81 +63,31 @@ class AddTestCase(TestCase):
 
 
     def test_edit_site(self):
-        f = Client()
-        f.login(username = "frank",password = "password")
-        data={'site_name':u'kibuye',
-                              'comission_date':datetime(2015,12,11,22,0),
-                              'location_city':u'kigali',
-                              'location_country':u'rwanda',
-                              'time_zone':'Africa/Kigali',
-                              'position_0':36,
-                              'position_1':42,
-                              'installed_kw':2,
-                              'system_voltage':4,
-                              'number_of_panels':100,
-                              'site_Id':2,
-                              'battery_bank_capacity':1200}
-        form = SiteForm(data)
+        c = Client()
+        c.login(username = "frank",password = "password")
+        data= {'site_name':u'kibuye',
+               'comission_date':datetime(2015,12,11,22,0),
+               'location_city':u'kigali',
+               'location_country':u'rwanda',
+               'time_zone':'Africa/Kigali',
+               'position_0':36,
+               'position_1':42,
+               'installed_kw':2,
+               'system_voltage':4,
+               'number_of_panels':100,
+               'site_Id':2,
+               'battery_bank_capacity':1200,
+               'api_key': 'testing',
+               'api_key_numeric': '123456'}
 
-        # checking if site is valid
-        self.assertTrue(form.is_valid())
-        form.save()
+        response = c.post('/edit_site/' + str(self.site.id) , data)
 
-        # checking created site
-        sites = Sesh_Site.objects.all()
-        self.assertEqual(len(sites),2)
-
-        site = sites.last()
-        #create sesh rmc account
-        self.test_rmc_account = Sesh_RMC_Account(site = site, api_key='lcda5c15ae5cdsac464zx8f49asc16a')
-        self.test_rmc_account.save()
-
-        # submit form
-        response = f.post('/edit_site',data)
-        self.assertEqual(response.status_code,200)
-
-        #checking aonther user
-        r = Client()
-        r.login(username="patrick",password="cdakcjocajica")
-        response = r.post('/edit_site',data)
-        self.assertEqual(response.status_code,403)
-
-        #checking if a valid id is passed
-        response = f.get('/edit_site/2')
-        self.assertEqual(response.status_code,200)
-        # checking if a wrong id is passed
-        response = f.get('/edit_site/5')
-        self.assertEqual(response.status_code,404)
-
-    def test_add_site(self):
-        f = Client()
-        f.login(username = "frank",password = "password")
-        data={'site_name':u'kibuye',
-                              'comission_date':datetime(2015,12,11,22,0),
-                              'location_city':u'kigali',
-                              'location_country':u'rwanda',
-                              'time_zone':'Africa/Kigali',
-                              'position_0':36,
-                              'position_1':42,
-                              'installed_kw':2,
-                              'system_voltage':4,
-                              'number_of_panels':100,
-                              'battery_bank_capacity':1200}
-        form = SiteForm(data)
-        # testing form is valid
-        self.assertTrue(form.is_valid())
-        # checking created site
-        sites = Sesh_Site.objects.all()
-        self.assertEqual(len(sites),1)
-        response = f.post('/add_site', data)
+        # Testing if the site has been edited succesfully
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(Sesh_Site.objects.first().site_name, 'kibuye')
 
-        #checking aonther user
-        r = Client()
-        r.login(username="patrick",password="cdakcjocajica")
-        response = r.post('/edit_site',data)
-        self.assertEqual(response.status_code,403)
 
-        # test status card created
-        site = Sesh_Site.objects.last()
-        self.assertNotEqual(site.status_card, None)
+        # Checking for another unauthorized user
+        c.login(username="test_user",password="cdakcjocajica")
+        response = c.post('/edit_site/' + str(self.site.id), data)
+        self.assertEqual(response.status_code, 403)

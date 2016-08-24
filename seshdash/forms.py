@@ -50,6 +50,16 @@ class SiteRMCForm(ModelForm):
         widgets = {'comission_date':forms.DateInput()}
 
 
+class SiteVRMForm(ModelForm):
+    """ 
+    Form for a vrm site 
+    """
+    class Meta:
+        model = Sesh_Site
+        exclude = ('vrm_account', 'vrm_site_id', 'status_card', 'site_measurements')
+
+
+
 class RMCForm(ModelForm):
     error_css_class = "warning"
     required_css_class = "info"
