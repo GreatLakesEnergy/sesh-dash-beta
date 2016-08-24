@@ -352,7 +352,6 @@ def get_alert_point(alert):
 
     if is_influx_rule(rule):
         point = influx.get_point(check_field, alert.point_id)
-
     else:
         point = get_model_first_reference(model_name, alert)
 
@@ -389,41 +388,39 @@ def alert_status_check():
     unsilenced_alerts = get_unsilenced_alerts()
     logger.debug("Running alert status check")
 
-    if unsilenced_alerts:
-        for alert in unsilenced_alerts:
-            site = alert.site
-            rule = alert.alert
+    for alert in unsilenced_alerts:
+        site = alert.site
+        rule = alert.alert
 
-            if is_mysql_rule(rule):
-                latest_data_point_value = get_latest_data_point_value_mysql(site, rule)
-            elif is_influx_rule(rule):
-                latest_data_point_value = get_latest_point_value_influx(site, rule)
-            else:
-                logger.error('Invaliid rule')
+        if is_mysql_rule(rule):
+            latest_data_point_value = get_latest_data_point_value_mysql(site, rule)
+        elif is_influx_rule(rule):
+            latest_data_point_value = get_latest_point_value_influx(site, rule)
+        else:
+            raise Exception("Invalid alert Rule")
+
+
+        if check_alert(rule, latest_data_point_value):
+            logger.debug("Alert is still valid")
+        else:
+            # Silencing the alert and generating email content
+            logger.debug("Alert is not valid, silencing alert")
+            alert.isSilence = True
+            alert.save()
+            data_point, data_point_value = get_alert_check_value(alert.alert) 
+
+            # Handle no data point getting returned
+            if not data_point_value:
+                logger.warning("Now DP found for alert skipping ")
                 return None
 
+            content = get_alert_content(site, rule, data_point, data_point_value, alert)
 
-            if check_alert(rule, latest_data_point_value):
-                logger.debug("Alert is still valid")
-            else:
-                # Silencing the alert and generating email content
-                logger.debug("Alert is not valid, silencing alert")
-                alert.isSilence = True
-                alert.save()
-                data_point, data_point_value = get_alert_check_value(alert.alert) 
+            mails, sms_numbers = get_recipients_for_site(site)
+            site_groups = get_groups_with_perms(site)
 
-                # Handle no data point getting returned
-                if not data_point_value:
-                    logger.warning("Now DP found for alert skipping ")
-                    return None
-
-                content = get_alert_content(site, rule, data_point, data_point_value, alert)
-
-                mails, sms_numbers = get_recipients_for_site(site)
-                site_groups = get_groups_with_perms(site)
-
-                # Reporting
-                send_mail('Alert Silenced', content, mails)
-                send_sms(content, sms_numbers)
-                slack_msg = get_slack_alert_msg("Alert silenced", alert)
-                send_alert_slack(site_groups, slack_msg)
+            # Reporting
+            send_mail('Alert Silenced', content, mails)
+            send_sms(content, sms_numbers)
+            slack_msg = get_slack_alert_msg("Alert silenced", alert)
+            send_alert_slack(site_groups, slack_msg)

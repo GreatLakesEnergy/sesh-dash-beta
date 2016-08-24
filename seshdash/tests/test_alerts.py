@@ -106,8 +106,6 @@ class AlertTestCase(TestCase):
 
         assign_perm('can_manage_sesh_site', self.test_group, self.site)
 
-        print "The permission for the test site are "
-        print get_groups_with_perms(self.site)
 
         self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group,
                                                                   send_slack=True,
@@ -132,6 +130,10 @@ class AlertTestCase(TestCase):
 
         alert.alert_generator()
 
+
+        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  24)
+        sleep(2) # Added sleep to wait for sometime until the point is written to the db
+
         # Create data point that will silence alert
         self.new_data_point = Data_Point.objects.create(site=self.site,
                                                     soc=50,
@@ -149,69 +151,76 @@ class AlertTestCase(TestCase):
                                                         data_sent_24h=12,
                                                         time=datetime.now())
 
-        self.new_influx_data_point = insert_point(self.site, 'battery_voltage',  24)
+
+        self.client = Client()
 
 
     @override_settings(DEBUG=True)
-    def test_alert_fires(self):
-        """ Alert working correctly"""
-        # test if necessary alerts has triggered and if alert objects saved
+    def test_alert_fires_and_reported(self):
+        """
+        Test if the alerts objects are fired and saved.
+        and also if the alert is notified to mails, sms and slack.
+        """
         alerts_created = Sesh_Alert.objects.filter(site=self.site)
         self.assertEqual(alerts_created.count(),4)
-        """ Alert mails working correctly"""
-        self.assertEqual(alerts_created.filter(emailSent=True).count(),4)
 
-    # TODO add negative test cases
-
-        # test_get_alerts
-        """ Getting alerts correctly """
-        alerts = Sesh_Alert.objects.all().count()
-        self.assertEqual(alerts, 4)
-
-        # test_display_alert_data
-        """Getting the display alert data"""
-        c = Client()
-        c.login(username = "patrick",password = "cdakcjocajica")
+        alerts_mail_sent = alerts_created.filter(emailSent=True)
+        self.assertEqual(alerts_mail_sent.count(),4)
 
 
-        response=c.post('/get-alert-data/',{'alertId':'1'})
-        self.assertEqual(response.status_code, 200)
-
-
-        response = c.post('/silence-alert/',{'alert_id':'1'})
-        alerts = Sesh_Alert.objects.filter(isSilence=False).count()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(alerts, 3)
-
-        # test_get_latest_bom_data(self):
-        response = c.post('/get-latest-bom-data/',{"siteId": 1})
-        self.assertEqual(response.status_code, 200)
-
-        # test_sent_sms(self):
+        # test_sent_sms, sms are not sent where debug is false
         alert_sms_sent = Sesh_Alert.objects.filter(smsSent=True)
-
         if settings.DEBUG:
             self.assertEqual(alert_sms_sent.count(), 0)
         else:
             self.assertEqual(alert_sms_sent.count(), 1)
 
-        #test_slack
+        #test_slack 
         alert_slack_sent = Sesh_Alert.objects.filter(slackSent=True)
         self.assertEqual(alert_slack_sent.count(), 4)
 
-        #test_get_alerts_notifications
-        response = c.post('/notifications/',{})
+
+    def test_alert_display(self):
+        """
+        Test the display of alerts to the user
+        """
+        self.client.login(username="patrick", password="cdakcjocajica")
+
+
+        response = self.client.post('/get-alert-data/',{'alertId':'1'})
         self.assertEqual(response.status_code, 200)
 
+
+        #test_get_alerts_notifications
+        response = self.client.post('/notifications/',{})
+        self.assertEqual(response.status_code, 200)
+
+        # Test the display of the status card data
+        response = self.client.post('/get-latest-bom-data/',{"siteId": 1})
+        self.assertEqual(response.status_code, 200)
+
+
+
+    def test_alert_silencing(self):
+        """
+        Testing the silencing of alerts
+        """
+        self.client.login(username="patrick", password="cdakcjocajica")
+        response = self.client.post('/silence-alert/',{'alert_id':'1'})
+
+        self.assertEqual(response.status_code, 200)
+        silenced_alert = Sesh_Alert.objects.filter(id=1).first()
+        self.assertEqual(silenced_alert.isSilence, True)
+
+        
+            
 
 
     @override_settings(DEBUG=True)
     def test_alert_autosilencing(self):
         """
-        Test if alerts are silencing
+        Test if alerts are silencing correctly
         """
         alert.alert_status_check()
-        # Get none silenced alerts
-        alerts = Sesh_Alert.objects.filter(isSilence=False)
-        # Check they are equal to zero
-        self.assertEqual(alerts.count(), 0)
+        unsilenced_alerts = Sesh_Alert.objects.filter(isSilence=False)
+        self.assertEqual(unsilenced_alerts.count(), 0)
