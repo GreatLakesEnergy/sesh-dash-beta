@@ -649,20 +649,27 @@ def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
 
-    alert_id = int(alert_id)
-    alert = Sesh_Alert.objects.filter(id=alert_id).first()
+    if alert_id.isdigit():
+        alert = Sesh_Alert.objects.filter(id=alert_id).first()
+    else:
+        raise Exception("Invalid alert id, alert id is not an integer")
+
     alert_values = {}
     point = alert_utils.get_alert_point(alert)
 
-    if point is not None:
-
-        if type(point) != type(dict()):
+    if point:
+        """
+        If the point is from influx it comes as a dict 
+        if the point is from an sql db it comes as a model that needs to 
+        be converted to a dict
+        """
+        if type(point) != dict:
             alert_values = model_to_dict(point)
         else:
             alert_values = point
 
-        # Converting time to json serializable value and changing it to timesince
-        if type(alert_values['time'])  == type(unicode()):
+        # If the the time is from influx then we convert it to a python datetime
+        if type(alert_values['time'])  == unicode:
             alert_values['time'] = parser.parse(alert_values['time'])
 
         alert_values['time'] = get_timesince(alert_values['time'])
@@ -673,26 +680,34 @@ def display_alert_data(request):
 
     else:
         # Handling unecpexted data failure
-        return HttpResponse("Server Error")
+        raise Exception("The alert has not related point,")
 
 @login_required
 def silence_alert(request):
+    """
+    View for silencing alerts
+    """
     alert_id = request.POST.get("alert_id", '')
-    alerts = Sesh_Alert.objects.filter(id=alert_id)
 
-    if len(alerts) >= 1:
-       alert = alerts[0]
-       alert.isSilence = True
-       alert.save()
-       return HttpResponse(True);
+    if alert_id.isdigit():
+        alert = Sesh_Alert.objects.filter(id=alert_id).first()
     else:
-       return HttpResponse(False);
+        raise Exception("In SILENCING ALERT, The alert id is not an integer and the value is %s" % alert_d)
+
+
+    if alert:
+        alert.isSilence = True
+        alert.save()
+        return HttpResponse(True);
+    else:
+        raise Exception("IN SILENCING ALERT, The alert id is an integer and is %s but has no corresponding alert" % alert_id)
+
 
 @login_required
 def get_latest_bom_data(request):
     """
-      Returns the latest information of a site to be displayed in the status card
-      The data is got from the influx db
+    Returns the latest information of a site to be displayed in the status card
+    The data is got from the influx db
     """
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
