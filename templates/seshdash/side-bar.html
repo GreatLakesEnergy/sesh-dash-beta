@@ -17,8 +17,8 @@
                   {% endfor %}
                 </ul>
             </li>
-            {% if permitted == True %}
-            <li><a href="/add_site" class="waves-effect waves-button"><i class="glyphicon glyphicon-cog"></i><p>Settings</p></a></li>
+            {% if permitted %}
+            <li><a href="/settings" class="waves-effect waves-button"><i class="glyphicon glyphicon-cog"></i><p>Settings</p></a></li>
             {% endif %}
         </ul>
     </div><!-- Page Sidebar Inner -->

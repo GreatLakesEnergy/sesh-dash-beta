@@ -4,22 +4,28 @@
    {% block header %}
 
 		  <h2 class="page-header">
-		  Welcome {{ user }} looks like you don't have any sites setup
+		      Welcome {{ user }} looks like you don't have any sites setup
 		  </h2>
    {% endblock %}
 
    {% block dash_1 %}
      <div class="rmc-vrm">
-      {% if not form_type %}
-      <!-- RMC import form-->
-      {% include  "seshdash/rmc-card.html" %}
-          <!-- VRM import form -->
-          {% include  "seshdash/vrm-card.html" %}
+        {% if not form_type %}
+            <div class="row">
+                <!-- RMC import form-->
+                <div class="col-md-6">
+                    {% include  "seshdash/rmc-card.html" %}
+                </div>
+                <!-- VRM import form -->
+                <div class="col-md-6">
+                    {% include  "seshdash/vrm-card.html" %}
+                </div>
+            </div>
 
-      {% else %}
+        {% else %}
             {{ site_forms.management_form }}
             {% include  "seshdash/create-site.html" %}
-      {% endif %}
+        {% endif %}
      </div>
    {% endblock %}
 

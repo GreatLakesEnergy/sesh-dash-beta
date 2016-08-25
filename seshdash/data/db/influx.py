@@ -108,15 +108,15 @@ class Influx:
         except InfluxDBServerError,e:
             logger.error("Error running query on server %s"% str(e))
             logger.debug("error on server %s" % str(e))
-            raise Exception
+            raise Exception(str(e))
         except InfluxDBClientError,e:
             logger.error("Error running  query %s"%str(e))
             logger.debug("error %s"% str(e))
-            raise Exception
+            raise Exception(str(e))
         except Exception,e:
             logger.error("influxdb unkown error %s" %str(e))
             logger.debug("unkown error %s"% str(e))
-            raise Exception
+            raise Exception(str(e))
         return result_set_gen
 
     def send_object_measurements(self,measurement_dict, timestamp=None, tags={}, database=None):
