@@ -567,6 +567,7 @@ class Sensor_EmonTx(models.Model):
      Table representative for the emon tx
      """
      NODE_ID_CHOICES = (
+                         (19, 19),
                          (20, 20),
                          (21, 21),
                          (22, 22),
@@ -617,7 +618,8 @@ class Sensor_EmonTh(models.Model):
          return "Emon th sensor for " +  self.site.site_name
 
      def save(self, *args, **kwargs):
-        Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
+        if self.pk is None:
+            Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
         super(Sensor_EmonTh, self).save(*args, **kwargs)
 
 
@@ -644,7 +646,8 @@ class Sensor_BMV(models.Model):
         return "BMV sensor for " + self.site.site_name
 
     def save(self, *args, **kwargs):
-        Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
+        if self.pk is None:
+            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
         super(Sensor_BMV, self).save(*args, **kwargs)
 
 
@@ -673,10 +676,12 @@ class Sensor_EmonPi(models.Model):
         return "Emon pi for site %s " % self.site.site_name
 
     def save(self, *args, **kwargs):
-        if self.site.sensor_emonpi_set.all().count() > 0:
-            raise Exception("Site can not have more than 2 emonpi sensors")
 
-        Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_emonpi')
+        if self.pk is None: # If it is saved for the first time
+            if self.site.sensor_emonpi_set.all().count() > 0:
+                raise Exception("Site can not have more than 2 emonpi sensors")
+
+            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_emonpi')
         super(Sensor_EmonPi, self).save(*args, **kwargs)
 
 
@@ -696,7 +701,7 @@ class Sensor_Mapping(models.Model):
     sensor_type = models.CharField(max_length=40)
 
     def __str__(self):
-        return "Site_id: " + str(self.site_id) + " node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
+        return "Site_id: " + str(self.site_id) + "  node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
 
     class Meta:
         unique_together =  ('site_id', 'node_id', 'sensor_type')
