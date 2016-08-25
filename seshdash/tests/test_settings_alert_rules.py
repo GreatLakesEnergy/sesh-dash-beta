@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.utils import  timezone
 from django.contrib.auth.models import User
 from geoposition import Geoposition
+from time import sleep
 
 from seshdash.models import Alert_Rule, Sesh_Site
 from seshdash.data.db.influx import Influx
@@ -23,12 +24,12 @@ class TestAlertRules(TestCase):
 		self.i = Influx(database=self.influx_db_name)
 
 		try:
-			self.i.create_database(influx_db_name)
-		except InfluxDBClientError:
+			self.i.create_database(self.influx_db_name)
+		except:
 			# Database already exist
-			self.i.delete_database(influx_db_name)
+			self.i.delete_database(self.influx_db_name)
 			sleep(1)
-			self.i.create_database(influx_db_name)
+			self.i.create_database(self.influx_db_name)
 			pass
 
 		self.client = Client()
