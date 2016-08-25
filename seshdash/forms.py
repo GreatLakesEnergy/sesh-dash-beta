@@ -113,7 +113,7 @@ class SensorEmonPiForm(ModelForm):
     """
     class Meta:
         model = Sensor_EmonPi
-        exclude = ('',)
+        exclude = ('site',)
 
 
 class AlertRuleForm(ModelForm):

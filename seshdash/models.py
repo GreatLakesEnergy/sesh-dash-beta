@@ -187,6 +187,7 @@ class Sesh_Site(models.Model):
             self.status_card = Status_Card.objects.create()
             self.site_measurements = Site_Measurements.objects.create()
             super(Sesh_Site, self).save(*args, **kwargs)
+            Sensor_EmonPi.objects.create(site=self)
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
 
@@ -671,6 +672,13 @@ class Sensor_EmonPi(models.Model):
     def __str__(self):
         return "Emon pi for site %s " % self.site.site_name
 
+    def save(self, *args, **kwargs):
+        if self.site.sensor_emonpi_set.all().count() > 0:
+            raise Exception("Site can not have more than 2 emonpi sensors")
+
+        Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_emonpi')
+        super(Sensor_EmonPi, self).save(*args, **kwargs)
+
 
 
 
@@ -688,7 +696,7 @@ class Sensor_Mapping(models.Model):
     sensor_type = models.CharField(max_length=40)
 
     def __str__(self):
-        return "Site_id: " + str(self.site_id) + "node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
+        return "Site_id: " + str(self.site_id) + " node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
 
     class Meta:
         unique_together =  ('site_id', 'node_id', 'sensor_type')

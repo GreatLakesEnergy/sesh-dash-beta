@@ -1048,7 +1048,8 @@ def add_rmc_account(request, site_id):
     bmv_form_set = bmvFormSetFactory(prefix="bmv")
 
     # emonpi form
-    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site.emonpi)
+    site_emonpi = Sensor_EmonPi.objects.filter(site=site).first()
+    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site_emonpi)
 
     context_dict = {}
     rmc_form = RMCForm()
@@ -1056,7 +1057,7 @@ def add_rmc_account(request, site_id):
     if request.method == 'POST':
 
         rmc_form = RMCForm(request.POST)
-        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site.emonpi)
+        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site_emonpi)
         emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
         emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
         bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
