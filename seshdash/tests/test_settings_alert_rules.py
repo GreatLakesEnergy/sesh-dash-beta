@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from geoposition import Geoposition
 
 from seshdash.models import Alert_Rule, Sesh_Site
+from seshdash.data.db.influx import Influx
 
 class TestAlertRules(TestCase):
 	"""
@@ -16,7 +17,20 @@ class TestAlertRules(TestCase):
 		"""
 		Setting up the db
 		"""
-		print "setting up"
+
+		# Adding an influx database used by the quick_status_icons functions used on the pages to render
+		self.influx_db_name = 'test_db'
+		self.i = Influx(database=self.influx_db_name)
+
+		try:
+			self.i.create_database(influx_db_name)
+		except InfluxDBClientError:
+			# Database already exist
+			self.i.delete_database(influx_db_name)
+			sleep(1)
+			self.i.create_database(influx_db_name)
+			pass
+
 		self.client = Client()
 
 		self.site = Sesh_Site.objects.create(
