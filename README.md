@@ -47,7 +47,6 @@ If you wish to not use a virtual-machine you can skip to virtualenvonly section.
 ### Before you start ###
 You'll need to configure parameters for the APIs and Database. Copy to local_settings_example.ini to settings_local.ini in your repo and  put in your api keys and database settings.(contact repo owner for keys). Also setup database parameters
  1. Sync up local DB if using a local database:
-    `$ python manage.py makemigrations`
     `$ python manage.py migrate`
  1. Collect Static files in one place:
     `$ python ./manage.py collectstatic`
