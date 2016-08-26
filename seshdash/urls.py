@@ -24,7 +24,6 @@ urlpatterns = [
             url(r'^search', views.search),
             url(r'^historical_data', views.historical_data),
             url(r'^graphs', views.graphs),
-            url(r'^settings', views.settings, name='settings'),
             url(r'^edit_site$',views.edit_site, name='edit_site'),
             url(r'^edit_site/([0-9]{1,5})$',views.edit_site),
             url(r'^manage_sites$', views.site_add_edit, name='manage_sites'),

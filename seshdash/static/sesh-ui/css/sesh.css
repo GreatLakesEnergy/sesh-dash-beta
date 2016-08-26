@@ -335,3 +335,7 @@ a.action-icon {
 a.action-icon:hover {
   text-decoration: none;
 }
+
+.text-align-left {
+  text-align: left!important;
+}

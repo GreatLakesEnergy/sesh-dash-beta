@@ -1,27 +1,5 @@
-{% extends 'seshdash/base.html' %}
 
-{% block main %}
-	
-	<div id="main-wrapper">
-
-		{# Settings container  panel#}
-		<div class="panel panel-success">
-
-			<div class="panel-heading">
-				<h1 class="sesh-menu-heading">Settings</h1>
-			</div>
-
-			<div class="panel-body">
-
-				<ul class="list-group sesh-container">
-						<a href="{% url 'manage_sites' %}" class="list-group-item">Manage sites</a>
-						<a href="{% url 'manage_alert_rules' %}" class="list-group-item">Alert Rules</a>
-					</li>
-				</ul>
-			</div>
-
-		</div>
-
-	</div>
-
-{% endblock %}
+<ul>
+	<li><a href="{% url 'manage_sites' %}" >Manage sites</a></li>
+	<li><a href="{% url 'manage_alert_rules' %}" >Alert Rules</a></li>
+</ul>

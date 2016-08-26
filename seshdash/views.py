@@ -851,18 +851,6 @@ def graphs(request):
         return HttpResponseBadRequest()
 
 
-@login_required
-def settings(request):
-    """"
-    Displays the available settings for 
-    the current user 
-    """
-    context_dict = {}
-    user_sites = _get_user_sites(request)
-    context_dict['permitted'] = get_permissions(request.user)
-    context_dict['sites_stats'] = get_quick_status(user_sites)
-    return render(request, 'seshdash/settings/main.html', context_dict)
-
 #function to editing existing sites
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
