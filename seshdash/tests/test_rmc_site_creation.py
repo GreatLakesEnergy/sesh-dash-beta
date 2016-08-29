@@ -156,6 +156,7 @@ class TestAddRMCSite(TestCase):
         # Testing the rediction to the page that is shown after a rmc account is added which is the index
         self.assertEqual(response.status_code, 302)
 
+
         # Assserting the creation of the rmc site and the linking to the site
         self.assertEqual(Sesh_RMC_Account.objects.all().count(), 1)
         self.assertEqual(Sesh_RMC_Account.objects.last().site, self.site)
@@ -173,11 +174,11 @@ class TestAddRMCSite(TestCase):
         self.assertEqual(Sensor_BMV.objects.all().last().site, self.site)
 
         # Asserting the number of sensor mappings created
-        self.assertEqual(Sensor_Mapping.objects.all().count(), 5)
+        self.assertEqual(Sensor_Mapping.objects.all().count(), 6)
 
 
         # Testing editing emonpi sensor site
-        emonpi = Sensor_EmonPi.objects.filter(sesh_site=self.site).first()
+        emonpi = Sensor_EmonPi.objects.filter(site=self.site).first()
         self.assertEqual(emonpi.index1, 'testing')
 
     def test_get_rmc_config(self):

@@ -1,10 +1,12 @@
 {% extends 'seshdash/base.html' %}
 
+{% load static %}
 {% load bootstrap %}
-
 {% load js_escape %}
 
 {% block main %}
+    
+   <script type="text/javascript" src='{% static 'sesh-ui/js/add_rmc_account.js' %}'></script>
 
   <div id="main-wrapper">
     <div class="panel panel-primary">

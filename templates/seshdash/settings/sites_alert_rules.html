@@ -1,0 +1,25 @@
+{% extends 'seshdash/base.html' %}
+
+{% block main %}
+
+	<div id="main-wrapper">
+
+		<div class="panel panel-success ">
+
+			<div class="panel-heading">
+				<h1 class="sesh-menu-heading">Alert Rules for site</h1>
+			</div>
+
+
+			<div class="panel-body">
+				<ul class="list-group sesh-container">
+					{% for site in sites %}
+						<a href="{% url 'site_alert_rules' site.id %}" class="list-group-item">{{site.site_name}}</a>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+		
+	</div>
+
+{% endblock %}

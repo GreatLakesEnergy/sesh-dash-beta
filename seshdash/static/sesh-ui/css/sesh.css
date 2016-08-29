@@ -305,3 +305,37 @@ span.quick-status {
 .menu-button-container {
   padding: 15px 20px;
 }
+
+
+.sesh-menu-heading {
+  font-size: 20px;
+  font-weight: 400;
+  padding: 0;
+  margin: 0;
+}
+
+.sesh-container {
+  margin-top: 40px; 
+  margin-bottom: 40px;
+}
+
+.red {
+  color: red;
+}
+
+.red:hover {
+  color: darkred;
+}
+
+
+a.action-icon {
+  padding: 0 5px;
+}
+
+a.action-icon:hover {
+  text-decoration: none;
+}
+
+.text-align-left {
+  text-align: left!important;
+}

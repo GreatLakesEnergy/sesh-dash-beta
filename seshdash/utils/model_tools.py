@@ -179,12 +179,7 @@ def get_all_associated_sensors(site):
     """
     sensors_list = []
 
-    # Getting the emonpi configuration separately because it is OneToOneField related rather than ForeignKey
-    if site.emonpi:
-        sensors_list.append(site.emonpi)
-
-
-    for model in [Sensor_EmonTx, Sensor_EmonTh, Sensor_BMV]:
+    for model in [Sensor_EmonTx, Sensor_EmonTh, Sensor_BMV, Sensor_EmonPi]:
         sensors = model.objects.filter(site=site)
 
         for sensor in sensors:

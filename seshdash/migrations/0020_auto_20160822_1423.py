@@ -29,7 +29,7 @@ def reverse_emonpis_for_sites(apps, schema_editor):
 
     for site in sites:
         if hasattr(site, 'emonpi'):
-            del(site.emonpi)
+            site.emonpi.delete()
 
 class Migration(migrations.Migration):
 
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sesh_site',
             name='emonpi',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='seshdash.EmonPi'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.SET_NULL, null=True, to='seshdash.EmonPi'),
             preserve_default=False,
         ),
         migrations.RunPython(emonpis_for_sites, reverse_emonpis_for_sites),

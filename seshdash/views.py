@@ -28,7 +28,8 @@ from django.db.models import Avg
 from django.db.models import Sum
 
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
-                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm
+                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm, \
+                           AlertRuleForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -890,7 +891,7 @@ def edit_site(request,site_Id=1):
     context_dict['sites']= user_sites
     context_dict['permitted'] = get_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
-    return render(request,'seshdash/settings.html', context_dict)
+    return render(request,'seshdash/settings/site_settings.html', context_dict)
 
 
 @login_required
@@ -905,8 +906,89 @@ def site_add_edit(request):
     context_dict['sites_stats'] = get_quick_status(sites)
     context_dict['sites'] = sites
     context_dict['VRM_form'] = _create_vrm_login_form()
-    return render(request, 'seshdash/settings.html', context_dict)
+    context_dict['permitted'] = get_permissions(request.user)
+    return render(request, 'seshdash/settings/site_settings.html', context_dict)
 
+
+
+@login_required
+def settings_alert_rules(request):
+    """
+    To allow users to manage alert 
+    rules for given sites
+    """
+    context_dict = {}
+    sites = _get_user_sites(request)
+
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    context_dict['sites'] = sites
+    return render(request, 'seshdash/settings/sites_alert_rules.html', context_dict)
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def site_alert_rules(request, site_id):
+    """
+    Alert rules for a given site
+    """
+
+    context_dict = {}
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    alert_rules = Alert_Rule.objects.filter(site=site)
+    form = AlertRuleForm()
+
+
+
+    if request.method == 'POST':
+        form = AlertRuleForm(request.POST)
+        if form.is_valid():
+            alert_rule = form.save(commit=False)
+            alert_rule.site = site
+            alert_rule.save()
+            return redirect(reverse('site_alert_rules', args=[site.id]))
+
+
+    context_dict['form'] = form
+    context_dict['site'] = site
+    context_dict['alert_rules'] = alert_rules
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    return render(request, 'seshdash/settings/alert_rules.html', context_dict)
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def edit_alert_rule(request, alert_rule_id):
+    """
+    Editing alert rules for a given alert rule id
+    """
+    context_dict = {}
+    alert_rule = Alert_Rule.objects.filter(id=alert_rule_id).first()
+    form = AlertRuleForm(instance=alert_rule)
+
+    if request.method == 'POST':
+        form = AlertRuleForm(request.POST, instance=alert_rule)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('site_alert_rules', args=[alert_rule.site.id]))
+
+
+    context_dict['form'] = form
+    return render(request, 'seshdash/settings/edit_alert_rule.html', context_dict)
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def delete_alert_rule(request, alert_rule_id):
+    """
+    Deleting an alert rule
+    """
+    alert_rule = Alert_Rule.objects.filter(id=alert_rule_id).first()
+    site_id = alert_rule.site.id
+    alert_rule.delete()
+    return redirect(reverse('site_alert_rules', args=[site_id]))
 
 
 # function of adding new site
@@ -954,7 +1036,8 @@ def add_rmc_account(request, site_id):
     bmv_form_set = bmvFormSetFactory(prefix="bmv")
 
     # emonpi form
-    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site.emonpi)
+    site_emonpi = Sensor_EmonPi.objects.filter(site=site).first()
+    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site_emonpi)
 
     context_dict = {}
     rmc_form = RMCForm()
@@ -962,7 +1045,7 @@ def add_rmc_account(request, site_id):
     if request.method == 'POST':
 
         rmc_form = RMCForm(request.POST)
-        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site.emonpi)
+        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site_emonpi)
         emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
         emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
         bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")

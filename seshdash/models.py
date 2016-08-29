@@ -148,28 +148,7 @@ class Site_Measurements(models.Model):
         return self.sesh_site.site_name
 
 
-class Sensor_EmonPi(models.Model):
-    """
-    This is the default base sensor for each site
-    that is used in the rmc config
-    """
-    node_id = models.IntegerField(default=5, editable=False)
-    index1 = models.CharField(max_length=40, default="power1")
-    index2 = models.CharField(max_length=40, default="power2")
-    index3 = models.CharField(max_length=40, default="power3")
-    index4 = models.CharField(max_length=40, default="power4")
-    index5 = models.CharField(max_length=40, default="v_battery_bank")
-    index6 = models.CharField(max_length=40, default="Vrms")
-    index7 = models.CharField(max_length=40, default="T1")
-    index8 = models.CharField(max_length=40, default="T2")
-    index9 = models.CharField(max_length=40, default="T3")
-    index10 = models.CharField(max_length=40, default="T4")
-    index11 = models.CharField(max_length=40, default="T5")
-    index12 = models.CharField(max_length=40, default="T6")
-    index13 = models.CharField(max_length=40, default="pulseCount")
 
-    def __str__(self):
-        return "Emon pi for site %s " % self.sesh_site.site_name
     
 
 
@@ -197,7 +176,6 @@ class Sesh_Site(models.Model):
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
     site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.SET_NULL)
-    emonpi = models.OneToOneField(Sensor_EmonPi, editable=False)
 
     def __str__(self):
         return self.site_name
@@ -208,8 +186,8 @@ class Sesh_Site(models.Model):
         if self.pk is None:
             self.status_card = Status_Card.objects.create()
             self.site_measurements = Site_Measurements.objects.create()
-            self.emonpi = Sensor_EmonPi.objects.create()
             super(Sesh_Site, self).save(*args, **kwargs)
+            Sensor_EmonPi.objects.create(site=self)
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
 
@@ -557,6 +535,24 @@ class Site_Weather_Data(models.Model):
         unique_together = ('site','date')
 
 
+class Status_Rule(models.Model):
+    """
+    battery_voltage rules and pv pv_production rules
+    """
+    battery_rules = {
+                     50 : "red",
+                     70 : "yellow",
+                     100: "green"
+                    }
+    weather_rules = {
+               0.7 : "green",
+               1 : "yellow"
+               }
+    def __str__(self):
+        return self.battery_rules + self.pv_rules
+
+
+
 
 SENSORS_LIST = {
     'Emon Tx',
@@ -571,6 +567,7 @@ class Sensor_EmonTx(models.Model):
      Table representative for the emon tx
      """
      NODE_ID_CHOICES = (
+                         (19, 19),
                          (20, 20),
                          (21, 21),
                          (22, 22),
@@ -621,7 +618,8 @@ class Sensor_EmonTh(models.Model):
          return "Emon th sensor for " +  self.site.site_name
 
      def save(self, *args, **kwargs):
-        Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
+        if self.pk is None:
+            Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
         super(Sensor_EmonTh, self).save(*args, **kwargs)
 
 
@@ -648,24 +646,45 @@ class Sensor_BMV(models.Model):
         return "BMV sensor for " + self.site.site_name
 
     def save(self, *args, **kwargs):
-        Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
+        if self.pk is None:
+            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
         super(Sensor_BMV, self).save(*args, **kwargs)
 
-class Status_Rule(models.Model):
+
+class Sensor_EmonPi(models.Model):
     """
-    battery_voltage rules and pv pv_production rules
+    This is the default base sensor for each site
+    that is used in the rmc config
     """
-    battery_rules = {
-                     50 : "red",
-                     70 : "yellow",
-                     100: "green"
-                    }
-    weather_rules = {
-               0.7 : "green",
-               1 : "yellow"
-               }
+    site = models.ForeignKey(Sesh_Site)
+    node_id = models.IntegerField(default=5, editable=False)
+    index1 = models.CharField(max_length=40, default="power1")
+    index2 = models.CharField(max_length=40, default="power2")
+    index3 = models.CharField(max_length=40, default="power3")
+    index4 = models.CharField(max_length=40, default="power4")
+    index5 = models.CharField(max_length=40, default="v_battery_bank")
+    index6 = models.CharField(max_length=40, default="Vrms")
+    index7 = models.CharField(max_length=40, default="T1")
+    index8 = models.CharField(max_length=40, default="T2")
+    index9 = models.CharField(max_length=40, default="T3")
+    index10 = models.CharField(max_length=40, default="T4")
+    index11 = models.CharField(max_length=40, default="T5")
+    index12 = models.CharField(max_length=40, default="T6")
+    index13 = models.CharField(max_length=40, default="pulseCount")
+
     def __str__(self):
-        return self.battery_rules + self.pv_rules
+        return "Emon pi for site %s " % self.site.site_name
+
+    def save(self, *args, **kwargs):
+
+        if self.pk is None: # If it is saved for the first time
+            if self.site.sensor_emonpi_set.all().count() > 0:
+                raise Exception("Site can not have more than 2 emonpi sensors")
+
+            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_emonpi')
+        super(Sensor_EmonPi, self).save(*args, **kwargs)
+
+
 
 
 
@@ -682,7 +701,8 @@ class Sensor_Mapping(models.Model):
     sensor_type = models.CharField(max_length=40)
 
     def __str__(self):
-        return "Site_id: " + str(self.site_id) + "node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
+        return "Site_id: " + str(self.site_id) + "  node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
 
     class Meta:
         unique_together =  ('site_id', 'node_id', 'sensor_type')
+
