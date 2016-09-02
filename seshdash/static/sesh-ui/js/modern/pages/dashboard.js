@@ -6,17 +6,6 @@ $( document ).ready(function() {
         time: 1000
     });
 
-    setTimeout(function() {
-        toastr.options = {
-            closeButton: true,
-            progressBar: true,
-            showMethod: 'fadeIn',
-            hideMethod: 'fadeOut',
-            timeOut: 5000
-        };
-        toastr.success('Checkout settings menu on left!', 'Welcome to SESH Dashboard!');
-    }, 1800);
-
     var flot2 = function () {
 
 		// We use an inline data source in the example, usually data would

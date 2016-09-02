@@ -8,22 +8,11 @@
 
         <ul class="menu accordion-menu">
 
-            <li>
-                <a href="/" class="waves-effect waves-button">
-                    <span class="menu-icon glyphicon glyphicon-home"></span>
-                    <p>Dashboard</p>
-                </a>
-            </li>
-
-            <li>
-                <a href="/historical_data" class="waves-effect waves-button">
-                    <i class="fa fa-history fa-f"></i><p>Historical</p>
-                </a>
-            </li>
-
-            <li class="droplink open ">
+            <li class=" droplink open">
                 <a href="#" class="waves-effect waves-button">
-                    <span>Sites</span><span class="arrow"></span>
+                    <span class="menu-icon glyphicon glyphicon-home"></span>
+                    <p>Sites</p>
+                    <span class="arrow"></span>
                 </a>
 
                 <ul class="sub-menu site-list">
@@ -31,12 +20,15 @@
                         {# site #}
                         <li value="{{site.site.id}}">
 
-                            <a href="/dash/{{site.site.id}}" class="text-align-left">{{site.site.site_name}}
+                            <a href="/dash/{{site.site.id}}" class="text-align-left">
+                                <span class="site-name">{{site.site.site_name}}</span>
                                 {# Quick status icons showing the battery voltage and the weather #}
 
                                 <span class="quick-status">
-                                    <i class="fa fa-battery-full pull-right" style="color:{{site.battery}}"></i>
-                                    <i class="fa fa-sun-o pull-right" style="color:{{site.weather}}"></i>
+                                    <i class="fa fa-battery-full pull-right"
+                                            style="color:{{site.battery}}"></i>
+                                    <i class="fa fa-sun-o pull-right" 
+                                            style="color:{{site.weather}}"></i>
                                  </span>
                                 
                             </a>
@@ -44,14 +36,22 @@
                         </li>
                     {% endfor %}
                 </ul>
-
             </li>
+
+            <li>
+                <a href="/historical_data" class="waves-effect waves-button">
+                    <span class="fa fa-history menu-icon"></span>
+                    <p>Historical</p>
+                </a>
+            </li>
+
 
             <li class="droplink ">
   
                 <a href="#" class="waves-effect waves-button">
                     <span class="fa fa-cog menu-icon"></span>
                     <p>Settings</p>
+                    <span class="arrow"></span>
                 </a>
 
                 <ul class="sub-menu settings-list ">
