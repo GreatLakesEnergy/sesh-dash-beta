@@ -15,6 +15,7 @@ from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
+from django.contrib.admin.views.decorators import staff_member_required
 from django import forms
 from django.db import OperationalError
 from django.template.loader import get_template
@@ -1100,3 +1101,26 @@ def get_rmc_config(request):
     conf = get_template('seshdash/configs/rmc_config.conf')
 
     return HttpResponse(conf.render(context_dict), content_type='text/plain')
+
+
+@staff_member_required
+def user_notifications(request):
+    """
+    Renders page to display users of an organization
+    and their values to view the sites
+    """
+    context_dict = {}
+    user = request.user    
+
+    organisation_users = Sesh_User.objects.filter(user__groups=user.groups.first()) # all users belonging to the same organisations
+    SeshUserFormSetFactory = modelformset_factory(Sesh_User, fields=('on_call', 'send_mail', 'send_sms',), extra=0)
+    sesh_user_formset = SeshUserFormSetFactory(queryset=organisation_users)
+    
+    if request.method == 'POST':
+        sesh_user_formset = SeshUserFormSetFactory(request.POST, queryset=organisation_users)
+        if sesh_user_formset.is_valid():
+            sesh_user_formset.save()
+            return redirect('index')
+
+    context_dict['user_formset'] = sesh_user_formset
+    return render(request, 'seshdash/settings/user_notifications.html', context_dict)
