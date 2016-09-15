@@ -1122,5 +1122,8 @@ def user_notifications(request):
             sesh_user_formset.save()
             return redirect('index')
 
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     context_dict['user_formset'] = sesh_user_formset
     return render(request, 'seshdash/settings/user_notifications.html', context_dict)
