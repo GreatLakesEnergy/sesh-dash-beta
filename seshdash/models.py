@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.contrib import admin
+from django.contrib.auth.models import AbstractUser
 from geoposition.fields import GeopositionField
 from django.utils import timezone
 
@@ -28,10 +29,8 @@ class VRM_Account(models.Model):
     class Meta:
         verbose_name = "VRM Account"
 
-class Sesh_User(models.Model):
-    #TODO each user will have his her own settings / alarms this needs
-    #to be added
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="seshuser")
+
+class Sesh_User(AbstractUser):
     department = models.CharField(max_length=100)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
@@ -46,8 +45,8 @@ class Sesh_User(models.Model):
          verbose_name_plural = 'Users'
 
 
-class Sesh_Organisation(models.Model):
-    group = models.OneToOneField(Group)
+
+class Sesh_Organisation(Group):
     send_slack = models.BooleanField(default=False)
     slack_token = models.CharField(max_length=100)
 

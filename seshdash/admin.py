@@ -39,12 +39,12 @@ class RMC_AccountAdmin(GuardedModelAdmin):
 
 @admin.register(Sesh_Organisation)
 class Organisation(GuardedModelAdmin):
-    list_display = ('group', 'slack_token')
+    list_display = ('slack_token',)
     pass
 
 @admin.register(Sesh_User)
 class SeshUser(GuardedModelAdmin):
-    list_display = ('user','phone_number','on_call')
+    list_display = ('phone_number','on_call')
     list_filter = ('on_call',)
     pass
 
