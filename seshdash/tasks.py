@@ -35,7 +35,7 @@ def handle_task_failure(**kw):
         rollbar.report_exc_info(message=message,extra_data=kw)
 
 
-def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
+def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None, send_status=True):
     """
     Utility function to send data to influx
     """
@@ -55,7 +55,8 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
                 model_data_dict.pop(val)
 
         #Add our status will be used for RMC_Status
-        model_data_dict['status'] = 1.0
+        if send_status:
+            model_data_dict['status'] = 1.0
 
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
@@ -109,13 +110,6 @@ def get_BOM_data():
             if v_client.IS_INITIALIZED:
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-
-                        #date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
-                        #date = parse(date, ignoretz=True)
-
-                        #tz = pytz.timezone(site.time_zone)
-                        #date = tz.localize(date, is_dst=None)
-
                         #This data is already localazied
                         logger.debug("got raw date %s with timezone %s"%(
                             sys_data['VE.Bus state']['timestamp'],
@@ -369,7 +363,7 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                send_to_influx(w_data, site, day, to_exclude=['date'])
+                send_to_influx(w_data, site, day, to_exclude=['date'], send_status=False)
 
     return "updated weather for %s"%sites
 
@@ -526,7 +520,7 @@ def get_aggregate_daily_data(date=None):
 
                 pass
             #send to influx
-            send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
+            send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'], send_status=False)
 
 
 
