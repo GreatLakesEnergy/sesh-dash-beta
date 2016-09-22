@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Model's
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User, Sesh_Organisation, Slack_Channel
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_Organisation, Slack_Channel
 from django.contrib.auth.models import User, Group, Permission
 
 # Tasks
@@ -96,9 +96,13 @@ class AlertTestCase(TestCase):
         self.influx_data_point = insert_point(self.site, 'battery_voltage', 10)
 
         #create test user
-        self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
-        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713', on_call=True,
-                                                       send_mail=True, send_sms=True)
+        self.test_user = Sesh_User.objects.create(username="patrick",
+                                                       email="alp@gle.solar",
+                                                       password="cdakcjocajica",
+                                                       phone_number='250786688713',
+                                                       on_call=True,
+                                                       send_mail=True,
+                                                       send_sms=True)
 
         # Creating test group
         self.test_group = Group(name='test_group')
@@ -107,7 +111,7 @@ class AlertTestCase(TestCase):
         assign_perm('can_manage_sesh_site', self.test_group, self.site)
 
 
-        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group,
+        self.test_organisation = Sesh_Organisation.objects.create(group=self.group,
                                                                   send_slack=True,
                                                                   slack_token=settings.SLACK_TEST_KEY)
 

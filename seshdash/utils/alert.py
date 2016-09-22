@@ -1,4 +1,4 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status, Slack_Channel
+from seshdash.models import Sesh_User, Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, RMC_status, Slack_Channel
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
 from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
