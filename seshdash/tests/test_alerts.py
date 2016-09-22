@@ -5,6 +5,7 @@ from django.test.utils import override_settings
 # Model's
 from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_Organisation, Slack_Channel
 from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth import authenticate
 
 # Tasks
 from seshdash.tasks import generate_auto_rules
@@ -97,12 +98,16 @@ class AlertTestCase(TestCase):
 
         #create test user
         self.test_user = Sesh_User.objects.create(username="patrick",
-                                                       email="alp@gle.solar",
-                                                       password="cdakcjocajica",
-                                                       phone_number='250786688713',
-                                                       on_call=True,
-                                                       send_mail=True,
-                                                       send_sms=True)
+                                                  email="alp@gle.solar",
+                                                  password="test.test.test",
+                                                  phone_number='250786688713',
+                                                  on_call=True,
+                                                  send_mail=True,
+                                                  send_sms=True)
+
+        self.test_user.save()
+
+        print "THE AUTHENTICATION PASSWORD FOR THE USER IS: %s" % self.test_user.password
 
         # Creating test group
         self.test_group = Group(name='test_group')
@@ -111,7 +116,7 @@ class AlertTestCase(TestCase):
         assign_perm('can_manage_sesh_site', self.test_group, self.site)
 
 
-        self.test_organisation = Sesh_Organisation.objects.create(group=self.group,
+        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group,
                                                                   send_slack=True,
                                                                   slack_token=settings.SLACK_TEST_KEY)
 
@@ -188,8 +193,19 @@ class AlertTestCase(TestCase):
         """
         Test the display of alerts to the user
         """
-        self.client.login(username="patrick", password="cdakcjocajica")
+        print "The created user is: ",
+        print self.test_user.username
 
+        print "The password is: ",
+        print self.test_user.password
+
+        user = authenticate(username='patrick', password='test.test.test')
+        print 'The value authenticated is: %s ' % user
+
+        val = self.client.login(username="patrick", password="test.test.test")
+
+        print 'In testing the alerts well'
+        print 'The login status is: %s' % val
 
         response = self.client.post('/get-alert-data/',{'alertId':'1'})
         self.assertEqual(response.status_code, 200)
@@ -209,7 +225,7 @@ class AlertTestCase(TestCase):
         """
         Testing the silencing of alerts
         """
-        self.client.login(username="patrick", password="cdakcjocajica")
+        self.client.login(username="patrick", password="test.test.test")
         response = self.client.post('/silence-alert/',{'alert_id':'1'})
 
         self.assertEqual(response.status_code, 200)

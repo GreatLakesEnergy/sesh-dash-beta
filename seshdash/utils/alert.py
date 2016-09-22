@@ -236,11 +236,10 @@ def get_recipients_for_site(site):
     sms_numbers = []
 
     for user in users:
-        if user.seshuser:
-            mails.append(user.email)
+        mails.append(user.email)
 
-        if user.seshuser and user.seshuser.on_call and user.seshuser.send_sms and user.seshuser.phone_number:
-            sms_numbers.append(user.seshuser.phone_number)
+        if user.on_call and user.send_sms and user.phone_number:
+            sms_numbers.append(user.phone_number)
 
     return mails, sms_numbers
 

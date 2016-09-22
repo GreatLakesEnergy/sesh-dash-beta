@@ -39,6 +39,11 @@ class Sesh_User(AbstractUser):
 
     def __str__(self):
         return self.user.username
+    
+    def save(self, *args, **kwargs):
+        self.set_password(self.password)
+        super(Sesh_User, self).save(*args, **kwargs)
+
 
     class Meta:
          verbose_name = 'User'
