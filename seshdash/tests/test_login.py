@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 
 # Testing models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account
 
 # Testing forms
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
@@ -26,7 +26,7 @@ class LoginTestCase(TestCase):
     def setUp(self):
 
         #create test user
-        self.test_user = User.objects.create_user("johndoe","alp@gle.solar","asdasd12345")
+        self.test_user = Sesh_User.objects.create_user(username="johndoe",email="alp@gle.solar",password="asdasd12345")
 
 
         self.data = {

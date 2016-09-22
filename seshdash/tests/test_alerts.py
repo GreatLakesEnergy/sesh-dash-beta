@@ -97,7 +97,7 @@ class AlertTestCase(TestCase):
         self.influx_data_point = insert_point(self.site, 'battery_voltage', 10)
 
         #create test user
-        self.test_user = Sesh_User.objects.create(username="patrick",
+        self.test_user = Sesh_User.objects.create_user(username="patrick",
                                                   email="alp@gle.solar",
                                                   password="test.test.test",
                                                   phone_number='250786688713',
@@ -107,7 +107,6 @@ class AlertTestCase(TestCase):
 
         self.test_user.save()
 
-        print "THE AUTHENTICATION PASSWORD FOR THE USER IS: %s" % self.test_user.password
 
         # Creating test group
         self.test_group = Group(name='test_group')
@@ -193,19 +192,7 @@ class AlertTestCase(TestCase):
         """
         Test the display of alerts to the user
         """
-        print "The created user is: ",
-        print self.test_user.username
-
-        print "The password is: ",
-        print self.test_user.password
-
-        user = authenticate(username='patrick', password='test.test.test')
-        print 'The value authenticated is: %s ' % user
-
-        val = self.client.login(username="patrick", password="test.test.test")
-
-        print 'In testing the alerts well'
-        print 'The login status is: %s' % val
+        self.client.login(username='patrick', password='test.test.test')
 
         response = self.client.post('/get-alert-data/',{'alertId':'1'})
         self.assertEqual(response.status_code, 200)

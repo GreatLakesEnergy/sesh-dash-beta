@@ -31,6 +31,11 @@ class VRM_Account(models.Model):
 
 
 class Sesh_User(AbstractUser):
+    """
+    In creating Sesh_User instances,
+    Always remember to user create_user instead of create, 
+    Sesh_User.objects.create_user
+    """
     department = models.CharField(max_length=100)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
@@ -38,12 +43,8 @@ class Sesh_User(AbstractUser):
     send_sms = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.username
+        return self.username
     
-    def save(self, *args, **kwargs):
-        self.set_password(self.password)
-        super(Sesh_User, self).save(*args, **kwargs)
-
 
     class Meta:
          verbose_name = 'User'
