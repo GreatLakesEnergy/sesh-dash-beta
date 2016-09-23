@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status
 from django.contrib.auth.models import User
 
 # Tasks
@@ -54,18 +54,20 @@ class graph_TestCase(TestCase):
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
         #create test user
-        self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
-        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
+        self.test_sesh_user = Sesh_User.objects.create_user(username='patrick',
+                                                       email='alp@gle.solar',
+                                                       password='test.test.test',
+                                                       phone_number='250786688713')
         #assign a user to the sites
 
 
-        assign_perm("view_Sesh_Site",self.test_user,self.site)
+        assign_perm("view_Sesh_Site", self.test_sesh_user, self.site)
 
 
     # Testing graph
     def test_graph(self):
         f = Client()
-        f.login(username = "patrick",password = "cdakcjocajica")
+        f.login(username = "patrick",password = "test.test.test")
         choices = ['pv_production','soc']
         time = '24h'
         active_site_id = 1

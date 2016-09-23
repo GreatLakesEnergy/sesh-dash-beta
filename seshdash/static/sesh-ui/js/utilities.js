@@ -61,4 +61,22 @@ var csrftoken = getCookie('csrftoken');
              $('#alerts_counter').show();
           }
      });
+
+
+     // Minifying long site names
+    var siteNames = $('.site-name'),
+        MAX_SITE_NAME_LENGTH = 8;
+
+    siteNames.each(function(index){
+        var siteName = $(this).text();
+        
+        if(siteName.length > MAX_SITE_NAME_LENGTH) {
+            var nameSlice = siteName.slice(0, MAX_SITE_NAME_LENGTH);
+            var siteName =  nameSlice + '...';
+
+            $(this).text(siteName);
+        }
+    });
+
+
 });

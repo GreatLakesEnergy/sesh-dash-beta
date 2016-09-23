@@ -3,8 +3,9 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Model's
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User, Sesh_Organisation, Slack_Channel
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_Organisation, Slack_Channel
 from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth import authenticate
 
 # Tasks
 from seshdash.tasks import generate_auto_rules
@@ -96,9 +97,16 @@ class AlertTestCase(TestCase):
         self.influx_data_point = insert_point(self.site, 'battery_voltage', 10)
 
         #create test user
-        self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
-        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713', on_call=True,
-                                                       send_mail=True, send_sms=True)
+        self.test_user = Sesh_User.objects.create_user(username="patrick",
+                                                  email="alp@gle.solar",
+                                                  password="test.test.test",
+                                                  phone_number='250786688713',
+                                                  on_call=True,
+                                                  send_mail=True,
+                                                  send_sms=True)
+
+        self.test_user.save()
+
 
         # Creating test group
         self.test_group = Group(name='test_group')
@@ -184,8 +192,7 @@ class AlertTestCase(TestCase):
         """
         Test the display of alerts to the user
         """
-        self.client.login(username="patrick", password="cdakcjocajica")
-
+        self.client.login(username='patrick', password='test.test.test')
 
         response = self.client.post('/get-alert-data/',{'alertId':'1'})
         self.assertEqual(response.status_code, 200)
@@ -205,7 +212,7 @@ class AlertTestCase(TestCase):
         """
         Testing the silencing of alerts
         """
-        self.client.login(username="patrick", password="cdakcjocajica")
+        self.client.login(username="patrick", password="test.test.test")
         response = self.client.post('/silence-alert/',{'alert_id':'1'})
 
         self.assertEqual(response.status_code, 200)

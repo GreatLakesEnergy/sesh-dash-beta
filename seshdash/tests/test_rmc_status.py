@@ -2,7 +2,7 @@
 from django.test import TestCase
 
 # APP Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point, RMC_status, Sesh_RMC_Account
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point, RMC_status, Sesh_RMC_Account
 
 # django Time related
 from django.utils import timezone
@@ -67,7 +67,7 @@ class RMCTestCase(TestCase):
         self.i.insert_point(self.site,'status', 1, time = timestamp)
 
         sleep(1)
-        self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
+        self.test_user = Sesh_User.objects.create_user(username="john doe",email="alp@gle.solar",password="asdasd12345")
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 

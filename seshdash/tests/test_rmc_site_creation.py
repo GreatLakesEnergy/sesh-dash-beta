@@ -11,7 +11,7 @@ from django.utils import timezone
 # Other libs
 from geoposition import Geoposition
 
-from seshdash.models import Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Sensor_Mapping
+from seshdash.models import Sesh_User, Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Sensor_Mapping
 from seshdash.utils.model_tools import get_all_associated_sensors, get_config_sensors
 
 class TestAddRMCSite(TestCase):
@@ -21,7 +21,7 @@ class TestAddRMCSite(TestCase):
         """
         Initializing the db
         """
-        self.user = User.objects.create_superuser(username='test', email="test@gle.solar", password='test12345')
+        self.user = Sesh_User.objects.create_superuser(username='test', email="test@gle.solar", password='test12345')
         self.client = Client()
 
         self.site = Sesh_Site.objects.create(

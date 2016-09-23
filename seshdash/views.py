@@ -528,6 +528,7 @@ class BoM_Data_Detail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BoM_Data_PointSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+"""
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -536,6 +537,7 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+"""
 
 
 """
