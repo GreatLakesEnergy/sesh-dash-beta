@@ -58,14 +58,15 @@ class AddTestCase(TestCase):
 
         self.user = Sesh_User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
 
-        self.test_user = Sesh_User.objects.create_user(username='test_user', password='test.test.tests', email='test@test.test')
+        self.test_user = Sesh_User.objects.create_user(username='test_user', password='test.test.test', email='test@test.test')
 
+
+        print "Test user has permission to access?: %s " % (self.test_user.has_perm('auth.view_Sesh_Site'))
 
     def test_edit_site(self):
         c = Client()
         val = c.login(username = "frank",password = "password")
         
-        print "The login val is: %s " % val
 
         data= {'site_name':u'kibuye',
                'comission_date':datetime(2015,12,11,22,0),
@@ -90,6 +91,7 @@ class AddTestCase(TestCase):
 
 
         # Checking for another unauthorized user
-        c.login(username="test_user",password="test.test.test")
+        val = c.login(username="test_user",password="test.test.test")
+        print "The login value is %s" % val
         response = c.post('/edit_site/' + str(self.site.id), data)
         self.assertEqual(response.status_code, 403)
