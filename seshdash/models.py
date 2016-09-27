@@ -30,13 +30,26 @@ class VRM_Account(models.Model):
         verbose_name = "VRM Account"
 
 
+
+
+class Sesh_Organisation(models.Model):
+    name = models.CharField(max_length=40)
+    send_slack = models.BooleanField(default=False)
+    slack_token = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.group.name
+
+
 class Sesh_User(AbstractUser):
     """
     In creating Sesh_User instances,
     Always remember to user create_user instead of create, 
     Sesh_User.objects.create_user
     """
-    department = models.CharField(max_length=100)
+    department = models.CharField(max_length=100) 
+    organisation = models.ForeignKey(Sesh_Organisation, null=True)
+    is_org_admin = models.BooleanField(default=False)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
     send_mail = models.BooleanField(default=False)
@@ -49,16 +62,6 @@ class Sesh_User(AbstractUser):
     class Meta:
          verbose_name = 'User'
          verbose_name_plural = 'Users'
-
-
-
-class Sesh_Organisation(models.Model):
-    name = models.CharField(max_length=40)
-    send_slack = models.BooleanField(default=False)
-    slack_token = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.group.name
 
 
 class Slack_Channel(models.Model):
@@ -163,6 +166,7 @@ class Sesh_Site(models.Model):
     Model for each PV SESH installed site
     """
     site_name = models.CharField(max_length=100, unique = True)
+    organisation = models.ForeignKey(Sesh_Organisation, null=True)
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)
