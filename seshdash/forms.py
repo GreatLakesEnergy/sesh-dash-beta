@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account, Sensor_EmonTh, \
-                            Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Alert_Rule
+                            Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Alert_Rule, Sesh_User
 from seshdash.utils.time_utils import get_timezone_from_geo, localize
 
 class SiteForm(ModelForm):
@@ -124,3 +124,11 @@ class AlertRuleForm(ModelForm):
     class Meta:
         model = Alert_Rule
         fields = ('check_field', 'operator', 'value',)
+
+class SeshUserForm(ModelForm):
+    """
+    Form for the Sesh User
+    """
+    class Meta:
+        model = Sesh_User
+        fields = ("username", "is_org_admin", "email", "password",  "phone_number", "on_call", "send_mail", "send_sms")

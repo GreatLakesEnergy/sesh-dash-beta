@@ -35,5 +35,7 @@ urlpatterns = [
             url(r'^add_rmc_account/([0-9]{1,5})$', views.add_rmc_account, name='add_rmc_account'),
             url(r'^get_rmc_config$', views.get_rmc_config, name='get_rmc_config'),
             url(r'^user_notifications$', views.user_notifications, name='user_notifications'),
+            url(r'^manage_users$', views.manage_org_users, name='manage_org_users'),
+            url(r'^add_user$', views.add_sesh_user, name='add_sesh_user'),
             ]
 

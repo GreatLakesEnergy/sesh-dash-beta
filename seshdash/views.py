@@ -30,7 +30,7 @@ from django.db.models import Sum
 
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
                            SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm, \
-                           AlertRuleForm
+                           AlertRuleForm, SeshUserForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -49,7 +49,7 @@ from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
-from seshdash.utils.permission_utils import get_permissions
+from seshdash.utils.permission_utils import get_permissions, get_org_edit_permissions
 
 import json,time,random
 
@@ -120,10 +120,9 @@ def index(request,site_id=0):
     context_dict['sites_stats'] = sites_stats
 
     # user permissions
-    user = request.user
-    permission = get_permissions(user)
-    context_dict['permitted'] = permission
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['user'] = request.user
+    print 'The user %s permitted is: %s' % (request.user, context_dict['permitted'])
 
     return render(request,'seshdash/main-dash.html',context_dict)
 
@@ -1130,3 +1129,31 @@ def user_notifications(request):
     context_dict['sites_stats'] = get_quick_status(user_sites)
     context_dict['user_formset'] = sesh_user_formset
     return render(request, 'seshdash/settings/user_notifications.html', context_dict)
+
+def manage_org_users(request):
+    """
+    View to manage the users of an organisation
+    Should only be accessed by admin users of the organisation
+    """
+    context_dict = {}
+    context_dict['organisation_users'] = request.user.organisation.get_users()
+    context_dict['form'] = SeshUserForm()
+    return render(request, 'seshdash/settings/organisation_users.html', context_dict)
+
+
+def add_sesh_user(request):
+    """
+    View for adding a new sesh user
+    To be used by the admin of the organisation only
+    """
+    if request.user.is_org_admin:
+        if request.POST:
+            form = SeshUserForm(request.POST)
+            if form.is_valid():
+                print "The form is valid saving"
+                user = form.save(commit=False)
+                user.organisation = request.user.organisation
+                user.save()
+                return redirect('manage_org_users')
+    else:
+        return HttpResponseForbidden()

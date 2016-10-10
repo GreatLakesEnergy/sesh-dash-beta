@@ -1,0 +1,69 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% load bootstrap %}
+
+{% block main %}
+
+
+	<div role="tabpanel" id="main-wrapper">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active">
+				<a href="#home" aria-controls="home" role="tab" data-toggle="tab">{{user.organisation}} alert rules</a>
+			</li>
+			<li role="presentation">
+				<a href="#tab" aria-controls="tab" role="tab" data-toggle="tab">Add alert rules to {{user.organisation}}</a>
+			</li>
+		</ul>
+
+		<!-- Tab panes -->
+		<div class="tab-content">
+
+			{# Tab show users for the current organisation #}
+			<div role="tabpanel" class="tab-pane active" id="home">
+				<h4 class="text-left"> Users</h4>
+
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<th>Username</th>
+							<th>Email</th>
+							<th>Phone Number</th>
+						</thead>
+						<tbody>
+						{% for user in organisation_users %}
+								<tr>
+									<td>{{user.username}}</td>
+									<td>{{user.email}}</td>
+									<td>{{user.phone_number}}</td>
+									<td>
+										<a href="#" class="glyphicon glyphicon-remove-circle pull-right red action-icon">
+
+										<a href="#" class="glyphicon glyphicon-edit pull-right action-icon"></a>
+										</a>
+									</td>
+								</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+
+
+			<div role="tabpanel" class="tab-pane" id="tab">
+				<h4 class="text-left"> Add an alert rule to {{site}}</h4>
+
+				<form  method="post" action="{% url 'add_sesh_user' %}">
+					{% csrf_token %}
+					{{form|bootstrap}}
+					<input type="submit" class="btn btn-primary" value="Submit">
+				</form>
+
+			</div>
+
+		</div>
+	</div>
+
+{% endblock %}

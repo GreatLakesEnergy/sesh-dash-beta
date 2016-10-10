@@ -40,6 +40,8 @@ class Sesh_Organisation(models.Model):
     def __str__(self):
         return self.name
 
+    def get_users(self):
+        return Sesh_User.objects.filter(organisation=self)
 
 class Sesh_User(AbstractUser):
     """
