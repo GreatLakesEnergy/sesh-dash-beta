@@ -38,7 +38,7 @@ class Sesh_Organisation(models.Model):
     slack_token = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.group.name
+        return self.name
 
 
 class Sesh_User(AbstractUser):

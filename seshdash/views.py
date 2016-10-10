@@ -123,6 +123,7 @@ def index(request,site_id=0):
     user = request.user
     permission = get_permissions(user)
     context_dict['permitted'] = permission
+    context_dict['user'] = request.user
 
     return render(request,'seshdash/main-dash.html',context_dict)
 
