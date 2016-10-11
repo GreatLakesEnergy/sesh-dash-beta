@@ -1193,7 +1193,6 @@ def edit_sesh_user(request, user_id):
             if form.is_valid():
                 form.save()
                 return redirect('manage_org_users')   
-            else:
 
         user_sites = _get_user_sites(request)
         context_dict['form'] = form
