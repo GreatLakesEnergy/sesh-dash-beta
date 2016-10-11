@@ -10,10 +10,10 @@
 		<!-- Nav tabs -->
 		<ul class="nav nav-tabs" role="tablist">
 			<li role="presentation" class="active">
-				<a href="#home" aria-controls="home" role="tab" data-toggle="tab">{{user.organisation}} alert rules</a>
+				<a href="#home" aria-controls="home" role="tab" data-toggle="tab">{{user.organisation}} users</a>
 			</li>
 			<li role="presentation">
-				<a href="#tab" aria-controls="tab" role="tab" data-toggle="tab">Add alert rules to {{user.organisation}}</a>
+				<a href="#tab" aria-controls="tab" role="tab" data-toggle="tab">Add a user to {{user.organisation}}</a>
 			</li>
 		</ul>
 
@@ -32,16 +32,18 @@
 							<th>Phone Number</th>
 						</thead>
 						<tbody>
-						{% for user in organisation_users %}
+						{% for organisation_user in organisation_users %}
 								<tr>
-									<td>{{user.username}}</td>
-									<td>{{user.email}}</td>
-									<td>{{user.phone_number}}</td>
+									<td>{{organisation_user.username}}</td>
+									<td>{{organisation_user.email}}</td>
+									<td>{{organisation_user.phone_number}}</td>
 									<td>
-										<a href="{% url 'delete_sesh_user' user.id %}"
+										{% if organisation_user != user %}
+												<a href="{% url 'delete_sesh_user' organisation_user.id %}"
 																	class="glyphicon glyphicon-remove-circle pull-right red action-icon"></a>
+										{% endif %}
 
-										<a href="{% url 'edit_sesh_user' user.id %}"
+										<a href="{% url 'edit_sesh_user' organisation_user.id %}"
 																	class="glyphicon glyphicon-edit pull-right action-icon"></a>
 
 									</td>
@@ -55,7 +57,7 @@
 
 
 			<div role="tabpanel" class="tab-pane" id="tab">
-				<h4 class="text-left"> Add an alert rule to {{site}}</h4>
+				<h4 class="text-left"> Add a sesh user to {{user.organisation}}</h4>
 
 				<form  method="post" action="{% url 'add_sesh_user' %}">
 					{% csrf_token %}
