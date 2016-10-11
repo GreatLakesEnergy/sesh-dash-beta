@@ -1,0 +1,30 @@
+{% extends 'seshdash/base.html' %}
+
+{% load bootstrap %}
+
+{% block main %}
+
+
+  <div id="main-wrapper">
+
+    <div class="panel panel-success">
+
+      <div class="panel-heading">
+        <h3 class="panel-title">Edit Sesh User</h3>
+      </div>
+
+      <div class="panel-body sesh-container">
+
+        <form  method="POST" >
+          {% csrf_token %}
+          {{form|bootstrap}}
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+{% endblock %}

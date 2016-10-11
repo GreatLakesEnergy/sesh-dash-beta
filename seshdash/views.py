@@ -1144,16 +1144,55 @@ def manage_org_users(request):
 def add_sesh_user(request):
     """
     View for adding a new sesh user
-    To be used by the admin of the organisation only
+    user should be an organisation admin
     """
     if request.user.is_org_admin:
-        if request.POST:
+        if request.method == 'POST':
             form = SeshUserForm(request.POST)
             if form.is_valid():
-                print "The form is valid saving"
                 user = form.save(commit=False)
                 user.organisation = request.user.organisation
                 user.save()
                 return redirect('manage_org_users')
+        else:
+            return HttpResponseForbidden()
+    else:
+        return HttpResponseForbidden()
+
+
+def delete_sesh_user(request, user_id):
+     """
+     Deletes a sesh User
+     the user to access the view should be an admin of the organisation
+     """
+    
+     if request.user.is_org_admin:
+         user = Sesh_User.objects.filter(id=user_id).first()
+         user.delete()
+         return redirect('manage_org_users')
+     else:
+         return HttpResponseForbidden()
+
+
+def edit_sesh_user(request, user_id):
+    """
+    Edits a sesh user
+    the user loged in should be an admin of the organisation
+    """
+    if request.user.is_org_admin:
+        context_dict = {}
+        user = Sesh_User.objects.filter(id=user_id).first()
+        form = SeshUserForm(instance=user)
+
+        if request.method == 'POST':
+            form = SeshUserForm(request.POST, instance=user)
+            if form.is_valid():
+                form.save()
+                return redirect('manage_org_users')   
+            else:
+                print "The form is not valid: %s" % form.errors
+
+        context_dict['form'] = form
+        return render(request, 'seshdash/settings/edit_sesh_user.html', context_dict)
     else:
         return HttpResponseForbidden()

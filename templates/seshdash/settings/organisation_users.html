@@ -38,10 +38,12 @@
 									<td>{{user.email}}</td>
 									<td>{{user.phone_number}}</td>
 									<td>
-										<a href="#" class="glyphicon glyphicon-remove-circle pull-right red action-icon">
+										<a href="{% url 'delete_sesh_user' user.id %}"
+																	class="glyphicon glyphicon-remove-circle pull-right red action-icon"></a>
 
-										<a href="#" class="glyphicon glyphicon-edit pull-right action-icon"></a>
-										</a>
+										<a href="{% url 'edit_sesh_user' user.id %}"
+																	class="glyphicon glyphicon-edit pull-right action-icon"></a>
+
 									</td>
 								</tr>
 						{% endfor %}
