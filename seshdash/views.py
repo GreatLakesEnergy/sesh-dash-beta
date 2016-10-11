@@ -878,15 +878,12 @@ def edit_site(request,site_Id=1):
             if site_form.is_valid() and rmc_form.is_valid():
                 site_form.save()
                 rmc_form.save()
-            else:
-
             
             context_dict['RMCForm'] = rmc_form
         else:
             site_form = SiteVRMForm(request.POST, instance=site)
             if site_form.is_valid():
                 site_form.save()
-            else:
     
 
     user_sites = _get_user_sites(request)
