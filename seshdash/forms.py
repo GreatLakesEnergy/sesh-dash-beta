@@ -10,7 +10,7 @@ class SiteForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements')
+        exclude = ('Delete','vrm_site_id','organisation', 'rmc_account','time_zone','status_card','site_measurements')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
@@ -35,7 +35,7 @@ class EditSiteForm(ModelForm):
 
     class Meta:
         model= Sesh_Site
-        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements','vrm_account',)
+        exclude = ('Delete','organisation', 'vrm_site_id','rmc_account','time_zone','status_card','site_measurements','vrm_account',)
 
 
 class SiteRMCForm(ModelForm):
@@ -45,7 +45,7 @@ class SiteRMCForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('vrm_account','vrm_site_id','import_data', 'status_card', 'site_measurements')
+        exclude = ('vrm_account','vrm_site_id', 'organisation', 'import_data', 'status_card', 'site_measurements')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
@@ -56,7 +56,7 @@ class SiteVRMForm(ModelForm):
     """
     class Meta:
         model = Sesh_Site
-        exclude = ('vrm_account', 'vrm_site_id', 'status_card', 'site_measurements')
+        exclude = ('vrm_account', 'organisation', 'vrm_site_id', 'status_card', 'site_measurements')
 
 
 

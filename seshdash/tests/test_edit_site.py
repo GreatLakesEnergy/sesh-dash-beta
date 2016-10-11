@@ -66,6 +66,7 @@ class AddTestCase(TestCase):
         c = Client()
         val = c.login(username = "frank",password = "password")
         
+        print 'the login value is: %s' % val
 
         data= {'site_name':u'kibuye',
                'comission_date':datetime(2015,12,11,22,0),

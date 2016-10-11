@@ -860,10 +860,12 @@ def graphs(request):
 def edit_site(request,site_Id=1):
     context_dict = {}
     site = get_object_or_404(Sesh_Site, id=site_Id)
+    print "The site to edit is: %s" % site
     rmc_account = Sesh_RMC_Account.objects.filter(site=site).first();
 
     # If it is an rmc site create a rmc_form
     if rmc_account:
+        print "This is an rmc site"
         site_form = SiteRMCForm(instance=site)
         rmc_form = RMCForm(instance=rmc_account)
         context_dict['RMCForm'] = rmc_form
@@ -879,13 +881,20 @@ def edit_site(request,site_Id=1):
             if site_form.is_valid() and rmc_form.is_valid():
                 site_form.save()
                 rmc_form.save()
+            else:
+                print "The form is not valid errors are: %s" % site_form.errors
 
             
             context_dict['RMCForm'] = rmc_form
         else:
+            print "The site is not an rmc site"
             site_form = SiteVRMForm(request.POST, instance=site)
             if site_form.is_valid():
+                print "The site is valid"
                 site_form.save()
+            else:
+                print "The site form is not valid"
+                print "The site errors are: %s" % form.errors
     
 
     user_sites = _get_user_sites(request)

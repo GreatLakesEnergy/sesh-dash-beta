@@ -105,17 +105,12 @@ class AlertTestCase(TestCase):
                                                   send_mail=True,
                                                   send_sms=True)
 
-        self.test_user.save()
 
 
         # Creating test group
-        self.test_group = Group(name='test_group')
-        self.test_group.save()
-
-        assign_perm('can_manage_sesh_site', self.test_group, self.site)
 
 
-        self.test_organisation = Sesh_Organisation.objects.create(group=self.test_group,
+        self.test_organisation = Sesh_Organisation.objects.create(name='test_organisation',
                                                                   send_slack=True,
                                                                   slack_token=settings.SLACK_TEST_KEY)
 

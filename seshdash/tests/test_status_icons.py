@@ -58,6 +58,7 @@ class StatusTestCase(TestCase):
         self.Client.insert_point(self.site,'soc',20.0)
         sites = Sesh_Site.objects.all()
         response = get_quick_status(sites)
+        print 'The reponse is: %s' % response
         self.assertEqual(response[0]['battery'],'red')
         self.assertEqual(response[0]['weather'],'yellow')
 
