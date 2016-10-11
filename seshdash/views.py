@@ -1121,9 +1121,9 @@ def user_notifications(request):
     and their values to view the sites
     """
     context_dict = {}
-    user = request.user    
+    user = request.user   
 
-    organisation_users = Sesh_User.objects.filter(user__groups=user.groups.first()) # all users belonging to the same organisations
+    organisation_users = Sesh_User.objects.filter(organisation=user.organisation) # all users belonging to the same organisations
     SeshUserFormSetFactory = modelformset_factory(Sesh_User, fields=('on_call', 'send_mail', 'send_sms',), extra=0)
     sesh_user_formset = SeshUserFormSetFactory(queryset=organisation_users)
     
