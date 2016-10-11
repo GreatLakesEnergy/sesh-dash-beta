@@ -1135,10 +1135,16 @@ def manage_org_users(request):
     View to manage the users of an organisation
     Should only be accessed by admin users of the organisation
     """
-    context_dict = {}
-    context_dict['organisation_users'] = request.user.organisation.get_users()
-    context_dict['form'] = SeshUserForm()
-    return render(request, 'seshdash/settings/organisation_users.html', context_dict)
+    if request.user.is_org_admin: 
+        context_dict = {}
+        context_dict['organisation_users'] = request.user.organisation.get_users()
+        context_dict['form'] = SeshUserForm()
+        user_sites = _get_user_sites(request) 
+        context_dict['permitted'] = get_org_edit_permissions(request.user)
+        context_dict['sites_stats'] = get_quick_status(user_sites)
+        return render(request, 'seshdash/settings/organisation_users.html', context_dict)
+    else:
+        return HttpResponseForbidden()
 
 
 def add_sesh_user(request):
@@ -1192,7 +1198,11 @@ def edit_sesh_user(request, user_id):
             else:
                 print "The form is not valid: %s" % form.errors
 
+        user_sites = _get_user_sites(request)
+        print "The user sites are: %s" % user_sites
         context_dict['form'] = form
+        context_dict['permitted'] = get_org_edit_permissions(request.user)
+        context_dict['sites_stats'] = get_quick_status(user_sites)
         return render(request, 'seshdash/settings/edit_sesh_user.html', context_dict)
     else:
         return HttpResponseForbidden()
