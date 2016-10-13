@@ -8,7 +8,7 @@ from time import sleep
 from seshdash.models import Alert_Rule, Sesh_Site, Sesh_User
 from seshdash.data.db.influx import Influx
 
-class TestAlertRules(TestCase):
+class TestSettings(TestCase):
     """
     Testing the alert rules options in the 
     settings
@@ -122,26 +122,28 @@ class TestAlertRules(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Alert_Rule.objects.all().count(), 0)
 
-        def test_user_notifications(self):
-                """
-                Testing the user notifications
-                """
-                self.client.login(username='test_user', password='test.test.test')
+    def test_user_notifications(self):
+        """
+        Testing the user notifications
+        """
+        self.client.login(username='test_user', password='test.test.test')
                 
-                data = {
-                          u'form-MAX_NUM_FORMS': [u'1000'],
-                          u'form-INITIAL_FORMS': [u'3'],
-                          u'form-TOTAL_FORMS': [u'1'],
-                          u'form-0-send_sms': [u'on'],
-                          u'form-0-on_call': [u'on'],
-                          u'form-0-id': [u'1'],
-                          u'form-MIN_NUM_FORMS': [u'0']
-                }
-               
-                response = self.client.post(reverse('user_notifications'), data)
+        print 'The id for the sesh user is: %s ' % self.sesh_user.id
+
+        data = {
+            u'form-MAX_NUM_FORMS': [u'1000'],
+            u'form-INITIAL_FORMS': [u'3'],
+            u'form-TOTAL_FORMS': [u'1'],
+            u'form-0-send_sms': [u'on'],
+            u'form-0-on_call': [u'on'],
+            u'form-0-id': [u'%s' % self.sesh_user.id],
+            u'form-MIN_NUM_FORMS': [u'0']
+        }
+ 
+        response = self.client.post(reverse('user_notifications'), data)
                  
-                # Asserting the correctness of the response and the result of the post
-                self.assertEqual(response.status_code, 302)
-                user = Sesh_User.objects.filter(user=self.user).first()
-                self.assertEqual(user.on_call, True)
-                self.assertEqual(user.send_sms, True)
+        # Asserting the correctness of the response and the result of the post
+        self.assertEqual(response.status_code, 302)
+        user = Sesh_User.objects.filter(id=self.sesh_user.id).first()
+        self.assertEqual(user.on_call, True)
+        self.assertEqual(user.send_sms, True)

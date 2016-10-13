@@ -12,3 +12,8 @@ def get_permissions(user):
     permission =  user.has_perm('view_Sesh_Site')
     return permission
 
+def get_org_edit_permissions(user):
+    """
+    Permissions for editing the sesh organisation
+    """
+    return user.is_org_admin

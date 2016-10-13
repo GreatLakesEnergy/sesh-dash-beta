@@ -30,7 +30,7 @@ from django.db.models import Sum
 
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
                            SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm, \
-                           AlertRuleForm
+                           AlertRuleForm, SeshUserForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -49,7 +49,7 @@ from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
-from seshdash.utils.permission_utils import get_permissions
+from seshdash.utils.permission_utils import get_permissions, get_org_edit_permissions
 
 import json,time,random
 
@@ -120,9 +120,8 @@ def index(request,site_id=0):
     context_dict['sites_stats'] = sites_stats
 
     # user permissions
-    user = request.user
-    permission = get_permissions(user)
-    context_dict['permitted'] = permission
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['user'] = request.user
 
     return render(request,'seshdash/main-dash.html',context_dict)
 
@@ -879,7 +878,6 @@ def edit_site(request,site_Id=1):
             if site_form.is_valid() and rmc_form.is_valid():
                 site_form.save()
                 rmc_form.save()
-
             
             context_dict['RMCForm'] = rmc_form
         else:
@@ -1112,9 +1110,9 @@ def user_notifications(request):
     and their values to view the sites
     """
     context_dict = {}
-    user = request.user    
+    user = request.user   
 
-    organisation_users = Sesh_User.objects.filter(user__groups=user.groups.first()) # all users belonging to the same organisations
+    organisation_users = Sesh_User.objects.filter(organisation=user.organisation) # all users belonging to the same organisations
     SeshUserFormSetFactory = modelformset_factory(Sesh_User, fields=('on_call', 'send_mail', 'send_sms',), extra=0)
     sesh_user_formset = SeshUserFormSetFactory(queryset=organisation_users)
     
@@ -1129,3 +1127,77 @@ def user_notifications(request):
     context_dict['sites_stats'] = get_quick_status(user_sites)
     context_dict['user_formset'] = sesh_user_formset
     return render(request, 'seshdash/settings/user_notifications.html', context_dict)
+
+def manage_org_users(request):
+    """
+    View to manage the users of an organisation
+    Should only be accessed by admin users of the organisation
+    """
+    if request.user.is_org_admin: 
+        context_dict = {}
+        context_dict['organisation_users'] = request.user.organisation.get_users()
+        context_dict['form'] = SeshUserForm()
+        user_sites = _get_user_sites(request) 
+        context_dict['permitted'] = get_org_edit_permissions(request.user)
+        context_dict['sites_stats'] = get_quick_status(user_sites)
+        return render(request, 'seshdash/settings/organisation_users.html', context_dict)
+    else:
+        return HttpResponseForbidden()
+
+
+def add_sesh_user(request):
+    """
+    View for adding a new sesh user
+    user should be an organisation admin
+    """
+    if request.user.is_org_admin:
+        if request.method == 'POST':
+            form = SeshUserForm(request.POST)
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.organisation = request.user.organisation
+                user.save()
+                return redirect('manage_org_users')
+        else:
+            return HttpResponseForbidden()
+    else:
+        return HttpResponseForbidden()
+
+
+def delete_sesh_user(request, user_id):
+     """
+     Deletes a sesh User
+     the user to access the view should be an admin of the organisation
+     """
+    
+     if request.user.is_org_admin:
+         user = Sesh_User.objects.filter(id=user_id).first()
+         user.delete()
+         return redirect('manage_org_users')
+     else:
+         return HttpResponseForbidden()
+
+
+def edit_sesh_user(request, user_id):
+    """
+    Edits a sesh user
+    the user loged in should be an admin of the organisation
+    """
+    if request.user.is_org_admin:
+        context_dict = {}
+        user = Sesh_User.objects.filter(id=user_id).first()
+        form = SeshUserForm(instance=user)
+
+        if request.method == 'POST':
+            form = SeshUserForm(request.POST, instance=user)
+            if form.is_valid():
+                form.save()
+                return redirect('manage_org_users')   
+
+        user_sites = _get_user_sites(request)
+        context_dict['form'] = form
+        context_dict['permitted'] = get_org_edit_permissions(request.user)
+        context_dict['sites_stats'] = get_quick_status(user_sites)
+        return render(request, 'seshdash/settings/edit_sesh_user.html', context_dict)
+    else:
+        return HttpResponseForbidden()

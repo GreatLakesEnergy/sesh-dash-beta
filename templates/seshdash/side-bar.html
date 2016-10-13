@@ -27,10 +27,10 @@
                                 <span class="quick-status">
                                     <i class="fa fa-battery-full pull-right"
                                             style="color:{{site.battery}}"></i>
-                                    <i class="fa fa-sun-o pull-right" 
+                                    <i class="fa fa-sun-o pull-right"
                                             style="color:{{site.weather}}"></i>
                                  </span>
-                                
+
                             </a>
 
                         </li>
@@ -47,20 +47,23 @@
 
 
             <li class="droplink ">
-  
+
+              {% if permitted %}
                 <a href="#" class="waves-effect waves-button">
                     <span class="fa fa-cog menu-icon"></span>
                     <p>Settings</p>
                     <span class="arrow"></span>
                 </a>
-
                 <ul class="sub-menu settings-list ">
                     {% include 'seshdash/settings/main.html' %}
                 </ul>
 
+              {% endif %}
+
+
 
             </li>
-            
+
 
 
         </ul>
