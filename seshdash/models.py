@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from django.core.exceptions import ValidationError
 
+from django_mysql.models import JSONField
 
 # Create your models here.
 class VRM_Account(models.Model):
@@ -718,3 +719,21 @@ class Sensor_Mapping(models.Model):
     class Meta:
         unique_together =  ('site_id', 'node_id', 'sensor_type')
 
+
+class Report(models.Model):
+    """
+    Model to contain the reports that should be sent, 
+    to users of specific sites
+    """
+    DURATION_CHOICES = (
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+    )
+    site = models.ForeignKey(Sesh_Site)
+    duration = models.CharField(max_length=40, choices=DURATION_CHOICES)
+    day_to_report = models.IntegerField() # This will contain an integer value showing the day the reports will execute, if it is a weekly report and the number is 2 then it would execute on Tuesday
+    attributes = JSONField()
+   
+    def __str__(self):
+        return self.duration + " Report for " + self.site.site_name

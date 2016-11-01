@@ -4,6 +4,7 @@ from seshdash.utils.send_mail import send_mail
 from django.forms.models import model_to_dict
 from django.utils import timezone
 from django.db.models import Avg,Sum
+from django.apps import apps
 
 from guardian.shortcuts import get_users_with_perms
 from datetime import datetime
@@ -81,3 +82,31 @@ def prepare_report(site, duration="week"):
 
 def report(subject,content,recipients):
     return send_mail(subject, recipients, content, email_template="reporting")
+
+
+def generate_report(report):
+    """
+    Function to generate a report,
+    The function receives a report model instance and
+    it returns a dict containing the aggregated value of the 
+    report attributes
+    """ 
+    report_data = {}
+    now = datetime.now()
+    
+    # Getting the correct date range
+    if report.duration == "daily":
+        start = now - relativedelta(hours=24)
+    elif report.duration == "weekly":
+        start = now - relativedelta(weeks=1)
+    elif report.duration == "monthly":
+        start = now - relativedelta(months=1)
+
+    # Getting the aggregation of the values in the report attributes
+    for attribute in report.attributes:
+        table = apps.get_model(app_label="seshdash", model_name=attribute["table"])
+        data = table.objects.filter(site=report.site
+                                    date__range=[start, now]).aggregate(Sum(attribute["column"]))
+        report_data.update(data)
+                    
+    return report_data                       

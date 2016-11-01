@@ -278,6 +278,7 @@ INSTALLED_APPS = (
     'seshdash',
     'guardian',
     'djangobower',
+    'django_mysql',
     'django_nvd3',
     'rest_framework',
     'rest_framework.authtoken',
