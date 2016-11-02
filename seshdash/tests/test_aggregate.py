@@ -29,7 +29,7 @@ from django.forms.models import model_to_dict
 from seshdash.utils.time_utils import get_time_interval_array
 from seshdash.data.db.influx import Influx
 from django.conf import settings
-from seshdash.tasks import get_aggregate_daily_data, send_reports
+from seshdash.tasks import get_aggregate_daily_data, check_reports
 from seshdash.tests.data_generation import create_test_data
 
 
@@ -117,15 +117,6 @@ class AggregateTestCase(TestCase):
         self.assertNotEqual(ddp.daily_power_consumption_total,0)
         self.assertNotEqual(ddp.daily_grid_usage,0)
 
-    @override_settings(INFLUX_DB='test_db')
-    def test_reporting(self):
-        """
-        Test email reporting for sites
-        """
-        settings.INFLUX_DB = self._influx_db_name
-        get_aggregate_daily_data()
-        send_reports("day")
-        self.assertEqual(len(mail.outbox),1)
 
 
     def test_historical_data_display(self):
