@@ -3,12 +3,13 @@ from seshdash.utils.send_mail import send_mail
 
 from django.forms.models import model_to_dict
 from django.utils import timezone
-from django.db.models import Avg,Sum
+from django.db.models import Avg, Sum
 from django.apps import apps
 
 from guardian.shortcuts import get_users_with_perms
 from datetime import datetime
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 import logging
 
 # Instantiating the logger
@@ -102,11 +103,27 @@ def generate_report(report):
     elif report.duration == "monthly":
         start = now - relativedelta(months=1)
 
+
     # Getting the aggregation of the values in the report attributes
     for attribute in report.attributes:
+        operation = _get_operation(attribute) # Getting the operation to execute, average or sum
         table = apps.get_model(app_label="seshdash", model_name=attribute["table"])
         data = table.objects.filter(site=report.site,
-                                    date__range=[start, now]).aggregate(Sum(attribute["column"]))
+                                    date__range=[start, now]).aggregate(operation(attribute["column"]))
         report_data.update(data)
                     
-    return report_data                       
+    return report_data        
+
+def _get_operation(attribute):
+    """
+    Function to return the operation to be used
+    when aggregating data for a report attribute
+    """
+    if attribute['operation'] == "average":
+        operation = Avg
+    elif attribute['operation'] == "sum":
+        operation = Sum
+    else:
+        raise Exception("Invalid opperation in attribute for report")       
+
+    return operation      
