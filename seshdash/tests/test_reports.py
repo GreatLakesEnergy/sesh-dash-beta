@@ -2,12 +2,15 @@
 Testing the funcionality of the reports
 and the reporting utils
 """
+from datetime import datetime
+
 from django.test import TestCase
 from django.utils import timezone
 from geoposition import Geoposition
 
-from seshdash.models import Daily_Data_Point, Report, Sesh_Site
-from seshdash.utils.reporting import generate_report
+from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisation, Sesh_User
+from seshdash.utils.reporting import generate_report_data
+from seshdash.tasks import check_reports
 
 class ReportTestCase(TestCase):
     def setUp(self):
@@ -15,7 +18,19 @@ class ReportTestCase(TestCase):
         Initializing
         """
         self.location = Geoposition(1.7, 1.8)
+
+        self.organisation = Sesh_Organisation.objects.create(name='test_org',
+                                                             slack_token='testing_token')
+
+        self.test_user = Sesh_User.objects.create_user(username='test_user',
+                                                       email='patrickuwonkunda@gmail.com', 
+                                                       password='test.test.test',
+                                                       organisation=self.organisation,
+                                                       department='test',
+                                                       send_mail=True)
+
         self.site = Sesh_Site.objects.create(site_name='test_site', 
+                                             organisation=self.organisation,
                                              comission_date=timezone.now(),
                                              location_city='kigali',
                                              location_country='Rwanda',
@@ -46,7 +61,7 @@ class ReportTestCase(TestCase):
 
         self.report = Report.objects.create(site=self.site,
                                             duration="daily",
-                                            day_to_report=1,
+                                            day_to_report=datetime.now().today().weekday(),
                                             attributes=self.attributes_data)
 
         
@@ -56,11 +71,18 @@ class ReportTestCase(TestCase):
         """
         self.assertEqual(Report.objects.all().count(), 1)     
 
-    def test_generate_report(self):
+    def test_generate_report_data(self):
         """
         Testing the util that generates the report dict
         """
-        results = generate_report(self.report)
+        results = generate_report_data(self.report)
         # Asserting if the aggregations are correct
         self.assertEqual(results['daily_pv_yield__avg'], 10)
         self.assertEqual(results['daily_power_consumption_total__sum'], 20)
+
+    def test_send_reports(self):
+        """
+        Testing the task that send reports
+        """ 
+        reported_reports = check_reports()
+        self.assertEqual(reported_reports, 1)

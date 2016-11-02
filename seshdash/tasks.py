@@ -9,13 +9,13 @@ from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account, Report
 
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils.alert import alert_generator, alert_status_check
-from seshdash.utils.reporting import prepare_report
+from seshdash.utils.reporting import prepare_report, send_report
 from seshdash.data.db.influx import Influx, get_latest_point_site
 
 # Time related
@@ -539,21 +539,45 @@ def get_all_data_initial(days):
     get_enphase_daily_summary(days)
 
 @shared_task
-def send_reports(duration="week"):
+def check_reports():
     """
-    Schedule email report sending
-    options: month, week, day
+    Task to check send the reports,
+    This tasks should execute daily
     """
+    reports = Report.objects.all()
+    sent_reports_counter = 0
 
-    sites = Sesh_Site.objects.all()
-    for site in sites:
-        logger.debug("Sending report for site %s"%site)
-        result = prepare_report(site, duration=duration)
-        if not result:
-            send_reports.update_state(
-                             state = states.FAILURE,
-                             meta = 'Something went wrong creating report  check logs'
-                             )
+    for report in reports:
+        print "For each report"
+        # Daily reports
+        if report.duration == "daily":
+            print "Sending the daily report"
+            sent_val = send_report(report)
+            print "The sent value is: %s" % sent_val
+
+        # For weekly we check the day 
+        elif report.duration == "weekly":
+            if datetime.now().today().weekday() == report.day_to_report:
+                print "Ready to send the report"
+                sent_val = send_report(report)
+            else:
+                print "Not yet te day"
+
+        # For months we check the date
+        elif report.duration == "monthly":
+            if datetime.now().day == day_to_report:
+                # Issue: If the day_to_report is 31, some months will be skipped, need a better way to handle this
+                sent_val = send_report(report)
+        else:
+             raise Exception("Incorrect, report duration")
+
+        if sent_val:
+            sent_reports_counter += 1
+
+    logger.debug("Sent %s emails for this day %s" %  (sent_reports_counter, datetime.now().today()))
+    print "Sent %s emails for this day %s" %  (sent_reports_counter, datetime.now().today())
+    return sent_reports_counter
+
 @shared_task
 def rmc_status_update():
     """

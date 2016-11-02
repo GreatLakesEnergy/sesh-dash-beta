@@ -1,4 +1,4 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point
+from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point, Sesh_User
 from seshdash.utils.send_mail import send_mail
 
 from django.forms.models import model_to_dict
@@ -41,9 +41,7 @@ def prepare_report(site, duration="week"):
 
     # Query for Daily data points and aggregate across the given time
 
-    print "reports: getting aggregate between  %s and %s" %(date_range,now)
     test =  Daily_Data_Point.objects.filter(site=site, date__range= (date_range,now))
-    print "test %s"%test
 
     aggeragete_data = Daily_Data_Point.objects.filter(site=site,
             date__range= [date_range,now]).aggregate(
@@ -57,7 +55,6 @@ def prepare_report(site, duration="week"):
                     average_daily_grid = Avg('daily_grid_usage')/1000,
                     )
 
-    print "Generating report %s" %(aggeragete_data)
     # Get Users for site
     users = get_users_with_perms(site)
     for user in users:
@@ -85,7 +82,23 @@ def report(subject,content,recipients):
     return send_mail(subject, recipients, content, email_template="reporting")
 
 
-def generate_report(report):
+
+
+def send_report(report): 
+    """
+    Sends report to the users with 
+    activated report permission on the site
+    """
+    site = report.site
+
+    report_data = generate_report_data(report)
+    users = Sesh_User.objects.filter(organisation=site.organisation, send_mail=True) #users with emailreport on in the organisation
+    emails = get_emails_list(users) 
+
+    val = send_mail('%s report for %s' % (report.duration, report.site), emails, {}, 'reporting')
+    return val
+
+def generate_report_data(report):
     """
     Function to generate a report,
     The function receives a report model instance and
@@ -127,3 +140,15 @@ def _get_operation(attribute):
         raise Exception("Invalid opperation in attribute for report")       
 
     return operation      
+
+
+def get_emails_list(users):
+    """
+    Returns a list of emails from the users
+    """
+    emails = []
+
+    for user in users:
+        emails.append(user.email)
+    
+    return emails
