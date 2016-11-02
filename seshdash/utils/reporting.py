@@ -105,7 +105,7 @@ def generate_report(report):
     # Getting the aggregation of the values in the report attributes
     for attribute in report.attributes:
         table = apps.get_model(app_label="seshdash", model_name=attribute["table"])
-        data = table.objects.filter(site=report.site
+        data = table.objects.filter(site=report.site,
                                     date__range=[start, now]).aggregate(Sum(attribute["column"]))
         report_data.update(data)
                     
