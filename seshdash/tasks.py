@@ -548,26 +548,21 @@ def check_reports():
     sent_reports_counter = 0
 
     for report in reports:
-        print "For each report"
         # Daily reports
         if report.duration == "daily":
-            print "Sending the daily report"
             sent_val = send_report(report)
-            print "The sent value is: %s" % sent_val
 
         # For weekly we check the day 
         elif report.duration == "weekly":
             if datetime.now().today().weekday() == report.day_to_report:
-                print "Ready to send the report"
                 sent_val = send_report(report)
-            else:
-                print "Not yet te day"
 
         # For months we check the date
         elif report.duration == "monthly":
             if datetime.now().day == day_to_report:
                 # Issue: If the day_to_report is 31, some months will be skipped, need a better way to handle this
                 sent_val = send_report(report)
+
         else:
              raise Exception("Incorrect, report duration")
 
@@ -575,7 +570,6 @@ def check_reports():
             sent_reports_counter += 1
 
     logger.debug("Sent %s emails for this day %s" %  (sent_reports_counter, datetime.now().today()))
-    print "Sent %s emails for this day %s" %  (sent_reports_counter, datetime.now().today())
     return sent_reports_counter
 
 @shared_task
