@@ -89,13 +89,21 @@ def send_report(report):
     Sends report to the users with 
     activated report permission on the site
     """
-    site = report.site
-
     report_data = generate_report_data(report)
-    users = Sesh_User.objects.filter(organisation=site.organisation, send_mail=True) #users with emailreport on in the organisation
+    users = Sesh_User.objects.filter(organisation=report.site.organisation, send_mail=True) #users with emailreport on in the organisation
     emails = get_emails_list(users) 
+ 
+    # Collecting the data needed in the email reports.
+    subject = report.duration.capitalize() + " report for " + report.site.site_name
+    context_dict = {}
+    context_dict["title"] = subject
+    context_dict["report"] = report
+    context_dict["date"] = datetime.now()
+    context_dict["report_data"] = report_data
+    context_dict["url_to_dash"] = 'http://dash.gle.solar/site/' + report.site.site_name
 
-    val = send_mail('%s report for %s' % (report.duration, report.site), emails, {}, 'reporting')
+    print "The data to be sent is: %s" % context_dict
+    val = send_mail(subject, emails, context_dict, 'reporting')
     return val
 
 def generate_report_data(report):
@@ -105,7 +113,7 @@ def generate_report_data(report):
     it returns a dict containing the aggregated value of the 
     report attributes
     """ 
-    report_data = {}
+    report_data = []
     now = datetime.now()
     
     # Getting the correct date range
@@ -122,8 +130,9 @@ def generate_report_data(report):
         operation = _get_operation(attribute) # Getting the operation to execute, average or sum
         table = apps.get_model(app_label="seshdash", model_name=attribute["table"])
         data = table.objects.filter(site=report.site,
-                                    date__range=[start, now]).aggregate(operation(attribute["column"]))
-        report_data.update(data)
+                                    date__range=[start, now]).aggregate(val = operation(attribute["column"]))
+        data['user_friendly_name'] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
+        report_data.append(data)
                     
     return report_data        
 
@@ -140,6 +149,20 @@ def _get_operation(attribute):
         raise Exception("Invalid opperation in attribute for report")       
 
     return operation      
+
+
+def _format_column_str(string):
+    """
+    This formats a columns string to look
+    more user friendly
+    """
+    mod = ''
+    for index, letter in  enumerate(string):
+        if letter == '_':
+            mod = mod + ' '
+        else:
+            mod = mod + letter
+    return mod.capitalize()
 
 
 def get_emails_list(users):

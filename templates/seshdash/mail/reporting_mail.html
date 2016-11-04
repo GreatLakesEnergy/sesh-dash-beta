@@ -145,16 +145,14 @@ ul li {
 						<p>Hi there {{username}} ,</p>
 						<p>Here is your <i>energy usage</i>  for  {{ content.date }}</p>
 
-						<h2>{{ content.duration }}  repor:</h2>
-						<li><p> Total energy used was {{ content.total_consumption| floatformat}} KWh </p> </li>
-						<li><p> Total energy produced was {{ content.total_pv | floatformat }} KWh</p> </li>
-						<li><p> Energy used from grid was {{ content.grid_used | floatformat }} KWh</p> </li>
-						<li><p> The grid was unavailible for  {{ content.grid_outage  }} Minutes</p> </li>
-						<li><p> Total generator use was 0 {{ content.generator_stat  }} minutes</p> </li>
-						<li><p> Total alarms triggered was {{ content.no_alarms }} </p> </li>
+						<h2>{{ content.report.duration }}  report:</h2>
+
+						{% for attribute in content.report_data %}
+							<li><p> {{ attribute.user_friendly_name }} : {{ attribute.val|floatformat }} </p> </li>
+						{% endfor %}
 
 						<h3><p> Total dollars saved was <i>{{ content.cost_savings | floatformat:"-2" }} RWF </i> </p> </h3>
-						<a href="https://{{ content.url_to_dash }}" class="btn-primary">See the realtime stats here </a>
+						<a href="http:{{content.url_to_dash}}">See the realtime stats here </a>
 						<p>Thanks, have a lovely week.</p>
 						<p>Seshina</p>
 						<p><a href="http://twitter.com/sesh-dash">Follow @sesh-dash on Twitter</a>
