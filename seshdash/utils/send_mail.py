@@ -26,7 +26,6 @@ def send_mail(subject,list_of_recipients,content,email_template='alert'):
             # This would cause an issue if users have the same emails, (which is allowed in django by default)
             # TODO: Make the sesh user email field unique
             user = Sesh_User.objects.filter(email=mail).first()
-            print "The user is: %s" % user
 
             d = { 'username' : user.username,
                   'content'  : content,
