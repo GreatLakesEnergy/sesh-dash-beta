@@ -60,7 +60,9 @@ config = RawConfigParser(
                'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':'',
                'SLACK_TEST_KEY':'',
-               'USE_TEMPLATE_TWO':'False'
+               'USE_TEMPLATE_TWO':'False',
+               'KAPACITOR_HOST':'',
+               'KAPACITOR_PORT':''
                }
         )
 
@@ -164,12 +166,16 @@ DATABASES = {
     }
 }
 
-#influx settings
+# influx settings
 INFLUX_HOST = config.get('influx','HOST')
 INFLUX_PORT = config.get('influx','PORT')
 INFLUX_USERNAME =  config.get('influx','USERNAME')
 INFLUX_PASSWORD = config.get('influx','PASSWORD')
 INFLUX_DB = config.get('influx','DB')
+
+# kapacitor Settings
+KAPACITOR_HOST = config.get('kapacitor','KAPACITOR_HOST')
+KAPACITOR_PORT = config.get('kapacitor','KAPACITOR_PORT')
 
 # Guardian settings
 ANONYMOUS_USER_ID = -1

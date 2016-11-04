@@ -208,9 +208,9 @@ class KapacitorTestCase(TestCase):
         // Which field to process
         var field string
         // Warning criteria, has access to 'mean' field
-        var warn = lambda: "mean" <  10
+        var warn = lambda: \"value\" <  10
         // Critical criteria, has access to 'mean' field
-        var crit lambda = "mean" < 5
+        var crit = lambda:  \"value\" < 5
         // How much data to window
         var window = 5m
 
@@ -226,8 +226,6 @@ class KapacitorTestCase(TestCase):
             |alert()
                  .warn(warn)
                  .crit(crit)
-                 .slack()
-                 .channel(slack_channel)
 
         """
 
@@ -237,9 +235,9 @@ class KapacitorTestCase(TestCase):
         # Create template
         temp = self.kap.create_template(temp_id, temp_type, temp_script)
         self.assertTrue(temp.has_key('vars'))
-        dp_dict = {'temp':9.0}
-        self.i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),
-tags={"site_name":site.site_name}, db=self._influx_db_name)
+        for i in range(100,0):
+            dp_dict = {'temp': i}
+            self.i.send_object_measurements(dp_dict, tags={"site_name":"test_site"}, database=self._influx_db_name)
 
 
 

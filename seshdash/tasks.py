@@ -486,7 +486,7 @@ def get_aggregate_daily_data(date=None):
                 result = get_aggregate_data(site,
                         rule.input_field.field_name,
                         start=date_to_fetch,
-                        operator=rule.function
+                        operator=rule.function)
 
 
             """

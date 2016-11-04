@@ -369,62 +369,62 @@ class Data_Point(models.Model):
     Moving to single field to have a variable number of fields
     """
 
-    UNITS_DICTIONARY = {
-        "id": '',
-        "soc":"%",
-        "battery_voltage": "V",
-        "AC_Voltage_in" : "V",
-        "AC_Voltage_out" : "V",
-        "AC_input" : "W",
-        "AC_output" : "W",
-        "AC_Load_in" : "A",
-        "AC_Load_out" : "A",
-        "cloud_cover":"%",
-        "pv_production" : "W",
-        "main_on" : "",
-        "relay_state": "",
-        "trans" : "",
-        "genset_state" : "",
-        "site" : "",
-        "AC_output_absolute" : "W",
-        "minutes_last_contact" : "min",
-        "daily_battery_charge": "Wh",
-        "daily_grid_outage_n": "minute",
-        "daily_grid_outage_t": "",
-        "daily_grid_usage": "Wh",
-        "daily_no_of_alerts": "alert",
-        "daily_power_cons_pv": "W",
-        "daily_power_consumption_total": "Wh",
-        "daily_pv_yield": "Wh",
-    }
+    UNITS_DICTIONARY = (
+        ("id", ''),
+        ("soc","%"),
+        ("battery_voltage", "V"),
+        ("AC_Voltage_in" , "V"),
+        ("AC_Voltage_out" , "V"),
+        ("AC_input" , "W"),
+        ( "AC_output" , "W"),
+        ( "AC_Load_in" , "A"),
+        ( "AC_Load_out" , "A"),
+        ( "cloud_cover","%"),
+        ( "pv_production" , "W"),
+        ( "main_on" , ""),
+        ( "relay_state", ""),
+        ( "trans" , ""),
+        ( "genset_state" , ""),
+        ( "site" , ""),
+        ( "AC_output_absolute" , "W"),
+        ( "minutes_last_contact" , "min"),
+        ( "daily_battery_charge", "Wh"),
+        ( "daily_grid_outage_n", "minute"),
+        ( "daily_grid_outage_t", ""),
+        ( "daily_grid_usage", "Wh"),
+        ( "daily_no_of_alerts", "alert"),
+        ( "daily_power_cons_pv", "W"),
+        ( "daily_power_consumption_total", "Wh"),
+        ("daily_pv_yield", "Wh"),
+        )
 
 
-    MEASUREMENTS_VERBOSE_NAMES = {
-        "soc":"State of Charge",
-        "battery_voltage": "Battery Voltage",
-        "AC_Voltage_in": "AC Voltage In",
-        "AC_Voltage_out": "AC Voltage Out",
-        "AC_input": "AC Input",
-        "AC_output": "AC Output",
-        "AC_Load_in": "AC Load in",
-        "AC_Load_out": "AC Load out",
-        "pv_production": "PV Production",
-        "main_on": "Main On",
-        "relay_state": "Relay State",
-        "trans": " Trans",
-        "genset_state": "Genset State",
-        "AC_output_absolute": "AC Output absolute",
-        "minutes_last_contact": "Minutes last Contact",
-        "daily_battery_charge": "Daily Battery Charge",
-        "daily_grid_outage_n": "Daily Grid Outage N",
-        "daily_grid_outage_t": "Daily Grid Outage T",
-        "daily_grid_usage": "Daily Grid Usage",
-        "daily_no_of_alerts": "Daily Number of Alerts",
-        "daily_power_cons_pv": "Daily Power Cons Pv",
-        "daily_power_consumption_total": "Daily Power Consumption Total",
-        "daily_pv_yield": "Daily Pv Yield",
-        "cloud_cover": "Cloud Cover",
-    }
+    MEASUREMENTS_VERBOSE_NAMES = (
+        ("soc","State of Charge"),
+        ("battery_voltage", "Battery Voltage"),
+        ("AC_Voltage_in", "AC Voltage In"),
+        ("AC_Voltage_out", "AC Voltage Out"),
+        ("AC_input", "AC Input"),
+        ("AC_output", "AC Output"),
+        ("AC_Load_in", "AC Load in"),
+        ("AC_Load_out", "AC Load out"),
+        ("pv_production", "PV Production"),
+        ("main_on", "Main On"),
+        ("relay_state", "Relay State"),
+        ("trans", " Trans"),
+        ("genset_state", "Genset State"),
+        ("AC_output_absolute", "AC Output absolute"),
+        ("minutes_last_contact", "Minutes last Contact"),
+        ("daily_battery_charge", "Daily Battery Charge"),
+        ("daily_grid_outage_n", "Daily Grid Outage N"),
+        ("daily_grid_outage_t", "Daily Grid Outage T"),
+        ("daily_grid_usage", "Daily Grid Usage"),
+        ("daily_no_of_alerts", "Daily Number of Alerts"),
+        ("daily_power_cons_pv", "Daily Power Cons Pv"),
+        ("daily_power_consumption_total", "Daily Power Consumption Total"),
+        ("daily_pv_yield", "Daily Pv Yield"),
+        ("cloud_cover", "Cloud Cover"),
+    )
 
     site = models.ForeignKey(Sesh_Site)
     field_name = models.FloatField(default=0,
@@ -728,7 +728,7 @@ class Sensor_Mapping(models.Model):
     class Meta:
         unique_together =  ('site_id', 'node_id', 'sensor_type')
 
-class Data_Proccess_Rule(model.Model):
+class Data_Process_Rule(models.Model):
     """
     for building aggregate batch proccesing functions
     """
@@ -742,12 +742,12 @@ class Data_Proccess_Rule(model.Model):
         )
 
     TIME_BUCKETS = (
-            ("5m": "5 minutes"),
-            ("10m": "10 minutes"),
-            ("30m": "30 minutes"),
-            ("1h": "1 hour"),
-            ("2h": "2 hours"),
-            ("5h": "5 hours")
+            ("5m", "5 minutes"),
+            ("10m", "10 minutes"),
+            ("30m", "30 minutes"),
+            ("1h", "1 hour"),
+            ("2h", "2 hours"),
+            ("5h", "5 hours")
         )
 
     DURATION = (
@@ -760,7 +760,7 @@ class Data_Proccess_Rule(model.Model):
 
     site = models.ForeignKey(Sesh_Site)
     function_type = models.CharField(max_length=40, default="aggregate", choices=FUNCTION_CHOICES )
-    input_field = models.ForeignKey(Data_Point)
+    input_field = models.ForeignKey(Daily_Data_Point)
     duration = models.CharField(max_length=40, default="24h", choices=DURATION)
     interval = models.CharField(max_length=10, default="5m", choices=TIME_BUCKETS)
     output_field = models.ForeignKey(Trend_Data_Point)
