@@ -84,7 +84,10 @@ def get_measurement_verbose_name(measurement):
 
 
 def get_measurement_unit(measurement):
-    return Daily_Data_Point.UNITS_DICTIONARY[measurement]
+    try:
+        return Daily_Data_Point.UNITS_DICTIONARY[measurement]
+    except KeyError:
+        raise Exception("The measurement: %s has not key in the UNITS DICTIONARY DICT and maybe not a valid measurent" % measurement)
 
 
 def get_model_field_names(model):

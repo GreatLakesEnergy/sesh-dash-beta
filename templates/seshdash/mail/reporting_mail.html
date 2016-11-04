@@ -148,13 +148,11 @@ ul li {
 						<h2>{{ content.report.duration }}  report:</h2>
 
 						{% for attribute in content.report_data %}
-							<li><p> {{ attribute.user_friendly_name }} : {{ attribute.val|floatformat }} </p> </li>
+							<li><p> {{ attribute.user_friendly_name }} : {{ attribute.val|floatformat }} {{attribute.unit}} </p> </li>
 						{% endfor %}
 
-						<h3><p> Total dollars saved was <i>{{ content.cost_savings | floatformat:"-2" }} RWF </i> </p> </h3>
-
-						<a href="http:{{content.url_to_dash}}" class="btn-primary">See the realtime stats here </a>
-						<p>Thanks, have a lovely week.</p>
+						<a href="{{content.url_to_dash}}" class="btn-primary">See the realtime stats here </a>
+						<p>Thanks, have a lovely day.</p>
 						<p>Seshina</p>
 						<p><a href="http://twitter.com/sesh-dash">Follow @sesh-dash on Twitter</a>
 					</td>

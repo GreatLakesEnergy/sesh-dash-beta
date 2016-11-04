@@ -6,11 +6,13 @@ from datetime import datetime
 
 from django.test import TestCase
 from django.utils import timezone
+from django.db.models import Avg, Sum
 from geoposition import Geoposition
 
 from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisation, Sesh_User
-from seshdash.utils.reporting import generate_report_data
+from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list
 from seshdash.tasks import check_reports
+
 
 class ReportTestCase(TestCase):
     def setUp(self):
@@ -23,7 +25,7 @@ class ReportTestCase(TestCase):
                                                              slack_token='testing_token')
 
         self.test_user = Sesh_User.objects.create_user(username='test_user',
-                                                       email='patrickuwonkunda@gmail.com', 
+                                                       email='test@gle.solar', 
                                                        password='test.test.test',
                                                        organisation=self.organisation,
                                                        department='test',
@@ -77,8 +79,13 @@ class ReportTestCase(TestCase):
         """
         results = generate_report_data(self.report)
         # Asserting if the aggregations are correct
-        self.assertEqual(results['daily_pv_yield__avg'], 10)
-        self.assertEqual(results['daily_power_consumption_total__sum'], 20)
+        self.assertTrue(results[0]['unit'])
+        self.assertTrue(results[0]['user_friendly_name'])
+
+        for item in results:
+            if item['user_friendly_name'] == 'Daily pv yield average':
+                print 'This is found'
+                self.assertEqual(item['val'], 10)
 
     def test_send_reports(self):
         """
@@ -86,3 +93,35 @@ class ReportTestCase(TestCase):
         """ 
         reported_reports = check_reports()
         self.assertEqual(reported_reports, 1)
+
+    def test_send_report(self):
+        """
+        Testing the sending of the generated reports,
+        This tests the sending by mail 
+        """
+        val = send_report(self.report)
+        self.assertTrue(val)
+
+    def test__get_operation(self):
+        """
+        Testing _get_operation function that takes
+        an attribute and returns a function to execute
+        """
+        val = _get_operation(self.attributes_data[0])
+        self.assertEqual(val, Avg)
+
+    def test__format_column_str(self):
+        """
+        Tests the formating of a string,
+        changing column to spaces and capitalizing the first letter
+        """
+        val = _format_column_str('daily_pv_yield')
+        self.assertEqual(val, 'Daily pv yield')
+
+    def test_get_email_users(self):
+        """
+        A function to return a list of emails
+        when given an array of sesh user instances
+        """
+        mail_list = get_emails_list([self.test_user])
+        self.assertEqual(mail_list, ['test@gle.solar'])
