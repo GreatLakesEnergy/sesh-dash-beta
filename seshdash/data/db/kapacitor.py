@@ -17,6 +17,7 @@ class Kapacitor:
             'template': 'kapacitor/v1/templates',
             'get_template': 'kapacitor/v1/templates/{template_id}',
             'tasks' : 'kapacitor/v1/tasks',
+            'get_tasks' : 'kapacitor/v1/tasks/{task_id}',
             'ping' : 'kapacitor/v1/ping'
             }
     _REQUEST_URL  = "http://{host}:{port}/{path}"
@@ -132,6 +133,104 @@ class Kapacitor:
         return re[1]
 
 
+    def create_task(self, task_id, script='', dbrps=[{}] ,template_id=None, task_type='stream', status='enabled', task_vars = {} ):
+        """
+        Create a task based on a new sript or already existing template.
+
+        @param task_id - unique string for task
+        @param script - TICK Script for task if not using template
+        @param template_id - template id if usig template instead of new tick script
+        @param task_type -  type of task 'batch' or 'stream'
+        @param status - weather to create the task as 'enabled' or 'disabled'
+        @param task_vars - Varbiables if any that should get over written when creating a task from a template.
+        """
+
+        data_dict  = {
+                      'id': task_id,
+                      'status' :  status,
+                      'vars' : task_vars,
+                      'dbrps' : dbrps
+                       }
+
+        if template_id:
+                data_dict['template-id '] = template_id
+        else:
+                data_dict['script'] = script
+                data_dict['type' ] =  task_type
+
+        re = self._make_request('tasks',
+                                data=data_dict,
+                                )
+
+        logger.debug("got response %s %s"%re)
+        return re[1]
+
+
+    def get_task(self, task_id ):
+        """
+        Get details on a specific task that's been created
+
+        @param task_id - unique string for task to retrieve
+        """
+
+        data_dict  = {
+                      'task_id': task_id,
+                       }
+
+
+        re = self._make_request('get_tasks',
+                                type_of_request = 'GET',
+                                path_params = data_dict
+                                )
+
+        logger.debug("got response %s %s"%re)
+        return re[1]
+
+
+    def update_task(self, task_id ):
+        """
+        Get details on a specific task that's been created
+
+        @param task_id - unique string for task to retrieve
+        """
+
+        data_dict  = {
+                      'task_id': task_id,
+                       }
+
+
+        re = self._make_request('get_tasks',
+                                type_of_request = 'PATCH',
+                                path_params = data_dict
+                                )
+
+        logger.debug("got response %s %s"%re)
+        return re[1]
+
+
+
+    def delete_task(self, task_id ):
+        """
+        Delete a created task
+
+        @param task_id - unique string for task to delete
+        """
+
+        data_dict  = {
+                      'task_id': task_id
+                       }
+
+
+        re = self._make_request('get_tasks',
+                                type_of_request = 'DELETE',
+                                path_params = data_dict
+                                )
+
+        logger.debug("got response %s %s"%re)
+        return re[1]
+
+
+
 
 
     def _make_request(self, endpoint, data = {}, type_of_request='POST', path_params={}):
@@ -151,7 +250,8 @@ class Kapacitor:
                 )
 
         logger.debug("Sending request type %s : %s"% (type_of_request, endpoint_to_send))
-        logger.debug("with data %s"%data)
+        if data:
+            logger.debug("with data %s"%json.dumps(data))
         if type_of_request.lower() == "post":
             r = requests.post(endpoint_to_send, json=data)
         elif type_of_request.lower() == "get":

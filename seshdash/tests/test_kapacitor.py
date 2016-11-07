@@ -60,6 +60,8 @@ class KapacitorTestCase(TestCase):
         # Setup Kapacitor
         self.kap = Kapacitor()
         self.template_id = 'test_template'
+        self.task_id = 'test_task'
+        self.dbrps = [{'db': self._influx_db_name, 'rp':'autogen' }]
 
 
         self.location = Geoposition(52.5,24.3)
@@ -93,6 +95,7 @@ class KapacitorTestCase(TestCase):
     def tearDown(self):
         self.i.delete_database(self._influx_db_name)
         self.kap.delete_template(self.template_id)
+        self.kap.delete_task(self.task_id)
         pass
 
     @override_settings(INFLUX_DB='test_db')
@@ -192,53 +195,37 @@ class KapacitorTestCase(TestCase):
         # Delete template
         self.kap.delete_template(self.template_id)
 
-    def test_tick_alerts(self):
+    def test_task_creation(self):
         """
         Create a task and check if it actually causes an alert to trigger
         """
 
 
         temp_script = """
-        // Which measurement to consume
-        var measurement = 'temp'
-        // Optional where filter
-        var where_filter = lambda: TRUE
-        // Optional list of group by dimensions
-        var groups = [*]
-        // Which field to process
-        var field string
-        // Warning criteria, has access to 'mean' field
-        var warn = lambda: \"value\" <  10
-        // Critical criteria, has access to 'mean' field
-        var crit = lambda:  \"value\" < 5
-        // How much data to window
-        var window = 5m
-
-        stream
-            |from()
-                .measurement(measurement)
-                .where(where_filter)
-                .groupBy(groups)
-            |window()
-                .period(window)
-                .every(window)
-            |mean(field)
-            |alert()
-                 .warn(warn)
-                 .crit(crit)
-
-        """
+                    stream
+                        |from()
+                            .measurement('cpu')
+                        |alert()
+                            .crit(lambda: "value" <  70)
+                            .log('/tmp/alerts.log')
+                        """
 
         temp_id = self.template_id
-        temp_type = 'stream'
+        task_id = self.task_id
 
-        # Create template
-        temp = self.kap.create_template(temp_id, temp_type, temp_script)
-        self.assertTrue(temp.has_key('vars'))
-        for i in range(100,0):
-            dp_dict = {'temp': i}
+
+        # Create task
+        temp = self.kap.create_task(task_id, dbrps=self.dbrps, script=temp_script, task_type='stream')
+        self.assertEqual(temp['status'],'enabled')
+        sleep(11)
+
+        for i in reversed(range(0,5)):
+            sleep(1)
+            dp_dict = {'cpu': i}
             self.i.send_object_measurements(dp_dict, tags={"site_name":"test_site"}, database=self._influx_db_name)
+        temp = self.kap.get_task(task_id)
 
+        self.assertGreater(temp['stats']['node-stats']['alert2']['alerts_triggered'], 0)
 
 
 
