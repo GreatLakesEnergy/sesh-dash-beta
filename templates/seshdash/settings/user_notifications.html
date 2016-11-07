@@ -1,0 +1,53 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% load bootstrap %}
+
+{% block main %}
+
+
+	<div id="main-wrapper">
+		
+		<div class="panel panel-success">
+
+			<div class="panel-heading">
+				<h3 class="panel-title">Notifications</h3>
+			</div>
+
+			<div class="panel-body sesh-container">
+ 				<h4>Toggle Notifications for users</h4>
+
+				<form action="{% url 'user_notifications' %}" method=post>
+					<table class="table table-bordered">
+
+					    {% csrf_token %}
+	 					<thead>
+	 						<th>User</th>
+	 						<th>On call</th>
+	 						<th>Send sms</th>
+	 						<th>Send mail</th>
+	 					</thead>
+
+						<tbody>
+						{% for form in user_formset %}	
+							{{ form.id }}
+	 						<tr>
+	 							<td>{{form.instance.user.username}}</td>
+	 							<td>{{form.on_call}}</td>
+	 							<td>{{form.send_sms}}</td>
+	 							<td>{{form.send_mail}}</td>
+	 						</tr>						
+	 					{% endfor %}
+	 					{{ user_formset.management_form }}
+	 					</tbody>
+ 					</table>
+ 					<input type="submit" value="Save" class="btn btn-primary">
+ 				</form>
+
+			</div>
+
+		</div>
+
+	</div>
+
+{% endblock %}

@@ -15,6 +15,7 @@ from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
+from django.contrib.admin.views.decorators import staff_member_required
 from django import forms
 from django.db import OperationalError
 from django.template.loader import get_template
@@ -660,8 +661,8 @@ def display_alert_data(request):
 
     if point:
         """
-        If the point is from influx it comes as a dict 
-        if the point is from an sql db it comes as a model that needs to 
+        If the point is from influx it comes as a dict
+        if the point is from an sql db it comes as a model that needs to
         be converted to a dict
         """
         if type(point) != dict:
@@ -772,12 +773,13 @@ def historical_data(request):
         sort_data_dict.pop('date')
 
 
-        sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
+        #sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
+        sites =  _get_user_sites(request)
         active_site = sites[0]
         context_dict = {}
 
         #sites witth weather and battery status
-        user_sites =  _get_user_sites(request)
+        user_sites =  sites
         sites_stats = get_quick_status(user_sites)
         context_dict['sites_stats'] = sites_stats
 
@@ -877,13 +879,13 @@ def edit_site(request,site_Id=1):
                 site_form.save()
                 rmc_form.save()
 
-            
+
             context_dict['RMCForm'] = rmc_form
         else:
             site_form = SiteVRMForm(request.POST, instance=site)
             if site_form.is_valid():
                 site_form.save()
-    
+
 
     user_sites = _get_user_sites(request)
     context_dict['VRM_form'] = VRMForm()
@@ -914,7 +916,7 @@ def site_add_edit(request):
 @login_required
 def settings_alert_rules(request):
     """
-    To allow users to manage alert 
+    To allow users to manage alert
     rules for given sites
     """
     context_dict = {}
@@ -1059,7 +1061,7 @@ def add_rmc_account(request, site_id):
             associate_sensors_sets_to_site(sensors_sets, site)
             if emonpi_form.is_valid():
                 emonpi_form.save()
-                
+
             return redirect('index')
 
 
@@ -1100,3 +1102,29 @@ def get_rmc_config(request):
     conf = get_template('seshdash/configs/rmc_config.conf')
 
     return HttpResponse(conf.render(context_dict), content_type='text/plain')
+
+
+@staff_member_required
+def user_notifications(request):
+    """
+    Renders page to display users of an organization
+    and their values to view the sites
+    """
+    context_dict = {}
+    user = request.user
+
+    organisation_users = Sesh_User.objects.filter(user__groups=user.groups.first()) # all users belonging to the same organisations
+    SeshUserFormSetFactory = modelformset_factory(Sesh_User, fields=('on_call', 'send_mail', 'send_sms',), extra=0)
+    sesh_user_formset = SeshUserFormSetFactory(queryset=organisation_users)
+
+    if request.method == 'POST':
+        sesh_user_formset = SeshUserFormSetFactory(request.POST, queryset=organisation_users)
+        if sesh_user_formset.is_valid():
+            sesh_user_formset.save()
+            return redirect('index')
+
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    context_dict['user_formset'] = sesh_user_formset
+    return render(request, 'seshdash/settings/user_notifications.html', context_dict)

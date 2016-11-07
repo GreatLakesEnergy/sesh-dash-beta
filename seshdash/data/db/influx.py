@@ -73,6 +73,15 @@ class Influx:
                                 database=None):
         """
         return the requsted measurement values in given bucket size
+
+        @params measuremnt - field name to query
+        @params bucket_size - intervals to group the measurements in
+        @params clause - condition to apply to query
+        @params clause_val - condition value to check
+        @params time_delta - duration to query
+        @params start - when should the begenning of the query window be
+        @params operator - the function to use on the buckets mean/sum/min/max etc
+        @params dataase - influx db to run query against
         """
         db =  self.db
         if database:

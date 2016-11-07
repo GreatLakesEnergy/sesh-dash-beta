@@ -9,7 +9,7 @@ from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account, Data_Process_Rule
 
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
@@ -35,7 +35,7 @@ def handle_task_failure(**kw):
         rollbar.report_exc_info(message=message,extra_data=kw)
 
 
-def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
+def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None, send_status=True):
     """
     Utility function to send data to influx
     """
@@ -55,7 +55,8 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
                 model_data_dict.pop(val)
 
         #Add our status will be used for RMC_Status
-        model_data_dict['status'] = 1.0
+        if send_status:
+            model_data_dict['status'] = 1.0
 
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
@@ -109,13 +110,6 @@ def get_BOM_data():
             if v_client.IS_INITIALIZED:
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-
-                        #date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'])
-                        #date = parse(date, ignoretz=True)
-
-                        #tz = pytz.timezone(site.time_zone)
-                        #date = tz.localize(date, is_dst=None)
-
                         #This data is already localazied
                         logger.debug("got raw date %s with timezone %s"%(
                             sys_data['VE.Bus state']['timestamp'],
@@ -215,7 +209,7 @@ def get_historical_BoM(site_pk,start_at):
 
                 with transaction.atomic():
                     data_point.save()
-                send_to_influx(data_point, site, date, to_exclude=['time','inverter_state','id'],client=i)
+                send_to_influx(data_point, site, date, to_exclude=['time','inverter_state','id'],client=i, send_status=False)
 
                 count = count +1
                 if count % 100:
@@ -354,7 +348,7 @@ def get_weather_data(days=7,historical=False):
                     point.cloud_cover = forecast_result[day]["cloudcover"]
                     point.save()
 
-                    send_to_influx(point, site, day, to_exclude=['date'])
+                    send_to_influx(point, site, day, to_exclude=['date'], send_status=False)
 
             else:
                 #else create a new object
@@ -369,7 +363,7 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                send_to_influx(w_data, site, day, to_exclude=['date'])
+                send_to_influx(w_data, site, day, to_exclude=['date'], send_status=False)
 
     return "updated weather for %s"%sites
 
@@ -428,7 +422,6 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
     """
     i = Influx()
     result = [0]
-    operator = 'mean'
 
     clause_opts = {
             'negative': (lambda x : x[operator] < 0),
@@ -472,18 +465,31 @@ def get_aggregate_data(site, measurement, bucket_size='1h', clause=None, toSum=T
 @shared_task
 def get_aggregate_daily_data(date=None):
     """
-    Batch job to get daily aggregate data for each site
+    Batch job to get daily aggregate data for each sites,
+    Data_Process_Rule will be used to determine how the aggreation function should be applied
+
+    @params date - datetime object to do aggregations on
     """
     sites  = Sesh_Site.objects.all()
     date_to_fetch = time_utils.get_yesterday()
+
     if date:
         date_to_fetch =  date
 
     for site in sites:
+            site_rules = Data_Process_Rule.objects.filter(site=site)
 
-            #print "getting aggregate data for %s for %s"%(site,date_to_fetch)
             logger.debug("aggregate data for %s date: %ss"%(site,date_to_fetch))
             agg_dict = {}
+
+            for rule in site_rules:
+                result = get_aggregate_data(site,
+                        rule.input_field.field_name,
+                        start=date_to_fetch,
+                        operator=rule.function)
+
+
+            """
             agg_dict['aggregate_data_pv'] = get_aggregate_data (site, 'pv_production',start=date_to_fetch)[0]
             agg_dict['aggregate_data_AC'] = get_aggregate_data (site, 'AC_output_absolute',start=date_to_fetch)[0]
             agg_dict['aggregate_data_batt'] = get_aggregate_data (site, 'AC_output', clause='negative', start=date_to_fetch)[0]
@@ -495,7 +501,7 @@ def get_aggregate_daily_data(date=None):
             aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
             aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
             agg_dict['sum_power_pv'] = agg_dict['aggregate_data_AC'] - agg_dict['aggregate_data_grid']
-
+            """
 
             #print agg_dict
             # Create model of aggregates
@@ -526,7 +532,7 @@ def get_aggregate_daily_data(date=None):
 
                 pass
             #send to influx
-            send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
+            send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'], send_status=False)
 
 
 
