@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account, Sensor_EmonTh, \
-                            Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Alert_Rule
+                            Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Alert_Rule, Sesh_User
 from seshdash.utils.time_utils import get_timezone_from_geo, localize
 
 class SiteForm(ModelForm):
@@ -10,7 +10,7 @@ class SiteForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements')
+        exclude = ('Delete','vrm_site_id','organisation', 'rmc_account','time_zone','status_card','site_measurements')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
@@ -35,7 +35,7 @@ class EditSiteForm(ModelForm):
 
     class Meta:
         model= Sesh_Site
-        exclude = ('Delete','vrm_site_id','rmc_account','time_zone','status_card','site_measurements','vrm_account',)
+        exclude = ('Delete','organisation', 'vrm_site_id','rmc_account','time_zone','status_card','site_measurements','vrm_account',)
 
 
 class SiteRMCForm(ModelForm):
@@ -45,7 +45,7 @@ class SiteRMCForm(ModelForm):
 
     class Meta:
         model = Sesh_Site
-        exclude = ('vrm_account','vrm_site_id','import_data', 'status_card', 'site_measurements')
+        exclude = ('vrm_account','vrm_site_id', 'organisation', 'import_data', 'status_card', 'site_measurements')
         #DateSelectorWidget
         widgets = {'comission_date':forms.DateInput()}
 
@@ -56,7 +56,7 @@ class SiteVRMForm(ModelForm):
     """
     class Meta:
         model = Sesh_Site
-        exclude = ('vrm_account', 'vrm_site_id', 'status_card', 'site_measurements')
+        exclude = ('vrm_account', 'organisation', 'vrm_site_id', 'status_card', 'site_measurements')
 
 
 
@@ -124,3 +124,11 @@ class AlertRuleForm(ModelForm):
     class Meta:
         model = Alert_Rule
         fields = ('check_field', 'operator', 'value',)
+
+class SeshUserForm(ModelForm):
+    """
+    Form for the Sesh User
+    """
+    class Meta:
+        model = Sesh_User
+        fields = ("username", "is_org_admin", "email", "password",  "phone_number", "on_call", "send_mail", "send_sms")

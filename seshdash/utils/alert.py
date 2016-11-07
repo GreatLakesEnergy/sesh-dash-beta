@@ -1,4 +1,4 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status, Slack_Channel
+from seshdash.models import Sesh_User, Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, RMC_status, Slack_Channel
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
 from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
@@ -236,11 +236,10 @@ def get_recipients_for_site(site):
     sms_numbers = []
 
     for user in users:
-        if user.seshuser:
-            mails.append(user.email)
+        mails.append(user.email)
 
-        if user.seshuser and user.seshuser.on_call and user.seshuser.send_sms and user.seshuser.phone_number:
-            sms_numbers.append(user.seshuser.phone_number)
+        if user.on_call and user.send_sms and user.phone_number:
+            sms_numbers.append(user.phone_number)
 
     return mails, sms_numbers
 

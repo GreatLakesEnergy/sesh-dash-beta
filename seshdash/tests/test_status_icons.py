@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 #models
-from seshdash.models import Site_Weather_Data,VRM_Account,Sesh_Site,Status_Rule,BoM_Data_Point,Site_Measurements
+from seshdash.models import Sesh_User, Site_Weather_Data,VRM_Account,Sesh_Site,Status_Rule,BoM_Data_Point,Site_Measurements
 
 from geoposition import Geoposition
 from django.conf import settings
@@ -51,13 +51,14 @@ class StatusTestCase(TestCase):
                                                              sunrise = timezone.now(),
                                                              sunset = timezone.now())
 
-        User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
+        Sesh_User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
 
     def test_status(self):
         #insert_point in influx
         self.Client.insert_point(self.site,'soc',20.0)
         sites = Sesh_Site.objects.all()
         response = get_quick_status(sites)
+        print 'The reponse is: %s' % response
         self.assertEqual(response[0]['battery'],'red')
         self.assertEqual(response[0]['weather'],'yellow')
 

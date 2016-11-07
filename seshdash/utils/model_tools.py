@@ -273,10 +273,14 @@ def get_quick_status(user_sites):
 
         #site weather_data
         site_weather_data = Site_Weather_Data.objects.filter(site= site)
+        print "Found weather data: %s" % site_weather_data
         cloud_cover = []
         for weather_data in site_weather_data:
-            if weather_data.date > now:
-                cloud_cover.append(weather_data.cloud_cover)
+            print "for each"
+            print "The date for the weather data is: %s" % weather_data.date
+            print "The date now is: %s" % now
+            print "Appended"
+            cloud_cover.append(weather_data.cloud_cover)
         if len(cloud_cover) is not 0:
             average_cloud_cover = sum(cloud_cover)/len(cloud_cover)
 

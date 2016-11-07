@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.contrib import admin
+from django.contrib.auth.models import AbstractUser
 from geoposition.fields import GeopositionField
 from django.utils import timezone
 
@@ -28,31 +29,41 @@ class VRM_Account(models.Model):
     class Meta:
         verbose_name = "VRM Account"
 
-class Sesh_User(models.Model):
-    #TODO each user will have his her own settings / alarms this needs
-    #to be added
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="seshuser")
-    department = models.CharField(max_length=100)
+
+
+
+class Sesh_Organisation(models.Model):
+    name = models.CharField(max_length=40)
+    send_slack = models.BooleanField(default=False)
+    slack_token = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+    def get_users(self):
+        return Sesh_User.objects.filter(organisation=self)
+
+class Sesh_User(AbstractUser):
+    """
+    In creating Sesh_User instances,
+    Always remember to user create_user instead of create, 
+    Sesh_User.objects.create_user
+    """
+    department = models.CharField(max_length=100) 
+    organisation = models.ForeignKey(Sesh_Organisation, null=True)
+    is_org_admin = models.BooleanField(default=False)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
     on_call = models.BooleanField(default=False)
     send_mail = models.BooleanField(default=False)
     send_sms = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.username
+        return self.username
+    
 
     class Meta:
          verbose_name = 'User'
          verbose_name_plural = 'Users'
-
-
-class Sesh_Organisation(models.Model):
-    group = models.OneToOneField(Group)
-    send_slack = models.BooleanField(default=False)
-    slack_token = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.group.name
 
 
 class Slack_Channel(models.Model):
@@ -157,6 +168,7 @@ class Sesh_Site(models.Model):
     Model for each PV SESH installed site
     """
     site_name = models.CharField(max_length=100, unique = True)
+    organisation = models.ForeignKey(Sesh_Organisation, null=True, blank=True)
     comission_date = models.DateTimeField('date comissioned')
     location_city = models.CharField(max_length = 100)
     location_country = models.CharField(max_length = 100)

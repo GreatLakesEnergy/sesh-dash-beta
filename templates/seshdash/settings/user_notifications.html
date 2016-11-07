@@ -7,7 +7,7 @@
 
 
 	<div id="main-wrapper">
-		
+
 		<div class="panel panel-success">
 
 			<div class="panel-heading">
@@ -29,14 +29,14 @@
 	 					</thead>
 
 						<tbody>
-						{% for form in user_formset %}	
+						{% for form in user_formset %}
 							{{ form.id }}
 	 						<tr>
-	 							<td>{{form.instance.user.username}}</td>
+	 							<td>{{form.instance.username}}</td>
 	 							<td>{{form.on_call}}</td>
 	 							<td>{{form.send_sms}}</td>
 	 							<td>{{form.send_mail}}</td>
-	 						</tr>						
+	 						</tr>
 	 					{% endfor %}
 	 					{{ user_formset.management_form }}
 	 					</tbody>

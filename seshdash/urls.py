@@ -14,8 +14,8 @@ urlpatterns = [
             url(r'^bom-data-points/$', views.BoM_Data_Stream.as_view()),
             url(r'^bom-data-points/(?P<pk>[0-9]+)/$', views.BoM_Data_Detail.as_view()),
             url(r'^api-token-auth/', authtokenviews.obtain_auth_token),
-            url(r'^users/$', views.UserList.as_view()),
-            url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
+            #url(r'^users/$', views.UserList.as_view()),
+            #url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
             url(r'^silence-alert', views.silence_alert),
             url(r'^get-alerts', views.get_alerts),
             url(r'^get-alert-data', views.display_alert_data),
@@ -35,5 +35,9 @@ urlpatterns = [
             url(r'^add_rmc_account/([0-9]{1,5})$', views.add_rmc_account, name='add_rmc_account'),
             url(r'^get_rmc_config$', views.get_rmc_config, name='get_rmc_config'),
             url(r'^user_notifications$', views.user_notifications, name='user_notifications'),
+            url(r'^manage_users$', views.manage_org_users, name='manage_org_users'),
+            url(r'^add_user$', views.add_sesh_user, name='add_sesh_user'),
+            url(r'^delete_user/([0-9]{1,5})$', views.delete_sesh_user, name='delete_sesh_user'),
+            url(r'^edit_sesh_user/([0-9]{1,5})$', views.edit_sesh_user, name='edit_sesh_user'),
             ]
 

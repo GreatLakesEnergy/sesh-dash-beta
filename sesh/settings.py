@@ -166,7 +166,9 @@ DATABASES = {
     }
 }
 
-# influx settings
+AUTH_USER_MODEL = 'seshdash.Sesh_User'
+
+#influx settings
 INFLUX_HOST = config.get('influx','HOST')
 INFLUX_PORT = config.get('influx','PORT')
 INFLUX_USERNAME =  config.get('influx','USERNAME')

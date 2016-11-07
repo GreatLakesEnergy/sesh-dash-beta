@@ -6,7 +6,7 @@ from .models import *
 
 @admin.register(Sesh_Site)
 class Sesh_SiteAdmin(GuardedModelAdmin):
-    list_display = ('site_name','location_city','installed_kw','battery_bank_capacity','comission_date')
+    list_display = ('site_name', 'organisation', 'location_city','installed_kw','battery_bank_capacity','comission_date')
     list_filter = ('installed_kw','location_city', 'installed_kw')
     exclude = ('status_card',)
 
@@ -39,12 +39,12 @@ class RMC_AccountAdmin(GuardedModelAdmin):
 
 @admin.register(Sesh_Organisation)
 class Organisation(GuardedModelAdmin):
-    list_display = ('group', 'slack_token')
+    list_display = ('slack_token',)
     pass
 
 @admin.register(Sesh_User)
 class SeshUser(GuardedModelAdmin):
-    list_display = ('user','phone_number','on_call')
+    list_display = ('username', 'email', 'phone_number','on_call')
     list_filter = ('on_call',)
     pass
 

@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # APP Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
 
 # django Time related
 from django.utils import timezone
@@ -61,7 +61,7 @@ class AggregateTestCase(TestCase):
                                              has_genset=True,
                                              has_grid=True)
 
-        self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
+        self.test_user = Sesh_User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
         #assign a user to the sites
         try:
             self.i.create_database(self._influx_db_name)

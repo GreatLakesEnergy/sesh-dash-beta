@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User, Site_Weather_Data
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Site_Weather_Data
 from django.contrib.auth.models import User
 
 #Forms
@@ -50,21 +50,24 @@ class AddTestCase(TestCase):
 
 
 
-        #create test user
-        self.test_user = User.objects.create_user("test_user", "alp@gle.solar", "cdakcjocajica")
-        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
         #assign a user to the sites
 
 
 
         generate_auto_rules(self.site.pk)
 
-        User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
+        self.user = Sesh_User.objects.create_superuser(username='frank',password='password',email='frank@frank.frank')
+
+        self.test_user = Sesh_User.objects.create_user(username='test_user', password='test.test.test', email='test@test.test')
+
 
 
     def test_edit_site(self):
         c = Client()
-        c.login(username = "frank",password = "password")
+        val = c.login(username = "frank",password = "password")
+        
+        print 'the login value is: %s' % val
+
         data= {'site_name':u'kibuye',
                'comission_date':datetime(2015,12,11,22,0),
                'location_city':u'kigali',
@@ -88,6 +91,6 @@ class AddTestCase(TestCase):
 
 
         # Checking for another unauthorized user
-        c.login(username="test_user",password="cdakcjocajica")
+        val = c.login(username="test_user",password="test.test.test")
         response = c.post('/edit_site/' + str(self.site.id), data)
         self.assertEqual(response.status_code, 403)
