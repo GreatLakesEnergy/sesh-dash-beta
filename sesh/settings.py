@@ -412,3 +412,9 @@ GEOPOSITION_MAP_OPTIONS = {
 GEOPOSITION_MARKER_OPTIONS = {
     'cursor': 'move'
 }
+
+
+# Sesh Settings
+SESH_REPORT_TABLES = [
+    'Daily_Data_Point',
+]

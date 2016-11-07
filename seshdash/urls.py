@@ -39,5 +39,6 @@ urlpatterns = [
             url(r'^add_user$', views.add_sesh_user, name='add_sesh_user'),
             url(r'^delete_user/([0-9]{1,5})$', views.delete_sesh_user, name='delete_sesh_user'),
             url(r'^edit_sesh_user/([0-9]{1,5})$', views.edit_sesh_user, name='edit_sesh_user'),
+            url(r'^site/([0-9]{1,5})/add_report/', views.add_report, name='add_report'),
             ]
 

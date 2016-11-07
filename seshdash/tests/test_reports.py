@@ -10,7 +10,8 @@ from django.db.models import Avg, Sum
 from geoposition import Geoposition
 
 from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisation, Sesh_User
-from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list
+from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list, \
+                                     get_table_report_dict
 from seshdash.tasks import check_reports
 
 
@@ -125,3 +126,16 @@ class ReportTestCase(TestCase):
         """
         mail_list = get_emails_list([self.test_user])
         self.assertEqual(mail_list, ['test@gle.solar'])
+
+    def tests_get_table_report_dict(self):
+        """
+        Testing the function that takes a table and operations as input
+        and then returns a attribute dict that can be used to create a report
+        """
+        report_dict = get_table_report_dict('Daily_Data_Point', 'sum')
+        self.assertEqual(report_dict[0]['operation'], 'sum')
+        self.assertEqual(report_dict[0]['table'], 'Daily_Data_Point')
+        
+        # Should raise a lookup error in case of incorrect table input
+        with self.assertRaises(LookupError):
+            get_table_report_dict('UnknownTable', 'sum')

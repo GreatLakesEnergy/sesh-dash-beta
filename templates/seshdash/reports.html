@@ -1,0 +1,31 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% block main %}
+  <div id="main-wrapper">
+    <div class="panel panel-primary add-report">
+        <div class="panel-heading"> 
+            Add a report
+        </div>
+        <div class="panel-body">
+            <form class="" method="post" action="">
+                {% csrf_token %}
+            
+                <select name="duration" class="form-control col-md-4">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select><br>
+    
+                {% for attribute in report_attributes %}
+                    <label for="">{{attribute.user_friendly_name}}</label>
+                    <input type="checkbox"  name="{{attribute}}" checked="checked">  
+                {% endfor %}
+
+                <input type="submit" class="btn btn-primary" value="Go">
+            </form>
+        </div>
+
+    </div>
+  </div>
+{% endblock %}

@@ -118,3 +118,40 @@ def get_emails_list(users):
         emails.append(user.email)
     
     return emails
+
+def get_report_attributes():
+    """
+    Returns the report attributes for sesh report tables
+    found in settings
+    """
+    from django.conf import settings
+    attributes  = []
+
+    for table_name in settings.SESH_REPORT_TABLES:
+        attributes.extend(get_table_report_dict(table_name, ['sum', 'average']))
+  
+    return attributes
+
+def get_table_report_dict(report_table_name, operations):
+    """
+    Returns a dict containing all the reporting values
+    possible for models containing reporting data
+  
+    """ 
+    operations = operations if isinstance(operations, list) else [operations] # Converting any item that is not a list ot a list
+    table = apps.get_model(app_label="seshdash", model_name=report_table_name)
+
+    report_table_attributes = []
+    fields = table._meta.fields
+    
+    for operation in operations:
+        for field in fields:
+            if field.name != 'site' and field.name != 'id' and field.name != 'date':
+                report_attribute_dict = {}
+                report_attribute_dict['column'] = field.name
+                report_attribute_dict['table'] = report_table_name
+                report_attribute_dict['operation'] = operation
+                report_attribute_dict['user_friendly_name'] = _format_column_str(field.name) + ' ' + operation
+                report_table_attributes.append(report_attribute_dict)
+
+    return report_table_attributes
