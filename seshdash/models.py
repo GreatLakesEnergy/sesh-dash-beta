@@ -46,10 +46,10 @@ class Sesh_Organisation(models.Model):
 class Sesh_User(AbstractUser):
     """
     In creating Sesh_User instances,
-    Always remember to user create_user instead of create, 
+    Always remember to user create_user instead of create,
     Sesh_User.objects.create_user
     """
-    department = models.CharField(max_length=100) 
+    department = models.CharField(max_length=100)
     organisation = models.ForeignKey(Sesh_Organisation, null=True)
     is_org_admin = models.BooleanField(default=False)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
@@ -59,7 +59,7 @@ class Sesh_User(AbstractUser):
 
     def __str__(self):
         return self.username
-    
+
 
     class Meta:
          verbose_name = 'User'
@@ -263,6 +263,12 @@ class Alert_Rule(models.Model):
         ("lt" , "less than"),
         ("gt" , "greater than"),
         )
+
+    OPERATOR_MAPPING = {
+            'eq' : '=',
+            'lt' : '<',
+            'gt' : '>',
+            }
 
     FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
                      ('BoM_Data_Point#soc','System State of Charge'),

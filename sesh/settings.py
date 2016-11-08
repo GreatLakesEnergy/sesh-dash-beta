@@ -178,6 +178,7 @@ INFLUX_DB = config.get('influx','DB')
 # kapacitor Settings
 KAPACITOR_HOST = config.get('kapacitor','KAPACITOR_HOST')
 KAPACITOR_PORT = config.get('kapacitor','KAPACITOR_PORT')
+KAPACITOR_DBRPS = [{'db':INFLUX_DB, 'rp':'autogen'}] # INFLUX Retention Policy TODO think about this
 
 # Guardian settings
 ANONYMOUS_USER_ID = -1
@@ -238,6 +239,10 @@ CELERYBEAT_SCHEDULE = {
 # Authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
+
+
+ALERT_TEMPLATE_NAME = 'alert_template'
+KAPACITOR_TEMPLATE_FOLDER = 'kapacitor_tasks'
 
 
 # Email
