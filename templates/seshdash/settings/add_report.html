@@ -18,8 +18,7 @@
                 </select><br>
     
                 {% for attribute in report_attributes %}
-                    <label for="">{{attribute.user_friendly_name}}</label>
-                    <input type="checkbox"  name="{{attribute}}" checked="checked">  
+                    {{attribute.user_friendly_name}}<input type="checkbox"  name="{{attribute}}" checked="checked">  
                 {% endfor %}
 
                 <input type="submit" class="btn btn-primary" value="Go">

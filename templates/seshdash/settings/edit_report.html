@@ -1,0 +1,18 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% block main %}
+  <div id="main-wrapper">
+    <div class="panel panel-primary add-report">
+        <div class="panel-heading"> 
+            Manage reports for site {{site}}
+        </div>
+        <div class="panel-body">
+            {% for report in reports %}
+                <li><a href="{% url 'edit_report' report.id %}">{{report}}</a></li>	
+            {% endfor %}
+        </div>
+
+    </div>
+  </div>
+{% endblock %}

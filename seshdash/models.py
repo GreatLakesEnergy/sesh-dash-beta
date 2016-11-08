@@ -736,4 +736,4 @@ class Report(models.Model):
     attributes = JSONField()
    
     def __str__(self):
-        return self.duration + " Report for " + self.site.site_name
+        return self.get_duration_display() + " report for " + self.site.site_name

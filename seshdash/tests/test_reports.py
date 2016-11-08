@@ -7,6 +7,7 @@ from datetime import datetime
 from django.test import TestCase
 from django.utils import timezone
 from django.db.models import Avg, Sum
+from django.core.urlresolvers import reverse
 from geoposition import Geoposition
 
 from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisation, Sesh_User
@@ -29,6 +30,7 @@ class ReportTestCase(TestCase):
                                                        email='test@gle.solar', 
                                                        password='test.test.test',
                                                        organisation=self.organisation,
+                                                       is_org_admin=True,
                                                        department='test',
                                                        send_mail=True)
 
@@ -139,3 +141,33 @@ class ReportTestCase(TestCase):
         # Should raise a lookup error in case of incorrect table input
         with self.assertRaises(LookupError):
             get_table_report_dict('UnknownTable', 'sum')
+
+
+    def test_add_report(self):
+        """
+        Testing the adding of the reports from 
+        a client to a the db
+        """
+        # The below is the format of the data that is received from a client when adding a report
+        data = {
+            '{"table":"Daily_Data_Point", "column":"daily_pv_yield", "operation":"average"}': ['on'],
+            '{"table":"Daily_Data_Point", "column":"daily_power_consumption_total", "operation":"sum"}': ['on'],
+        }
+
+        self.client.login(username='test_user', password='test.test.test')
+        response = self.client.post(reverse('add_report', args=[self.site.id]), data)
+ 
+        self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
+        self.assertEqual(Report.objects.all().count(), 2)
+
+
+
+    def test_delete_report(self):
+        """
+        Testing the deletion of a report 
+        """
+        self.client.login(username='test_user', password='test.test.test')
+        response = self.client.get(reverse('delete_report', args=[self.report.id]))
+        self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site      
+
+        self.assertEqual(Report.objects.all().count(), 0)

@@ -1130,6 +1130,7 @@ def user_notifications(request):
     context_dict['user_formset'] = sesh_user_formset
     return render(request, 'seshdash/settings/user_notifications.html', context_dict)
 
+@login_required
 def manage_org_users(request):
     """
     View to manage the users of an organisation
@@ -1146,7 +1147,7 @@ def manage_org_users(request):
     else:
         return HttpResponseForbidden()
 
-
+@login_required
 def add_sesh_user(request):
     """
     View for adding a new sesh user
@@ -1166,6 +1167,7 @@ def add_sesh_user(request):
         return HttpResponseForbidden()
 
 
+@login_required
 def delete_sesh_user(request, user_id):
      """
      Deletes a sesh User
@@ -1179,7 +1181,7 @@ def delete_sesh_user(request, user_id):
      else:
          return HttpResponseForbidden()
 
-
+@login_required
 def edit_sesh_user(request, user_id):
     """
     Edits a sesh user
@@ -1204,6 +1206,22 @@ def edit_sesh_user(request, user_id):
     else:
         return HttpResponseForbidden()
 
+
+@login_required
+def manage_reports(request, site_id):
+    """
+    Manages reports for a given site
+    """
+    context_dict = {}
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    reports = Report.objects.filter(site=site)
+    
+    context_dict['site'] = site
+    context_dict['reports'] = reports
+    return render(request, 'seshdash/settings/manage_reports.html', context_dict)
+
+
+@login_required
 def add_report(request, site_id):
     """
     View to help in managing the reports
@@ -1227,6 +1245,31 @@ def add_report(request, site_id):
                               attributes=attributes,
                               duration=request.POST.get('duration', 'daily'),
                               day_to_report=0)
-        return redirect('index')
+        return redirect(reverse('manage_reports', args=[site.id]))
 
-    return render(request, 'seshdash/reports.html', context_dict)
+    return render(request, 'seshdash/settings/add_report.html', context_dict)
+
+
+@login_required
+def edit_report(request, report_id):
+    """
+    View to edit a report given, 
+    a report id as an parameter
+    """
+    context_dict = {}
+    report = Report.objects.filter(id=report_id)
+   
+    context_dict['report'] = report
+    return render(request, 'seshdash/settings/edit_report.html', context_dict)
+    
+
+@login_required
+def delete_report(request, report_id):
+    """
+    View to delete a report
+    """
+    context_dict = {}
+    report = Report.objects.filter(id=report_id).first()
+    site = report.site
+    report.delete()
+    return redirect(reverse('manage_reports', args=[site.id]))
