@@ -3,11 +3,10 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # APP Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
+from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point, Sesh_User
 
 # django Time related
 from django.utils import timezone
-from django.contrib.auth.models import User
 from time import sleep
 from datetime import timedelta
 import pytz
@@ -15,6 +14,7 @@ import pytz
 #Helper Functions
 from django.forms.models import model_to_dict
 from django.core import mail
+from django.template.loader import get_template
 
 #Security
 from guardian.shortcuts import assign_perm
@@ -61,6 +61,9 @@ class KapacitorTestCase(TestCase):
         self.kap = Kapacitor()
         self.template_id = 'test_template'
         self.task_id = 'test_task'
+        self.dj_template_name = 'alert_template'
+
+
         self.dbrps = [{'db': self._influx_db_name, 'rp':'autogen' }]
 
 
@@ -88,7 +91,7 @@ class KapacitorTestCase(TestCase):
        #                                 random = False)
 
         #create test user
-        self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
+        self.test_user = Sesh_User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
@@ -226,6 +229,29 @@ class KapacitorTestCase(TestCase):
         temp = self.kap.get_task(task_id)
 
         self.assertGreater(temp['stats']['node-stats']['alert2']['alerts_triggered'], 0)
+
+    def test_task_dj_template(self):
+        """
+        test task creation with django templates
+        """
+
+        template =  get_template('seshdash/kapacitor_tasks/%s.tick'%self.dj_template_name)
+
+        alert_id = self.task_id
+        alert_info ={
+                'field': 'cpu',
+                'where_filter_lambda' : 'lambda: TRUE',
+                'error_lambda' : 'lambda: \"value\" < 30',
+                'time_window' : '5m',
+                'slack_channel' : '#alerts'
+                }
+
+
+        rendered_alert = template.render(alert_info)
+        result = self.kap.create_task(alert_id, dbrps= self.dbrps, script=rendered_alert)
+        self.assertEquals(result['status'], 'enabled')
+
+
 
 
 
