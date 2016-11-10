@@ -489,7 +489,6 @@ def get_aggregate_daily_data(date=None):
                         operator=rule.function)
 
 
-            """
             agg_dict['aggregate_data_pv'] = get_aggregate_data (site, 'pv_production',start=date_to_fetch)[0]
             agg_dict['aggregate_data_AC'] = get_aggregate_data (site, 'AC_output_absolute',start=date_to_fetch)[0]
             agg_dict['aggregate_data_batt'] = get_aggregate_data (site, 'AC_output', clause='negative', start=date_to_fetch)[0]
@@ -501,7 +500,6 @@ def get_aggregate_daily_data(date=None):
             aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
             aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
             agg_dict['sum_power_pv'] = agg_dict['aggregate_data_AC'] - agg_dict['aggregate_data_grid']
-            """
 
             #print agg_dict
             # Create model of aggregates

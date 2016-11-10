@@ -23,7 +23,7 @@ from seshdash.data.db.kapacitor import Kapacitor
 import logging
 
 #Insantiating the logger
-logger = logging.getLogger(__name__)a
+logger = logging.getLogger(__name__)
 
 #initialize global kapacitor
 kap = Kapacitor()
