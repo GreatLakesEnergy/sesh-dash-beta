@@ -662,8 +662,8 @@ def display_alert_data(request):
 
     if point:
         """
-        If the point is from influx it comes as a dict 
-        if the point is from an sql db it comes as a model that needs to 
+        If the point is from influx it comes as a dict
+        if the point is from an sql db it comes as a model that needs to
         be converted to a dict
         """
         if type(point) != dict:
@@ -774,12 +774,13 @@ def historical_data(request):
         sort_data_dict.pop('date')
 
 
-        sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
+        #sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
+        sites =  _get_user_sites(request)
         active_site = sites[0]
         context_dict = {}
 
         #sites witth weather and battery status
-        user_sites =  _get_user_sites(request)
+        user_sites =  sites
         sites_stats = get_quick_status(user_sites)
         context_dict['sites_stats'] = sites_stats
 
@@ -878,13 +879,12 @@ def edit_site(request,site_Id=1):
             if site_form.is_valid() and rmc_form.is_valid():
                 site_form.save()
                 rmc_form.save()
-            
             context_dict['RMCForm'] = rmc_form
         else:
             site_form = SiteVRMForm(request.POST, instance=site)
             if site_form.is_valid():
                 site_form.save()
-    
+
 
     user_sites = _get_user_sites(request)
     context_dict['VRM_form'] = VRMForm()
@@ -915,7 +915,7 @@ def site_add_edit(request):
 @login_required
 def settings_alert_rules(request):
     """
-    To allow users to manage alert 
+    To allow users to manage alert
     rules for given sites
     """
     context_dict = {}
@@ -1060,7 +1060,7 @@ def add_rmc_account(request, site_id):
             associate_sensors_sets_to_site(sensors_sets, site)
             if emonpi_form.is_valid():
                 emonpi_form.save()
-                
+
             return redirect('index')
 
 
@@ -1110,12 +1110,12 @@ def user_notifications(request):
     and their values to view the sites
     """
     context_dict = {}
-    user = request.user   
+    user = request.user
 
     organisation_users = Sesh_User.objects.filter(organisation=user.organisation) # all users belonging to the same organisations
     SeshUserFormSetFactory = modelformset_factory(Sesh_User, fields=('on_call', 'send_mail', 'send_sms',), extra=0)
     sesh_user_formset = SeshUserFormSetFactory(queryset=organisation_users)
-    
+
     if request.method == 'POST':
         sesh_user_formset = SeshUserFormSetFactory(request.POST, queryset=organisation_users)
         if sesh_user_formset.is_valid():
@@ -1133,11 +1133,11 @@ def manage_org_users(request):
     View to manage the users of an organisation
     Should only be accessed by admin users of the organisation
     """
-    if request.user.is_org_admin: 
+    if request.user.is_org_admin:
         context_dict = {}
         context_dict['organisation_users'] = request.user.organisation.get_users()
         context_dict['form'] = SeshUserForm()
-        user_sites = _get_user_sites(request) 
+        user_sites = _get_user_sites(request)
         context_dict['permitted'] = get_org_edit_permissions(request.user)
         context_dict['sites_stats'] = get_quick_status(user_sites)
         return render(request, 'seshdash/settings/organisation_users.html', context_dict)
@@ -1169,7 +1169,7 @@ def delete_sesh_user(request, user_id):
      Deletes a sesh User
      the user to access the view should be an admin of the organisation
      """
-    
+
      if request.user.is_org_admin:
          user = Sesh_User.objects.filter(id=user_id).first()
          user.delete()
@@ -1192,7 +1192,7 @@ def edit_sesh_user(request, user_id):
             form = SeshUserForm(request.POST, instance=user)
             if form.is_valid():
                 form.save()
-                return redirect('manage_org_users')   
+                return redirect('manage_org_users')
 
         user_sites = _get_user_sites(request)
         context_dict['form'] = form

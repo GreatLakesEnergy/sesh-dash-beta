@@ -22,11 +22,24 @@ from datetime import datetime
 from seshdash.utils import alert
 from django.utils import timezone
 
+from seshdash.data.db.influx import Influx
 
 class AddTestCase(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
         self.VRM = VRM_Account.objects.create(vrm_user_id='asd@asd.com',vrm_password="asd")
+
+        self._influx_db_name = 'test_db'
+        self.i = Influx(database=self._influx_db_name)
+
+        try:
+            self.i.create_database(self._influx_db_name)
+            #Generate random data  points for 24h
+        except:
+           self.i.delete_database(self._influx_db_name)
+           sleep(1)
+           self.i.create_database(self._influx_db_name)
+           pass
 
         self.location = Geoposition(52.5,24.3)
 
@@ -41,7 +54,7 @@ class AddTestCase(TestCase):
                         number_of_panels=45,
                         battery_bank_capacity=450,
                    )
-                        
+
 
 
         #create sesh rmc account
@@ -61,11 +74,14 @@ class AddTestCase(TestCase):
         self.test_user = Sesh_User.objects.create_user(username='test_user', password='test.test.test', email='test@test.test')
 
 
+    def tearDown(self):
+        self.i.delete_database(self._influx_db_name)
+        pass
 
     def test_edit_site(self):
         c = Client()
         val = c.login(username = "frank",password = "password")
-        
+
         print 'the login value is: %s' % val
 
         data= {'site_name':u'kibuye',

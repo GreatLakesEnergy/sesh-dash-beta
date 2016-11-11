@@ -12,9 +12,13 @@ addons:
             - redis-server
 
 before_install:
-      - wget https://s3.amazonaws.com/influxdb/influxdb_0.10.1-1_amd64.deb
-      - sudo dpkg -i influxdb_0.10.1-1_amd64.deb
+      - wget https://dl.influxdata.com/influxdb/releases/influxdb_1.0.2_amd64.deb
+      - sudo dpkg -i influxdb_1.0.2_amd64.deb
+      - wget https://dl.influxdata.com/kapacitor/releases/kapacitor_1.0.2_amd64.deb
+      - sudo dpkg -i kapacitor_1.0.2_amd64.deb
       - sudo /etc/init.d/influxdb start
+      - sleep 8
+      - sudo service kapacitor start
       - sleep 8
 
 notifications:

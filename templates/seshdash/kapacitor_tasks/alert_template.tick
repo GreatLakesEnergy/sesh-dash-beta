@@ -1,0 +1,36 @@
+{% autoescape off %}
+// Which measurement to consume
+var measurement = '{{field}}'
+
+// Optional where filter site filter
+var wherefilter = {{ where_filter_lambda }}
+
+// Optional list of group by dimensions
+var groups = [*]
+
+// Critical criteria, has access to 'mean' field
+var crit = {{ error_lambda }}
+
+// How much data to window 5m by default
+var window = {{ time_window}}
+// The slack channel for alerts
+var slack_channel = '{{ slack_channel }}'
+
+
+stream
+    |from()
+        .measurement(measurement)
+        .where(wherefilter)
+        .groupBy(groups)
+    |window()
+        .period(window)
+        .every(window)
+    |alert()
+         .crit(crit)
+         .slack()
+         .channel(slack_channel)
+
+{% endautoescape %}
+
+
+
