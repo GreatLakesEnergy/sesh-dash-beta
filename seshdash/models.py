@@ -737,3 +737,10 @@ class Report(models.Model):
    
     def __str__(self):
         return self.get_duration_display() + " report for " + self.site.site_name
+
+    def get_duration_choices(self):
+        duration_list = []
+        for item in self.DURATION_CHOICES:
+            duration_list.append(item[0])
+     
+        return duration_list

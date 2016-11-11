@@ -12,7 +12,7 @@ from geoposition import Geoposition
 
 from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisation, Sesh_User
 from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list, \
-                                     get_table_report_dict
+                                     get_table_report_dict, get_edit_report_list, is_in_report_attributes
 from seshdash.tasks import check_reports
 
 
@@ -46,8 +46,15 @@ class ReportTestCase(TestCase):
                                              battery_bank_capacity = 1000)
 
         self.attributes_data = [
-                                   {"table":"Daily_Data_Point", "column":"daily_pv_yield", "operation":"average"},
-                                   {"table":"Daily_Data_Point", "column":"daily_power_consumption_total", "operation":"sum"},
+                                   {"table":"Daily_Data_Point",
+                                    "column":"daily_pv_yield",
+                                    "operation":"average",
+                                    "user_friendly_name":"Daily pv yield average"},
+                                   {"table":"Daily_Data_Point",
+                                    "column":"daily_power_consumption_total",
+                                    "operation":"sum",
+                                    "user_friendly_name":"Daily power consumption total sum"
+                                   },
                                ]
 
         self.daily_data_point_one = Daily_Data_Point.objects.create(
@@ -87,7 +94,6 @@ class ReportTestCase(TestCase):
 
         for item in results:
             if item['user_friendly_name'] == 'Daily pv yield average':
-                print 'This is found'
                 self.assertEqual(item['val'], 10)
 
     def test_send_reports(self):
@@ -150,8 +156,9 @@ class ReportTestCase(TestCase):
         """
         # The below is the format of the data that is received from a client when adding a report
         data = {
-            '{"table":"Daily_Data_Point", "column":"daily_pv_yield", "operation":"average"}': ['on'],
-            '{"table":"Daily_Data_Point", "column":"daily_power_consumption_total", "operation":"sum"}': ['on'],
+            '{"table":"Daily_Data_Point","column":"daily_pv_yield","operation":"average","user_friendly_name":"Daily pv yield average"}': ['on'],
+
+            '{"table":"Daily_Data_Point","column":"daily_power_consumption_total","operation":"sum","user_friendly_name":"Daily power consumption sum"}': ['on'],
         }
 
         self.client.login(username='test_user', password='test.test.test')
@@ -171,3 +178,50 @@ class ReportTestCase(TestCase):
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site      
 
         self.assertEqual(Report.objects.all().count(), 0)
+
+    def test_is_in_report_attributes(self): 
+        """
+        Testing the function that determines if an attribute
+        is in the report.attribues
+        """
+        result = is_in_report_attributes(self.report.attributes[0], self.report)
+        self.assertTrue(result)
+        
+
+
+    def test_get_edit_report_list(self):
+        """
+        Testing the function that returns a list representing the report.attributes
+        status.
+         
+        The function returns a dict, which has status on for each active attribute and off otherwise
+        """
+        report_dict = get_edit_report_list(self.report)
+        count = 0       
+
+        for item in report_dict:
+            if item['status'] == 'on':
+                count += 1
+ 
+        self.assertEqual(count, 2) # Testing that the report list is detecting 2 attributes in the report.
+
+
+    def test_edit_report(self):
+        """
+        This will test the editing of the sesh
+        reports
+        """
+        self.client.login(username='test_user', password='test.test.test')
+        data = {
+            '{"table":"Daily_Data_Point", "column":"daily_pv_yield","operation":"average","user_friendly_name":"Daily pv yield average"}'
+
+            : ['on'],
+            'duration': 'monthly',
+        }
+
+        response = self.client.post(reverse('edit_report', args=[self.report.id]), data)
+        self.assertEqual(response.status_code, 302)  # The rediction to the manage reports
+        
+        report = Report.objects.filter(id=self.report.id).first()
+        self.assertEqual(report.duration, 'monthly')
+        self.assertEqual(len(report.attributes), 1)

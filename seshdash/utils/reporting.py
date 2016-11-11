@@ -13,6 +13,7 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 import logging
+import json
 
 # Instantiating the logger
 logger = logging.getLogger()
@@ -119,7 +120,7 @@ def get_emails_list(users):
     
     return emails
 
-def get_report_attributes():
+def get_report_table_attributes():
     """
     Returns the report attributes for sesh report tables
     found in settings
@@ -132,11 +133,68 @@ def get_report_attributes():
   
     return attributes
 
+
+def get_report_instance_attributes(report):
+    """
+    This function takes in a report, 
+    and then generates a dict representing the elements
+    in the json field and the value
+    This is to be passed to a template in order to help in editing a report
+    """
+    data_list = []
+    jsondata = report.attributes
+
+    for field in jsondata: 
+        data_dict = {}
+        data_dict['report_value'] = field
+        data_dict['status'] = 'on'
+        data_list.append(data_dict)
+ 
+    return data_list
+
+
+def get_edit_report_list(report):
+    """
+    Returns a list that represents the status
+    of items in the report compared to what can be in the reports
+    """
+    possible_attributes = get_report_table_attributes()
+    data_list = []
+
+    for attribute in possible_attributes:
+        data_dict = {}
+        if is_in_report_attributes(attribute, report):
+            data_dict['status'] = 'on'
+        else:
+            data_dict['status'] = 'off'
+
+        data_dict['report_value'] = attribute
+        data_list.append(data_dict)
+
+    return data_list
+
+def is_in_report_attributes(dictionary, report):
+    """
+    This function checks if a dictionary of items is 
+    in the report attributes
+    @param dictionary: this is a string containing json reprot data "{'column':'pv_yield', 'table':'Daily_Data_Point', ...}
+    @param report: Report class instance
+    """
+    report_attributes = report.attributes
+
+    for item in report_attributes:
+        if item == dictionary:
+            return True
+    return False
+
+
 def get_table_report_dict(report_table_name, operations):
     """
     Returns a dict containing all the reporting values
     possible for models containing reporting data
   
+    @param report_table_name: Ex Daily_Data_Point
+    @param operations: 'sum' or 'average' or ['sum', 'average']
     """ 
     operations = operations if isinstance(operations, list) else [operations] # Converting any item that is not a list ot a list
     table = apps.get_model(app_label="seshdash", model_name=report_table_name)

@@ -8,9 +8,30 @@
             Manage reports for site {{site}}
         </div>
         <div class="panel-body">
-            {% for report in reports %}
-                <li><a href="{% url 'edit_report' report.id %}">{{report}}</a></li>	
-            {% endfor %}
+            <form class="" method="post">
+                {% csrf_token %}
+                <select name="duration" class="form-control">
+                    {% for duration in duration_choices %}
+                        {% if report.duration == duration %}
+                            <option value="{{duration}}" selected>{{duration|title}}</option>
+                        {% else %} 
+                            <option value="{{duration}}">{{duration|title}}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select> 
+
+                {% for attribute in attributes %}
+                    {% if attribute.status == 'on' %}
+                        <input type="checkbox" checked="checked" name="{{attribute.report_value}}">
+                        {{attribute.report_value.user_friendly_name}}
+                    {% else %}
+                        <input type="checkbox" name="{{attribute.report_value}}">
+                        {{attribute.report_value.user_friendly_name}}
+                    {% endif %}
+                {% endfor %}
+
+                <br><input type="submit" class="btn btn-success" value="Submit">
+            </form>
         </div>
 
     </div>
