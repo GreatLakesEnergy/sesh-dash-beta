@@ -1,0 +1,70 @@
+
+{# This is the sidebar for sesh dashboard #}
+
+<div class="page-sidebar sidebar">
+
+    <div class="page-sidebar-inner slimscroll">
+
+
+        <ul class="menu accordion-menu">
+
+            <li class=" droplink open">
+                <a href="#" class="waves-effect waves-button">
+                    <span class="menu-icon glyphicon glyphicon-home"></span>
+                    <p>Sites</p>
+                    <span class="arrow"></span>
+                </a>
+
+                <ul class="sub-menu site-list">
+                    {% for site in sites_stats %}
+                        {# site #}
+                        <li value="{{site.site.id}}">
+
+                            <a href="/dash/{{site.site.id}}" class="text-align-left">
+                                <span class="site-name">{{site.site.site_name}}</span>
+                                {# Quick status icons showing the battery voltage and the weather #}
+
+                                <span class="quick-status">
+                                    <i class="fa fa-battery-full pull-right"
+                                            style="color:{{site.battery}}"></i>
+                                    <i class="fa fa-sun-o pull-right"
+                                            style="color:{{site.weather}}"></i>
+                                 </span>
+
+                            </a>
+
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+
+            <li>
+                <a href="/historical_data" class="waves-effect waves-button">
+                    <span class="fa fa-history menu-icon"></span>
+                    <p>Historical</p>
+                </a>
+            </li>
+
+
+            <li class="droplink "> 
+              {% if permitted %}
+                <a href="#" class="waves-effect waves-button">
+                    <span class="fa fa-cog menu-icon"></span>
+                    <p>Settings</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu settings-list ">
+                    {% include 'seshdash/settings/main.html' %}
+                </ul>
+
+              {% endif %}
+
+
+
+            </li>
+
+
+
+        </ul>
+    </div><!-- Page Sidebar Inner -->
+</div><!-- Page Sidebar -->

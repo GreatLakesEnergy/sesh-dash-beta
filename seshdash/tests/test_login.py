@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 
 # Testing models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account
 
 # Testing forms
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
@@ -26,7 +26,7 @@ class LoginTestCase(TestCase):
     def setUp(self):
 
         #create test user
-        self.test_user = User.objects.create_user("johndoe","alp@gle.solar","asdasd12345")
+        self.test_user = Sesh_User.objects.create_user(username="johndoe",email="alp@gle.solar",password="asdasd12345")
 
 
         self.data = {
@@ -105,7 +105,7 @@ class LoginTestCase(TestCase):
                                     Sesh_Site,
                                     form = SiteForm,
                                     can_delete = False,
-                                    exclude = ('Delete','vrm_account','vrm_site_id','rmc_account','time_zone'),
+                                    exclude = ('Delete','vrm_account','vrm_site_id','time_zone'),
                                     extra = 1
                                     )
 
@@ -118,48 +118,8 @@ class LoginTestCase(TestCase):
         sites = Sesh_Site.objects.all()
         self.assertEqual(len(sites),1)
 
-        site = sites[0]
-        self.assertEqual(site.time_zone,'Asia/Baghdad')
-
-
-
-    def test_rmc_site_form(self):
-        """
-        Test Creation of RMC form
-        """
-
-        self.location = Geoposition(52.5,24.3)
-
-        self.data = {
-                 'site_name':u"Test site",
-                 'comission_date':timezone.datetime(2015, 12, 11, 22, 0),
-                 'location_city':u"kigali",
-                 'location_country':u"rwanda",
-                 'installed_kw':123.0,
-                 'position':self.location,
-                 'system_voltage':12,
-                 'number_of_panels':12,
-                 'battery_bank_capacity':12321,
-                 'has_genset':True,
-                 'has_grid':True,
-                 'sesh_site_set-TOTAL_FORMS':1,
-                 'sesh_site_set-INITIAL_FORMS':0,
-                 'sesh_site_set-MAX_NUM_FORMS':1,
-                }
-
-        form_factory = inlineformset_factory(Sesh_RMC_Account,
-                                    Sesh_Site,
-                                    form=SiteRMCForm,
-                                    can_delete=False,
-                                    extra=1)
-
-        rmc = Sesh_RMC_Account.objects.create(api_key=rmc_tools.generate_rmc_api_key())
-        rmc.save()
-
-        form = form_factory(self.data, instance=rmc)
-        self.assertTrue(form.is_valid())
-        form.save()
-
-
+        # Removing not used anymore #PR 251
+        #site = sites[0]
+        #self.assertEqual(site.time_zone,'Asia/Baghdad')
 
 

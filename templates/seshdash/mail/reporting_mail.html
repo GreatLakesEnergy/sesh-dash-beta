@@ -5,36 +5,31 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>SESH Email Report for {{site_name}} </title>
 <style>
-/* ------------------------------------- 
-		GLOBAL 
+/* -------------------------------------
+		GLOBAL
 ------------------------------------- */
-* { 
+* {
 	margin:0;
 	padding:0;
-	font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif; 
+	font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
 	font-size: 100%;
 	line-height: 1.6;
 }
-
-img { 
-	max-width: 100%; 
+img {
+	max-width: 100%;
 }
-
 body {
-	-webkit-font-smoothing:antialiased; 
-	-webkit-text-size-adjust:none; 
-	width: 100%!important; 
+	-webkit-font-smoothing:antialiased;
+	-webkit-text-size-adjust:none;
+	width: 100%!important;
 	height: 100%;
 }
-
-
-/* ------------------------------------- 
-		ELEMENTS 
+/* -------------------------------------
+		ELEMENTS
 ------------------------------------- */
-a { 
+a {
 	color: #348eda;
 }
-
 .btn-primary, .btn-secondary {
 	text-decoration:none;
 	color: #FFF;
@@ -47,62 +42,49 @@ a {
 	display: inline-block;
 	border-radius: 25px;
 }
-
 .btn-secondary{
 	background: #aaa;
 }
-
-.last { 
+.last {
 	margin-bottom: 0;
 }
-
 .first{
 	margin-top: 0;
 }
-
-
-/* ------------------------------------- 
-		BODY 
+/* -------------------------------------
+		BODY
 ------------------------------------- */
-table.body-wrap { 
+table.body-wrap {
 	width: 100%;
 	padding: 20px;
 }
-
 table.body-wrap .container{
 	border: 1px solid #f0f0f0;
 }
-
-
-/* ------------------------------------- 
-		FOOTER 
+/* -------------------------------------
+		FOOTER
 ------------------------------------- */
-table.footer-wrap { 
-	width: 100%;	
+table.footer-wrap {
+	width: 100%;
 	clear:both!important;
 }
-
 .footer-wrap .container p {
 	font-size:12px;
 	color:#666;
-	
-}
 
+}
 table.footer-wrap a{
 	color: #999;
 }
-
-
-/* ------------------------------------- 
-		TYPOGRAPHY 
+/* -------------------------------------
+		TYPOGRAPHY
 ------------------------------------- */
 h1,h2,h3{
 	font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; line-height: 1.1; margin-bottom:15px; color:#000;
 	margin: 40px 0 10px;
 	line-height: 1.2;
-	font-weight:200; 
+	font-weight:200;
 }
-
 h1 {
 	font-size: 36px;
 }
@@ -112,23 +94,19 @@ h2 {
 h3 {
 	font-size: 22px;
 }
-
-p, ul { 
-	margin-bottom: 10px; 
-	font-weight: normal; 
+p, ul {
+	margin-bottom: 10px;
+	font-weight: normal;
 	font-size:14px;
 }
-
 ul li {
 	margin-left:5px;
 	list-style-position: inside;
 }
-
-/* --------------------------------------------------- 
+/* ---------------------------------------------------
 		RESPONSIVENESS
-		Nuke it from orbit. It's the only way to be sure. 
+		Nuke it from orbit. It's the only way to be sure.
 ------------------------------------------------------ */
-
 /* Set a max-width, and make it display as block so it will automatically stretch to that width, but will also shrink down on a phone or something */
 .container {
 	display:block!important;
@@ -136,23 +114,20 @@ ul li {
 	margin:0 auto!important; /* makes it centered */
 	clear:both!important;
 }
-
 /* This should also be a block element, so that it will fill 100% of the .container */
 .content {
 	padding:20px;
 	max-width:600px;
 	margin:0 auto;
-	display:block; 
+	display:block;
 }
-
 /* Let's make sure tables in the content area are 100% wide */
-.content table { 
-	width: 100%; 
+.content table {
+	width: 100%;
 }
-
 </style>
 </head>
- 
+
 <body bgcolor="#f6f6f6">
 
 <!-- body -->
@@ -168,19 +143,16 @@ ul li {
 					<td>
 						<h1>SESH {{ content.title }} </h1>
 						<p>Hi there {{username}} ,</p>
-						<p>Here is your <i>energy usage</i> for last {{ content.duration }}</p>
-						
-						<h2>Last {{ content.duration }} </h2>
-						<li><p> Total energy used was {{ content.total_consumption| floatformat}} KWh </p> </li>
-						<li><p> Total energy produced was {{ content.total_pv | floatformat }} KWh</p> </li>
-						<li><p> Energy used from grid was {{ content.grid_used | floatformat }} KWh</p> </li>
-						<li><p> The grid was unavailible for  {{ content.grid_outage  }} Minutes</p> </li>
-						<li><p> Total generator use was 0 {{ content.generator_stat  }} minutes</p> </li>
-						<li><p> Total alarms triggered was {{ content.no_alarms }} </p> </li>
+						<p>Here is your <i>energy usage</i>  for  {{ content.date }}</p>
 
-						<h3><p> Total dollars saved was <i>{{ content.cost_savings | floatformat:"-2" }} RWF </i> </p> </h3>
-						<a href="https://{{ content.url_to_dash }}" class="btn-primary">See the realtime stats here </a>
-						<p>Thanks, have a lovely week.</p>
+						<h2>{{ content.report.duration }}  report:</h2>
+
+						{% for attribute in content.report_data %}
+							<li><p> {{ attribute.user_friendly_name }} : {{ attribute.val|floatformat }} {{attribute.unit}} </p> </li>
+						{% endfor %}
+
+						<a href="{{content.url_to_dash}}" class="btn-primary">See the realtime stats here </a>
+						<p>Thanks, have a lovely day.</p>
 						<p>Seshina</p>
 						<p><a href="http://twitter.com/sesh-dash">Follow @sesh-dash on Twitter</a>
 					</td>
@@ -188,7 +160,7 @@ ul li {
 			</table>
 			</div>
 			<!-- /content -->
-									
+
 		</td>
 		<td></td>
 	</tr>
@@ -200,7 +172,7 @@ ul li {
 	<tr>
 		<td></td>
 		<td class="container">
-			
+
 			<!-- content -->
 			<div class="content">
 				<table>
@@ -212,7 +184,7 @@ ul li {
 					</tr>
 				</table>
 			</div><!-- /content -->
-				
+
 		</td>
 		<td></td>
 	</tr>

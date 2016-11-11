@@ -1,0 +1,70 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% load bootstrap %}
+
+{% block main %}
+
+
+	<div role="tabpanel" id="main-wrapper">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active">
+				<a href="#home" aria-controls="home" role="tab" data-toggle="tab">{{site}} alert rules</a>
+			</li>
+			<li role="presentation">
+				<a href="#tab" aria-controls="tab" role="tab" data-toggle="tab">Add alert rules to {{site}}</a>
+			</li>
+		</ul>
+	
+		<!-- Tab panes -->
+		<div class="tab-content">
+
+			{# Tab show alert rules for site #}
+			<div role="tabpanel" class="tab-pane active" id="home">	
+
+				<h4 class="text-left"> Alert rules for {{site}}</h4>
+
+				{% if alert_rules %}
+					{% for alert_rule in alert_rules %}
+
+						<ul class="list-group">
+							<li class="list-group-item">
+								{{alert_rule}}
+
+								<a href="{% url 'delete_alert_rule' alert_rule.id %}" 
+													class="glyphicon glyphicon-remove-circle pull-right red action-icon">
+													
+								<a href="{% url 'edit_alert_rule' alert_rule.id %}" 
+													class="glyphicon glyphicon-edit pull-right action-icon"></a>
+								</a>
+
+							</li>
+						</ul>
+
+					{% endfor %}
+				{% else %}	
+
+						<p> No Alert rules for {{site}} site </p>
+
+				{% endif %}
+
+
+			</div>
+
+
+
+			<div role="tabpanel" class="tab-pane" id="tab">
+				<h4 class="text-left"> Add an alert rule to {{site}}</h4>
+
+				<form  method="post">
+					{% csrf_token %}
+					{{form|bootstrap}}
+					<input type="submit" class="btn btn-primary" value="Submit">
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+
+<ul>
+	<li><a href="{% url 'manage_sites' %}" >Manage sites</a></li>
+	<li><a href="{% url 'manage_alert_rules' %}" >Alert Rules</a></li>
+	<li><a href="{% url 'user_notifications' %}">Notifications</a></li>
+	<li><a href="{% url 'manage_org_users' %}">Users</a>
+        <li class="droplink"><a href="#"><p>Reports</p><span class="arrow"></span></a>
+            <ul class="sub-menu">
+                {% for site in sites_stats %}
+                    <li><a href="{% url 'manage_reports' site.site.id %}">{{site.site}}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+</ul>

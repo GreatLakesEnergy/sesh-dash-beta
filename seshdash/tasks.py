@@ -2,23 +2,25 @@
 from __future__ import absolute_import
 import logging
 import sys
+import pytz
 
 from django.conf import settings
 from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account, Report
 
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
 from seshdash.api.victron import VictronAPI,VictronHistoricalAPI
 from seshdash.utils.alert import alert_generator, alert_status_check
-from seshdash.utils.reporting import prepare_report
-from seshdash.data.db.influx import Influx
+from seshdash.utils.reporting import send_report
+from seshdash.data.db.influx import Influx, get_latest_point_site
 
 # Time related
 from datetime import datetime, date, timedelta
+from dateutil.parser import parse
 from seshdash.utils import time_utils
 from django.utils import timezone
 
@@ -26,17 +28,14 @@ logger = logging.getLogger(__name__)
 
 @task_failure.connect
 def handle_task_failure(**kw):
-    message = 'error occured in task: %/n message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
-    logger.warning("CELERY TASK FAILURE:%s"%kw.get('message',"no error message"))
-    print "ERROR in task %s"%kw.get('message',"no error message")
+    message = 'error occured in task: %s message: %s'%(kw.get('name','name not defined'),kw.get('message','no message'))
+    logger.error("CELERY TASK FAILURE:%s"%(message))
     if not settings.DEBUG:
         import rollbar
-        trace = sys.exc_info()
-        kw['trace'] = trace
-        rollbar.report_message(message=message,extra_data=kw)
+        rollbar.report_exc_info(message=message,extra_data=kw)
 
 
-def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
+def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None, send_status=True):
     """
     Utility function to send data to influx
     """
@@ -55,6 +54,10 @@ def send_to_influx(model_data, site, timestamp, to_exclude=[],client=None):
                 #if to_exclude  in model_data_dict.keys():
                 model_data_dict.pop(val)
 
+        #Add our status will be used for RMC_Status
+        if send_status:
+            model_data_dict['status'] = 1.0
+
         status = i.send_object_measurements(model_data_dict, timestamp=timestamp, tags={"site_id":site.id, "site_name":site.site_name})
     except Exception,e:
         message = "Error sending to influx with exception %s in datapint %s"%(e,model_data_dict)
@@ -66,18 +69,12 @@ def generate_auto_rules(site_id):
     """
     site = Sesh_Site.objects.get(pk=site_id)
 
-    send_sms = False
-    send_mail = True
-    send_slack = True
-
+    logger.info("Running auto rule generation")
     # Create battery low voltage alarm
     lv_alarm = Alert_Rule(site =site,
                         check_field = 'BoM_Data_Point#battery_voltage',
                         value = site.system_voltage,
                         operator = 'lt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
 
     # Create soc low voltage alarm
@@ -85,18 +82,12 @@ def generate_auto_rules(site_id):
                         check_field = 'BoM_Data_Point#soc',
                         value = 35,
                         operator = 'lt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
     # Create communication alarm
     com_alarm = Alert_Rule(site =site,
                         check_field = 'RMC_status#minutes_last_contact',
                         value = 60,
                         operator = 'gt',
-                        send_sms = send_sms,
-                        send_mail = send_mail,
-                        send_slack = send_slack,
             )
 
     lv_alarm.save()
@@ -108,21 +99,26 @@ def generate_auto_rules(site_id):
 
 @shared_task
 def get_BOM_data():
-    print "Getting started getting the bom point "
     # Get all sites that have vrm id
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
-
+    logger.info("Running VRM data collection")
     for site in sites:
+        logger.debug("Getting VRM data for %s"%site)
         try:
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
 
             if v_client.IS_INITIALIZED:
-
                         bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
-                        date = time_utils.epoch_to_datetime(sys_data['VE.Bus state']['timestamp'] , tz=site.time_zone)
+                        #This data is already localazied
+                        logger.debug("got raw date %s with timezone %s"%(
+                            sys_data['VE.Bus state']['timestamp'],
+                            site.time_zone
+                            ))
+                        date = time_utils.epoch_to_datetime(float(sys_data['VE.Bus state']['timestamp']) , tz=site.time_zone)
+                        #logger.debug("saving before localize  BOM data point with time %s"%date)
+                        logger.debug("saving BOM data point with time %s"%date)
                         mains = False
-                        logger.debug("Fetching vrm data %s for %s"%(date,site))
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
                             mains = True
@@ -152,19 +148,19 @@ def get_BOM_data():
                         # Send to influx
                         send_to_influx(data_point, site, date, to_exclude=['time'])
 
-                        print "BoM Data saved"
                         # Alert if check(data_point) fails
 
         except IntegrityError, e:
             logger.debug("Duplicate entry skipping data point")
             pass
+        except KeyError,  e:
+            logger.warning("Sites %s is missing key while getting vrm data%s"%(site,e))
         except Exception ,e:
-            print "The exceptions is ",
-            print Exception
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
-            handle_task_failure(message = message, exception=e)
+            handle_task_failure(message = message, exception=e, name='get_BOM_data' )
             pass
+
 
 def _check_data_pont(data_point_arr):
         """
@@ -229,7 +225,7 @@ def get_historical_BoM(site_pk,start_at):
                     message = "error with creating data point  data exception %s"%(e)
                     logger.debug(message)
                     logger.exception( message )
-                    handle_task_failure(message = message)
+                    handle_task_failure(message = message, name= 'get_Hitorical_bom')
                     pass
 
         logger.debug("saved %s BoM data points"%count)
@@ -367,7 +363,7 @@ def get_weather_data(days=7,historical=False):
                 )
 
                 w_data.save()
-                send_to_influx(w_data, site, day, to_exclude=['date'])
+                send_to_influx(w_data, site, day, to_exclude=['date'], send_status=False)
 
     return "updated weather for %s"%sites
 
@@ -388,6 +384,7 @@ def find_chunks(input_list,key):
             count = count + 1
             if i == (len(input_list)-2):
             # We are at end of list
+
                 result_list.append(section)
         else:
             count = 0
@@ -487,6 +484,7 @@ def get_aggregate_daily_data(date=None):
             agg_dict['aggregate_data_grid'] = get_aggregate_data (site, 'AC_input', clause='positive',start=date_to_fetch)[0]
             agg_dict['aggregate_data_grid_data'] = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
 
+            # Calculate outage data
             logger.debug("aggregate date for grid %s "%agg_dict['aggregate_data_grid_data'])
             aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
             aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
@@ -515,9 +513,14 @@ def get_aggregate_daily_data(date=None):
                 pass
             except Exception,e:
                 logger.exception('Unkown error occured aggregatin data')
+                message = "error with creating data point  data exception %s"%(e)
+                logger.debug(message)
+                logger.exception( message )
+                handle_task_failure(message = message, name= 'get_aggregate_daily_data')
+
                 pass
             #send to influx
-            send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'])
+            send_to_influx(daily_aggr, site, date_to_fetch, to_exclude=['date'], send_status=False)
 
 
 
@@ -536,39 +539,62 @@ def get_all_data_initial(days):
     get_enphase_daily_summary(days)
 
 @shared_task
-def send_reports(duration="week"):
+def check_reports():
     """
-    Schedule email report sending
-    options: month, week, day
+    Task to check send the reports,
+    This tasks should execute daily
     """
+    reports = Report.objects.all()
+    sent_reports_counter = 0
 
-    sites = Sesh_Site.objects.all()
-    for site in sites:
-        logger.debug("Sending report for site %s"%site)
-        result = prepare_report(site, duration=duration)
-        if not result:
-            send_reports.update_state(
-                             state = states.FAILURE,
-                             meta = 'Something went wrong creating report  check logs'
-                             )
+    for report in reports:
+        # Daily reports
+        if report.duration == "daily":
+            sent_val = send_report(report)
+
+        # For weekly we check the day 
+        elif report.duration == "weekly":
+            if datetime.now().today().weekday() == report.day_to_report:
+                sent_val = send_report(report)
+
+        # For months we check the date
+        elif report.duration == "monthly":
+            if datetime.now().day == day_to_report:
+                # Issue: If the day_to_report is 31, some months will be skipped, need a better way to handle this
+                sent_val = send_report(report)
+
+        else:
+             raise Exception("Incorrect, report duration")
+
+        if sent_val:
+            sent_reports_counter += 1
+
+    logger.debug("Sent %s emails for this day %s" %  (sent_reports_counter, datetime.now().today()))
+    return sent_reports_counter
+
 @shared_task
 def rmc_status_update():
     """
     Calculate BoM_Data_Point related RMC Status. RMC based status are calculated by kraken
     """
+    logger.debug("Getting rmc status")
     sites = Sesh_Site.objects.all()
     for site in sites:
-        latest_dp = BoM_Data_Point.objects.filter(site=site).order_by('-time').first()
-        logger.debug("getting status from site %s"%site)
+        # TODO get latest DP from influx
+        latest_dp = get_latest_point_site(site,'status')
+        logger.debug("getting status from site %s with dp %s"%(site,latest_dp))
         if latest_dp:
-            last_contact = time_utils.get_timesince_seconds(latest_dp.time)
+            #localize to time of site
+            dp_time = time_utils.convert_influx_time_string(latest_dp['time'],tz=site.time_zone)
+            last_contact = time_utils.get_timesince_seconds(dp_time, tz=site.time_zone)
             tn = timezone.localtime(timezone.now())
             last_contact_min = last_contact / 60
+
+            # Get RMC account
             rmc_status = RMC_status(site = site,
-                                    rmc = site.rmc_account,
                                     minutes_last_contact = last_contact_min,
                                     time = tn)
-            logger.debug("rmc status logger now: %s last_contact: %s "%(tn,latest_dp.time))
+            logger.debug("rmc status logger now: %s last_contact: %s "%(tn,dp_time))
             logger.debug("saving status %s "%rmc_status)
             rmc_status.save()
         else:

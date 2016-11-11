@@ -5,34 +5,52 @@ from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
+from django.shortcuts import redirect
+from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_objects_for_user
 from guardian.shortcuts import get_perms
 from django.forms import modelformset_factory, inlineformset_factory, formset_factory
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
+from django.contrib.admin.views.decorators import staff_member_required
 from django import forms
+from django.db import OperationalError
+from django.template.loader import get_template
+
+#Guardian decorator
+from guardian.decorators import permission_required_or_403
 
 #Import Models and Forms
-from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point
+from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Account, Sesh_Alert,Sesh_RMC_Account, Daily_Data_Point, RMC_status
 from django.db.models import Avg
 from django.db.models import Sum
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm
+
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
+                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm, \
+                           AlertRuleForm, SeshUserForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
-from pprint import pprint
+import demjson
 
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_model_first_reference, get_model_verbose, get_measurement_verbose_name, get_measurement_unit
+from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
+                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set
+
+from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
+from seshdash.models import SENSORS_LIST
+
 from datetime import timedelta
 from datetime import datetime, date, time, tzinfo
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
+from seshdash.utils.permission_utils import get_permissions, get_org_edit_permissions
 
 import json,time,random
 
@@ -52,7 +70,6 @@ import logging
 
 #Autocomplete
 from seshdash.models import *
-from django.forms import model_to_dict
 import json
 # Influxdb
 from seshdash.data.db.influx import Influx
@@ -67,7 +84,6 @@ def index(request,site_id=0):
     Initial user view user needs to be logged
     Get user related site data initially to display on main-dashboard view
     """
-
     sites =  _get_user_sites(request)
 
     context_dict = {}
@@ -84,26 +100,29 @@ def index(request,site_id=0):
 
     context_dict = jsonify_dict(context_dict,content_json)
     #Generate date for dashboard  TODO use victron solar yield data using mock weather data for now
-    y_data,x_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
-    y2_data,x2_data = prep_time_series(context_dict['site_weather'],'cloud_cover','date')
-    #create graphs for PV dailt prod vs cloud cover
-
-    # Create an object of the get_high_chart_date
-    context_dict['high_chart']= get_high_chart_data(request.user,site_id,sites)
     context_dict['site_id'] = site_id
 
-    #Generate measurements in the time_series_graph
-    client=Influx()
-    measurements_value=client.get_measurements()
+    #Generating site measurements for a graph
+    current_site = Sesh_Site.objects.filter(id = site_id).first()
 
-    measurements =[]
+    #getting site measurements
+    site_measurements = get_site_measurements(current_site)
+    measurements ={}
 
-
-    for measurement in measurements_value:
-        measurements.append(measurement['name'])
-
+    for measurement in site_measurements:
+        #getting verbose names
+        measurement_verbose_name = get_measurement_verbose_name(measurement)
+        measurements[measurement] = measurement_verbose_name
     context_dict['measurements']= measurements
 
+
+    #sites witth weather and battery status
+    sites_stats = get_quick_status(sites)
+    context_dict['sites_stats'] = sites_stats
+
+    # user permissions
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['user'] = request.user
 
     return render(request,'seshdash/main-dash.html',context_dict)
 
@@ -155,9 +174,7 @@ def import_site(request):
     if request.method == "POST":
             #check if post is VRM Account form
             #print "got post"
-            #print request.POST.keys()
             if request.POST.get('form_type',None) == 'vrm':
-                print "got vrm form"
                 form = VRMForm(request.POST)
                 if not form.is_valid():
                     context_dict['VRM_form'] = form
@@ -185,8 +202,9 @@ def import_site(request):
                     pre_pop_data = []
                     for site in site_list['sites']:
                         #get one and only vrm account
+                        #TODO this is a bug
                         VRM = VRM_Account.objects.first()
-
+                        logger.debug("Fetching VRM account %s"%VRM)
                         site_model_form = {'site_name':site['name'],
                                             'vrm_site_id':site['idSite'],
                                             'has_genset': site['hasGenerator'],
@@ -201,12 +219,12 @@ def import_site(request):
 
                     context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data,
                                                                     instance=VRM)
+
             else:
                 # if RMC site
                 # Handle RMC account info
                 #print "rmc request recieved is rmc request getting form ready"
-                site_forms_factory = inlineformset_factory(Sesh_RMC_Account,
-                                                           Sesh_Site,
+                site_forms_factory = modelformset_factory( Sesh_Site,
                                                            form=SiteRMCForm,
                                                            extra=1,
                                                            can_delete=False
@@ -231,6 +249,9 @@ def _download_data(request):
             get_historical_BoM.delay(site_id, time_utils.get_epoch_from_datetime(site.comission_date))
 
 def _aggregate_imported_data(sites):
+    """
+    Run aggregations on daily data
+    """
     for site in sites:
         aggregate_daily_data()
 
@@ -239,6 +260,7 @@ def _validate_form(form,context_dict):
     Validate forms basedo no form input
     """
     if form.is_valid():
+        logger.debug("getting ready to save form %s")
         form = form.save(commit=False)
         context_dict['error'] =  False
 
@@ -278,7 +300,6 @@ def handle_create_site(request):
             context_dict['form'] = form
 
     context_dict, valid_form = _validate_form(form,context_dict)
-    print valid_form
     # Handle Form Errors
     if context_dict['error']:
         # Got Error return problem!
@@ -316,6 +337,7 @@ def _create_site_vrm(request):
     """
     #TODO Bug allert!!  more than one VRM account will cause problem
     VRM = VRM_Account.objects.first()
+    logger.debug("Getting VRM m2m object %s"%VRM)
     site_forms_factory = inlineformset_factory(VRM_Account,
             Sesh_Site,
             form=SiteForm,
@@ -392,7 +414,7 @@ def logout_user(request):
     Logout user
     """
     logout(request)
-    return render(request,'seshdash/logout.html')
+    return render(request,'seshdash/login.html')
 
 def login_user(request):
     """
@@ -460,7 +482,6 @@ def get_user_data(user,site_id,sites):
     bom_data = BoM_Data_Point.objects.filter(site=site).order_by('-time')
 
     bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],now]).order_by('-id')
-    pprint( bom_data.first())
 
     #NOTE remvong JSON versions of data for now as it's not necassary
     #weather_data_json = serialize_objects(weather_data)
@@ -506,6 +527,7 @@ class BoM_Data_Detail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BoM_Data_PointSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+"""
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -514,6 +536,7 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+"""
 
 
 """
@@ -529,7 +552,6 @@ def get_high_chart_data(user,site_id,sites):
      site = Sesh_Site.objects.get(pk=site_id)
      context_high_data = {}
      if not user.has_perm('seshdash.view_Sesh_Site',site):
-        print "user doesn't have permission to view site %s"%site_id
         #TODO return 403 permission denied
         return context_high_data
 
@@ -571,7 +593,6 @@ def get_high_chart_data(user,site_id,sites):
     # initiating the context_high_data Object
      context_high_data['high_date']= high_date_data
      context_high_data['high_pv_production']= high_pv_production
-     print (context_high_data['high_pv_production'])
      return context_high_data
 
 def display_alerts(site_id):
@@ -631,20 +652,27 @@ def display_alert_data(request):
     # Getting the clicked alert via ajax
     alert_id = request.POST.get("alertId",'')
 
-    alert_id = int(alert_id)
-    alert = Sesh_Alert.objects.filter(id=alert_id).first()
+    if alert_id.isdigit():
+        alert = Sesh_Alert.objects.filter(id=alert_id).first()
+    else:
+        raise Exception("Invalid alert id, alert id is not an integer")
+
     alert_values = {}
     point = alert_utils.get_alert_point(alert)
 
-    if point is not None:
-
-        if type(point) != type(dict()):
+    if point:
+        """
+        If the point is from influx it comes as a dict 
+        if the point is from an sql db it comes as a model that needs to 
+        be converted to a dict
+        """
+        if type(point) != dict:
             alert_values = model_to_dict(point)
         else:
             alert_values = point
 
-        # Converting time to json serializable value and changing it to timesince
-        if type(alert_values['time'])  == type(unicode()):
+        # If the the time is from influx then we convert it to a python datetime
+        if type(alert_values['time'])  == unicode:
             alert_values['time'] = parser.parse(alert_values['time'])
 
         alert_values['time'] = get_timesince(alert_values['time'])
@@ -655,67 +683,76 @@ def display_alert_data(request):
 
     else:
         # Handling unecpexted data failure
-        return HttpResponse("Server Error")
+        raise Exception("The alert has not related point,")
 
 @login_required
 def silence_alert(request):
+    """
+    View for silencing alerts
+    """
     alert_id = request.POST.get("alert_id", '')
-    alerts = Sesh_Alert.objects.filter(id=alert_id)
 
-    if len(alerts) >= 1:
-       alert = alerts[0]
-       alert.isSilence = True
-       alert.save()
-       return HttpResponse(True);
+    if alert_id.isdigit():
+        alert = Sesh_Alert.objects.filter(id=alert_id).first()
     else:
-       return HttpResponse(False);
+        raise Exception("In SILENCING ALERT, The alert id is not an integer and the value is %s" % alert_d)
+
+
+    if alert:
+        alert.isSilence = True
+        alert.save()
+        return HttpResponse(True);
+    else:
+        raise Exception("IN SILENCING ALERT, The alert id is an integer and is %s but has no corresponding alert" % alert_id)
+
 
 @login_required
 def get_latest_bom_data(request):
     """
-      Returns the latest information of a site to be displayed in the status card
-      The data is got from the influx db
+    Returns the latest information of a site to be displayed in the status card
+    The data is got from the influx db
     """
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
     site = Sesh_Site.objects.filter(id=site_id).first()
 
-
     # The measurement list contains attributes to be displayed in the status card,
-    measurement_list = ['soc','battery_voltage','AC_output_absolute']
-    latest_points = get_measurements_latest_point(site, measurement_list)
+    measurement_list = get_status_card_items(site)
 
+    if measurement_list != 0:
+        latest_points = get_measurements_latest_point(site, measurement_list)
 
-    latest_point_data = []
+        latest_point_data = []
 
-    # If the points exist and the points returned are equal to the items in measurement list
-    if len(latest_points) == len(measurement_list):
+        # If the points exist and the points returned are equal to the items in measurement list
         for measurement, point in latest_points.items():
             latest_point_data.append({"item":get_measurement_verbose_name(measurement),
                                       "value":str(round(latest_points[measurement]['value'], 2))
                                               + get_measurement_unit(measurement)
                              })
 
-    # adding data from the rmc_status
-    try:
-        # TODO letest_point should only return one point
-        latest_point_data.append({"item":"Last Contact", "value": get_timesince_influx(latest_points.itervalues().next()['time'])})
-        logger.debug("RMC status card %s"%latest_points)
-    except StopIteration:
-        logger.warning("No further points %s"%latest_points)
-        pass
+        if 'last_contact' in measurement_list:
+            # Adding the last contact from the rmc status
+            rmc_latest = RMC_status.objects.filter(site=site).last()
+            if rmc_latest:
+                last_contact = rmc_latest.minutes_last_contact
+                last_contact_seconds = last_contact * 60
+                last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
+                latest_point_data.append({"item":"Last Contact", "value": last_contact})
+            else:
+                logger.debug("No rmc_status points for site ")
 
-    return HttpResponse(json.dumps(latest_point_data))
+        return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
 
 
 @login_required
 def search(request):
+
     data=[]
-    sites = Sesh_Site.objects.all()
-    site = sites[0]
-    site.site_name
+    # Getting all user sites
+    sites = _get_user_sites(request)
     for site in sites:
         data.append({"key":site.id,"value":site.site_name})
     return HttpResponse(json.dumps(data))
@@ -740,13 +777,23 @@ def historical_data(request):
         sites = get_objects_for_user(request.user, 'seshdash.view_Sesh_Site')
         active_site = sites[0]
         context_dict = {}
+
+        #sites witth weather and battery status
+        user_sites =  _get_user_sites(request)
+        sites_stats = get_quick_status(user_sites)
+        context_dict['sites_stats'] = sites_stats
+
+        #checking user permissions
+        user = request.user
+        permission = get_permissions(user)
+        context_dict['permitted'] = permission
+
         context_dict['sites'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/historical-data.html', context_dict);
-
 
 #function for Graph Generations
 @login_required
@@ -768,7 +815,7 @@ def graphs(request):
         active_id = request.POST.get('active_site_id','')
         active_site = Sesh_Site.objects.filter(id=active_id)
         time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
-        time_bucket_dict = {'24h':'30m','7d':'12h','30d':'1d'}
+        time_bucket_dict = {'24h':'1h','7d':'1d','30d':'5d'}
 
         # Checking for a valid site_id
         if active_site != []:
@@ -780,12 +827,9 @@ def graphs(request):
             data_values = []
             time_delta = time_delta_dict[time]
             time_bucket=time_bucket_dict[time]
-            SI_units = BoM_Data_Point.SI_UNITS
-            SI_unit = SI_units[choice]
-
+            SI_unit = get_measurement_unit(choice)
             # creating an influx instance
             client = Influx()
-
             # using an influx query to get measurements values with their time-stamps
             values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
 
@@ -807,3 +851,437 @@ def graphs(request):
         return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest()
+
+
+#function to editing existing sites
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def edit_site(request,site_Id=1):
+    context_dict = {}
+    site = get_object_or_404(Sesh_Site, id=site_Id)
+    rmc_account = Sesh_RMC_Account.objects.filter(site=site).first();
+
+    # If it is an rmc site create a rmc_form
+    if rmc_account:
+        site_form = SiteRMCForm(instance=site)
+        rmc_form = RMCForm(instance=rmc_account)
+        context_dict['RMCForm'] = rmc_form
+    else:
+        site_form = SiteVRMForm(instance=site)
+
+
+    if request.method == 'POST':
+        if rmc_account:
+            site_form = SiteRMCForm(request.POST, instance=site)
+            rmc_form = RMCForm(request.POST, instance=rmc_account)
+
+            if site_form.is_valid() and rmc_form.is_valid():
+                site_form.save()
+                rmc_form.save()
+            
+            context_dict['RMCForm'] = rmc_form
+        else:
+            site_form = SiteVRMForm(request.POST, instance=site)
+            if site_form.is_valid():
+                site_form.save()
+    
+
+    user_sites = _get_user_sites(request)
+    context_dict['VRM_form'] = VRMForm()
+    context_dict['site_form']= site_form
+    context_dict['sites']= user_sites
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    return render(request,'seshdash/settings/site_settings.html', context_dict)
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def site_add_edit(request):
+    """
+    This views renders the page for editing and
+    adding new rmc sites
+    """
+    context_dict = {}
+    sites = _get_user_sites(request)
+    context_dict['sites_stats'] = get_quick_status(sites)
+    context_dict['sites'] = sites
+    context_dict['VRM_form'] = _create_vrm_login_form()
+    context_dict['permitted'] = get_permissions(request.user)
+    return render(request, 'seshdash/settings/site_settings.html', context_dict)
+
+
+
+@login_required
+def settings_alert_rules(request):
+    """
+    To allow users to manage alert 
+    rules for given sites
+    """
+    context_dict = {}
+    sites = _get_user_sites(request)
+
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    context_dict['sites'] = sites
+    return render(request, 'seshdash/settings/sites_alert_rules.html', context_dict)
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def site_alert_rules(request, site_id):
+    """
+    Alert rules for a given site
+    """
+
+    context_dict = {}
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    alert_rules = Alert_Rule.objects.filter(site=site)
+    form = AlertRuleForm()
+
+
+
+    if request.method == 'POST':
+        form = AlertRuleForm(request.POST)
+        if form.is_valid():
+            alert_rule = form.save(commit=False)
+            alert_rule.site = site
+            alert_rule.save()
+            return redirect(reverse('site_alert_rules', args=[site.id]))
+
+
+    context_dict['form'] = form
+    context_dict['site'] = site
+    context_dict['alert_rules'] = alert_rules
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    return render(request, 'seshdash/settings/alert_rules.html', context_dict)
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def edit_alert_rule(request, alert_rule_id):
+    """
+    Editing alert rules for a given alert rule id
+    """
+    context_dict = {}
+    alert_rule = Alert_Rule.objects.filter(id=alert_rule_id).first()
+    form = AlertRuleForm(instance=alert_rule)
+
+    if request.method == 'POST':
+        form = AlertRuleForm(request.POST, instance=alert_rule)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('site_alert_rules', args=[alert_rule.site.id]))
+
+
+    context_dict['form'] = form
+    return render(request, 'seshdash/settings/edit_alert_rule.html', context_dict)
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def delete_alert_rule(request, alert_rule_id):
+    """
+    Deleting an alert rule
+    """
+    alert_rule = Alert_Rule.objects.filter(id=alert_rule_id).first()
+    site_id = alert_rule.site.id
+    alert_rule.delete()
+    return redirect(reverse('site_alert_rules', args=[site_id]))
+
+
+# function of adding new site
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def add_rmc_site(request):
+    """
+    This adds an rmc site to
+    the database
+    """
+    context_dict = {}
+
+    if request.method == 'POST':
+        form = SiteRMCForm(request.POST)
+
+        if form.is_valid():
+            form = form.save()
+            return HttpResponseRedirect(reverse('add_rmc_account', args=[form.id]))
+
+    else:
+        form = SiteRMCForm()
+
+    context_dict['form'] = form
+    return render(request, 'seshdash/add_rmc_site.html', context_dict)
+
+
+
+@login_required
+@permission_required_or_403('auth.view_Sesh_Site')
+def add_rmc_account(request, site_id):
+    """
+    This view is for adding a new rmc account
+    to the database and associate it with a site
+    """
+    site = Sesh_Site.objects.filter(id=site_id).first()
+
+    # sensors formset factories
+    emonThFormSetFactory = formset_factory(SensorEmonThForm)
+    emonTxFormSetFactory = formset_factory(SensorEmonTxForm)
+    bmvFormSetFactory = formset_factory(SensorBMVForm)
+
+    # formsets
+    emonth_form_set = emonThFormSetFactory(prefix="emonth")
+    emontx_form_set = emonTxFormSetFactory(prefix="emontx")
+    bmv_form_set = bmvFormSetFactory(prefix="bmv")
+
+    # emonpi form
+    site_emonpi = Sensor_EmonPi.objects.filter(site=site).first()
+    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site_emonpi)
+
+    context_dict = {}
+    rmc_form = RMCForm()
+
+    if request.method == 'POST':
+
+        rmc_form = RMCForm(request.POST)
+        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site_emonpi)
+        emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
+        emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
+        bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
+
+        sensors_sets =  [emonth_form_set, emontx_form_set, bmv_form_set]
+
+        if rmc_form.is_valid():
+            rmc_account = rmc_form.save(commit=False)
+            rmc_account.site = site
+            rmc_account.save()
+            associate_sensors_sets_to_site(sensors_sets, site)
+            if emonpi_form.is_valid():
+                emonpi_form.save()
+                
+            return redirect('index')
+
+
+    context_dict['rmc_form'] = rmc_form
+    context_dict['emonpi_form'] = emonpi_form
+    context_dict['site_id'] = site_id
+    context_dict['sensors_list'] = SENSORS_LIST
+    context_dict['emonth_form'] = emonThFormSetFactory(prefix="emonth")
+    context_dict['emontx_form'] = emonTxFormSetFactory(prefix="emontx")
+    context_dict['bmv_form'] = bmvFormSetFactory(prefix="bmv")
+    return render(request, 'seshdash/add_rmc_account.html', context_dict)
+
+
+
+def get_rmc_config(request):
+    """
+    View to return the config file for a given rmc given
+    an api key for the rmc account
+    """
+    context_dict = {}
+    api_key = request.GET.get('api_key', '')
+    context_dict['api_key'] = api_key
+
+    rmc_account = Sesh_RMC_Account.objects.filter(api_key=api_key).first()
+
+    if not rmc_account:
+        logger.debug("There is no rmc account associated with the api key")
+        logger.debug("Make sure you rmc site is configured on the server")
+        return HttpResponseForbidden()
+
+    site = rmc_account.site
+    associated_sensors = get_all_associated_sensors(site)
+
+    configuration, bmv_number = get_config_sensors(associated_sensors)
+    context_dict['configuration']  = configuration
+    context_dict['bmv_number'] = bmv_number
+
+    conf = get_template('seshdash/configs/rmc_config.conf')
+
+    return HttpResponse(conf.render(context_dict), content_type='text/plain')
+
+
+@staff_member_required
+def user_notifications(request):
+    """
+    Renders page to display users of an organization
+    and their values to view the sites
+    """
+    context_dict = {}
+    user = request.user   
+
+    organisation_users = Sesh_User.objects.filter(organisation=user.organisation) # all users belonging to the same organisations
+    SeshUserFormSetFactory = modelformset_factory(Sesh_User, fields=('on_call', 'send_mail', 'send_sms',), extra=0)
+    sesh_user_formset = SeshUserFormSetFactory(queryset=organisation_users)
+    
+    if request.method == 'POST':
+        sesh_user_formset = SeshUserFormSetFactory(request.POST, queryset=organisation_users)
+        if sesh_user_formset.is_valid():
+            sesh_user_formset.save()
+            return redirect('index')
+
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    context_dict['user_formset'] = sesh_user_formset
+    return render(request, 'seshdash/settings/user_notifications.html', context_dict)
+
+@login_required
+def manage_org_users(request):
+    """
+    View to manage the users of an organisation
+    Should only be accessed by admin users of the organisation
+    """
+    if request.user.is_org_admin: 
+        context_dict = {}
+        context_dict['organisation_users'] = request.user.organisation.get_users()
+        context_dict['form'] = SeshUserForm()
+        user_sites = _get_user_sites(request) 
+        context_dict['permitted'] = get_org_edit_permissions(request.user)
+        context_dict['sites_stats'] = get_quick_status(user_sites)
+        return render(request, 'seshdash/settings/organisation_users.html', context_dict)
+    else:
+        return HttpResponseForbidden()
+
+@login_required
+def add_sesh_user(request):
+    """
+    View for adding a new sesh user
+    user should be an organisation admin
+    """
+    if request.user.is_org_admin:
+        if request.method == 'POST':
+            form = SeshUserForm(request.POST)
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.organisation = request.user.organisation
+                user.save()
+                return redirect('manage_org_users')
+        else:
+            return HttpResponseForbidden()
+    else:
+        return HttpResponseForbidden()
+
+
+@login_required
+def delete_sesh_user(request, user_id):
+     """
+     Deletes a sesh User
+     the user to access the view should be an admin of the organisation
+     """
+    
+     if request.user.is_org_admin:
+         user = Sesh_User.objects.filter(id=user_id).first()
+         user.delete()
+         return redirect('manage_org_users')
+     else:
+         return HttpResponseForbidden()
+
+@login_required
+def edit_sesh_user(request, user_id):
+    """
+    Edits a sesh user
+    the user loged in should be an admin of the organisation
+    """
+    if request.user.is_org_admin:
+        context_dict = {}
+        user = Sesh_User.objects.filter(id=user_id).first()
+        form = SeshUserForm(instance=user)
+
+        if request.method == 'POST':
+            form = SeshUserForm(request.POST, instance=user)
+            if form.is_valid():
+                form.save()
+                return redirect('manage_org_users')   
+
+        user_sites = _get_user_sites(request)
+        context_dict['form'] = form
+        context_dict['permitted'] = get_org_edit_permissions(request.user)
+        context_dict['sites_stats'] = get_quick_status(user_sites)
+        return render(request, 'seshdash/settings/edit_sesh_user.html', context_dict)
+    else:
+        return HttpResponseForbidden()
+
+
+@login_required
+def manage_reports(request, site_id):
+    """
+    Manages reports for a given site
+    """
+    context_dict = {}
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    reports = Report.objects.filter(site=site)
+    
+    context_dict['site'] = site
+    context_dict['reports'] = reports
+    return render(request, 'seshdash/settings/manage_reports.html', context_dict)
+
+
+@login_required
+def add_report(request, site_id):
+    """
+    View to help in managing the reports
+    """
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    context_dict = {}
+    context_dict['report_attributes'] = get_report_table_attributes()
+    attributes = []
+ 
+    # if the user does not belong to the organisation or if the user is not an admin   
+    if not(request.user.organisation == site.organisation and request.user.is_org_admin):
+        return HttpResponseForbidden()
+    
+    if request.method == "POST": 
+        # Getting all the checked report attribute values
+        for key, value in request.POST.items():
+            if value == 'on':
+                attributes.append(demjson.decode(key))
+
+        Report.objects.create(site=site,
+                              attributes=attributes,
+                              duration=request.POST.get('duration', 'daily'),
+                              day_to_report=0)
+        return redirect(reverse('manage_reports', args=[site.id]))
+
+    return render(request, 'seshdash/settings/add_report.html', context_dict)
+
+
+@login_required
+def edit_report(request, report_id):
+    """
+    View to edit a report given, 
+    a report id as an parameter
+    """
+    context_dict = {}
+    report = Report.objects.filter(id=report_id).first()
+    attribute_list = []    
+   
+    if request.method == 'POST':
+        for key, value in request.POST.items():
+            if value == 'on':
+                attribute_list.append(demjson.decode(key))
+
+        report.attributes = attribute_list
+        report.duration = request.POST['duration'] 
+        report.save() 
+        return redirect(reverse('manage_reports', args=[report.site.id]))
+
+    context_dict['attributes'] = get_edit_report_list(report)
+    context_dict['report'] = report
+    context_dict['duration_choices'] = report.get_duration_choices()
+    return render(request, 'seshdash/settings/edit_report.html', context_dict)
+    
+
+
+@login_required
+def delete_report(request, report_id):
+    """
+    View to delete a report
+    """
+    context_dict = {}
+    report = Report.objects.filter(id=report_id).first()
+    site = report.site
+    report.delete()
+    return redirect(reverse('manage_reports', args=[site.id]))

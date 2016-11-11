@@ -1,4 +1,4 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, Sesh_User, RMC_status, Slack_Channel
+from seshdash.models import Sesh_User, Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, RMC_status, Slack_Channel
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
 from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
@@ -10,7 +10,7 @@ from dateutil import parser
 # Influx client
 from seshdash.data.db import influx
 
-from seshdash.utils.model_tools import get_model_first_reference
+from seshdash.utils.model_tools import get_model_first_reference, get_measurement_from_rule, get_measurement_unit, get_measurement_verbose_name
 from seshdash.utils.time_utils import get_epoch_from_datetime
 from seshdash.utils.send_slack import Slack
 
@@ -42,12 +42,11 @@ def alert_generator():
         site_groups = get_groups_with_perms(site)
 
         # Get datapoint and real value
-        data_point, real_value = get_alert_check_value(site, rule)
+        data_point, real_value = get_alert_check_value(rule)
+
 
         if data_point is not None and real_value is not None:
-
             if check_alert(rule, real_value):
-
                 alert_obj = alert_factory(site, rule, data_point)
 
                 # if alert_obj is created
@@ -55,48 +54,72 @@ def alert_generator():
                     content = get_alert_content(site, rule, data_point, real_value, alert_obj)
                     mails, sms_numbers = get_recipients_for_site(site)
 
-
-                    if rule.send_mail:
-                         alert_obj.emailSent = alertEmail('Alert Email from seshdash',data_point,content,mails)
-
-                    if rule.send_sms:
-                         alert_obj.smsSent = alertSms(data_point,content,sms_numbers)
-
-                    if rule.send_slack:
-                         for site_group in site_groups:
-
-                             # unpacking the neccessary data
-                             sesh_organisation = site_group.sesh_organisation
-                             channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
-
-
-                             # instantiating the client
-                             slack = Slack(sesh_organisation.slack_token)
-
-                             for channel in channels:
-                                 if settings.DEBUG == True:
-                                     alert_obj.slackSent = True
-                                 else:
-                                     alert_obj.slackSent = slack.send_message_to_channel(channel.name, content['alert_str'])
+                    # reporting
+                    alert_obj.emailSent = send_mail("Alert Mail", mails, content)
+                    alert_obj.smsSent = send_sms(sms_numbers, content)
+                    slack_msg = get_slack_alert_msg("Alert Triggered", alert_obj)
+                    alert_obj.slackSent = send_alert_slack(site_groups, slack_msg)
 
                     alert_obj.save()
 
 
 
+def send_alert_slack(site_groups, content):
+    """
+    Sends the alert message to specific channels in slack for organisations
+    """
+    for site_group in site_groups:
+        try:
+           sesh_organisation = site_group.sesh_organisation
+        except RelatedObjectDoesNotExist:
+           logging.error("There is not associated sesh organisation for group %s " % site_group)
+	   return False
+
+        if sesh_organisation.send_slack:
+            channels = sesh_organisation.slack_channel.all().filter(is_alert_channel=True)
+            slack = Slack(sesh_organisation.slack_token)  # instantiate the api for the organisation
+
+            for channel in channels:
+                response = slack.send_message_to_channel(channel.name, content)
+
+                if not response:
+                    logging.error('Failed to send message for %s in %s' % (sesh_organisation, channel))
+                    return False
+        else:
+            logger.debug("Slack reports disabled for %s organisation " % sesh_organisation)
+            return False
+
+    return True
 
 
-def alertEmail(subject, data_point,content,recipients):
-    return send_mail(subject,recipients,content)
+def get_slack_alert_msg(subject, alert):
+    """
+    Function to generate alert messages provided the
+    subject and the alert obj
+    """
+    msg = ''
+    data_point, value = get_alert_check_value(alert.alert)
+
+    msg += subject
+    msg += '\n'
+    msg += 'rule: ' + str(alert.alert)
+    msg += '\n'
+    msg += 'found: ' + str(value)
+    msg += '\n'
+    msg += 'At site: ' + str(alert.site)
+
+    return msg
 
 
 
-def alertSms(data_point,content,recipients):
-    return send_sms(recipients, content)
 
 
-
-def get_alert_check_value(site, rule):
-    """ Returns the value to check for alert from latest data point """
+def get_alert_check_value(rule):
+    """
+    Returns the value to check for alert from latest data point
+    This are the latest data point referring to a rule for a specific site
+    """
+    site = rule.site
 
     if is_mysql_rule(rule):
         model, field_name = rule.check_field.split('#')
@@ -133,8 +156,8 @@ def get_latest_point_value_influx(site, rule):
 
 def is_influx_rule(rule):
     """
-       A function that detects if the alert rule defined uses influx,
-       Influx rules should not contain a '#' because split returns
+    A function that detects if the alert rule defined uses influx,
+    Influx rules should not contain a '#' because split returns
     """
     if len(rule.check_field.split('#')) == 1:
         return True
@@ -143,7 +166,9 @@ def is_influx_rule(rule):
 
 
 def is_mysql_rule(rule):
-    """ A function that detects if the alert rule defined, uses mysql """
+    """
+    A function that detects if the alert rule defined, uses mysql
+    """
 
     if len(rule.check_field.split('#')) == 2:
         return True
@@ -170,13 +195,24 @@ def check_alert(rule, data_point_value):
         return False
 
 
+def get_message_alert(alert):
+    """
+    Returns an alert mesage represetnation
+    """
+    measurement = get_measurement_from_rule(alert.alert)
+    return "At site %s \n %s is %s %s%s" % (alert.site, get_measurement_verbose_name(measurement),
+                                            alert.alert.get_operator_display(), alert.alert.value,
+                                            get_measurement_unit(measurement))
+
+
+
 
 def get_alert_content(site, rule, data_point, value, alert):
     """ Returns a dictionary containing information about the alert """
 
     content = {}
 
-    content_str = "site:%s\nrule:%s '%s' %s --> found %s " %(site.site_name,rule.check_field,rule.operator,rule.value, value)
+    content_str = get_message_alert(alert)
 
     # Get ready content for email
     content['site'] = site.site_name
@@ -199,21 +235,13 @@ def get_recipients_for_site(site):
     mails = []
     sms_numbers = []
 
-    # TODO to be removed
     for user in users:
+        mails.append(user.email)
 
-
-        if hasattr(user, 'seshuser'):
-            mails.append(user.email)
-
-            if user.seshuser.phone_number and user.seshuser.on_call:
-                sms_numbers.append(user.seshuser.phone_number)
-
-
-                logger.debug("emailing %s" % mails)
+        if user.on_call and user.send_sms and user.phone_number:
+            sms_numbers.append(user.phone_number)
 
     return mails, sms_numbers
-
 
 
 def alert_factory(site, rule, data_point):
@@ -323,7 +351,6 @@ def get_alert_point(alert):
 
     if is_influx_rule(rule):
         point = influx.get_point(check_field, alert.point_id)
-
     else:
         point = get_model_first_reference(model_name, alert)
 
@@ -354,44 +381,45 @@ def get_alert_point_value(alert, point=None):
 
 
 def alert_status_check():
-    """ Checks if the alert is still valid and silences it if it is invalid """
+    """
+    Checks if the alert is still valid and silences it if it is invalid
+    """
     unsilenced_alerts = get_unsilenced_alerts()
     logger.debug("Running alert status check")
-    if unsilenced_alerts:
-        for alert in unsilenced_alerts:
-            site = alert.site
-            rule = alert.alert
 
-            if is_mysql_rule(rule):
-                latest_data_point_value = get_latest_data_point_value_mysql(site, rule)
-            elif is_influx_rule(rule):
-                latest_data_point_value = get_latest_point_value_influx(site, rule)
-            else:
-                logger.error('Invaliid rule')
+    for alert in unsilenced_alerts:
+        site = alert.site
+        rule = alert.alert
+
+        if is_mysql_rule(rule):
+            latest_data_point_value = get_latest_data_point_value_mysql(site, rule)
+        elif is_influx_rule(rule):
+            latest_data_point_value = get_latest_point_value_influx(site, rule)
+        else:
+            raise Exception("Invalid alert Rule")
+
+
+        if check_alert(rule, latest_data_point_value):
+            logger.debug("Alert is still valid")
+        else:
+            # Silencing the alert and generating email content
+            logger.debug("Alert is not valid, silencing alert")
+            alert.isSilence = True
+            alert.save()
+            data_point, data_point_value = get_alert_check_value(alert.alert) 
+
+            # Handle no data point getting returned
+            if not data_point_value:
+                logger.warning("Now DP found for alert skipping ")
                 return None
 
+            content = get_alert_content(site, rule, data_point, data_point_value, alert)
 
-            if check_alert(rule, latest_data_point_value):
-                logger.debug("Alert is still valid")
-            else:
-                # Silencing the alert and generating email content
-                alert.isSilence = True
-                alert.save()
-                data_point = get_alert_point(alert)
-                data_point_value = get_alert_point_value(alert, data_point)
+            mails, sms_numbers = get_recipients_for_site(site)
+            site_groups = get_groups_with_perms(site)
 
-                # Handle no data point getting returned
-                if not data_point_value:
-                    logger.warning("Now DP found for alert skipping ")
-                    return None
-
-                content = get_alert_content(site, rule, data_point, data_point_value, alert)
-
-                mails, sms_numbers = get_recipients_for_site(site)
-
-                # Reporting
-                if rule.send_mail:
-                    alertEmail('Alert auto silenced', data_point, content, mails)
-
-                if rule.send_sms:
-                    alertSms(data_point,content,sms_numbers)
+            # Reporting
+            send_mail('Alert Silenced', content, mails)
+            send_sms(content, sms_numbers)
+            slack_msg = get_slack_alert_msg("Alert silenced", alert)
+            send_alert_slack(site_groups, slack_msg)

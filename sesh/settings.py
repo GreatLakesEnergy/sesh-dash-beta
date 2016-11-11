@@ -14,12 +14,14 @@ from __future__ import absolute_import
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import sys
+import logging
 from celery.schedules import crontab
 from datetime import timedelta
 from ConfigParser import RawConfigParser
 import djcelery
 
 djcelery.setup_loader()
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.join(BASE_DIR,'seshdash')
@@ -57,7 +59,8 @@ config = RawConfigParser(
                'FORCAST_KEY':'ASDASFAG',
                'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':'',
-               'SLACK_TEST_KEY':''
+               'SLACK_TEST_KEY':'',
+               'USE_TEMPLATE_TWO':'False'
                }
         )
 
@@ -81,6 +84,66 @@ FORECAST_KEY = config.get('api','forecast_key')
 # slack key
 SLACK_TEST_KEY = config.get('api', 'slack_test_key')
 
+
+LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
+
+#logging
+#Make sure logging folder exists
+
+if not os.path.exists(LOG_DIR):
+    # Create log dir
+    print "LOG DIR %s doesn't exist creating"%LOG_DIR
+    os.mkdir(LOG_DIR)
+
+
+
+
+# Logging configurations
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': LOGGING_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+
+        },
+        'file':{
+           'level': 'DEBUG',
+           'class': 'logging.FileHandler',
+           'filename':os.path.join(LOG_DIR, "all.log"),
+           'formatter': 'verbose',
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+        'seshdash': {
+            'handlers': ['console', 'file'],
+            'level': LOGGING_LEVEL,
+        },
+        'sesh.settings': {
+            'handlers': ['console','file'],
+            'level': LOGGING_LEVEL,
+        }
+    }
+
+}
+
+
+logger = logging.getLogger(__name__)
+
+
 # Temp folder for misc files
 
 try:
@@ -100,6 +163,10 @@ DATABASES = {
         'HOST': config.get('database','HOST'),
     }
 }
+
+
+AUTH_USER_MODEL = 'seshdash.Sesh_User'
+
 #influx settings
 INFLUX_HOST = config.get('influx','HOST')
 INFLUX_PORT = config.get('influx','PORT')
@@ -119,6 +186,13 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Kigali'
+CELERY_SEND_TASK_ERROR_EMAILS = True
+
+# Use this for emailing celery task failures
+ADMINS = (
+            ('Alp Tilev', 'alp@gle.solar'),
+            )
+
 CELERYBEAT_SCHEDULE = {
    'get_daily_weather_forecast': {
         'task': 'seshdash.tasks.get_weather_data',
@@ -156,66 +230,28 @@ CELERYBEAT_SCHEDULE = {
         'args': '',
        },
 }
-#authentication
+# Authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
-#mail
+
+
+# Email
 EMAIL_USE_TLS = True
 EMAIL_HOST = config.get('mail','EMAIL_HOST')
 EMAIL_PORT = config.get('mail','EMAIL_PORT')
 EMAIL_HOST_USER = config.get('mail','EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config.get('mail','EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+
+# SETUP Celery Email
+# Email address used as sender (From field).
+SERVER_EMAIL = 'reports@gle.solar'
+
+
 #email_templates_dir = os.path.join(template_dir,'email')
 FROM_EMAIL = config.get('mail','FROM_EMAIL')
-
-
-LOGGING_LEVEL = config.get('system','LOGGING_LEVEL')
-
-#logging
-# Make sure logging folder exists
-
-if not os.path.exists(LOG_DIR):
-    # Create log dir
-    print "LOG DIR %s doesn't exist creating"%LOG_DIR
-    os.mkdir(LOG_DIR)
-
-LOGGING = {
-    'version': 1,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
-        },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': LOGGING_LEVEL,
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-
-        },
-        'file':{
-           'level': 'DEBUG',
-           'class': 'logging.FileHandler',
-           'filename':os.path.join(LOG_DIR, "all.log"),
-           'formatter': 'verbose',
-        },
-    },
-
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-        },
-        'seshdash': {
-            'handlers': ['console', 'file'],
-            'level': LOGGING_LEVEL,
-        }
-    }
-
-}
 
 
 # Error reporting
@@ -242,34 +278,50 @@ INSTALLED_APPS = (
     'seshdash',
     'guardian',
     'djangobower',
+    'django_mysql',
     'django_nvd3',
     'rest_framework',
     'rest_framework.authtoken',
     'geoposition',
     'djcelery',
     'django_extensions',
-
+    'bootstrapform'
 )
 
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
 BOWER_INSTALLED_APPS = (
-            'jquery#2.2.1',
-            'jquery-ui#1.11.4',
-            'mapbox.js#2.4.0',
-            'd3#3.5.16',
-            'nvd3#1.7.1',
-            'moment#2.11.2',
-            'highcharts-release#4.2.4',
-            'bootstrap#3.3.6',
-            'font-awesome#4.6.1',
-            'metisMenu#2.5.0',
-            'morrisjs#0.5.1',
-            'raphael#2.2.0',
-            'react#0.14.8',
-            'babel#d54d59ff74',
-            'awesomplete#1.1.0',
-            'pace#1.0.2',
+                        'jquery#2.2.4',
+                        'jquery-ui',
+                        'pace',
+                        'bootstrap',
+                        'switchery',
+                        'jquery.uniform',
+                        'classie',
+                        'waves',
+                        'blockui',
+                        'jquery-slimscroll',
+                        'uniform',
+                        'Font-Awesome',
+                        'simple-line-icons',
+                        'offcanvasmenueffects',
+                        '3d-bold-navigation',
+                        'Blueprint-SlidePushMenus',
+                        'weather-icons',
+                        'metrojs',
+                        'toastr',
+                        'jquery-waypoints',
+                        'counterup',
+                        'jquery-flot',
+                        'curvedlines',
+                        'jquery.counterup',
+                        'awesomplete#1.1.0',
+                        'babel#d54d59ff74',
+                        'react',
+                        'd3',
+                        'moment',
+                        'mapbox.js',
+                        'highcharts',
             )
 
 ANONYMOUS_USER_ID = -1
@@ -360,3 +412,9 @@ GEOPOSITION_MAP_OPTIONS = {
 GEOPOSITION_MARKER_OPTIONS = {
     'cursor': 'move'
 }
+
+
+# Sesh Settings
+SESH_REPORT_TABLES = [
+    'Daily_Data_Point',
+]

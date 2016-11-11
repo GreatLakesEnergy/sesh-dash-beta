@@ -6,8 +6,9 @@ from .models import *
 
 @admin.register(Sesh_Site)
 class Sesh_SiteAdmin(GuardedModelAdmin):
-    list_display = ('site_name','location_city','installed_kw','battery_bank_capacity','comission_date')
+    list_display = ('site_name', 'organisation', 'location_city','installed_kw','battery_bank_capacity','comission_date')
     list_filter = ('installed_kw','location_city', 'installed_kw')
+    exclude = ('status_card',)
 
 @admin.register(BoM_Data_Point)
 class BoM_Data_PointAdmin(GuardedModelAdmin):
@@ -33,17 +34,17 @@ class VRM_AccountAdmin(GuardedModelAdmin):
 
 @admin.register(Sesh_RMC_Account)
 class RMC_AccountAdmin(GuardedModelAdmin):
-    list_display = ('api_key','api_key_numeric')
+    list_display = ('site','api_key','api_key_numeric')
     pass
 
 @admin.register(Sesh_Organisation)
 class Organisation(GuardedModelAdmin):
-    list_display = ('group', 'slack_token')
+    list_display = ('slack_token',)
     pass
 
 @admin.register(Sesh_User)
 class SeshUser(GuardedModelAdmin):
-    list_display = ('user','phone_number','on_call')
+    list_display = ('username', 'email', 'phone_number','on_call')
     list_filter = ('on_call',)
     pass
 
@@ -60,3 +61,37 @@ class RMCStatus(GuardedModelAdmin):
     pass
 
 
+@admin.register(Status_Card)
+class StatusCard(GuardedModelAdmin):
+    list_display = ('row1','row2','row3','sesh_site')
+    list_filter = ('sesh_site',)
+    pass
+
+@admin.register(Site_Measurements)
+class SiteMeasurements(GuardedModelAdmin):
+    list_display = ('sesh_site','row1','row2','row3','row4')
+    list_filter = ('sesh_site',)
+    pass
+
+
+@admin.register(Sensor_EmonTx)
+class SensorEmonTx(GuardedModelAdmin):
+    list_filter = ('site',)
+    pass
+
+@admin.register(Sensor_EmonTh)
+class SensorEmonTh(GuardedModelAdmin):
+    list_filter = ('site',)
+    pass
+
+@admin.register(Sensor_BMV)
+class SensorBMV(GuardedModelAdmin):
+    list_filter = ('site',)
+
+@admin.register(Status_Rule)
+class StatusRule(GuardedModelAdmin):
+    pass
+
+@admin.register(Report)
+class ReportDisplay(GuardedModelAdmin):
+    pass

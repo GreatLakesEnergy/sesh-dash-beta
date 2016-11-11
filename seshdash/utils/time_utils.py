@@ -3,7 +3,9 @@ from dateutil.parser import parse
 from time import localtime,strftime
 from django.conf import settings
 from  pytz import timezone
+from django.utils import timezone as timezone_dt
 from tzwhere import tzwhere
+
 
 def get_epoch(tz=None):
     """
@@ -11,7 +13,8 @@ def get_epoch(tz=None):
     """
     now = datetime.now()
     if tz:
-        now = timezone.now(tz)
+        tz = _clean_tz(tz)
+        now = timezone_dt.now(tz)
     epoch = datetime(1970,1,1)
     diff = now - epoch
     diff = str(diff.total_seconds())
@@ -23,7 +26,8 @@ def get_yesterday(tz=None):
 
     now = datetime.date(datetime.now())
     if tz:
-        now = timezone.now(tz)
+        tz = _clean_tz(tz)
+        now = timezone_dt.now(tz)
 
     one_day = timedelta(days=1)
     return now - one_day
@@ -37,6 +41,7 @@ def get_time_interval_array(interval,interval_type,start,end,tz=None):
     """
 
     if tz:
+        tz = _clean_tz(tz)
         timez = timezone(tz)
     else:
         timez = timezone(settings.TIME_ZONE)
@@ -74,6 +79,7 @@ def get_epoch_from_date(year, month, day, hours, minutes, tz=None):
     """
     date = datetime(year,month,day,hours,minutes)
     if tz:
+        tz = _clean_tz(tz)
         date = datetime(year,month,day,hours,minutes,tzinfo=tz)
 
     epoch = datetime(1970,1,1)
@@ -104,6 +110,7 @@ def epoch_to_date(seconds_time, tz=None):
     """
     time = strftime('%Y-%m-%d',localtime(seconds_time))
     if tz:
+        tz = _clean_tz(tz)
         time = localize(time,tz)
 
     return time
@@ -119,13 +126,15 @@ def epoch_to_datetime(seconds_time, tz=None):
     """
     Translate seconds time to datetime object
     """
-    time = localtime(seconds_time)
+    time = datetime.fromtimestamp(seconds_time)
 
     if tz:
+        tz = _clean_tz(tz)
         time = localize(time,tz)
 
 
-    return strftime('%Y-%m-%dT%XZ',time)
+    #return strftime('%Y-%m-%dT%XZ',time)
+    return time
 
 
 def get_last_five_days(from_date="now", tz=None):
@@ -178,13 +187,12 @@ def get_timesince_seconds(time, tz=None):
     """
     Get timesince and time provided
     """
-    now = datetime.now()
+    now = timezone_dt.now()
     if tz:
-        now = timezone.now(tz)
+        now = timezone(tz).localize(datetime.now())
 
-
-    loc = timezone(settings.TIME_ZONE)
-    now = loc.localize(now)
+    #loc = timezone(settings.TIME_ZONE)
+    #now = loc.localize(now)
     diff =  now - time
     return int(diff.total_seconds())
 
@@ -192,7 +200,8 @@ def get_timesince(time, tz=None):
 
     now = datetime.now()
     if tz:
-        now = timezone.now(tz)
+        tz = _clean_tz(tz)
+        now = timezone_dt.now(tz)
 
     loc = timezone(settings.TIME_ZONE)
     now = loc.localize(now)
@@ -223,17 +232,25 @@ def format_timesince_seconds(seconds):
             return seconds/86400, " day ago"
         else:
             return seconds/86400, " days ago"
+    
 
 def get_date_dashed(date):
     date_string = str(date.year) + '-' + str(date.month) +  '-' + str(date.day)
     return date_string
 
 
-def convert_influx_time_string(date_string):
+def convert_influx_time_string(date_string, tz=None):
     """ Converts influx style strings to datetime """
-    return parse(date_string)   
+    parsed = parse(date_string)
+
+    if tz:
+        parsed =parsed.astimezone(timezone(tz))
+
+    return parsed
 
 def get_timesince_influx(date_string):
     date_obj = convert_influx_time_string(date_string)
     return get_timesince(date_obj)
-    
+
+def _clean_tz(tz):
+    return tz.strip().replace('\'','').replace('\"','')

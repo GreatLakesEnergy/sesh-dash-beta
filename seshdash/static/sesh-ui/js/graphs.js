@@ -1,76 +1,21 @@
 
 var csrftoken = getCookie('csrftoken');
-
-
-/* Time Series Graph Generation */
-function time_series_graph() {
-                 measurement_value = $('#measurements_dropdown').val();
-                 time_value = $('#time_dropdown').val();
-    $.post('/graphs',{csrfmiddlewaretoken:csrftoken,'choice':[measurement_value],'time':time_value,'active_site_id':active_site_id},function(data){
-                 var response = JSON.parse(data)
-                graph_data_values = response[measurement_value][0]
-                 si_units = response[measurement_value][1]
-                 for (i=0;i<graph_data_values.length;i++){
-                 graph_data_values[i][0]=graph_data_values[i][0]*1000
-                 }
-
-
-         $('#time_series_graph').highcharts({
-           chart : {
-                zoomtype : 'x'
-           },
-           title : {
-                text: 'Time Series Graph '
-           },
-           xAxis : {
-                  type : 'datetime'
-                  },
-           yAxis : [{
-                   labels : {
-                         format : '{value}'+ si_units,
-                         style : {
-                               color : Highcharts.getOptions().colors[1]
-                         },
-                     },
-                   title : {
-                         text : measurement_value,
-                   },
-
-           }],
-           legend : {
-                layout : 'vertical',
-                align : 'left',
-                x:40,
-                varticalAlign: 'top',
-                y :-350,
-                floating:true,
-           },
-           series :[{
-                 name : measurement_value,
-                 type : 'spline',
-                 data :graph_data_values,
-                 tooltip : {
-
-                        valueSuffix : si_units
-                 },
-            }],
-
-
-          });
-     });
-}
-
 /* Function For Daily DataPoints Graph Generation */
 function daily_data_points_graph() {
+
    drop_choice1 = $("#drop1").val();
    drop_choice2 = $("#drop2").val();
-   time = "24h";
-  message = ('Daily ' + drop_choice1 + '  With  ' + drop_choice2);
-  $("#title-message").html(message);
-  $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time , 'active_site_id':active_site_id},function(data){
-        
+   measurement1 = $("#drop1 option:selected").html();
+   measurement2 = $("#drop2 option:selected").html();
+   time_value = $('#time_dropdown').val();
+   var title = $('#time_dropdown').find(":selected").text();
+
+   $("#dynamic_graph").hide();
+   $(".graph-loader").show();
+
+  $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time_value , 'active_site_id':active_site_id},function(data){
+
         var response = JSON.parse(data);
-        
 
         dropdown1_values = response[drop_choice1][0];
         SI_unit1 = response[drop_choice1][1];
@@ -80,10 +25,10 @@ function daily_data_points_graph() {
         SI_unit2 = response[drop_choice2][1];
 
         for (i=0;i<dropdown1_values.length;i++){
-        dropdown1_values[i][0]=dropdown1_values[i][0]*1000
+        dropdown1_values[i][0]=dropdown1_values[i][0] * 1000
         }
         for (i=0;i<dropdown2_values.length;i++){
-        dropdown2_values[i][0]=dropdown2_values[i][0]*1000
+        dropdown2_values[i][0]=dropdown2_values[i][0] * 1000
         }
 
         $('#containerhigh').highcharts({
@@ -91,7 +36,7 @@ function daily_data_points_graph() {
             zoomType: 'xy'
         },
         title: {
-            text: ' Daily ' + drop_choice1 + ' with ' + drop_choice2 + ' In High Charts'
+            text: title + " " + measurement1 + ' with ' + measurement2
         },
         xAxis: [{
             crosshair: true,
@@ -105,14 +50,14 @@ function daily_data_points_graph() {
                 }
             },
             title: {
-                text: drop_choice2,
+                text: measurement2,
                 style: {
                     color: Highcharts.getOptions().colors[1]
                 }
             }
         }, { // Secondary yAxis
             title: {
-                text: drop_choice1,
+                text: measurement1,
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
@@ -138,45 +83,62 @@ function daily_data_points_graph() {
             backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
         },
         series: [{
-            name: drop_choice1 ,
+
+           name: measurement2,
+           type: 'column',
+           data: dropdown2_values,
+           tooltip: {
+                   valueSuffix: SI_unit2
+            }
+
+        }, {
+
+            name: measurement1 ,
             type: 'spline',
             yAxis: 1,
             data: dropdown1_values,
             tooltip: {
-                valueSuffix: SI_unit1
-            }
-
-        }, {
-            name: drop_choice2,
-            type: 'spline',
-            data: dropdown2_values,
-            tooltip: {
-                valueSuffix: SI_unit2
+                    valueSuffix: SI_unit1
             }
         }]
     });
 
-});
+  });
+    $(".graph-loader").hide();
+    $("#dynamic_graph").show();
+
 }
-
-
-
-
+window.onload = daily_data_points_graph()
+/*
 $(document).ready(function(){
-   time_series_graph()
-   daily_data_points_graph()
+ alert("on page load is this")
+ daily_data_points_graph()
+
  });
-
-
-/* Update Time Series Graph on Click */
-$("#update-button").click(function(){
-  time_series_graph()
-});
-
-
+ */
 /* Update Daily Data Point Graph on Click */
 $("#dynamic_graph_button").click(function(){
+  Pace.restart();
+  /*
+  paceOptions = {
+  initialRate:0.7,
+  minTime:1750,
+  maxProgressPerFrame:2,
+  ghostTime: 120000
+ }
+*/
+paceOptions = {
+ catchupTime : 10000,
+ maxProgressPerFrame:1,
+ ghostTime: Number.MAX_SAFE_INTEGER,
+   checkInterval :{
+     checkInterval: 50000
+   },
+   eventLag : {
+     minSamples: 5,
+     sampleCount: 30000000,
+     lagThreshold: 0.5
+   }
+}
   daily_data_points_graph()
 });
-
-

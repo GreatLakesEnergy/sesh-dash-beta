@@ -6,10 +6,13 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.contrib import admin
+from django.contrib.auth.models import AbstractUser
 from geoposition.fields import GeopositionField
 from django.utils import timezone
 
 from django.core.exceptions import ValidationError
+
+from django_mysql.models import JSONField
 
 # Create your models here.
 class VRM_Account(models.Model):
@@ -28,13 +31,204 @@ class VRM_Account(models.Model):
         verbose_name = "VRM Account"
 
 
+
+
+class Sesh_Organisation(models.Model):
+    name = models.CharField(max_length=40)
+    send_slack = models.BooleanField(default=False)
+    slack_token = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+    def get_users(self):
+        return Sesh_User.objects.filter(organisation=self)
+
+class Sesh_User(AbstractUser):
+    """
+    In creating Sesh_User instances,
+    Always remember to user create_user instead of create, 
+    Sesh_User.objects.create_user
+    """
+    department = models.CharField(max_length=100) 
+    organisation = models.ForeignKey(Sesh_Organisation, null=True)
+    is_org_admin = models.BooleanField(default=False)
+    phone_number =  models.CharField(max_length=12, blank=True, null=True)
+    on_call = models.BooleanField(default=False)
+    send_mail = models.BooleanField(default=False)
+    send_sms = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.username
+    
+
+    class Meta:
+         verbose_name = 'User'
+         verbose_name_plural = 'Users'
+
+
+class Slack_Channel(models.Model):
+    organisation = models.ForeignKey(Sesh_Organisation, related_name='slack_channel')
+    name = models.CharField(max_length=40)
+    is_alert_channel = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Status_Card(models.Model):
+     """
+     Contains the rows to be displayed in the
+     status card
+     """
+
+     ROW_CHOICES = (
+         ('AC_Load_in', 'AC Load in'),
+         ('AC_Load_out', 'AC Load out'),
+         ('AC_Voltage_in', 'AC Voltage in'),
+         ('AC_Voltage_out', 'AC Voltage out'),
+         ('AC_input', 'AC input'),
+         ('AC_output', 'AC output' ),
+         ('AC_output_absolute', 'AC output absolute'),
+         ('battery_voltage', 'Battery Voltage'),
+         ('genset_state', 'Genset state'),
+         ('main_on', 'Main on'),
+         ('pv_production', 'PV production'),
+         ('relay_state', 'Relay state'),
+         ('soc', 'State of Charge'),
+         ('trans', 'Trans'),
+         ('last_contact', 'Last Contact'),
+     )
+
+
+     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, default='soc')
+     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, default='battery_voltage')
+     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output_absolute')
+     row4 = models.CharField(max_length=30, choices=ROW_CHOICES, default='last_contact')
+
+
+     def __str__(self):
+         return "For site: " + self.sesh_site.site_name
+
+class Site_Measurements(models.Model):
+    """
+    Contains measurements to be displayed in graphs dropdowns
+    """
+    ROW_CHOICES = (
+         ('AC_Load_in', 'AC Load in'),
+         ('AC_Load_out', 'AC Load out'),
+         ('AC_Voltage_in', 'AC Voltage in'),
+         ('AC_Voltage_out', 'AC Voltage out'),
+         ('AC_input', 'AC input'),
+         ('AC_output', 'AC output' ),
+         ('AC_output_absolute', 'AC output absolute'),
+         ('battery_voltage', 'Battery Voltage'),
+         ('genset_state', 'Genset state'),
+         ('main_on', 'Main on'),
+         ('pv_production', 'PV production'),
+         ('relay_state', 'Relay state'),
+         ('soc', 'State of Charge'),
+         ('trans', 'Trans'),
+         ('cloud_cover', 'Cloud Cover'),
+         ("daily_battery_charge","Daily Battery Charge"),
+         ("daily_grid_outage_n", "Daily Grid Outage N"),
+         ("daily_grid_outage_t", "Daily Grid Outage T"),
+         ("daily_grid_usage", "Daily Grid Usage"),
+         ("daily_no_of_alerts", "Daily Number of Alerts"),
+         ("daily_power_cons_pv", "Daily Power Cons Pv"),
+         ("daily_power_consumption_total", "Daily Power Consumption Total"),
+         ("daily_pv_yield", "Daily Pv Yield"),
+    )
+
+    row1 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='soc')
+    row2 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='battery_voltage')
+    row3 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_output_absolute')
+    row4 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Load_in')
+    row5 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Load_out')
+    row6 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Voltage_in')
+    row7 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_Voltage_out')
+    row8 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_input')
+    row9 = models.CharField(max_length=30, choices=ROW_CHOICES,  default='AC_output')
+    row10 = models.CharField(max_length=30, choices=ROW_CHOICES, default='cloud_cover')
+    row11 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_pv_yield')
+    row12 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_battery_charge')
+    row13 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_power_consumption_total')
+    row14 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_power_cons_pv')
+    row15 = models.CharField(max_length=30, choices=ROW_CHOICES, default='daily_grid_outage_n')
+
+    def __str__(self):
+        return self.sesh_site.site_name
+
+
+
+    
+
+
+class Sesh_Site(models.Model):
+    """
+    Model for each PV SESH installed site
+    """
+    site_name = models.CharField(max_length=100, unique = True)
+    organisation = models.ForeignKey(Sesh_Organisation, null=True, blank=True)
+    comission_date = models.DateTimeField('date comissioned')
+    location_city = models.CharField(max_length = 100)
+    location_country = models.CharField(max_length = 100)
+    time_zone = models.CharField(max_length = 100, default='Africa/Kigali')
+    position = GeopositionField()
+    installed_kw = models.FloatField()
+    system_voltage = models.IntegerField()
+    number_of_panels = models.IntegerField()
+    #enphase_ID = models.CharField( max_length = 100)
+    #TODO need to figure a way to show this in admin to automatically populate
+    #enphase_site_id = models.IntegerField()
+    import_data = models.BooleanField(default=False)
+    battery_bank_capacity = models.IntegerField()
+    has_genset = models.BooleanField(default=False)
+    has_grid = models.BooleanField(default=False)
+    vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
+    vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
+    status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
+    site_measurements = models.OneToOneField(Site_Measurements, default=None,blank=True,null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return self.site_name
+
+
+    def save(self, *args, **kwargs):
+        # If site is being created
+        if self.pk is None:
+            self.status_card = Status_Card.objects.create()
+            self.site_measurements = Site_Measurements.objects.create()
+            super(Sesh_Site, self).save(*args, **kwargs)
+            Sensor_EmonPi.objects.create(site=self)
+        else:
+            super(Sesh_Site, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Delete the site and its associated status card
+        status_card = self.status_card
+        site_measurements = self.site_measurements
+        site_measurements.delete()
+        status_card.delete()
+        super(Sesh_Site, self).delete(*args, **kwargs)
+
+    #Row based permissioning using django guardian not every user should be able to see all sites
+
+    class Meta:
+        verbose_name = 'Sesh Site'
+        verbose_name_plural = 'Sesh Sites'
+        permissions = (
+            ('view_Sesh_Site', 'View Sesh Site'),
+        )
+
+
 class Sesh_RMC_Account(models.Model):
     """
     API key used by SESH EMON node to communicate
     """
-    #site = models.ForeignKey(Sesh_Site)
-    api_key = models.CharField(max_length=130,default="")
-    api_key_numeric = models.CharField(max_length=130, default="")
+    site = models.OneToOneField(Sesh_Site, on_delete = models.CASCADE, primary_key = True)
+    api_key = models.CharField(max_length=130,default="", unique=True)
+    api_key_numeric = models.CharField(max_length=130, default="", unique=True)
 
     def __str__(self):
         return "alphanum:%s numeric:%s "%(self.api_key,self.api_key_numeric)
@@ -54,84 +248,23 @@ class Sesh_RMC_Account(models.Model):
         verbose_name = "RMC API Account"
 
 
-class Sesh_User(models.Model):
-    #TODO each user will have his her own settings / alarms this needs
-    #to be added
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="seshuser")
-    department = models.CharField(max_length=100)
-    phone_number =  models.CharField(max_length=12, blank=True, null=True)
-    on_call = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.user.username
-
-    class Meta:
-         verbose_name = 'User'
-         verbose_name_plural = 'Users'
-
-class Sesh_Organisation(models.Model):
-    group = models.OneToOneField(Group)
-    slack_token = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.group.name
-
-class Slack_Channel(models.Model):
-    organisation = models.ForeignKey(Sesh_Organisation, related_name='slack_channel')
-    name = models.CharField(max_length=40)
-    is_alert_channel = models.BooleanField(default=True)
-    
-    def __str__(self):
-        return self.name
-
-
-class Sesh_Site(models.Model):
-    """
-    Model for each PV SESH installed site
-    """
-    site_name = models.CharField(max_length=100)
-    comission_date = models.DateTimeField('date comissioned')
-    location_city = models.CharField(max_length = 100)
-    location_country = models.CharField(max_length = 100)
-    time_zone = models.CharField(max_length = 100, default='Africa/Kigali')
-    position = GeopositionField()
-    installed_kw = models.FloatField()
-    system_voltage = models.IntegerField()
-    number_of_panels = models.IntegerField()
-    #enphase_ID = models.CharField( max_length = 100)
-    #TODO need to figure a way to show this in admin to automatically populate
-    #enphase_site_id = models.IntegerField()
-    import_data = models.BooleanField(default=False)
-    battery_bank_capacity = models.IntegerField()
-    has_genset = models.BooleanField(default=False)
-    has_grid = models.BooleanField(default=False)
-    vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
-    vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
-    rmc_account = models.ForeignKey(Sesh_RMC_Account,max_length=20,default="",blank=True, null=True)
-
-    def __str__(self):
-        return self.site_name
-
-    #Row based permissioning using django guardian not every user should be able to see all sites
-
-    class Meta:
-        verbose_name = 'Sesh Site'
-        verbose_name_plural = 'Sesh Sites'
-        permissions = (
-            ('view_Sesh_Site', 'View Sesh Site'),
-        )
-
 
 class Alert_Rule(models.Model):
     """
     Basic Alert rule model
-    TODO think about how to make this more power/generic
+
+    Alerts are defined through field choices.
+    if an alert is defined as <model-name>#<field> this will be checking the MYSQL db
+    if an alert is simple  <field-name> it will be queried in influx
+
+
     """
     OPERATOR_CHOICES = (
         ("eq" , "equals"),
         ("lt" , "less than"),
         ("gt" , "greater than"),
         )
+
     FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
                      ('BoM_Data_Point#soc','System State of Charge'),
                      ('BoM_Data_Point#AC_output','AC Loads'),
@@ -148,13 +281,11 @@ class Alert_Rule(models.Model):
     operator = models.CharField(max_length=2,
                                       choices=OPERATOR_CHOICES,
                                       default="lt")
-    send_mail = models.BooleanField(default=True)
-    send_sms = models.BooleanField(default=True)
-    send_slack = models.BooleanField(default=True)
+
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
-        return "If %s is %s %s" %(self.get_check_field_display(), self.get_operator_display() ,self.value)
+        return "If %s is %s %s" % (self.get_check_field_display(), self.get_operator_display() ,self.value)
 
     class Meta:
          verbose_name = 'System Alert Rule'
@@ -174,13 +305,14 @@ class Sesh_Alert(models.Model):
     point_model = models.CharField(max_length=40, default="BoM_Data_Point")
     point_id = models.CharField(max_length=40)
 
-    # def __str__(self):  # Patrick: Commenting out due to errors with FK
+    # def __str__(self):  #
     #     return "Some texting text " #  % (self.alert.check_field, self.alert.operator, self.alert.value )
 
     def __str__(self):
 
-        # TODO make this print useful information
+       # TODO make this print useful information
        return str(self.alert)
+
 
     class Meta:
         verbose_name = 'System Alert'
@@ -191,7 +323,8 @@ class RMC_status(models.Model):
     """
     Table containing status information for each RMC unit
     """
-    rmc = models.ForeignKey(Sesh_RMC_Account, blank=True, null=True)
+    # Removing due to infinitae migration error
+    #rmc_account = models.OneToOneField(Sesh_RMC_Account,on_delete=models.CASCADE, related_name="rmc_status")
     site = models.ForeignKey(Sesh_Site, blank=True, null=True)
     ip_address = models.GenericIPAddressField(default=None, null=True)
     minutes_last_contact = models.IntegerField(default=None)
@@ -201,7 +334,7 @@ class RMC_status(models.Model):
     target_alert = models.ForeignKey(Sesh_Alert, blank=True, null=True )
 
     def clean(self):
-        if not self.rmc and not self.site:
+        if not self.site:
             raise ValidationError("RMC status object requires either rmc account or sesh site reference")
 
     class Meta:
@@ -252,29 +385,7 @@ class BoM_Data_Point(models.Model):
     #TODO relay will likely need to be it's own model
     relay_state = models.IntegerField(default=0)
     trans = models.IntegerField(default=0)
-    
-    """
-    SI units
-    """
-    SI_UNITS = {
-        "id": '',
-        "soc":"%",
-        "battery_voltage": "V",
-        "AC_Voltage_in" : "V",
-        "AC_Voltage_out" : "V",
-        "AC_input" : "V",
-        "AC_output" : "V",
-        "AC_Load_in" : "V",
-        "AC_Load_out" : "V",
-        "pv_production" : "W",
-        "main_on" : "V",
-        "relay_state": "",
-        "trans" : "",
-        "genset_state" : "V",
-        "site" : "",
-        "AC_output_absolute" : "V",
-        }
-    
+
     def __str__(self):
         return " %s : %s : %s" %(self.time,self.site,self.soc)
 
@@ -294,25 +405,27 @@ class Daily_Data_Point(models.Model):
         "battery_voltage": "V",
         "AC_Voltage_in" : "V",
         "AC_Voltage_out" : "V",
-        "AC_input" : "V",
-        "AC_output" : "V",
-        "AC_Load_in" : "V",
-        "AC_Load_out" : "V",
+        "AC_input" : "W",
+        "AC_output" : "W",
+        "AC_Load_in" : "A",
+        "AC_Load_out" : "A",
+        "cloud_cover":"%",
         "pv_production" : "W",
-        "main_on" : "V",
+        "main_on" : "",
         "relay_state": "",
         "trans" : "",
-        "genset_state" : "V",
+        "genset_state" : "",
         "site" : "",
         "AC_output_absolute" : "W",
-        "daily_battery_charge": "W",
+        "minutes_last_contact" : "min",
+        "daily_battery_charge": "Wh",
         "daily_grid_outage_n": "minute",
         "daily_grid_outage_t": "",
-        "daily_grid_usage": "W",
+        "daily_grid_usage": "Wh",
         "daily_no_of_alerts": "alert",
         "daily_power_cons_pv": "W",
-        "daily_power_consumption_total": "W",
-        "daily_pv_yield": "W",
+        "daily_power_consumption_total": "Wh",
+        "daily_pv_yield": "Wh",
     }
 
 
@@ -331,6 +444,7 @@ class Daily_Data_Point(models.Model):
         "trans": " Trans",
         "genset_state": "Genset State",
         "AC_output_absolute": "AC Output absolute",
+        "minutes_last_contact": "Minutes last Contact",
         "daily_battery_charge": "Daily Battery Charge",
         "daily_grid_outage_n": "Daily Grid Outage N",
         "daily_grid_outage_t": "Daily Grid Outage T",
@@ -338,15 +452,16 @@ class Daily_Data_Point(models.Model):
         "daily_no_of_alerts": "Daily Number of Alerts",
         "daily_power_cons_pv": "Daily Power Cons Pv",
         "daily_power_consumption_total": "Daily Power Consumption Total",
-        "daily_pv_yield": "Daily Pv Yield"       
+        "daily_pv_yield": "Daily Pv Yield",
+        "cloud_cover": "Cloud Cover",
     }
 
-   
+
 
 
     site = models.ForeignKey(Sesh_Site)
     daily_pv_yield = models.FloatField(default=0,
-            verbose_name="Battery Voltage") # Aggregate pv produced that day Kwh
+            verbose_name="Daily PV Yield") # Aggregate pv produced that day Kwh
     daily_power_consumption_total = models.FloatField(default=0,
             verbose_name="Daily Power Consumption")
     daily_power_cons_pv = models.FloatField(default=0,
@@ -431,3 +546,201 @@ class Site_Weather_Data(models.Model):
     class Meta:
         verbose_name = 'Weather Data'
         unique_together = ('site','date')
+
+
+class Status_Rule(models.Model):
+    """
+    battery_voltage rules and pv pv_production rules
+    """
+    battery_rules = {
+                     50 : "red",
+                     70 : "yellow",
+                     100: "green"
+                    }
+    weather_rules = {
+               0.7 : "green",
+               1 : "yellow"
+               }
+    def __str__(self):
+        return self.battery_rules + self.pv_rules
+
+
+
+
+SENSORS_LIST = {
+    'Emon Tx',
+    'Emon Th',
+    'BMV'
+}
+
+
+
+class Sensor_EmonTx(models.Model):
+     """
+     Table representative for the emon tx
+     """
+     NODE_ID_CHOICES = (
+                         (19, 19),
+                         (20, 20),
+                         (21, 21),
+                         (22, 22),
+                     )
+
+     site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     index1 = models.CharField(max_length=40, default="ac_power1")
+     index2 = models.CharField(max_length=40, default="pv_production")
+     index3 = models.CharField(max_length=40, default="consumption")
+     index4 = models.CharField(max_length=40, default="grid_in")
+     index5 = models.CharField(max_length=40, default="AC_Voltage_out")
+     index6 = models.CharField(max_length=40, blank=True, null=True)
+     index7 = models.CharField(max_length=40, blank=True, null=True)
+     index8 = models.CharField(max_length=40, blank=True, null=True)
+     index9 = models.CharField(max_length=40, blank=True, null=True)
+     index10 = models.CharField(max_length=40, blank=True, null=True)
+     index11 = models.CharField(max_length=40, blank=True, null=True)
+     index12 = models.CharField(max_length=40, blank=True, null=True)
+
+     def __str__(self):
+         return "Emon tx sensor for " + self.site.site_name
+
+     def save(self, *args, **kwargs):
+         Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emontx')
+         super(Sensor_EmonTx, self).save(*args, **kwargs)
+
+
+
+class Sensor_EmonTh(models.Model):
+     """
+     Table Representive structure fo the emon th
+     """
+     NODE_ID_CHOICES = (
+                    (6, 6),
+                    (7, 7),
+                    (8, 8),
+               )
+
+     site = models.ForeignKey(Sesh_Site)
+     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     index1 = models.CharField(max_length=40, default="tempreature")
+     index2 = models.CharField(max_length=40, default="external_tempreature")
+     index3 = models.CharField(max_length=40, default="humidity")
+     index4 = models.CharField(max_length=40, default="battery")
+
+     def __str__(self):
+         return "Emon th sensor for " +  self.site.site_name
+
+     def save(self, *args, **kwargs):
+        if self.pk is None:
+            Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
+        super(Sensor_EmonTh, self).save(*args, **kwargs)
+
+
+
+class Sensor_BMV(models.Model):
+    """
+    Mapping for the bmv
+    """
+    NODE_ID_CHOICES = (
+                        (29, 29),
+                    )
+
+    site = models.ForeignKey(Sesh_Site)
+    node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+    index1 = models.CharField(max_length=40, default="soc")
+    index2 = models.CharField(max_length=40, default="ce")
+    index3 = models.CharField(max_length=40, default="ttg")
+    index4 = models.CharField(max_length=40, default="v")
+    index5 = models.CharField(max_length=40, default="i")
+    index6 = models.CharField(max_length=40, default="relay")
+    index7 = models.CharField(max_length=40, default="alarm")
+
+    def __str__(self):
+        return "BMV sensor for " + self.site.site_name
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
+        super(Sensor_BMV, self).save(*args, **kwargs)
+
+
+class Sensor_EmonPi(models.Model):
+    """
+    This is the default base sensor for each site
+    that is used in the rmc config
+    """
+    site = models.ForeignKey(Sesh_Site)
+    node_id = models.IntegerField(default=5, editable=False)
+    index1 = models.CharField(max_length=40, default="power1")
+    index2 = models.CharField(max_length=40, default="power2")
+    index3 = models.CharField(max_length=40, default="power3")
+    index4 = models.CharField(max_length=40, default="power4")
+    index5 = models.CharField(max_length=40, default="v_battery_bank")
+    index6 = models.CharField(max_length=40, default="Vrms")
+    index7 = models.CharField(max_length=40, default="T1")
+    index8 = models.CharField(max_length=40, default="T2")
+    index9 = models.CharField(max_length=40, default="T3")
+    index10 = models.CharField(max_length=40, default="T4")
+    index11 = models.CharField(max_length=40, default="T5")
+    index12 = models.CharField(max_length=40, default="T6")
+    index13 = models.CharField(max_length=40, default="pulseCount")
+
+    def __str__(self):
+        return "Emon pi for site %s " % self.site.site_name
+
+    def save(self, *args, **kwargs):
+
+        if self.pk is None: # If it is saved for the first time
+            if self.site.sensor_emonpi_set.all().count() > 0:
+                raise Exception("Site can not have more than 2 emonpi sensors")
+
+            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_emonpi')
+        super(Sensor_EmonPi, self).save(*args, **kwargs)
+
+
+
+
+
+class Sensor_Mapping(models.Model):
+    """
+    To contain informations about the sensor mapping
+    of sensors node_ids and sites
+    
+    This helps in the writing of data to the database by 
+    the sesh-api-helper
+    """
+    site_id = models.IntegerField()
+    node_id = models.IntegerField()
+    sensor_type = models.CharField(max_length=40)
+
+    def __str__(self):
+        return "Site_id: " + str(self.site_id) + "  node_id: " + str(self.node_id) + ": " + str(self.sensor_type)
+
+    class Meta:
+        unique_together =  ('site_id', 'node_id', 'sensor_type')
+
+
+class Report(models.Model):
+    """
+    Model to contain the reports that should be sent, 
+    to users of specific sites
+    """
+    DURATION_CHOICES = (
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+    )
+    site = models.ForeignKey(Sesh_Site)
+    duration = models.CharField(max_length=40, choices=DURATION_CHOICES)
+    day_to_report = models.IntegerField() # This will contain an integer value showing the day the reports will execute, if it is a weekly report and the number is 2 then it would execute on Tuesday
+    attributes = JSONField()
+   
+    def __str__(self):
+        return self.get_duration_display() + " report for " + self.site.site_name
+
+    def get_duration_choices(self):
+        duration_list = []
+        for item in self.DURATION_CHOICES:
+            duration_list.append(item[0])
+     
+        return duration_list

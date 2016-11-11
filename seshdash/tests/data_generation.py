@@ -13,6 +13,9 @@ from seshdash.utils.time_utils import get_time_interval_array
 # models
 from seshdash.models import Sesh_Site, Daily_Data_Point
 
+# weather
+from seshdash.tasks import get_weather_data
+
 def get_random_int():
     val =  random() * 100
     return int(val)
@@ -46,7 +49,7 @@ def generate_date_array(start=None, end = 'now',  naive=False, interval=5, units
 def create_test_data(site, start=None, end="now", interval=5, units='minutes' ,random=True, val=50, db='test_db'):
         #TODO test weekly and monthly reports
 
-        _influx_db_name =db
+        _influx_db_name = db
         i = Influx(database=_influx_db_name)
         data_point_dates = generate_date_array(start=start, end=end, interval=interval, units=units)
         voltage_in = 220
@@ -133,4 +136,8 @@ def generate_test_data_daily_points():
     for site in sites:
         create_test_data_daily_points(site.id)
 
-
+def create_weather_data():
+    """
+    creating weather_data for next 5 days
+    """
+    get_weather_data()

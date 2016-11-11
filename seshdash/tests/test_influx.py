@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # APP Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point
 
 # django Time related
 from django.utils import timezone
@@ -30,7 +30,7 @@ from django.forms.models import model_to_dict
 from seshdash.utils.time_utils import get_time_interval_array
 from seshdash.data.db.influx import Influx
 from django.conf import settings
-from seshdash.tasks import get_aggregate_daily_data, send_reports
+from seshdash.tasks import get_aggregate_daily_data
 from seshdash.tests.data_generation import create_test_data
 
 
@@ -77,7 +77,7 @@ class InfluxTestCase(TestCase):
                                         interval = 30,
                                         random = False)
         #create test user
-        self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
+        self.test_user = Sesh_User.objects.create_user(username="john doe",email="alp@gle.solar",password="asdasd12345")
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 

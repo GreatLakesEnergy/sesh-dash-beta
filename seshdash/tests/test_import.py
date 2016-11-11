@@ -3,12 +3,11 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 # APP Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point as ddp
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Daily_Data_Point as ddp
 
 # django Time related
 from seshdash.utils import time_utils
 from django.utils import timezone
-from django.contrib.auth.models import User
 from time import sleep
 import pytz
 from datetime import datetime,timedelta
@@ -79,7 +78,7 @@ class VRM_Import_TestCase(TestCase):
 
 
         #create test user
-        self.test_user = User.objects.create_user("john doe","alp@gle.solar","asdasd12345")
+        self.test_user = Sesh_User.objects.create_user(username="john doe",email="alp@gle.solar",password="asdasd12345")
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 

@@ -1,7 +1,7 @@
 #!/bin/bash                                              
                                                          
 # Get latest code                                        
-git pull origin                                          
+git pull origin master
                                                          
 # Update packets                                         
 pip install -r requirements.txt                          

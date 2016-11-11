@@ -1,0 +1,73 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% load bootstrap %}
+
+{% block main %}
+
+
+	<div role="tabpanel" id="main-wrapper">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active">
+				<a href="#home" aria-controls="home" role="tab" data-toggle="tab">{{user.organisation}} users</a>
+			</li>
+			<li role="presentation">
+				<a href="#tab" aria-controls="tab" role="tab" data-toggle="tab">Add a user to {{user.organisation}}</a>
+			</li>
+		</ul>
+
+		<!-- Tab panes -->
+		<div class="tab-content">
+
+			{# Tab show users for the current organisation #}
+			<div role="tabpanel" class="tab-pane active" id="home">
+				<h4 class="text-left"> Users</h4>
+
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<th>Username</th>
+							<th>Email</th>
+							<th>Phone Number</th>
+						</thead>
+						<tbody>
+						{% for organisation_user in organisation_users %}
+								<tr>
+									<td>{{organisation_user.username}}</td>
+									<td>{{organisation_user.email}}</td>
+									<td>{{organisation_user.phone_number}}</td>
+									<td>
+										{% if organisation_user != user %}
+												<a href="{% url 'delete_sesh_user' organisation_user.id %}"
+																	class="glyphicon glyphicon-remove-circle pull-right red action-icon"></a>
+										{% endif %}
+
+										<a href="{% url 'edit_sesh_user' organisation_user.id %}"
+																	class="glyphicon glyphicon-edit pull-right action-icon"></a>
+
+									</td>
+								</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+
+
+			<div role="tabpanel" class="tab-pane" id="tab">
+				<h4 class="text-left"> Add a sesh user to {{user.organisation}}</h4>
+
+				<form  method="post" action="{% url 'add_sesh_user' %}">
+					{% csrf_token %}
+					{{form|bootstrap}}
+					<input type="submit" class="btn btn-primary" value="Submit">
+				</form>
+
+			</div>
+
+		</div>
+	</div>
+
+{% endblock %}

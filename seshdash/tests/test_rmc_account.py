@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status
 from django.contrib.auth.models import User
 
 # Tasks
@@ -23,8 +23,8 @@ class RMCTestCase(TestCase):
 
     @override_settings(DEBUG=True)
     def setUp(self):
-
         self.location = Geoposition(52.5,24.3)
+
 
         self.site = Sesh_Site.objects.create(site_name=u"Test site",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
@@ -37,7 +37,8 @@ class RMCTestCase(TestCase):
                                              vrm_site_id=213,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
-                                             has_grid=True)
+                                             has_grid=True,
+                                            )
 
         #create sesh rmc account
         self.test_rmc_account = Sesh_RMC_Account.objects.create(api_key='lcda5c15ae5cdsac464zx8f49asc16a')

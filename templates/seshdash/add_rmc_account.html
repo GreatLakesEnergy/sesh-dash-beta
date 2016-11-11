@@ -1,0 +1,109 @@
+{% extends 'seshdash/base.html' %}
+
+{% load static %}
+{% load bootstrap %}
+{% load js_escape %}
+
+{% block main %}
+    
+   <script type="text/javascript" src='{% static 'sesh-ui/js/add_rmc_account.js' %}'></script>
+
+  <div id="main-wrapper">
+    <div class="panel panel-primary">
+        <!-- Panel heading -->
+        <div class="panel-heading text-center">
+            Add an rmc Account
+        </div>
+
+        <!-- The panel body -->
+        <div class="panel-body">
+
+            <form class="" method="post" action="{% url 'add_rmc_account' site_id %}">
+                {% csrf_token %}
+                {{rmc_form|bootstrap}}
+
+                <div class="sensor-list-container">
+                    
+
+                        <div class="sensor-container " >
+                            <div class="row emonpi-sensor">
+                                <div class="form-group col-xs-8">
+                                    <select class="sensor-selector form-control" name="sensor" class="disabled">
+                                        <option name="emonpi">EmonPi</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-xs-4">
+                                    <span class="glyphicon glyphicon-cog configure-sensor pos-glyphicon"></span>
+                                </div>
+
+                            </div>
+
+                            <div class="row configure-form-container">
+                                {{ emonpi_form|bootstrap }}
+                            </div>
+        
+                        </div>
+
+                        <div class="sensor-container sensor-form-structure">
+                            <div class="row">
+
+                                <div class="form-group col-xs-8">
+                                     <select class="sensor-selector sensor-changeable form-control" name="sensor">
+                                        {% for sensor in sensors_list %}
+                                            <option name="{{sensor}}">{{sensor}}</option>
+                                        {% endfor %}}
+                                    </select>
+                                </div>
+                          
+                                <div class="col-xs-4">
+                                    <span class="glyphicon glyphicon-remove remove-sensor pos-glyphicon"></span>
+                                    <span class="glyphicon glyphicon-cog configure-sensor pos-glyphicon"></span>
+                                </div>
+
+                            </div>
+      
+                            <div class="row configure-form-container">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="menu-button-container">
+                     <a class="add-another-sensor" href="#">Add another sensor</a><br><br>
+
+                     <input type="submit" class="btn btn-primary" value="Create RMC Account">
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+  </div>
+
+{% endblock %}
+
+
+{# Removing the footer from this page #}
+{% block footer %}
+{% endblock %}
+
+{% block seshjs %}
+
+
+{% endblock %}
+
+
+
+
+{% block javascript %}
+    
+        var emonThForm = '{{ emonth_form|bootstrap|js_escape }}',
+            emonTxForm = '{{ emontx_form|bootstrap|js_escape }}',
+            bmvForm = '{{bmv_form|bootstrap|js_escape}}';
+          
+ 
+{% endblock %}

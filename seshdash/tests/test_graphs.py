@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Models
-from seshdash.models import Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status, Sesh_User
+from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status
 from django.contrib.auth.models import User
 
 # Tasks
@@ -53,32 +53,21 @@ class graph_TestCase(TestCase):
                                                     AC_output=15.0,
                                                     AC_Load_in=0.0,
                                                     AC_Load_out=-0.7)
-        #create sesh rmc account
-        self.test_rmc_account = Sesh_RMC_Account(api_key='lcda5c15ae5cdsac464zx8f49asc16a')
-        self.test_rmc_account.save()
-
-        #create rmc status
-        self.test_rmc_status = RMC_status.objects.create(rmc=self.test_rmc_account,
-                                                        ip_address='127.0.0.1',
-                                                        minutes_last_contact=100,
-                                                        signal_strength=27,
-                                                        data_sent_24h=12,
-                                                        time=datetime.now())
-        self.test_rmc_status.save()
-
         #create test user
-        self.test_user = User.objects.create_user("patrick", "alp@gle.solar", "cdakcjocajica")
-        self.test_sesh_user = Sesh_User.objects.create(user=self.test_user,phone_number='250786688713' )
+        self.test_sesh_user = Sesh_User.objects.create_user(username='patrick',
+                                                       email='alp@gle.solar',
+                                                       password='test.test.test',
+                                                       phone_number='250786688713')
         #assign a user to the sites
 
 
-        assign_perm("view_Sesh_Site",self.test_user,self.site)
+        assign_perm("view_Sesh_Site", self.test_sesh_user, self.site)
 
 
     # Testing graph
     def test_graph(self):
         f = Client()
-        f.login(username = "patrick",password = "cdakcjocajica")
+        f.login(username = "patrick",password = "test.test.test")
         choices = ['pv_production','soc']
         time = '24h'
         active_site_id = 1

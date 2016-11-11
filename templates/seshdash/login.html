@@ -1,43 +1,38 @@
-   {% extends "seshdash/base.html" %}
+{% extends 'seshdash/base.html' %}
+{% block sidebar %}
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block main-content %}
+{% endblock %}
+{% block footer %}
+{% endblock %}
+{% block content %}
+    <div class="page-login">
+        <main class="main-page-login">
+            <div class="">
+                    <div class="row">
+                        <div class="col-md-3 center">
+                            <div class="login-box">
+                                <a href="/" class="logo-name text-lg text-center">Sesh DashBoard <i>beta</i></a>
+                                <p class="text-center m-t-md">Please login into your account.</p>
+                                <form class="m-t-md" action="/login/" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <input type="text" name="inputEmail" class="form-control" placeholder="Email or Username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="inputPassword" class="form-control" placeholder="Password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-block">Login</button>
+                                <p class="text-center m-t-xs text-sm">2016 &copy; Made In Rwanda by GLE With Love.</p>
 
-  {% block top_navbar %}
-
-    {% endblock %}
-    
-    {% block side_navbar %}
-
-    {% endblock %}
-
-    {% block main_content %}
-    <div class="container">
-
-      <form class="form-signin" action="/login/" method="post" >
-        <h2 class="form-signin-heading">Sign in to SESH Dashboard</h2>
-        {% if error %}
-            <div class="form-group has-error has-feedback">
-                <label for="inputEmail" name="inputEmail" apassa class="sr-only ">Email address</label>
-                <input type="text" name="inputEmail" id="inputEmail" class="form-control" placeholder="Incorrect Email address" required autofocus>
-
-                <label for="inputPassword" class="sr-only">Password</label>
-                <input name="inputPassword" type="password" id="inputPassword" class="form-control" placeholder=" Incorrect Password" required>
-            </div>
-        {% else %}
-                <label for="inputEmail" name="inputEmail" apassa class="sr-only">Email address</label>
-                <input type="text" name="inputEmail" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-
-                <label for="inputPassword" class="sr-only">Password</label>
-                <input name="inputPassword" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-
-        {% endif %}
-        <div class="checkbox">
-          <label>
-            <input type="checkbox" value="remember-me"> Remember me
-          </label>
-        </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-        {% csrf_token %}
-      </form>
-    <!-- {{ error }} -->
-    </div> <!-- /container -->
- {% endblock %}
-
+                            </div>
+                        </div>
+                    </div><!-- Row -->
+            </div><!-- Page Inner -->
+        </main><!-- Page Content -->
+    </div>
+{% endblock %}
+{% block seshjs %}
+{% endblock %}
