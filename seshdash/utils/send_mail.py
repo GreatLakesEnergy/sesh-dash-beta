@@ -1,6 +1,5 @@
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.template import Context
 from sesh.settings import FROM_EMAIL
 
 from seshdash.models import Sesh_User

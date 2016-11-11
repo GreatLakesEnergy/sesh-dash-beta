@@ -60,7 +60,9 @@ config = RawConfigParser(
                'TOKEN':'asdasdasd',
                'CLICKATELL_KEY':'',
                'SLACK_TEST_KEY':'',
-               'USE_TEMPLATE_TWO':'False'
+               'USE_TEMPLATE_TWO':'False',
+               'KAPACITOR_HOST':'',
+               'KAPACITOR_PORT':''
                }
         )
 
@@ -164,7 +166,6 @@ DATABASES = {
     }
 }
 
-
 AUTH_USER_MODEL = 'seshdash.Sesh_User'
 
 #influx settings
@@ -173,6 +174,11 @@ INFLUX_PORT = config.get('influx','PORT')
 INFLUX_USERNAME =  config.get('influx','USERNAME')
 INFLUX_PASSWORD = config.get('influx','PASSWORD')
 INFLUX_DB = config.get('influx','DB')
+
+# kapacitor Settings
+KAPACITOR_HOST = config.get('kapacitor','KAPACITOR_HOST')
+KAPACITOR_PORT = config.get('kapacitor','KAPACITOR_PORT')
+KAPACITOR_DBRPS = [{'db':INFLUX_DB, 'rp':'autogen'}] # INFLUX Retention Policy TODO think about this
 
 # Guardian settings
 ANONYMOUS_USER_ID = -1
@@ -233,6 +239,10 @@ CELERYBEAT_SCHEDULE = {
 # Authentication
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
+
+
+ALERT_TEMPLATE_NAME = 'alert_template'
+KAPACITOR_TEMPLATE_FOLDER = 'kapacitor_tasks'
 
 
 # Email

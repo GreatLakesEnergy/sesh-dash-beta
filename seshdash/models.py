@@ -47,10 +47,10 @@ class Sesh_Organisation(models.Model):
 class Sesh_User(AbstractUser):
     """
     In creating Sesh_User instances,
-    Always remember to user create_user instead of create, 
+    Always remember to user create_user instead of create,
     Sesh_User.objects.create_user
     """
-    department = models.CharField(max_length=100) 
+    department = models.CharField(max_length=100)
     organisation = models.ForeignKey(Sesh_Organisation, null=True)
     is_org_admin = models.BooleanField(default=False)
     phone_number =  models.CharField(max_length=12, blank=True, null=True)
@@ -60,7 +60,7 @@ class Sesh_User(AbstractUser):
 
     def __str__(self):
         return self.username
-    
+
 
     class Meta:
          verbose_name = 'User'
@@ -161,7 +161,7 @@ class Site_Measurements(models.Model):
 
 
 
-    
+
 
 
 class Sesh_Site(models.Model):
@@ -265,6 +265,12 @@ class Alert_Rule(models.Model):
         ("gt" , "greater than"),
         )
 
+    OPERATOR_MAPPING = {
+            'eq' : '=',
+            'lt' : '<',
+            'gt' : '>',
+            }
+
     FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
                      ('BoM_Data_Point#soc','System State of Charge'),
                      ('BoM_Data_Point#AC_output','AC Loads'),
@@ -342,23 +348,6 @@ class RMC_status(models.Model):
         verbose_name_plural = 'RMC Status\'s'
 
 
-
-"""
-Data point for PV production at a site from pv panels.
-Currently comes form enphase
-
-REMMOVING because enphase API SUCS and  victron now provides us with this data
-"""
-# class PV_Production_Point(models.Model):
-    # site = models.ForeignKey(Sesh_Site)
-    # time = models.DateTimeField()
-    # w_production = models.IntegerField()
-    # wh_production = models.IntegerField()
-    # data_duration = models.DurationField(default=timedelta())
-
-    # class Meta:
-     #    unique_together = ('site','time')
-
 class BoM_Data_Point(models.Model):
     """
     BoM data Soc,, battery voltage system voltage etc
@@ -393,6 +382,75 @@ class BoM_Data_Point(models.Model):
          verbose_name = 'Data Point'
          unique_together = ('site','time')
 
+class Data_Point(models.Model):
+    """
+    Successor to Daily Data Point
+    Moving to single field to have a variable number of fields
+    """
+
+    UNITS_DICTIONARY = (
+        ("id", ''),
+        ("soc","%"),
+        ("battery_voltage", "V"),
+        ("AC_Voltage_in" , "V"),
+        ("AC_Voltage_out" , "V"),
+        ("AC_input" , "W"),
+        ( "AC_output" , "W"),
+        ( "AC_Load_in" , "A"),
+        ( "AC_Load_out" , "A"),
+        ( "cloud_cover","%"),
+        ( "pv_production" , "W"),
+        ( "main_on" , ""),
+        ( "relay_state", ""),
+        ( "trans" , ""),
+        ( "genset_state" , ""),
+        ( "site" , ""),
+        ( "AC_output_absolute" , "W"),
+        ( "minutes_last_contact" , "min"),
+        ( "daily_battery_charge", "Wh"),
+        ( "daily_grid_outage_n", "minute"),
+        ( "daily_grid_outage_t", ""),
+        ( "daily_grid_usage", "Wh"),
+        ( "daily_no_of_alerts", "alert"),
+        ( "daily_power_cons_pv", "W"),
+        ( "daily_power_consumption_total", "Wh"),
+        ("daily_pv_yield", "Wh"),
+        )
+
+
+    MEASUREMENTS_VERBOSE_NAMES = (
+        ("soc","State of Charge"),
+        ("battery_voltage", "Battery Voltage"),
+        ("AC_Voltage_in", "AC Voltage In"),
+        ("AC_Voltage_out", "AC Voltage Out"),
+        ("AC_input", "AC Input"),
+        ("AC_output", "AC Output"),
+        ("AC_Load_in", "AC Load in"),
+        ("AC_Load_out", "AC Load out"),
+        ("pv_production", "PV Production"),
+        ("main_on", "Main On"),
+        ("relay_state", "Relay State"),
+        ("trans", " Trans"),
+        ("genset_state", "Genset State"),
+        ("AC_output_absolute", "AC Output absolute"),
+        ("minutes_last_contact", "Minutes last Contact"),
+        ("daily_battery_charge", "Daily Battery Charge"),
+        ("daily_grid_outage_n", "Daily Grid Outage N"),
+        ("daily_grid_outage_t", "Daily Grid Outage T"),
+        ("daily_grid_usage", "Daily Grid Usage"),
+        ("daily_no_of_alerts", "Daily Number of Alerts"),
+        ("daily_power_cons_pv", "Daily Power Cons Pv"),
+        ("daily_power_consumption_total", "Daily Power Consumption Total"),
+        ("daily_pv_yield", "Daily Pv Yield"),
+        ("cloud_cover", "Cloud Cover"),
+    )
+
+    site = models.ForeignKey(Sesh_Site)
+    field_name = models.FloatField(default=0,
+            verbose_name="Data Point Name",  choices=MEASUREMENTS_VERBOSE_NAMES)
+    field_unit = models.FloatField(default=0,
+            verbose_name="Data Point Name",  choices=UNITS_DICTIONARY)
+    #TODO Perhaps add scale as well?
 
 class Daily_Data_Point(models.Model):
     """
@@ -492,41 +550,11 @@ class Daily_Data_Point(models.Model):
 
 class Trend_Data_Point(models.Model):
     """
-    Data that's calculated from individual data points. Used to display an aggregate view
-    Overall aggregates
+    Succesor to aggregate data points. Each site can have almost an unlimited number
+    of aggregate data points, using Trend_Data _point to succede this
     """
     site = models.ForeignKey(Sesh_Site)
-    pv_yield = models.FloatField(default=0) #
-    battery_usage = models.FloatField(default=0)
-    system_efficiency  = models.FloatField(default=0)
-    system_capacity = models.FloatField(default=0)
-    battery_efficieny = models.FloatField(default=0)
-
-"""
-TODO removing for now as it's breaking celery object creation
-    owner = models.ForeignKey('auth.User', related_name='snippets')
-    highlighted = models.TextField()
-
-    def save(self, *args, **kwargs):
-        site = self.site
-        time = self.time
-        soc = self.soc
-        battery_voltage = self.battery_voltage
-        AC_input = self.AC_input
-        AC_output = self.AC_output
-        AC_Load_in = self.AC_Load_in
-        AC_Load_out = self.AC_Load_out
-        inverter_state = self.inverter_state
-        genset_state = self.genset_state
-        relay_state = self.relay_state
-        owner = self.owner
-        super(BoM_Data_Point, self).save(*args, **kwargs)
-
-    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-    def create_auth_token(sender, instance=None, created=False, **kwargs):
-        if created:
-            Token.objects.create(user=instance)
-"""
+    aggrge_field_name = models.FloatField(default=0)
 
 
 class Site_Weather_Data(models.Model):
@@ -566,7 +594,7 @@ class Status_Rule(models.Model):
 
 
 
-
+# Used globally?
 SENSORS_LIST = {
     'Emon Tx',
     'Emon Th',
@@ -705,8 +733,8 @@ class Sensor_Mapping(models.Model):
     """
     To contain informations about the sensor mapping
     of sensors node_ids and sites
-    
-    This helps in the writing of data to the database by 
+
+    This helps in the writing of data to the database by
     the sesh-api-helper
     """
     site_id = models.IntegerField()
@@ -744,3 +772,40 @@ class Report(models.Model):
             duration_list.append(item[0])
      
         return duration_list
+
+class Data_Process_Rule(models.Model):
+    """
+    for building aggregate batch proccesing functions
+    """
+    FUNCTION_CHOICES = (
+        ("mean" , "average"),
+        ("sum" , "aggregate"),
+        ("min" , "minimum"),
+        ("max" , "maximum"),
+        ("mid" , "median"),
+        ("std" , "standard deviation"),
+        )
+
+    TIME_BUCKETS = (
+            ("5m", "5 minutes"),
+            ("10m", "10 minutes"),
+            ("30m", "30 minutes"),
+            ("1h", "1 hour"),
+            ("2h", "2 hours"),
+            ("5h", "5 hours")
+        )
+
+    DURATION = (
+            ("12h", "12 hours"),
+            ("24h", "24 hours"),
+            ("48h", "48 hours"),
+            ("7d", "7 days"),
+            ("31d", "1 month"),
+            )
+
+    site = models.ForeignKey(Sesh_Site)
+    function_type = models.CharField(max_length=40, default="aggregate", choices=FUNCTION_CHOICES )
+    input_field = models.ForeignKey(Daily_Data_Point)
+    duration = models.CharField(max_length=40, default="24h", choices=DURATION)
+    interval = models.CharField(max_length=10, default="5m", choices=TIME_BUCKETS)
+    output_field = models.ForeignKey(Trend_Data_Point)

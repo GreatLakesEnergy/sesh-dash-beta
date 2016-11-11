@@ -1,23 +1,32 @@
+# Seshdash imports
 from seshdash.models import Sesh_User, Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert, RMC_status, Slack_Channel
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
 from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
-from django.utils import timezone
-from guardian.shortcuts import get_users_with_perms, get_groups_with_perms
-from django.conf import settings
-from dateutil import parser
-
-# Influx client
-from seshdash.data.db import influx
-
 from seshdash.utils.model_tools import get_model_first_reference, get_measurement_from_rule, get_measurement_unit, get_measurement_verbose_name
 from seshdash.utils.time_utils import get_epoch_from_datetime
 from seshdash.utils.send_slack import Slack
 
+
+# django helper imports
+from django.utils import timezone
+from guardian.shortcuts import get_users_with_perms, get_groups_with_perms
+from django.conf import settings
+from dateutil import parser
+from django.template.loader import get_template
+
+# Influx relates clients
+from seshdash.data.db import influx
+from seshdash.data.db.kapacitor import Kapacitor
+
+# Misc
 import logging
 
 #Insantiating the logger
 logger = logging.getLogger(__name__)
+
+#initialize global kapacitor
+# kap = Kapacitor()
 
 # Sends an email if the received data point fails to pass the defined rules for its site.
 
@@ -29,7 +38,6 @@ logger = logging.getLogger(__name__)
 
 # Rules are based on sites. So you need to define a rule for each site if you want to check same configurations in several sites.
 # A Sesh_Alert object is created for each 'alert triggered and an email is send if the rule has send_mail option true
-
 
 def alert_generator():
     """ Generates alerts for a given site """
@@ -61,6 +69,56 @@ def alert_generator():
                     alert_obj.slackSent = send_alert_slack(site_groups, slack_msg)
 
                     alert_obj.save()
+
+
+def render_alert_script(data_for_alert):
+    """
+    Utility funciton to find alert template
+
+    @params data_for_alert - dictionary conatining data to render in alert
+    """
+
+    template = ""
+    try:
+        template_file = "%s/%s.tick"%(
+                    self.settings.KAPACITOR_TEMPLATE_FOLDER,
+                    self.settings.ALERT_TEMPLATE_NAME)
+
+        template = get_template(template_file)
+
+    except TemplateDoesNotExist, e:
+        logging.exception("Unable to find template %s"%template_file)
+
+    if template:
+        template.render(data_for_alert)
+
+    return template
+
+
+
+
+def create_alert(site, alert):
+    """
+    Wrapper function to create alerts in kapacitor using django alert tempaltes
+
+    @params site - site which the alert is getting created for
+    @params alert - Alert Rule object
+
+    """
+    data_for_alert = {}
+
+    # Generate a unique ID for alert
+    alert_id = "%s#%s"%(site.site_name, alert.pk )
+    alert_opr = alert.OPERATOR_MAPPING[alert.operator]
+    data_for_alert['id '] = alert_id
+    data_for_alert['where_filter_lambda'] = 'lambda: \'site\'=%s'%site.site_name
+    data_for_alert['error_lambda'] = 'lambda: \'value\' %s %s'(alert_opr, alert.value)
+    # TODO this is hard coded bake this into model, 5m i 5 minutes
+    data_for_alert['time_window'] = '5m'
+
+    alert_script = render_alert_script(data_for_alert)
+    res = kap.create_task(alert_id, dbrps = self.settings.KAPACITOR_DBRPS, script=alert_script)
+
 
 
 
@@ -174,6 +232,7 @@ def is_mysql_rule(rule):
         return True
     else:
         return False
+
 
 
 
@@ -406,7 +465,7 @@ def alert_status_check():
             logger.debug("Alert is not valid, silencing alert")
             alert.isSilence = True
             alert.save()
-            data_point, data_point_value = get_alert_check_value(alert.alert) 
+            data_point, data_point_value = get_alert_check_value(alert.alert)
 
             # Handle no data point getting returned
             if not data_point_value:
