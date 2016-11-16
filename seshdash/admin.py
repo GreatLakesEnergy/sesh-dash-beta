@@ -91,3 +91,7 @@ class SensorBMV(GuardedModelAdmin):
 @admin.register(Status_Rule)
 class StatusRule(GuardedModelAdmin):
     pass
+
+@admin.register(Report)
+class ReportDisplay(GuardedModelAdmin):
+    pass

@@ -31,7 +31,7 @@ from seshdash.utils.time_utils import get_time_interval_array
 from seshdash.data.db.kapacitor import Kapacitor
 from seshdash.data.db.influx import  Influx
 from django.conf import settings
-from seshdash.tasks import get_aggregate_daily_data, send_reports
+from seshdash.tasks import get_aggregate_daily_data
 from seshdash.tests.data_generation import create_test_data
 
 

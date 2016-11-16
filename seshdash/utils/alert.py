@@ -26,7 +26,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 #initialize global kapacitor
-kap = Kapacitor()
+# kap = Kapacitor()
 
 # Sends an email if the received data point fails to pass the defined rules for its site.
 

@@ -34,7 +34,7 @@ from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonTh
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
-from pprint import pprint
+import demjson
 
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
@@ -43,6 +43,7 @@ from seshdash.utils.model_tools import get_quick_status, get_model_first_referen
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
                                        associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set
 
+from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
 from seshdash.models import SENSORS_LIST
 
 from datetime import timedelta
@@ -481,7 +482,6 @@ def get_user_data(user,site_id,sites):
     bom_data = BoM_Data_Point.objects.filter(site=site).order_by('-time')
 
     bom_data = BoM_Data_Point.objects.filter(site=site,time__range=[last_5_days[0],now]).order_by('-id')
-    pprint( bom_data.first())
 
     #NOTE remvong JSON versions of data for now as it's not necassary
     #weather_data_json = serialize_objects(weather_data)
@@ -1128,6 +1128,7 @@ def user_notifications(request):
     context_dict['user_formset'] = sesh_user_formset
     return render(request, 'seshdash/settings/user_notifications.html', context_dict)
 
+@login_required
 def manage_org_users(request):
     """
     View to manage the users of an organisation
@@ -1144,7 +1145,7 @@ def manage_org_users(request):
     else:
         return HttpResponseForbidden()
 
-
+@login_required
 def add_sesh_user(request):
     """
     View for adding a new sesh user
@@ -1164,6 +1165,7 @@ def add_sesh_user(request):
         return HttpResponseForbidden()
 
 
+@login_required
 def delete_sesh_user(request, user_id):
      """
      Deletes a sesh User
@@ -1177,7 +1179,7 @@ def delete_sesh_user(request, user_id):
      else:
          return HttpResponseForbidden()
 
-
+@login_required
 def edit_sesh_user(request, user_id):
     """
     Edits a sesh user
@@ -1201,3 +1203,85 @@ def edit_sesh_user(request, user_id):
         return render(request, 'seshdash/settings/edit_sesh_user.html', context_dict)
     else:
         return HttpResponseForbidden()
+
+
+@login_required
+def manage_reports(request, site_id):
+    """
+    Manages reports for a given site
+    """
+    context_dict = {}
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    reports = Report.objects.filter(site=site)
+    
+    context_dict['site'] = site
+    context_dict['reports'] = reports
+    return render(request, 'seshdash/settings/manage_reports.html', context_dict)
+
+
+@login_required
+def add_report(request, site_id):
+    """
+    View to help in managing the reports
+    """
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    context_dict = {}
+    context_dict['report_attributes'] = get_report_table_attributes()
+    attributes = []
+ 
+    # if the user does not belong to the organisation or if the user is not an admin   
+    if not(request.user.organisation == site.organisation and request.user.is_org_admin):
+        return HttpResponseForbidden()
+    
+    if request.method == "POST": 
+        # Getting all the checked report attribute values
+        for key, value in request.POST.items():
+            if value == 'on':
+                attributes.append(demjson.decode(key))
+
+        Report.objects.create(site=site,
+                              attributes=attributes,
+                              duration=request.POST.get('duration', 'daily'),
+                              day_to_report=0)
+        return redirect(reverse('manage_reports', args=[site.id]))
+
+    return render(request, 'seshdash/settings/add_report.html', context_dict)
+
+
+@login_required
+def edit_report(request, report_id):
+    """
+    View to edit a report given, 
+    a report id as an parameter
+    """
+    context_dict = {}
+    report = Report.objects.filter(id=report_id).first()
+    attribute_list = []    
+   
+    if request.method == 'POST':
+        for key, value in request.POST.items():
+            if value == 'on':
+                attribute_list.append(demjson.decode(key))
+
+        report.attributes = attribute_list
+        report.duration = request.POST['duration'] 
+        report.save() 
+        return redirect(reverse('manage_reports', args=[report.site.id]))
+
+    context_dict['attributes'] = get_edit_report_list(report)
+    context_dict['report'] = report
+    context_dict['duration_choices'] = report.get_duration_choices()
+    return render(request, 'seshdash/settings/edit_report.html', context_dict)
+    
+
+
+@login_required
+def delete_report(request, report_id):
+    """
+    View to delete a report
+    """
+    context_dict = {}
+    report = Report.objects.filter(id=report_id).first()
+    site = report.site
+    report.delete()
+    return redirect(reverse('manage_reports', args=[site.id]))

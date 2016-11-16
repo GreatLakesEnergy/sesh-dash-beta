@@ -345,3 +345,15 @@ a.action-icon:hover {
 .main-page-login {
   background: #f1f4f9;
 }
+
+.display-report {
+  margin-top: 20px;
+}
+
+.display-report .fa.pull-right {
+  margin-left: 0.7em;
+}
+
+.add-report .panel-body {
+  margin-top: 20px;
+}

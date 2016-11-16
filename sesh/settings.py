@@ -288,6 +288,7 @@ INSTALLED_APPS = (
     'seshdash',
     'guardian',
     'djangobower',
+    'django_mysql',
     'django_nvd3',
     'rest_framework',
     'rest_framework.authtoken',
@@ -421,3 +422,9 @@ GEOPOSITION_MAP_OPTIONS = {
 GEOPOSITION_MARKER_OPTIONS = {
     'cursor': 'move'
 }
+
+
+# Sesh Settings
+SESH_REPORT_TABLES = [
+    'Daily_Data_Point',
+]

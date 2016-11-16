@@ -1,0 +1,33 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% block main %}
+  <div id="main-wrapper">
+    <div class="panel panel-primary add-report">
+        <div class="panel-heading"> 
+            Manage reports for site {{site}}
+        </div>
+        <div class="panel-body">
+
+            <div class="display-report">
+                <ul class="list-group">
+                    {% for report in reports %}
+                        <li class="list-group-item">{{report}} 
+                            <a href="{% url 'delete_report' report.id %}" class="pull-right red fa fa-close"></a>
+                            <a href="{% url 'edit_report' report.id %}" class="pull-right fa fa-pencil-square-o"></a>
+                        </li>	
+                    {% empty %}
+                        <p>No reports for {{site}}, add one.</p>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="add-report">
+                <a href="{% url 'add_report' site.id %}" class="btn btn-success">Add report</a>
+            </div>
+
+        </div>
+
+    </div>
+  </div>
+{% endblock %}
