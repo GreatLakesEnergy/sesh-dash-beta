@@ -18,8 +18,12 @@ class Kapacitor:
             'get_template': 'kapacitor/v1/templates/{template_id}',
             'tasks' : 'kapacitor/v1/tasks',
             'get_tasks' : 'kapacitor/v1/tasks/{task_id}',
-            'ping' : 'kapacitor/v1/ping'
-            }
+            'ping' : 'kapacitor/v1/ping',
+            'recordings': 'kapacitor/v1/recordings/{method}',
+            'a_recording': 'kapacitor/v1/recordings/{recording_id}',
+            'list_recordings': 'kapacitor/v1/recordings'
+            } 
+
     _REQUEST_URL  = "http://{host}:{port}/{path}"
 
     IS_INITIALIZED = False
@@ -45,6 +49,30 @@ class Kapacitor:
         else:
             logger.error("Kapacitor couldn't connect to host %s %s"%ping)
 
+
+
+
+    def create_template(self, template_id, template_type,  template_script):
+        """
+        Use this method to create or modify TICK script templates for jobs
+
+        @param template_id -  Unique indentifier used for template
+        @param template_stype -  The template type: stream or batch.
+        @param template_script -  The content of the script.
+
+        """
+
+        data_dict  = {
+                'id': template_id,
+                'type': template_type,
+                'script': template_script
+                }
+
+        re = self._make_request('template', data=data_dict)
+        logger.debug("got response %s %s"%re)
+        return re[1]
+
+
     def get_template(self, template_id):
         """
         Get information on template that's already been created
@@ -57,6 +85,7 @@ class Kapacitor:
         re = self._make_request('get_template', path_params = data, type_of_request='GET')
         logger.debug("got response %s %s"%re)
         return re[1]
+
 
     def delete_template(self, template_id):
         """
@@ -89,28 +118,6 @@ class Kapacitor:
         logger.debug("got response %s %s"%re)
         return re[1]
 
-
-
-
-    def create_template(self, template_id, template_type,  template_script):
-        """
-        Use this method to create or modify TICK script templates for jobs
-
-        @param template_id -  Unique indentifier used for template
-        @param template_stype -  The template type: stream or batch.
-        @param template_script -  The content of the script.
-
-        """
-
-        data_dict  = {
-                'id': template_id,
-                'type': template_type,
-                'script': template_script
-                }
-
-        re = self._make_request('template', data=data_dict)
-        logger.debug("got response %s %s"%re)
-        return re[1]
 
     def update_template(self, template_id, template_script):
         """
@@ -166,6 +173,7 @@ class Kapacitor:
         return re[1]
 
 
+
     def get_task(self, task_id ):
         """
         Get details on a specific task that's been created
@@ -185,6 +193,21 @@ class Kapacitor:
 
         logger.debug("got response %s %s"%re)
         return re[1]
+
+
+    def list_tasks(self):
+        """
+        List the current tasks in kapacitor
+        """
+        data_dict = {}
+         
+        re = self._make_request('tasks', 
+                                type_of_request = 'GET',
+                                )
+
+        logger.debug("got response %s %s" % re)
+        return re[1]
+
 
 
     def update_task(self, task_id ):
@@ -209,6 +232,7 @@ class Kapacitor:
 
 
 
+
     def delete_task(self, task_id ):
         """
         Delete a created task
@@ -230,24 +254,72 @@ class Kapacitor:
         return re[1]
 
 
-
-    def list_tasks(self):
+    def create_recording(self, task_id, stop, method='stream', id=None):
         """
-        List the current tasks in kapacitor
-        """
-        data_dict = {}
-         
-        re = self._make_request('tasks', 
-                                type_of_request = 'GET',
-                                path_params = data_dict
-                                )
+        Creates a kapacitor recording
 
+        @param task_id - id of a task, used to only record for the dbrps of the task
+        @param method - the method to use, stream, batch or query
+        @param stop - the time to stop recording data
+        @param id - the id to give to the recording, not required
+
+        TODO: This should also support batch and query methods
+        """
+        data = {
+                     'task': task_id,
+                     'stop': stop.isoformat() + 'Z',                   
+                      }
+
+        
+        re = self._make_request('recordings',
+                                type_of_request = 'POST',
+                                path_params = {'method': method},
+                                data = data
+                               )
+ 
         logger.debug("got response %s %s" % re)
-        print "got response %s %s" % re
         return re[1]
 
+    def get_recording(self, recording_id):
+        """
+        Returns the status of a recording
+      
+        @param recording_id - a recording id 
+        """
+        re = self._make_request('a_recording', 
+                                type_of_request='GET',
+                                path_params={'recording_id': recording_id}
+                               )
+  
+        logger.debug("got response %s %s" % re)
+        return re[1]
+     
+    def delete_recording(self, recording_id):
+        """
+        Deletes a kapacitor recording
+  
+        @param recording_id - a recording id
+        """
+        re = self._make_request('a_recording', 
+                                type_of_request='DELETE',
+                                path_params={'recording_id': recording_id}
+                               )
 
+        logger.debug("got response %s %s" % re)
+        return re[1]
 
+    def list_recordings(self):
+        """
+        Retuns a list of all kapacitor recordings
+        """
+        re = self._make_request('list_recordings', 
+                                type_of_request='GET',
+                                path_params={'method': ''}
+                               )
+
+        logger.debug("got response %s %s" % re)
+        return re[1]
+   
 
     def _make_request(self, endpoint, data = {}, type_of_request='POST', path_params={}):
         """
