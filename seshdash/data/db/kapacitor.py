@@ -231,6 +231,22 @@ class Kapacitor:
 
 
 
+    def list_tasks(self):
+        """
+        List the current tasks in kapacitor
+        """
+        data_dict = {}
+         
+        re = self._make_request('tasks', 
+                                type_of_request = 'GET',
+                                path_params = data_dict
+                                )
+
+        logger.debug("got response %s %s" % re)
+        print "got response %s %s" % re
+        return re[1]
+
+
 
 
     def _make_request(self, endpoint, data = {}, type_of_request='POST', path_params={}):
