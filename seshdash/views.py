@@ -1285,3 +1285,29 @@ def delete_report(request, report_id):
     site = report.site
     report.delete()
     return redirect(reverse('manage_reports', args=[site.id]))
+
+
+def get_csv_measurement_data(request):
+    """
+    Returns a csv of a given measurement a request
+
+    """
+    import csv
+    measurement = request.POST.get('measurement', '')
+    start_time = request.POST.get('start-time', '')
+    end_time = request.POST.get('end-time', '')
+    
+    i = Influx()
+    results = i.get_measurement_range('battery_voltage', datetime.now(), datetime.now())
+ 
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="test.csv"'
+    writer = csv.writer(response)
+    
+    writer.writerow(results[0].keys())
+    for result in results:
+        writer.writerow(result.values())
+ 
+    return response
+   
+       
