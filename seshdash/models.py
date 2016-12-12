@@ -28,9 +28,11 @@ class VRM_Account(models.Model):
 
 
     class Meta:
-        verbose_name = "VRM Account"
-
-
+        verbose_name = 'VRM Account'
+        verbose_name_plural = 'VRM Accounts'
+        permissions = (
+            ('view_VRM_Accounts', 'View VRM Acccount'),
+        )
 
 
 class Sesh_Organisation(models.Model):
@@ -750,7 +752,7 @@ class Sensor_Mapping(models.Model):
 
 class Report(models.Model):
     """
-    Model to contain the reports that should be sent, 
+    Model to contain the reports that should be sent,
     to users of specific sites
     """
     DURATION_CHOICES = (
@@ -762,7 +764,7 @@ class Report(models.Model):
     duration = models.CharField(max_length=40, choices=DURATION_CHOICES)
     day_to_report = models.IntegerField() # This will contain an integer value showing the day the reports will execute, if it is a weekly report and the number is 2 then it would execute on Tuesday
     attributes = JSONField()
-   
+
     def __str__(self):
         return self.get_duration_display() + " report for " + self.site.site_name
 
@@ -770,7 +772,7 @@ class Report(models.Model):
         duration_list = []
         for item in self.DURATION_CHOICES:
             duration_list.append(item[0])
-     
+
         return duration_list
 
 class Data_Process_Rule(models.Model):

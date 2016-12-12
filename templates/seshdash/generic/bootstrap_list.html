@@ -1,0 +1,81 @@
+{% extends 'seshdash/base.html' %}
+
+{% load staticfiles %}
+{% load bootstrap %}
+
+{% block main %}
+
+
+    <div id="page-wrapper"> 
+     {# Tabs container #}
+        <div id="create_site" class="container">
+
+            {# Tab titles #}
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#Edit_site" >Edit Existing site</a></li>
+                <li><a data-toggle="tab" href="#Add_site">Add new site</a></li>
+            </ul>
+
+            <div class="tab-content">
+
+                {# Tab content -> Edit site #}
+                <div id="Edit_site" class="tab-pane fade in active">
+                    <form method="post" >
+                          {% csrf_token %}
+
+
+                          {# Display a site form if it is there other wise display the sites #}
+                          {% if site_form %}
+                            {{ site_form|bootstrap }}
+
+
+                            {# If there is an RMCForm display it #}
+                            {% if RMCForm %}
+                                {{ RMCForm|bootstrap }}
+                            {% endif %}
+
+                          {% else %}
+
+                            {% include 'seshdash/table.html' %}
+
+                          {% endif %}
+
+
+                          
+
+                          <button type="submit" class="btn btn-primary button-save">SAVE </button>
+                     </form>
+                 
+                </div>
+
+                {# Tab content -> Add site #}
+                <div id="Add_site" class="tab-pane fade">
+                    <h3> Add a new Sesh Site</h3>
+
+                    <div class="rmc-vrm row">
+
+                      <div class="col-md-6">
+                          {% include 'seshdash/rmc-card.html' %}
+                      </div>
+
+                      <div class="col-md-6">
+                           {% include 'seshdash/vrm-card.html' %}
+                      </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+
+{% block seshjs %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

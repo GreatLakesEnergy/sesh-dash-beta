@@ -137,6 +137,7 @@ def get_user_sites(vrm_user_id,vrm_password):
     """
     Import user sites from VRM
     """
+
     context_dict = {}
     site_list = []
     flatten_list = []
@@ -151,6 +152,18 @@ def get_user_sites(vrm_user_id,vrm_password):
         flatten_list = reduce(lambda x,y: x+y,site_list)
     context_dict['sites'] = flatten_list
     return context_dict
+
+def get_user_vrm_accounts(request):
+    """
+    get a list of vrm accouts attached to the user account
+    """
+    context_dict = {}
+    vrm_accounts = get_objects_for_user(request.user,'seshdash.view_VRM_Accounts', klass=VRM_Account)
+    context_dict['items'] = vrm_accounts
+    context_dict['var_name'] = 'vrm_accounts'
+    context_dict['verbose_name'] = VRM_Account._meta.verbose_name
+    return context_dict
+
 
 
 def _return_error_import( request, context_dict, form, message):
@@ -906,8 +919,16 @@ def site_add_edit(request):
     sites = _get_user_sites(request)
     context_dict['sites_stats'] = get_quick_status(sites)
     context_dict['sites'] = sites
-    context_dict['VRM_form'] = _create_vrm_login_form()
     context_dict['permitted'] = get_permissions(request.user)
+    user_vrm_accounts = (get_user_vrm_accounts(request))
+    context_dict['has_vrm'] = False
+    if user_vrm_accounts.get('items',''):
+        context_dict.update(get_user_vrm_accounts(request)) # Add user VRM accounts
+        context_dict['has_vrm'] = True
+    else:
+        context_dict['VRM_form'] = _create_vrm_login_form()
+
+    print  "got list for manage sites  %s"%(context_dict)
     return render(request, 'seshdash/settings/site_settings.html', context_dict)
 
 
@@ -1213,7 +1234,7 @@ def manage_reports(request, site_id):
     context_dict = {}
     site = Sesh_Site.objects.filter(id=site_id).first()
     reports = Report.objects.filter(site=site)
-    
+
     context_dict['site'] = site
     context_dict['reports'] = reports
     return render(request, 'seshdash/settings/manage_reports.html', context_dict)
@@ -1228,12 +1249,12 @@ def add_report(request, site_id):
     context_dict = {}
     context_dict['report_attributes'] = get_report_table_attributes()
     attributes = []
- 
-    # if the user does not belong to the organisation or if the user is not an admin   
+
+    # if the user does not belong to the organisation or if the user is not an admin
     if not(request.user.organisation == site.organisation and request.user.is_org_admin):
         return HttpResponseForbidden()
-    
-    if request.method == "POST": 
+
+    if request.method == "POST":
         # Getting all the checked report attribute values
         for key, value in request.POST.items():
             if value == 'on':
@@ -1251,28 +1272,28 @@ def add_report(request, site_id):
 @login_required
 def edit_report(request, report_id):
     """
-    View to edit a report given, 
+    View to edit a report given,
     a report id as an parameter
     """
     context_dict = {}
     report = Report.objects.filter(id=report_id).first()
-    attribute_list = []    
-   
+    attribute_list = []
+
     if request.method == 'POST':
         for key, value in request.POST.items():
             if value == 'on':
                 attribute_list.append(demjson.decode(key))
 
         report.attributes = attribute_list
-        report.duration = request.POST['duration'] 
-        report.save() 
+        report.duration = request.POST['duration']
+        report.save()
         return redirect(reverse('manage_reports', args=[report.site.id]))
 
     context_dict['attributes'] = get_edit_report_list(report)
     context_dict['report'] = report
     context_dict['duration_choices'] = report.get_duration_choices()
     return render(request, 'seshdash/settings/edit_report.html', context_dict)
-    
+
 
 
 @login_required
