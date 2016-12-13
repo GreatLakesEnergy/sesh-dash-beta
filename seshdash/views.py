@@ -794,7 +794,7 @@ def historical_data(request):
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
-        return render(request, 'seshdash/historical-data.html', context_dict);
+        return render(request, 'seshdash/data_analysis/historical-data.html', context_dict);
 
 #function for Graph Generations
 @login_required
@@ -1287,27 +1287,32 @@ def delete_report(request, report_id):
     return redirect(reverse('manage_reports', args=[site.id]))
 
 
-def get_csv_measurement_data(request):
+def export_csv_measurement_data(request):
     """
     Returns a csv of a given measurement a request
 
     """
     import csv
+    context_dict = {}
     measurement = request.POST.get('measurement', '')
     start_time = request.POST.get('start-time', '')
     end_time = request.POST.get('end-time', '')
     
-    i = Influx()
-    results = i.get_measurement_range('battery_voltage', datetime.now(), datetime.now())
+    if request.method == 'POST':
+        i = Influx()
+        results = i.get_measurement_range('battery_voltage', datetime.now(), datetime.now())
  
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="test.csv"'
-    writer = csv.writer(response)
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="test.csv"'
+        writer = csv.writer(response)
     
-    writer.writerow(results[0].keys())
-    for result in results:
-        writer.writerow(result.values())
+        writer.writerow(results[0].keys())
+        for result in results:
+            writer.writerow(result.values())
  
-    return response
-   
-       
+        return response
+    
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    return render(request, 'seshdash/data_analysis/export-csv.html', context_dict)

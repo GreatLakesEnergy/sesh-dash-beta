@@ -132,3 +132,4 @@ class SeshUserForm(ModelForm):
     class Meta:
         model = Sesh_User
         fields = ("username", "is_org_admin", "email", "password",  "phone_number", "on_call", "send_mail", "send_sms")
+
