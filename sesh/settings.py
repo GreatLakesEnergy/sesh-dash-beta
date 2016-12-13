@@ -295,8 +295,12 @@ INSTALLED_APPS = (
     'geoposition',
     'djcelery',
     'django_extensions',
-    'bootstrapform'
+    'bootstrapform',
+    'compressor',
 )
+
+# Django compressor
+COMPRESS_ENABLED = False
 
 #BOWER
 BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR,'components')
@@ -412,7 +416,8 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 STATICFILES_FINDERS = (
                         "django.contrib.staticfiles.finders.FileSystemFinder",
                         "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-                        "djangobower.finders.BowerFinder",)
+                        "djangobower.finders.BowerFinder",
+                        "compressor.finders.CompressorFinder",)
 
 GEOPOSITION_MAP_OPTIONS = {
     'minZoom': 3,

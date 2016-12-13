@@ -12,7 +12,7 @@ class SiteForm(ModelForm):
         model = Sesh_Site
         exclude = ('Delete','vrm_site_id','organisation', 'rmc_account','time_zone','status_card','site_measurements')
         #DateSelectorWidget
-        widgets = {'comission_date':forms.DateInput()}
+        widgets = {'comission_date':forms.DateInput(attrs={'type':'date'})}
 
 
 #    def clean(self,**kwargs):
@@ -47,7 +47,7 @@ class SiteRMCForm(ModelForm):
         model = Sesh_Site
         exclude = ('vrm_account','vrm_site_id', 'organisation', 'import_data', 'status_card', 'site_measurements')
         #DateSelectorWidget
-        widgets = {'comission_date':forms.DateInput()}
+        widgets = {'comission_date':forms.DateInput(attrs={'type': 'date'})}
 
 
 class SiteVRMForm(ModelForm):
@@ -132,3 +132,4 @@ class SeshUserForm(ModelForm):
     class Meta:
         model = Sesh_User
         fields = ("username", "is_org_admin", "email", "password",  "phone_number", "on_call", "send_mail", "send_sms")
+

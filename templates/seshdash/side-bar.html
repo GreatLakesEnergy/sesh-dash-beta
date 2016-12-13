@@ -9,7 +9,7 @@
         <ul class="menu accordion-menu">
 
             <li class=" droplink open">
-                <a href="#" class="waves-effect waves-button">
+                <a href="#" class="">
                     <span class="menu-icon glyphicon glyphicon-home"></span>
                     <p>Sites</p>
                     <span class="arrow"></span>
@@ -38,17 +38,29 @@
                 </ul>
             </li>
 
-            <li>
-                <a href="/historical_data" class="waves-effect waves-button">
-                    <span class="fa fa-history menu-icon"></span>
-                    <p>Historical</p>
+            <li class="droplink">
+                <a href="#" class="">
+                    <span class="menu-icon fa fa-bar-chart-o"></span>
+                    <p>Data analysis</p>
+                    <span class="arrow"></span>
                 </a>
+              
+                <ul class="sub-menu">
+                    <li>
+                        <a href="/historical_data">
+                           <span>Historical</span>
+                           <span class="fa fa-history"></span>
+                        </a> 
+                    </li>
+                    <li><a href="{% url 'export-csv-data' %}">Export csv</a></li>
+                </ul>
+
             </li>
 
 
             <li class="droplink "> 
               {% if permitted %}
-                <a href="#" class="waves-effect waves-button">
+                <a href="#" class="">
                     <span class="fa fa-cog menu-icon"></span>
                     <p>Settings</p>
                     <span class="arrow"></span>

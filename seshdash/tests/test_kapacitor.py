@@ -220,7 +220,9 @@ class KapacitorTestCase(TestCase):
         # Create task
         temp = self.kap.create_task(task_id, dbrps=self.dbrps, script=temp_script, task_type='stream')
         self.assertEqual(temp['status'],'enabled')
-        sleep(11)
+        sleep(20)
+        print "The tasks created are: ",
+        print self.kap.list_tasks()
 
         for i in reversed(range(0,5)):
             sleep(1)
