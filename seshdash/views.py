@@ -133,7 +133,7 @@ def _create_vrm_login_form():
         return VRMForm
 
 
-def get_user_sites(vrm_user_id,vrm_password):
+def get_user_sites(vrm_user_id, vrm_password):
     """
     Import user sites from VRM
     """
@@ -142,6 +142,7 @@ def get_user_sites(vrm_user_id,vrm_password):
     site_list = []
     flatten_list = []
     v = VictronAPI(vrm_user_id,vrm_password)
+
     if v.IS_INITIALIZED:
             logger.debug("victron API is initialized ")
             sites = v.get_site_list()
@@ -161,6 +162,7 @@ def get_user_vrm_accounts(request):
     vrm_accounts = get_objects_for_user(request.user,'seshdash.view_VRM_Accounts', klass=VRM_Account)
     context_dict['items'] = vrm_accounts
     context_dict['var_name'] = 'vrm_accounts'
+
     context_dict['verbose_name'] = VRM_Account._meta.verbose_name
     return context_dict
 
@@ -176,6 +178,55 @@ def _return_error_import( request, context_dict, form, message):
     context_dict['VRM_form'] = form
     return render(request,'seshdash/initial-login.html',context_dict)
 
+
+def _create_vrm_site_forms(vrm_user_id, vrm_password, context_dict):
+    """
+    Create forms for site importation from VRM
+    """
+    site_list = get_user_sites(vrm_user_id, vrm_password)
+    if not site_list['sites']:
+       # Error with credentials
+       return _return_error_import(request,context_dict,form,"check credentials")
+
+    #create initial data for formset
+    pre_pop_data = []
+
+    for site in site_list['sites']:
+        #get one and only vrm account
+        #TODO this is a bug
+        VRM = VRM_Account.objects.first()
+        logger.debug("Fetching VRM account %s"%VRM)
+        site_model_form = {'site_name':site['name'],
+                            'vrm_site_id':site['idSite'],
+                            'has_genset': site['hasGenerator'],
+                            'vrm_account': VRM
+                            }
+        pre_pop_data.append(site_model_form)
+
+    # Create form factory
+    site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,
+            extra=len(site_list['sites']),form=SiteForm,
+            exclude=('vrm_account','rmc_account'),
+            can_delete= False)
+    site_forms_factory = site_forms_factory(initial = pre_pop_data,
+                                                                    instance=VRM)
+    context_dict['site_forms'] = site_forms_factory
+
+    return  context_dict, site_list
+
+@login_required
+def import_site_account(request):
+    context_dict = {}
+    site_list = []
+    if request.method == 'GET':
+        vrm_account = get_object_or_404(VRM_Account,pk=request.GET.get('vrm_account',''))
+        context_dict, site_list  = _create_vrm_site_forms(vrm_account.vrm_user_id,
+                    vrm_account.vrm_password,
+                    context_dict)
+
+        # exclude already existing sites from list
+        context_dict['form_type'] = 'vrm'
+        return render(request, 'seshdash/initial-login.html', context_dict)
 
 @login_required
 def import_site(request):
@@ -194,44 +245,18 @@ def import_site(request):
                     context_dict['error'] = True
                     context_dict['message'] = 'Unable to add account'
                 if form.is_valid():
-                    #print "form is vald"
-                    site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
-                    if not site_list['sites']:
-                       # Error with credentials
-                       return _return_error_import(request,context_dict,form,"check credentials")
-
+                    # Fake save our vrm account
+                    form.save(commit=False)
+                    # generate site forms based on data from vrm
+                    context_dict, site_list = _create_vrm_site_forms(form['vrm_user_id'].value(),form['vrm_password'].value(), context_dict)
+                    form.number_of_sites = len(site_list)
+                    form.save()
+                    # add some messages
                     context_dict['message'] = "success"
-                    #do a psuedo save first we need to modify a field later
-                    form = form.save(commit=False)
                     #now get user sites
                     context_dict['form_type'] = "vrm"
                     context_dict['site_list'] = site_list
                     context_dict['no_sites'] = len(site_list)
-                    #modify field
-                    form.number_of_sites = len(site_list)
-                    #save for real
-                    form.save()
-                    #create initial data for formset
-                    pre_pop_data = []
-                    for site in site_list['sites']:
-                        #get one and only vrm account
-                        #TODO this is a bug
-                        VRM = VRM_Account.objects.first()
-                        logger.debug("Fetching VRM account %s"%VRM)
-                        site_model_form = {'site_name':site['name'],
-                                            'vrm_site_id':site['idSite'],
-                                            'has_genset': site['hasGenerator'],
-                                            'vrm_account': VRM
-                                            }
-                        pre_pop_data.append(site_model_form)
-
-                    site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,
-                            extra=len(site_list['sites']),form=SiteForm,
-                            exclude=('vrm_account','rmc_account'),
-                            can_delete= False)
-
-                    context_dict['site_forms'] = site_forms_factory(initial = pre_pop_data,
-                                                                    instance=VRM)
 
             else:
                 # if RMC site
@@ -248,7 +273,7 @@ def import_site(request):
     else:
         context_dict['VRM_form'] = _create_vrm_login_form()
 
-    return render(request,template,context_dict)
+    return render(request,'seshdash/initial-login.html',context_dict)
 
 def _download_data(request):
     """
@@ -925,8 +950,12 @@ def site_add_edit(request):
     if user_vrm_accounts.get('items',''):
         context_dict.update(get_user_vrm_accounts(request)) # Add user VRM accounts
         context_dict['has_vrm'] = True
+        context_dict['var_url'] = 'import-site-account' # for link generation on list
+        context_dict['param'] = 'vrm_account' # for link generation on list
+
     else:
         context_dict['VRM_form'] = _create_vrm_login_form()
+
 
     print  "got list for manage sites  %s"%(context_dict)
     return render(request, 'seshdash/settings/site_settings.html', context_dict)
@@ -1093,7 +1122,6 @@ def add_rmc_account(request, site_id):
     context_dict['emontx_form'] = emonTxFormSetFactory(prefix="emontx")
     context_dict['bmv_form'] = bmvFormSetFactory(prefix="bmv")
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
-
 
 
 def get_rmc_config(request):
