@@ -43,5 +43,6 @@ urlpatterns = [
             url(r'^site/([0-9]{1,5})/add_report/$', views.add_report, name='add_report'),
             url(r'^edit_report/([0-9]{1,6})$', views.edit_report, name='edit_report'),
             url(r'^delete_report/([0-9]{1,6})$', views.delete_report, name='delete_report'),
+            url(r'^export-csv/', views.export_csv_measurement_data, name='export-csv-data'),
             ]
 

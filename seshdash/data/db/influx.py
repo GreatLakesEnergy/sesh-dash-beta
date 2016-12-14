@@ -7,6 +7,8 @@ from django.conf import settings
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError,InfluxDBServerError
 
+from seshdash.utils.time_utils import get_epoch_from_datetime, epoch_s_to_ns
+
 # Instantiating the logger
 logger = logging.getLogger(__name__)
 
@@ -282,6 +284,36 @@ class Influx:
                 pass
 
         return measurement_dict
+
+    def get_measurement_range(self, measurement_name, start, end, site=None, database=None):
+        """
+        Returns the measurement points for a given range
+        
+        @param measurement_name - name of the measurement
+        @param start - The date to start from (type python datetime)
+        @param end - The time to stop at (type python datetime)
+        """
+        db = self.db
+        if database:
+            db = database
+
+        query_string = 'SELECT * FROM {measurement_name} WHERE time > {start} and time <= {end}'
+         
+ 
+        # This assumes the precision of influx db is set to nanoseconds    
+        data = {'measurement_name': measurement_name, 
+                      'start': epoch_s_to_ns(get_epoch_from_datetime(start)),
+                      'end': epoch_s_to_ns(get_epoch_from_datetime(end))}
+
+        query = query_string.format(**data)
+
+        if site:
+            query += " and site_name='%s'" % site.site_name
+          
+
+        results = list(self._influx_client.query(query, database=db).get_points())
+  
+        return results
 
 
 # Helper classes to the interface

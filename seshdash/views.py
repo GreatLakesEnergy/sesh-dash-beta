@@ -276,7 +276,7 @@ def _get_user_sites(request):
     Helper function to get sites for user
     """
     # Get sites for use
-    return  get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
+    return Sesh_Site.objects.filter(organisation=request.user.organisation)
 
 
 @login_required
@@ -787,14 +787,14 @@ def historical_data(request):
         #checking user permissions
         user = request.user
         permission = get_permissions(user)
-        context_dict['permitted'] = permission
+        context_dict['permitted'] = get_org_edit_permissions(user)
 
         context_dict['sites'] = sites
         context_dict['site_id'] = 0
         context_dict['active_site'] = active_site
         context_dict['sort_keys'] = sort_data_dict.keys()
         context_dict['sort_dict'] = sort_data_dict
-        return render(request, 'seshdash/historical-data.html', context_dict);
+        return render(request, 'seshdash/data_analysis/historical-data.html', context_dict);
 
 #function for Graph Generations
 @login_required
@@ -890,7 +890,7 @@ def edit_site(request,site_Id=1):
     context_dict['VRM_form'] = VRMForm()
     context_dict['site_form']= site_form
     context_dict['sites']= user_sites
-    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request,'seshdash/settings/site_settings.html', context_dict)
 
@@ -907,7 +907,7 @@ def site_add_edit(request):
     context_dict['sites_stats'] = get_quick_status(sites)
     context_dict['sites'] = sites
     context_dict['VRM_form'] = _create_vrm_login_form()
-    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
     return render(request, 'seshdash/settings/site_settings.html', context_dict)
 
 
@@ -922,7 +922,7 @@ def settings_alert_rules(request):
     sites = _get_user_sites(request)
 
     user_sites = _get_user_sites(request)
-    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
     context_dict['sites'] = sites
     return render(request, 'seshdash/settings/sites_alert_rules.html', context_dict)
@@ -954,7 +954,7 @@ def site_alert_rules(request, site_id):
     context_dict['site'] = site
     context_dict['alert_rules'] = alert_rules
     user_sites = _get_user_sites(request)
-    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/settings/alert_rules.html', context_dict)
 
@@ -1123,7 +1123,7 @@ def user_notifications(request):
             return redirect('index')
 
     user_sites = _get_user_sites(request)
-    context_dict['permitted'] = get_permissions(request.user)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
     context_dict['user_formset'] = sesh_user_formset
     return render(request, 'seshdash/settings/user_notifications.html', context_dict)
@@ -1285,3 +1285,45 @@ def delete_report(request, report_id):
     site = report.site
     report.delete()
     return redirect(reverse('manage_reports', args=[site.id]))
+
+
+def export_csv_measurement_data(request):
+    """
+    Returns a csv of a given measurement a request
+
+    """
+    import csv
+    context_dict = {}
+    measurement = request.POST.get('measurement', '')
+    start_time = request.POST.get('start-time', None)
+    end_time = request.POST.get('end-time', None)
+    site_name = request.POST.get('site-name', '')
+    
+    site = Sesh_Site.objects.filter(site_name=site_name).first()
+    
+    if request.method == 'POST':
+        # Converting strings to date
+        start_time = datetime.strptime(start_time, '%Y-%m-%d')
+        end_time = datetime.strptime(end_time, '%Y-%m-%d')
+
+        i = Influx()
+        results = i.get_measurement_range('battery_voltage', start_time, end_time, site=site)
+ 
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="test.csv"'
+        writer = csv.DictWriter(response, ['site_name', 'time', 'value'])
+    
+        writer.writeheader()
+        for result in results:
+            del result['source']
+            writer.writerow(result)
+ 
+        return response
+    
+    i = Influx()
+    user_sites = _get_user_sites(request)
+    context_dict['sites'] = user_sites
+    context_dict['measurements'] = i.get_measurements()
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
+    return render(request, 'seshdash/data_analysis/export-csv.html', context_dict)
