@@ -314,6 +314,21 @@ class Influx:
   
         return results
 
+    def get_measurement_range_bucket(self, meeasurement_name, start, end, database=None):
+        """
+        Returns the measurement points for a given range grouped by time
+        
+        @param measurement_name - name of the measurement
+        @param start - The date to start from (type python datetime)
+        @param end - The time to stop at (type python datetime)
+        """
+        db = self.db
+   
+        if database:
+            db = database
+
+        query_string = 'SELECT * from {measurement_name} WHERE time > {start} and time <= now()'
+
 
 # Helper classes to the interface
 def get_latest_point_site(site, measurement_name, db=None):

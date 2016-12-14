@@ -1,35 +1,54 @@
+/* Displays the data analysis graph */
 
-var csrftoken = getCookie('csrftoken');
-/* Function For Daily DataPoints Graph Generation */
+
+
+
 function daily_data_points_graph() {
 
-   drop_choice1 = $("#drop1").val();
-   drop_choice2 = $("#drop2").val();
-   measurement1 = $("#drop1 option:selected").html();
-   measurement2 = $("#drop2 option:selected").html();
-   time_value = $('#time_dropdown').val();
-   var title = $('#time_dropdown').find(":selected").text();
+    var drop_choice1 = $("#drop1").val(),
+        drop_choice2 = $("#drop2").val(),
+        start_time = $('#dynamic_graph_container #start-time').val(),
+        end_time = $('#dynamic_graph_container #end-time').val(),
+        measurement1 = $("#drop1 option:selected").html(),
+        measurement2 = $("#drop2 option:selected").html(),
+        time_value = $('#time_dropdown').val(),
+        title = $('#time_dropdown').find(":selected").text();
 
-   $("#dynamic_graph").hide();
-   $(".graph-loader").show();
 
-  $.post("/graphs",{csrfmiddlewaretoken: csrftoken, 'choice': [drop_choice1,drop_choice2], 'time':time_value , 'active_site_id':active_site_id},function(data){
 
+    $("#dynamic_graph").hide();
+    $(".graph-loader").show();
+
+    data_to_send = {
+          'choice': [drop_choice1,drop_choice2],
+          'start-time': start_time,
+          'end-time': end_time,
+          'active_site_id': active_site_id
+    }
+
+
+    $.get("/graphs", data_to_send, function(data){
+
+        console.log(data);
         var response = JSON.parse(data);
 
-        dropdown1_values = response[drop_choice1][0];
-        SI_unit1 = response[drop_choice1][1];
 
-        dropdown2_values = response[drop_choice2][0];
+        dropdown1_values = response[0].data;
+        SI_unit1 = response[0].si_unit;
 
-        SI_unit2 = response[drop_choice2][1];
+        dropdown2_values = response[1].data;
 
+        SI_unit2 = response[1].si_unit;
+
+        /*
+        
         for (i=0;i<dropdown1_values.length;i++){
         dropdown1_values[i][0]=dropdown1_values[i][0] * 1000
         }
         for (i=0;i<dropdown2_values.length;i++){
         dropdown2_values[i][0]=dropdown2_values[i][0] * 1000
         }
+        */
 
         $('#containerhigh').highcharts({
                  chart: {

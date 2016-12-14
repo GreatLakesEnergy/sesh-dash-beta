@@ -1,9 +1,11 @@
+{% comment %}
 
-<!---
-This is the High chart of Daily PV Production with Cloud cover forecast In High Chart
+  This is the data analysis graph,
+  It has selectable measurements,
+  It plots measurements against each other
 
+{% endcomment %}
 
--->
 
 
 {% block graphs %}
@@ -12,16 +14,15 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
             <div class="panel-heading">
                 <!-- TODO make this a variable -->
                 <i class="fa fa-bar-chart-o fa-fw" ></i>
-                <span id="title-message" > Data Analysis</span>
+                <span id="title-message" >Data Analysis</span>
             </div>
             <div class="panel-body">
                     <div  id="containerhigh">
                     </div>
 
-                     <!--Loader-->
+                    {# Loader #}
                     <div class="graph-loader">
                          <div class="spinner">
-
                               <div class="rect1"></div>
 
                               <div class="rect2"></div>
@@ -39,7 +40,7 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
             <div class="panel-footer">
 
 		    <div class="row" id ="dynamic_graph_container">
-			     <div id="x-axis" class="col-md-3">
+			     <div id="x-axis" class="col-md-2">
 			          <p>Select option</p>
 
 			          <select class="form-control" id="drop1" value="cloud_cover">
@@ -53,7 +54,7 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 			          </select>
 
 			    </div>
-			    <div id="y-axis" class="col-md-3">
+			    <div id="y-axis" class="col-md-2">
 			         <p>Select another option</p>
 			         <select class="form-control" id="drop2" >
 				             {{ measurements }}
@@ -67,7 +68,22 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
 				             {% endfor %}
 			         </select>
 			    </div>
-                <div class="col-md-3" >
+              
+                <div class="col-md-2" >
+                     <div class="form-group"> 
+                         <label for="start-time">Start time</label>
+                         <input type="date" name="start-time" class="form-control" id="start-time">
+                     </div>
+                </div>
+
+                
+                <div class="col-md-2">
+                     <div class="form-group">
+                         <label for="end-time">End time</label>
+                         <input type="date" name="end-time"   class="form-control" id="end-time">
+                     </div>
+                </div>
+
                      <div class ="filter-form" id ="time-range">
                           <div class ="data-sort-container">
                                <p>Choose a time range </p>
@@ -79,7 +95,7 @@ This is the High chart of Daily PV Production with Cloud cover forecast In High 
                           </div>
                      </div>
                </div>
-               <div class="col-md-3">
+               <div class="col-md-2">
                      <button type="button" class="btn btn-info" id = 'dynamic_graph_button'>update graph </button>
                </div>
 		    </div>
