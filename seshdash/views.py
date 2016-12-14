@@ -1330,7 +1330,7 @@ def export_csv_measurement_data(request):
         results = i.get_measurement_range(measurement, start_time, end_time, site=site)
  
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="%s.csv"' % ( site.site_name + '_' + measurement + '' + '.csv')
+        response['Content-Disposition'] = 'attachment; filename="%s.csv"' % ( site.site_name + '_' + measurement + '_sesh')
         writer = csv.DictWriter(response, ['site_name', 'time', 'value'])
     
         writer.writeheader()
