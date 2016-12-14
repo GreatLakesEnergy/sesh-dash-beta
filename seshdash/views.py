@@ -1327,10 +1327,10 @@ def export_csv_measurement_data(request):
         end_time = datetime.strptime(end_time, '%Y-%m-%d')
 
         i = Influx()
-        results = i.get_measurement_range('battery_voltage', start_time, end_time, site=site)
+        results = i.get_measurement_range(measurement, start_time, end_time, site=site)
  
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="test.csv"'
+        response['Content-Disposition'] = 'attachment; filename="%s.csv"' % ( site.site_name + '_' + measurement + '' + '.csv')
         writer = csv.DictWriter(response, ['site_name', 'time', 'value'])
     
         writer.writeheader()

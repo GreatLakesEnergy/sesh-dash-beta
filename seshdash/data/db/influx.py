@@ -93,7 +93,6 @@ class Influx:
 
         end_time = start_time + timedelta(**time_delta)
 
-       #print "start is %s end is %s" % (start_time, end_time)
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
         result_set_gen = []
         if not start == "now":
@@ -151,7 +150,6 @@ class Influx:
             timestamp = datetime.now()
         if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
-        #print "sending data to influx %s"%measurement_dict
         for key in measurement_dict.keys():
                # Incoming data is likely to have datetime object. We need to ignore this
                data_point = {}
@@ -307,7 +305,6 @@ class Influx:
 
         query = query_string.format(**data)
 
-        print "The query is: %s" % query
         if site:
             query += " and site_name='%s'" % site.site_name
           
@@ -338,7 +335,6 @@ class Influx:
 
         query = query_string.format(**data)
 
-        print "The query to execute is: %s" % query
         if site:
             query += " and site_name='%s'" % site.site_name
     

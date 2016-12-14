@@ -11,7 +11,7 @@ function daily_data_points_graph() {
         end_time = $('#dynamic_graph_container #end-time').val(),
         measurement1 = $("#drop1 option:selected").html(),
         measurement2 = $("#drop2 option:selected").html(),
-        time_value = $('#time_dropdown').val(),
+        resolution = $('#resolution').val(),
         title = $('#time_dropdown').find(":selected").text();
 
 
@@ -23,7 +23,8 @@ function daily_data_points_graph() {
           'choice': [drop_choice1,drop_choice2],
           'start-time': start_time,
           'end-time': end_time,
-          'active_site_id': active_site_id
+          'active_site_id': active_site_id,
+          'resolution': resolution
     }
 
 
