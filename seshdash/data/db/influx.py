@@ -307,6 +307,7 @@ class Influx:
 
         query = query_string.format(**data)
 
+        print "The query is: %s" % query
         if site:
             query += " and site_name='%s'" % site.site_name
           
@@ -315,20 +316,35 @@ class Influx:
   
         return results
 
-    def get_measurement_range_bucket(self, meeasurement_name, start, end, database=None):
+    def get_measurement_range_bucket(self, measurement_name, start, end, group_by, site=None, database=None):
         """
-        Returns the measurement points for a given range grouped by time
-        
+        Returns the measurement points for a given range grouped by a given time
+
         @param measurement_name - name of the measurement
         @param start - The date to start from (type python datetime)
-        @param end - The time to stop at (type python datetime)
+        @param end - The time to stop at ( type python datetime)
         """
         db = self.db
-   
         if database:
             db = database
+ 
+        query_string = 'SELECT mean("value") FROM {measurement_name} WHERE time > {start} AND time <= {end} GROUP BY time({time})'
 
-        query_string = 'SELECT * from {measurement_name} WHERE time > {start} and time <= now()'
+        # This assumes the precision of influx db is set to nanoseconds
+        data = {'measurement_name': measurement_name,
+                'start': epoch_s_to_ns(get_epoch_from_datetime(start)),
+                'end': epoch_s_to_ns(get_epoch_from_datetime(end)),
+                'time': group_by}
+
+        query = query_string.format(**data)
+
+        print "The query to execute is: %s" % query
+        if site:
+            query += " and site_name='%s'" % site.site_name
+    
+        results = list(self._influx_client.query(query, database=db).get_points())
+        return results
+
 
 
 # Helper classes to the interface

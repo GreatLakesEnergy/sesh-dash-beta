@@ -812,7 +812,9 @@ def graphs(request):
     active_id = request.GET.get('active_site_id', None)
     start_time = request.GET.get('start_time', None)
     end_time = request.GET.get('end_time', None)
+    resolution = request.GET.get('resolution', '1h')
     current_site = Sesh_Site.objects.filter(id=active_id).first()
+    
 
     print "Got values %s %s %s of site %s " % (time, choices, active_id, current_site)
     if not current_site:
@@ -834,9 +836,8 @@ def graphs(request):
         start_time = datetime.strptime(start_time, "%Y-%m-%d")
         end_time = datetime.strptime(end_time, "%Y-%m-%d")
     else:
-        end_time = datetime.now() - timedelta(weeks=1)
-        start_time = datetime.now()
-
+        start_time = datetime.now() - timedelta(weeks=1)
+        end_time = datetime.now()
 
     # processing post request values to be used in the influx queries
     for choice in choices:
@@ -849,15 +850,19 @@ def graphs(request):
         # Gettting the values of the given element
         client = Influx()
 
-        query_results = client.get_measurement_range(choice, start_time, end_time)
+        query_results = client.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
 
+        
         #looping into values
         choice_data = []
         for result in query_results:
             choice_data_dict = {}
             result_time = parser.parse(result['time'])
             result_time = get_epoch_from_datetime(result_time)
-            result_value = round(result['value'], 2)
+            if result['mean'] is not None:
+                result_value = round(result['mean'], 2)
+            else:
+                result_value = 0
             choice_data_dict['time'] = result_time
             choice_data_dict['value'] = result_value
             choice_data.append([result_time, result_value])
