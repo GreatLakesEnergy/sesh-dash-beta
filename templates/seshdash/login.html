@@ -24,6 +24,13 @@
                                     <div class="form-group">
                                         <input type="password" name="inputPassword" class="form-control" placeholder="Password" required>
                                     </div>
+                             
+                                    {% if error %}
+                                        <div class="error">
+                                            <p>{{error}}</p>
+                                        </div>
+                                    {% endif %}
+
                                     <button type="submit" class="btn btn-success btn-block">Login</button>
                                 <p class="text-center m-t-xs text-sm">2016 &copy; Made In Rwanda by GLE With Love.</p>
 

@@ -262,4 +262,4 @@ def epoch_s_to_ns(epoch_seconds):
     if type(epoch_seconds) is not str:
         epoch_seconds = str(epoch_seconds)
     
-    return epoch_seconds + '00000000'  # converts to ns by adding 9 zeros
+    return epoch_seconds + '000000000'  # converts to ns by adding 9 zeros

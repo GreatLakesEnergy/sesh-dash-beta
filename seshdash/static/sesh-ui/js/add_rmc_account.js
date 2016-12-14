@@ -71,6 +71,8 @@ $(function(){
             form = bmvForm
         }
 
+        form = form.substring(1, (form.length -1)) // Removing the wrapper quotes
+
         sensorSelectorInput.parent().parent().parent()
                           .children('.configure-form-container').html(form).hide();
 

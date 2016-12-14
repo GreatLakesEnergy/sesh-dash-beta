@@ -285,7 +285,7 @@ class Influx:
 
         return measurement_dict
 
-    def get_measurement_range(self, measurement_name, start, end, database=None):
+    def get_measurement_range(self, measurement_name, start, end, site=None, database=None):
         """
         Returns the measurement points for a given range
         
@@ -297,9 +297,8 @@ class Influx:
         if database:
             db = database
 
-        query_string = 'SELECT * FROM {measurement_name} WHERE time > {start} and time <= now()'
+        query_string = 'SELECT * FROM {measurement_name} WHERE time > {start} and time <= {end}'
          
-
  
         # This assumes the precision of influx db is set to nanoseconds    
         data = {'measurement_name': measurement_name, 
@@ -307,9 +306,11 @@ class Influx:
                       'end': epoch_s_to_ns(get_epoch_from_datetime(end))}
 
         query = query_string.format(**data)
+
+        if site:
+            query += " and site_name='%s'" % site.site_name
           
 
-        print 'The query is: %s' % query
         results = list(self._influx_client.query(query, database=db).get_points())
   
         return results
