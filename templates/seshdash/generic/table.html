@@ -15,7 +15,7 @@
                   {% for item in items %}
                       <tr>
                           <td class="{{var_name}}-available">
-                              <a href="/{{ var_name|slugify }}/{{ item.id }}">{{ item.pk }}</a>
+                              <a href="/{{ var_url|slugify }}/?{{param}}={{item.pk}}">{{ item.pk }}</a>
                           </td>
                       </tr>
                   {% endfor %}
