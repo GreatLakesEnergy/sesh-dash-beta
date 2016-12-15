@@ -3,7 +3,8 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 # Models
-from seshdash.models import Sesh_User, Sesh_Alert, Alert_Rule, Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status
+from seshdash.models import Sesh_User, Sesh_Organisation, Sesh_Alert, Alert_Rule,\
+                            Sesh_Site,VRM_Account, BoM_Data_Point as Data_Point, Sesh_RMC_Account, RMC_status
 from django.contrib.auth.models import User
 
 # Tasks
@@ -31,6 +32,8 @@ class graph_TestCase(TestCase):
 
         self.location = Geoposition(52.5,24.3)
 
+        self.organisation = Sesh_Organisation.objects.create(name='test_organisation')
+    
         self.site = Sesh_Site.objects.create(site_name=u"Test site",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
                                              location_city=u"kigali",
@@ -43,7 +46,8 @@ class graph_TestCase(TestCase):
                                              vrm_site_id=213,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
-                                             has_grid=True)
+                                             has_grid=True,
+                                             organisation=self.organisation)
 
         self.data_point = Data_Point.objects.create(site=self.site,
                                                     soc=10,
@@ -57,7 +61,8 @@ class graph_TestCase(TestCase):
         self.test_sesh_user = Sesh_User.objects.create_user(username='patrick',
                                                        email='alp@gle.solar',
                                                        password='test.test.test',
-                                                       phone_number='250786688713')
+                                                       phone_number='250786688713',
+                                                       organisation=self.organisation)
         #assign a user to the sites
 
 

@@ -30,7 +30,6 @@ function daily_data_points_graph() {
 
     $.get("/graphs", data_to_send, function(data){
 
-        console.log(data);
         var response = JSON.parse(data);
 
 

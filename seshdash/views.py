@@ -810,14 +810,14 @@ def graphs(request):
     time = request.GET.get('time', '') # This is the time range it has to be: 24h, 7d or 30d
     choices = request.GET.getlist('choice[]')
     active_id = request.GET.get('active_site_id', None)
-    start_time = request.GET.get('start_time', None)
-    end_time = request.GET.get('end_time', None)
+    start_time = request.GET.get('start_time', datetime.now() - timedelta(weeks=1))
+    end_time = request.GET.get('end_time', datetime.now())
     resolution = request.GET.get('resolution', '1h')
     current_site = Sesh_Site.objects.filter(id=active_id).first()
     
 
-    print "Got values %s %s %s of site %s " % (time, choices, active_id, current_site)
-    if not current_site:
+    if (not current_site) or site.organisation != user.organisation:
+        print "The site is: %s" % current_site
         return HttpResponseBadRequest("Invalid site id, No site was found for the given site id")
 
     time_delta_dict = {'24h':{'hours':24},
