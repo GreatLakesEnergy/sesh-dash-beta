@@ -322,6 +322,9 @@ class Influx:
         @param measurement_name - name of the measurement
         @param start - The date to start from (type python datetime)
         @param end - The time to stop at ( type python datetime)
+        @param group_by - The resolution of the data
+        @param site - instance of Sesh_Site
+        @param database - The influx database to use (default settings.influx_db)
         """
         db = self.db
         if database:

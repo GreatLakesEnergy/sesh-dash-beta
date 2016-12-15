@@ -817,7 +817,6 @@ def graphs(request):
     
 
     if (not current_site) or site.organisation != user.organisation:
-        print "The site is: %s" % current_site
         return HttpResponseBadRequest("Invalid site id, No site was found for the given site id")
 
     time_delta_dict = {'24h':{'hours':24},
