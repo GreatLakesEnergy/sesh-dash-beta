@@ -816,7 +816,8 @@ def graphs(request):
     current_site = Sesh_Site.objects.filter(id=active_id).first()
     
 
-    if (not current_site) or site.organisation != user.organisation:
+    if (not current_site) or current_site.organisation != request.user.organisation:
+        print "The site is: %s" % current_site
         return HttpResponseBadRequest("Invalid site id, No site was found for the given site id")
 
     time_delta_dict = {'24h':{'hours':24},

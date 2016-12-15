@@ -75,7 +75,7 @@ class graph_TestCase(TestCase):
         f.login(username = "patrick",password = "test.test.test")
         choices = ['pv_production','soc']
         resolution = '1d'
-        active_site_id = 1
+        active_site_id = self.site.id
 
         start_time = datetime.now() - timedelta(weeks=1)
         end_time = datetime.now()
