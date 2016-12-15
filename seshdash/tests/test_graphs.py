@@ -16,7 +16,7 @@ from geoposition import Geoposition
 from django.conf import settings
 
 # Utils
-from datetime import datetime
+from datetime import datetime, timedelta
 from seshdash.utils import alert
 from django.utils import timezone
 # Influx
@@ -74,9 +74,18 @@ class graph_TestCase(TestCase):
         f = Client()
         f.login(username = "patrick",password = "test.test.test")
         choices = ['pv_production','soc']
-        time = '24h'
+        resolution = '1d'
         active_site_id = 1
-        response = f.post('/graphs',{ 'choice': choices,'time':time , 'active_site_id': active_site_id })
+
+        start_time = datetime.now() - timedelta(weeks=1)
+        end_time = datetime.now()
+
+        data = {'choice': choices,
+               'start_time': str(start_time.date()),
+               'end_time': str(end_time.date()),
+               'active_site_id': active_site_id }
+                       
+        response = f.get('/graphs', data)
         self.assertEqual(response.status_code, 200)
 
 
