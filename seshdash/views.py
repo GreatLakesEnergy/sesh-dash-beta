@@ -968,7 +968,6 @@ def site_add_edit(request):
         context_dict['VRM_form'] = _create_vrm_login_form()
 
 
-    print  "got list for manage sites  %s"%(context_dict)
     return render(request, 'seshdash/settings/site_settings.html', context_dict)
 
 
