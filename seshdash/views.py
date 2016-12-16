@@ -179,7 +179,7 @@ def _return_error_import( request, context_dict, form, message):
     return render(request,'seshdash/initial-login.html',context_dict)
 
 
-def _create_vrm_site_forms(site_list, context_dict, exclude=[]):
+def _create_vrm_site_forms(site_list, VRM_acc, context_dict, exclude=[]):
     """
     Create forms for site importation from VRM
     """
@@ -195,12 +195,10 @@ def _create_vrm_site_forms(site_list, context_dict, exclude=[]):
         #get one and only vrm account
         #  remove sites that are already in the sesh_site
         if not site['name'] in exclude:
-            VRM = VRM_Account.objects.get(vrm_user_id=vrm_user_id)
-            logger.debug("Fetching VRM account %s"%VRM)
             site_model_form = {'site_name':site['name'],
                                 'vrm_site_id':site['idSite'],
                                 'has_genset': site['hasGenerator'],
-                                'vrm_account': VRM
+                                'vrm_account': VRM_acc
                                 }
             pre_pop_data.append(site_model_form)
 
@@ -224,6 +222,7 @@ def import_site_account(request):
         site_list = get_user_sites(vrm_account.vrm_user_id, vrm_account.vrm_password)
         context_dict = _create_vrm_site_forms(
                     site_list,
+                    vrm_account,
                     context_dict,
                     exclude = exclude_list
                     )
@@ -254,9 +253,10 @@ def import_site(request):
                     site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
                     form.number_of_sites = len(site_list)
                     form.save()
-
+                    vrm_acc = VRM_Account.objects.get(vrm_user_id=form['vrm_user_id'].value())
+                    VRM = VRM_Account.objects.get(vrm_user_id=form['vrm_user_id'].value())
                     # generate site forms based on data from vrm
-                    context_dict = _create_vrm_site_forms(site_list, context_dict)
+                    context_dict = _create_vrm_site_forms(site_list, VRM, context_dict)
                     # add some messages
                     context_dict['message'] = "success"
                     #now get user sites
