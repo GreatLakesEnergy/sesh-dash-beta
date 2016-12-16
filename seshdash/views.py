@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.views import generic
+from django.views.decorators.http import require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
@@ -796,62 +797,80 @@ def historical_data(request):
         context_dict['sort_dict'] = sort_data_dict
         return render(request, 'seshdash/data_analysis/historical-data.html', context_dict);
 
-#function for Graph Generations
+
+@require_GET
 @login_required
-def graphs(request):
+def graphs(request): 
+    """
+    Returns json, containing data that is used in data analysis graphs
+    """
+    results = []
 
-    # if ajax request
-    if request.method == 'POST':
+    # Getting values from Post request
+    time = request.GET.get('time', '') # This is the time range it has to be: 24h, 7d or 30d
+    choices = request.GET.getlist('choice[]')
+    active_id = request.GET.get('active_site_id', None)
+    start_time = request.GET.get('start_time', datetime.now() - timedelta(weeks=1))
+    end_time = request.GET.get('end_time', datetime.now())
+    resolution = request.GET.get('resolution', '1h')
+    current_site = Sesh_Site.objects.filter(id=active_id).first()
+    
 
-        # variables declaration
-        results = {}
-        time_delta_dict = {}
-        time_bucket_dict = {}
-        data_values =[]
-        date_time = []
+    if (not current_site) or current_site.organisation != request.user.organisation:
+        return HttpResponseBadRequest("Invalid site id, No site was found for the given site id")
 
-        # Getting values from Post request
-        time = request.POST.get('time','')
-        choices = request.POST.getlist('choice[]')
-        active_id = request.POST.get('active_site_id','')
-        active_site = Sesh_Site.objects.filter(id=active_id)
-        time_delta_dict = {'24h':{'hours':24},'7d':{'days':7},'30d':{'days':30}}
-        time_bucket_dict = {'24h':'1h','7d':'1d','30d':'5d'}
+    time_delta_dict = {'24h':{'hours':24},
+                       '7d': {'days':7},
+                       '30d':{'days':30},
+                    }
 
-        # Checking for a valid site_id
-        if active_site != []:
-            active_site_name = active_site [0]
-        current_site = active_site_name.site_name
+    time_bucket_dict = {'24h':'1h',
+                        '7d':'1d',
+                        '30d':'5d',
+                    }
 
-        # processing post request values to be used in the influx queries
-        for choice in choices:
-            data_values = []
-            time_delta = time_delta_dict[time]
-            time_bucket=time_bucket_dict[time]
-            SI_unit = get_measurement_unit(choice)
-            # creating an influx instance
-            client = Influx()
-            # using an influx query to get measurements values with their time-stamps
-            values = client.get_measurement_bucket(choice,time_bucket,'site_name',current_site,time_delta)
 
-            #looping into values
-            for value in values:
-                data_values.append([value['time'],value['mean']])
 
-            #Converting date_strings into epoch_time
-            for data in data_values:
-                data[0] = get_epoch_from_datetime(datetime.strptime(data[0],"%Y-%m-%dT%H:%M:%SZ"))
-
-            #Rounding off values
-            for data in data_values:
-                data[1] = round(data[1],2)
-
-            #getting the measurements values with their time-stamps
-            results[choice] = [data_values,SI_unit]
-
-        return HttpResponse(json.dumps(results))
+    if start_time and end_time: 
+        start_time = datetime.strptime(start_time, "%Y-%m-%d")
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
     else:
-        return HttpResponseBadRequest()
+        start_time = datetime.now() - timedelta(weeks=1)
+        end_time = datetime.now()
+
+    # processing post request values to be used in the influx queries
+    for choice in choices:
+        choice_dict = {}
+        choice_dict['measurement'] = choice
+        #time_delta = time_delta_dict[time]
+        #time_bucket= time_bucket_dict[time]
+        choice_dict['si_unit'] = get_measurement_unit(choice)
+       
+        # Gettting the values of the given element
+        client = Influx()
+
+        query_results = client.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
+
+        
+        #looping into values
+        choice_data = []
+        for result in query_results:
+            choice_data_dict = {}
+            result_time = parser.parse(result['time'])
+            result_time = get_epoch_from_datetime(result_time)
+            if result['mean'] is not None:
+                result_value = round(result['mean'], 2)
+            else:
+                result_value = 0
+            choice_data_dict['time'] = result_time
+            choice_data_dict['value'] = result_value
+            choice_data.append([result_time, result_value])
+
+
+        choice_dict['data'] = choice_data
+        results.append(choice_dict)
+
+    return HttpResponse(json.dumps(results))
 
 
 #function to editing existing sites
@@ -1307,10 +1326,10 @@ def export_csv_measurement_data(request):
         end_time = datetime.strptime(end_time, '%Y-%m-%d')
 
         i = Influx()
-        results = i.get_measurement_range('battery_voltage', start_time, end_time, site=site)
+        results = i.get_measurement_range(measurement, start_time, end_time, site=site)
  
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="test.csv"'
+        response['Content-Disposition'] = 'attachment; filename="%s.csv"' % ( site.site_name + '_' + measurement + '_sesh')
         writer = csv.DictWriter(response, ['site_name', 'time', 'value'])
     
         writer.writeheader()

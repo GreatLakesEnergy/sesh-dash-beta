@@ -93,7 +93,6 @@ class Influx:
 
         end_time = start_time + timedelta(**time_delta)
 
-       #print "start is %s end is %s" % (start_time, end_time)
         query_string = "SELECT {operator}(\"value\") FROM \"{measurement}\" WHERE \"{clause}\" = '{clause_value}' AND  {time_constraint}  GROUP BY time({bucket_size}) fill(0)"
         result_set_gen = []
         if not start == "now":
@@ -151,7 +150,6 @@ class Influx:
             timestamp = datetime.now()
         if not isinstance(timestamp,str):
             timestamp = timestamp.isoformat()
-        #print "sending data to influx %s"%measurement_dict
         for key in measurement_dict.keys():
                # Incoming data is likely to have datetime object. We need to ignore this
                data_point = {}
@@ -292,6 +290,8 @@ class Influx:
         @param measurement_name - name of the measurement
         @param start - The date to start from (type python datetime)
         @param end - The time to stop at (type python datetime)
+        @param site - An instance of a Sesh_Site Model
+        @param database - Influx db to use (default settings.influx_db )
         """
         db = self.db
         if database:
@@ -314,6 +314,38 @@ class Influx:
         results = list(self._influx_client.query(query, database=db).get_points())
   
         return results
+
+    def get_measurement_range_bucket(self, measurement_name, start, end, group_by, site=None, database=None):
+        """
+        Returns the measurement points for a given range grouped by a given time
+
+        @param measurement_name - name of the measurement
+        @param start - The date to start from (type python datetime)
+        @param end - The time to stop at ( type python datetime)
+        @param group_by - The resolution of the data
+        @param site - instance of Sesh_Site
+        @param database - The influx database to use (default settings.influx_db)
+        """
+        db = self.db
+        if database:
+            db = database
+ 
+        query_string = 'SELECT mean("value") FROM {measurement_name} WHERE time > {start} AND time <= {end} GROUP BY time({time})'
+
+        # This assumes the precision of influx db is set to nanoseconds
+        data = {'measurement_name': measurement_name,
+                'start': epoch_s_to_ns(get_epoch_from_datetime(start)),
+                'end': epoch_s_to_ns(get_epoch_from_datetime(end)),
+                'time': group_by}
+
+        query = query_string.format(**data)
+
+        if site:
+            query += " and site_name='%s'" % site.site_name
+    
+        results = list(self._influx_client.query(query, database=db).get_points())
+        return results
+
 
 
 # Helper classes to the interface

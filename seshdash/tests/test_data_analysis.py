@@ -58,7 +58,7 @@ class DataAnalysisTestCase(TestCase):
             'measurement': 'battery_voltage',
             'start-time': '2015-01-01',
             'end-time': '2017-01-01',
-            'site_name': self.site.site_name
+            'site-name': self.site.site_name
         }
 
         response = self.client.post(reverse('export-csv-data'), data) 
