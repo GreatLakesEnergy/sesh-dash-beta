@@ -254,3 +254,12 @@ def get_timesince_influx(date_string):
 
 def _clean_tz(tz):
     return tz.strip().replace('\'','').replace('\"','')
+
+def epoch_s_to_ns(epoch_seconds):
+    """
+    Converts epoch seconds to nanoseconds
+    """
+    if type(epoch_seconds) is not str:
+        epoch_seconds = str(epoch_seconds)
+    
+    return epoch_seconds + '000000000'  # converts to ns by adding 9 zeros

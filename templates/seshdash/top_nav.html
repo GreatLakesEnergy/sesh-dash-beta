@@ -3,7 +3,7 @@
     <div class="input-group">
         <input type="text" class="form-control" id="search-site" placeholder="Search...">
         <span class="input-group-btn">
-            <button class="btn btn-default close-search waves-effect waves-button waves-classic" type="button"><i class="fa fa-times"></i></button>
+            <button class="btn btn-default close-search " type="button"><i class="fa fa-times"></i></button>
         </span>
     </div><!-- Input Group -->
 </form><!-- Search Form -->
@@ -11,7 +11,7 @@
 <div class="navbar">
     <div class="navbar-inner">
         <div class="sidebar-pusher">
-            <a href="javascript:void(0);" class="waves-effect waves-button waves-classic push-sidebar">
+            <a href="javascript:void(0);" class="push-sidebar">
                 <i class="fa fa-bars"></i>
             </a>
         </div>
@@ -19,7 +19,7 @@
             <a href="/" class="logo-text"><span>{{user.organisation.name}}</span></a>
         </div><!-- Logo Box -->
         <div class="search-button">
-            <a href="javascript:void(0);" class="waves-effect waves-button waves-classic show-search"><i class="fa fa-search"></i></a>
+            <a href="javascript:void(0);" class=" show-search"><i class="fa fa-search"></i></a>
         </div>
         <div class="topmenu-outer">
             <div class="top-menu">
@@ -28,11 +28,11 @@
                 <ul class="nav navbar-nav navbar-left">
 
                     <li>
-                        <a href="javascript:void(0);" class="waves-effect waves-button waves-classic sidebar-toggle"><i class="fa fa-bars"></i></a>
+                        <a href="javascript:void(0);" class="sidebar-toggle"><i class="fa fa-bars"></i></a>
                     </li>
 
                     <li>
-                        <a href="javascript:void(0);" class="waves-effect waves-button waves-classic toggle-fullscreen"><i class="fa fa-expand"></i></a>
+                        <a href="javascript:void(0);" class="toggle-fullscreen"><i class="fa fa-expand"></i></a>
                     </li>
 
                 </ul>
@@ -41,10 +41,10 @@
             {# Navbar the part on the right #}
             <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="javascript:void(0);" class="waves-effect waves-button waves-classic show-search"><i class="fa fa-search"></i></a>
+                        <a href="javascript:void(0);" class="show-search"><i class="fa fa-search"></i></a>
                     </li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle waves-effect waves-button waves-classic" data-toggle="dropdown"><i class="fa fa-bell"></i><span class="badge badge-danger pull-right" id="alerts_counter" hidden></span></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i><span class="badge badge-danger pull-right" id="alerts_counter" hidden></span></a>
                         <ul class="dropdown-menu title-caret dropdown-lg" role="menu">
                             <li><p class="drop-title">You have <span class="alerts_counter"></span> pending Alerts !</p></li>
                             <li class="dropdown-menu-list slimscroll tasks">
@@ -56,13 +56,13 @@
                     </li>
                     {% if permitted %}
                     <li>
-                        <a href="/admin" class="dropdown-toggle waves-effect waves-button waves-classic">
+                        <a href="/admin" class="dropdown-toggle">
                             <i class="fa fa-cogs"></i>
                         </a>
                     </li>
                     {% endif %}
                     <li>
-                        <a href="/logout" class="log-out waves-effect waves-button waves-classic">
+                        <a href="/logout" class="log-out ">
                             <span><i class="fa fa-sign-out m-r-xs"></i>Log out</span>
                         </a>
                     </li>
