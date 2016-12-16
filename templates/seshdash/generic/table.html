@@ -1,0 +1,28 @@
+{# Table to be used to display a dictionary with varialbles var_name as name and  items as items #}
+<div class="panel panel-white">
+    <div class="panel-heading clearfix">
+
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>  {{ verbose_name }} </th>
+                    </tr>
+                </thead>
+                <tbody>
+                  {% for item in items %}
+                      <tr>
+                          <td class="{{var_name}}-available">
+                              <a href="/{{ var_url|slugify }}/?{{param}}={{item.pk}}">{{ item.pk }}</a>
+                          </td>
+                      </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+

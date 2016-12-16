@@ -225,7 +225,7 @@ def get_config_sensors(sensors):
 
         elif type(sensor) is Sensor_EmonPi:
             t = get_template('seshdash/configs/emonpi.conf')
-            text = t.render({'number': sensor.node_id})           
+            text = t.render({'number': sensor.node_id})
         else:
             logger.error("Invalid sensor")
             raise Exception("Invalid sensor")
@@ -323,3 +323,16 @@ def save_sensor_set(sensor_set, site):
         sensor_instance.site = site
         sensor.save()
 
+def model_list_to_field_list(model_list, field):
+    """
+    Convert a model dictionary into a list with the values of the field from each item as each item.
+
+    @params model_list - list of model items
+    @params field - name of field to extract from each model
+    @returns list with value of field for each model
+    """
+    result_list = []
+    for val in model_list:
+        result_list.append(getattr(val,field))
+
+    return result_list
