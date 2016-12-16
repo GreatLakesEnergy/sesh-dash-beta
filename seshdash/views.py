@@ -179,11 +179,10 @@ def _return_error_import( request, context_dict, form, message):
     return render(request,'seshdash/initial-login.html',context_dict)
 
 
-def _create_vrm_site_forms(vrm_user_id, vrm_password, context_dict, exclude=[]):
+def _create_vrm_site_forms(site_list, context_dict, exclude=[]):
     """
     Create forms for site importation from VRM
     """
-    site_list = get_user_sites(vrm_user_id, vrm_password)
 
     if not site_list['sites']:
        # Error with credentials
@@ -213,7 +212,7 @@ def _create_vrm_site_forms(vrm_user_id, vrm_password, context_dict, exclude=[]):
             )
     site_forms_factory = site_forms_factory(initial = pre_pop_data)
     context_dict['site_forms'] = site_forms_factory
-    return  context_dict, site_list
+    return  context_dict
 
 @login_required
 def import_site_account(request):
@@ -222,9 +221,11 @@ def import_site_account(request):
     if request.method == 'GET':
 
         vrm_account = get_object_or_404(VRM_Account,pk=request.GET.get('vrm_account',''))
-        context_dict, site_list = _create_vrm_site_forms(vrm_account.vrm_user_id,
-                    vrm_account.vrm_password,
-                    context_dict, exclude = exclude_list
+        site_list = get_user_sites(vrm_account.vrm_user_id, vrm_account.vrm_password)
+        context_dict = _create_vrm_site_forms(
+                    site_list,
+                    context_dict,
+                    exclude = exclude_list
                     )
 
         # exclude already existing sites from list
@@ -248,12 +249,14 @@ def import_site(request):
                     context_dict['error'] = True
                     context_dict['message'] = 'Unable to add account'
                 if form.is_valid():
-                    # Fake save our vrm account
+                    # Fake save our vrm account so we can add number of sites to it
                     form.save(commit=False)
-                    # generate site forms based on data from vrm
-                    context_dict, site_list = _create_vrm_site_forms(form['vrm_user_id'].value(),form['vrm_password'].value(), context_dict)
+                    site_list = get_user_sites(form['vrm_user_id'].value(),form['vrm_password'].value())
                     form.number_of_sites = len(site_list)
                     form.save()
+
+                    # generate site forms based on data from vrm
+                    context_dict = _create_vrm_site_forms(form['vrm_user_id'].value(),form['vrm_password'].value(), context_dict)
                     # add some messages
                     context_dict['message'] = "success"
                     #now get user sites
@@ -1360,9 +1363,9 @@ def export_csv_measurement_data(request):
     start_time = request.POST.get('start-time', None)
     end_time = request.POST.get('end-time', None)
     site_name = request.POST.get('site-name', '')
-    
+
     site = Sesh_Site.objects.filter(site_name=site_name).first()
-    
+
     if request.method == 'POST':
         # Converting strings to date
         start_time = datetime.strptime(start_time, '%Y-%m-%d')
@@ -1370,18 +1373,18 @@ def export_csv_measurement_data(request):
 
         i = Influx()
         results = i.get_measurement_range('battery_voltage', start_time, end_time, site=site)
- 
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="test.csv"'
         writer = csv.DictWriter(response, ['site_name', 'time', 'value'])
-    
+
         writer.writeheader()
         for result in results:
             del result['source']
             writer.writerow(result)
- 
+
         return response
-    
+
     i = Influx()
     user_sites = _get_user_sites(request)
     context_dict['sites'] = user_sites
