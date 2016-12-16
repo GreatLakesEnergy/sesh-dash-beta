@@ -41,7 +41,7 @@ from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, g
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
-                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
 
 from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
 from seshdash.models import SENSORS_LIST
@@ -179,11 +179,12 @@ def _return_error_import( request, context_dict, form, message):
     return render(request,'seshdash/initial-login.html',context_dict)
 
 
-def _create_vrm_site_forms(vrm_user_id, vrm_password, context_dict):
+def _create_vrm_site_forms(vrm_user_id, vrm_password, context_dict, exclude=[]):
     """
     Create forms for site importation from VRM
     """
     site_list = get_user_sites(vrm_user_id, vrm_password)
+
     if not site_list['sites']:
        # Error with credentials
        return _return_error_import(request,context_dict,form,"check credentials")
@@ -193,36 +194,38 @@ def _create_vrm_site_forms(vrm_user_id, vrm_password, context_dict):
 
     for site in site_list['sites']:
         #get one and only vrm account
-        #TODO this is a bug
-        VRM = VRM_Account.objects.first()
-        logger.debug("Fetching VRM account %s"%VRM)
-        site_model_form = {'site_name':site['name'],
-                            'vrm_site_id':site['idSite'],
-                            'has_genset': site['hasGenerator'],
-                            'vrm_account': VRM
-                            }
-        pre_pop_data.append(site_model_form)
+        #  remove sites that are already in the sesh_site
+        if not site['name'] in exclude:
+            VRM = VRM_Account.objects.get(vrm_user_id=vrm_user_id)
+            logger.debug("Fetching VRM account %s"%VRM)
+            site_model_form = {'site_name':site['name'],
+                                'vrm_site_id':site['idSite'],
+                                'has_genset': site['hasGenerator'],
+                                'vrm_account': VRM
+                                }
+            pre_pop_data.append(site_model_form)
 
     # Create form factory
     site_forms_factory = inlineformset_factory(VRM_Account,Sesh_Site,
-            extra=len(site_list['sites']),form=SiteForm,
+            extra=len(pre_pop_data),form=SiteForm,
             exclude=('vrm_account','rmc_account'),
-            can_delete= False)
-    site_forms_factory = site_forms_factory(initial = pre_pop_data,
-                                                                    instance=VRM)
+            can_delete= False
+            )
+    site_forms_factory = site_forms_factory(initial = pre_pop_data)
     context_dict['site_forms'] = site_forms_factory
-
     return  context_dict, site_list
 
 @login_required
 def import_site_account(request):
     context_dict = {}
-    site_list = []
+    exclude_list = model_list_to_field_list(_get_user_sites(request),'site_name')
     if request.method == 'GET':
+
         vrm_account = get_object_or_404(VRM_Account,pk=request.GET.get('vrm_account',''))
-        context_dict, site_list  = _create_vrm_site_forms(vrm_account.vrm_user_id,
+        context_dict, site_list = _create_vrm_site_forms(vrm_account.vrm_user_id,
                     vrm_account.vrm_password,
-                    context_dict)
+                    context_dict, exclude = exclude_list
+                    )
 
         # exclude already existing sites from list
         context_dict['form_type'] = 'vrm'
@@ -309,12 +312,20 @@ def _validate_form(form,context_dict):
 
     return context_dict,form
 
-def _get_user_sites(request):
+def _get_user_sites(request, site_type='all'):
     """
     Helper function to get sites for user
+    type = all, vrm, rmc
     """
     # Get sites for use
-    return  get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
+    sites =  get_objects_for_user(request.user,'seshdash.view_Sesh_Site')
+    if site_type == 'vrm':
+        sites.filter(vrm_site_id__isnull=False)
+    elif site_type == 'rmc':
+        sites.filter(vrm_site_id__isnull=True)
+    else:
+        return sites
+    return sites
 
 
 @login_required
