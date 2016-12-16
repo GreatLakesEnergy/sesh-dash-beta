@@ -256,7 +256,7 @@ def import_site(request):
                     form.save()
 
                     # generate site forms based on data from vrm
-                    context_dict = _create_vrm_site_forms(form['vrm_user_id'].value(),form['vrm_password'].value(), context_dict)
+                    context_dict = _create_vrm_site_forms(site_list, context_dict)
                     # add some messages
                     context_dict['message'] = "success"
                     #now get user sites
