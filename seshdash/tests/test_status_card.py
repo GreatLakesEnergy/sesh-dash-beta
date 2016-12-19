@@ -16,6 +16,19 @@ class StatusCardTestCase(TestCase):
         """
         Initializing
         """
+        # Setup Influx
+        self._influx_db_name = 'test_db'
+        self.i = Influx(database=self._influx_db_name)
+
+        try:
+            self.i.create_database(self._influx_db_name)
+        except:
+           self.i.delete_database(self._influx_db_name)
+           sleep(1)
+           self.i.create_database(self._influx_db_name)
+           pass
+
+ 
         self.client = Client()
         self.organisation = Sesh_Organisation.objects.create(name='test_organisation')
                                                              
