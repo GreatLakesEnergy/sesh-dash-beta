@@ -889,15 +889,6 @@ def graphs(request):
                         '30d':'5d',
                     }
 
-
-
-    if start_time and end_time: 
-        start_time = datetime.strptime(start_time, "%Y-%m-%d")
-        end_time = datetime.strptime(end_time, "%Y-%m-%d")
-    else:
-        start_time = datetime.now() - timedelta(weeks=1)
-        end_time = datetime.now()
-
     # processing post request values to be used in the influx queries
     for choice in choices:
         choice_dict = {}
