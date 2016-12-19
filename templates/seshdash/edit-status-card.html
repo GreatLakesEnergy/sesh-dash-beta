@@ -1,6 +1,8 @@
 {% extends 'seshdash/base.html' %}
 
 
+{% load bootstrap %}
+
 {% block main %}
 
     <div id="main-wrapper">
@@ -9,9 +11,9 @@
                Edit status card for {{site}}
            </div>
            <div class="panel-body">
-               <form class="" method="post">
+               <form class="panel-form" method="post">
                    {% csrf_token %}
-                   {{form.as_p}}
+                   {{form|bootstrap}}
                    <input type="submit" class="btn btn-primary" value="Submit">
                </form>
            </div>

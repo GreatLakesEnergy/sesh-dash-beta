@@ -357,3 +357,15 @@ a.action-icon:hover {
 .add-report .panel-body {
   margin-top: 20px;
 }
+
+.panel-form {
+  margin-top: 20px;
+}
+
+.status-card-link {
+  color: white;
+}
+
+.status-card-link:hover {
+  color: #ddd;
+}

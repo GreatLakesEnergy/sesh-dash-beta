@@ -1433,6 +1433,9 @@ def edit_status_card(request, site_id):
             status_card = form.save()
             return redirect(reverse('index', args=[site.id]))
 
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['site_stats'] = get_quick_status(user_sites)
     context_dict['site'] = site
     context_dict['form'] = form
     return render(request, 'seshdash/edit-status-card.html', context_dict)
