@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 
 from guardian.shortcuts import assign_perm
 
+from seshdash.data.db.influx import Influx
 from seshdash.models import Sesh_User, Sesh_Site, Status_Card, Sesh_Organisation
 
 from geoposition import Geoposition
