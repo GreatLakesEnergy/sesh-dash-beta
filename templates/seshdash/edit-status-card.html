@@ -1,0 +1,21 @@
+{% extends 'seshdash/base.html' %}
+
+
+{% block main %}
+
+    <div id="main-wrapper">
+       <div class="panel panel-success">
+           <div class="panel-heading">
+               Edit status card for {{site}}
+           </div>
+           <div class="panel-body">
+               <form class="" method="post">
+                   {% csrf_token %}
+                   {{form.as_p}}
+                   <input type="submit" class="btn btn-primary" value="Submit">
+               </form>
+           </div>
+       </div>
+    </div>
+
+{% endblock %}
