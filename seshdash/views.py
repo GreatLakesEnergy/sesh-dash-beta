@@ -86,7 +86,6 @@ def index(request,site_id=0):
     Get user related site data initially to display on main-dashboard view
     """
     sites =  _get_user_sites(request)
-    print "The sites: %s" % sites
 
     context_dict = {}
     # Handle fisrt login if user has no site setup:
@@ -100,7 +99,6 @@ def index(request,site_id=0):
     #Check if user has any sites under their permission
     context_dict, content_json = get_user_data(request.user,site_id,sites)
 
-    print "The data brought back is:  %s" % content_json
     context_dict = jsonify_dict(context_dict,content_json)
     #Generate date for dashboard  TODO use victron solar yield data using mock weather data for now
     context_dict['site_id'] = site_id
@@ -117,6 +115,11 @@ def index(request,site_id=0):
         measurement_verbose_name = get_measurement_verbose_name(measurement)
         measurements[measurement] = measurement_verbose_name
     context_dict['measurements']= measurements
+
+    # status card form
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    form = StatusCardForm(instance=site.status_card) 
+    context_dict['status_form'] = form
 
 
     #sites witth weather and battery status
@@ -516,10 +519,8 @@ def get_user_data(user,site_id,sites):
         #TODO return 403 permission denied
         return context_data,context_data_json
     context_data['sites'] = sites
-    print "In get user data the sites are: %s" % sites
     context_data['active_site'] = site
     context_data_json['sites'] = serialize_objects(sites)
-    print "The sites in context_data_json is: %s" % context_data_json['sites']
     #get 5 days ago and 5 days in future for weather
     now = timezone.localtime(timezone.now())
     five_day_past = now - timedelta(days=5)
@@ -1433,9 +1434,3 @@ def edit_status_card(request, site_id):
             status_card = form.save()
             return redirect(reverse('index', args=[site.id]))
 
-    user_sites = _get_user_sites(request)
-    context_dict['permitted'] = get_org_edit_permissions(request.user)
-    context_dict['site_stats'] = get_quick_status(user_sites)
-    context_dict['site'] = site
-    context_dict['form'] = form
-    return render(request, 'seshdash/edit-status-card.html', context_dict)
