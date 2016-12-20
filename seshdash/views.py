@@ -31,7 +31,7 @@ from django.db.models import Sum
 
 from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
                            SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm, \
-                           AlertRuleForm, SeshUserForm
+                           AlertRuleForm, SeshUserForm, StatusCardForm
 
 # Special things we need
 from seshdash.utils import time_utils, rmc_tools, alert as alert_utils
@@ -115,6 +115,11 @@ def index(request,site_id=0):
         measurement_verbose_name = get_measurement_verbose_name(measurement)
         measurements[measurement] = measurement_verbose_name
     context_dict['measurements']= measurements
+
+    # status card form
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    form = StatusCardForm(instance=site.status_card) 
+    context_dict['status_form'] = form
 
 
     #sites witth weather and battery status
@@ -884,15 +889,6 @@ def graphs(request):
                         '30d':'5d',
                     }
 
-
-
-    if start_time and end_time: 
-        start_time = datetime.strptime(start_time, "%Y-%m-%d")
-        end_time = datetime.strptime(end_time, "%Y-%m-%d")
-    else:
-        start_time = datetime.now() - timedelta(weeks=1)
-        end_time = datetime.now()
-
     # processing post request values to be used in the influx queries
     for choice in choices:
         choice_dict = {}
@@ -1412,3 +1408,22 @@ def export_csv_measurement_data(request):
     context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/data_analysis/export-csv.html', context_dict)
+
+
+@login_required
+def edit_status_card(request, site_id):
+    """
+    Edits the status card of a site
+    """
+    context_dict = {}
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    form = StatusCardForm(instance=site.status_card)
+
+    if request.method == 'POST':
+        if request.user.is_org_admin:
+            form = StatusCardForm(request.POST, instance=site.status_card)
+            if form.is_valid():
+                status_card = form.save()
+                return redirect(reverse('index', args=[site.id]))
+        else:
+            return HttpResponseBadRequest("You can not edit the status card, You are not and admin of your organisation")
