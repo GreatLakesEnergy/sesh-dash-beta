@@ -65,8 +65,6 @@ class StatusCardTestCase(TestCase):
         """
         Testing the editing of a status card
         """
-        val = self.client.login(username='test_user', password='test.test.test')
-
         data = {
             'row1': 'battery_voltage',
             'row2': 'AC_Load_in',
@@ -74,10 +72,21 @@ class StatusCardTestCase(TestCase):
             'row4': 'AC_Voltage_out'
         }
 
-        # Editing the site status card
+        # Testing for a user that is not an admin
+        self.client.login(username='test_user', password='test.test.test')
+        response = self.client.post(reverse('edit_status_card', args=[self.site.id]), data)
+        self.assertEqual(response.status_code, 400)
+
+
+        # Testing if the changes have been applied
+        self.user.is_org_admin = True
+        self.user.save()
         response = self.client.post(reverse('edit_status_card', args=[self.site.id]), data)
         self.assertRedirects(response, reverse('index', args=[self.site.id]))
 
         # Testing if the changes have been applied
         status_card = Status_Card.objects.filter(id=self.status_card.id).first()
         self.assertEqual(status_card.row1, 'battery_voltage')
+      
+
+

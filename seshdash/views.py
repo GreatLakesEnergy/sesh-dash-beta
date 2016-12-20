@@ -1420,8 +1420,10 @@ def edit_status_card(request, site_id):
     form = StatusCardForm(instance=site.status_card)
 
     if request.method == 'POST':
-        form = StatusCardForm(request.POST, instance=site.status_card)
-        if form.is_valid():
-            status_card = form.save()
-            return redirect(reverse('index', args=[site.id]))
-
+        if request.user.is_org_admin:
+            form = StatusCardForm(request.POST, instance=site.status_card)
+            if form.is_valid():
+                status_card = form.save()
+                return redirect(reverse('index', args=[site.id]))
+        else:
+            return HttpResponseBadRequest("You can not edit the status card, You are not and admin of your organisation")
