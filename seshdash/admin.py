@@ -95,3 +95,7 @@ class StatusRule(GuardedModelAdmin):
 @admin.register(Report)
 class ReportDisplay(GuardedModelAdmin):
     pass
+
+@admin.register(Tick_Script)
+class TickScript(GuardedModelAdmin):
+    pass
