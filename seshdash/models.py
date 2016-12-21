@@ -811,3 +811,24 @@ class Data_Process_Rule(models.Model):
     duration = models.CharField(max_length=40, default="24h", choices=DURATION)
     interval = models.CharField(max_length=10, default="5m", choices=TIME_BUCKETS)
     output_field = models.ForeignKey(Trend_Data_Point)
+
+
+class Tick_Script(models.Model):
+    """ 
+    This is a model to hold data about the 
+    tick scripts
+    """
+    SCRIPT_TYPE_CHOICES = (
+        ('stream', 'Stream'),
+        ('batch', 'Batch'),
+    )
+
+    site = models.ForeignKey(Sesh_Site)
+    input_field_name = models.CharField(max_length=40)  # The influx measurement to operate on
+    output_field_name = models.CharField(max_length=40)  # The influx measurement to output results of the operation
+    script = models.TextField() 
+    function = models.CharField(max_length=20) # Influx function operation to use
+    interval = models.CharField(max_length=10) # The interval the task script runs on e.g 1min, 1h, 1d, 1w
+    type = models.CharField(max_length=10, choices=SCRIPT_TYPE_CHOICES)
+    
+    
