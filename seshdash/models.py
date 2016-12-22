@@ -829,6 +829,6 @@ class Tick_Script(models.Model):
     script = models.TextField() 
     function = models.CharField(max_length=20) # Influx function operation to use
     interval = models.CharField(max_length=10) # The interval the task script runs on e.g 1min, 1h, 1d, 1w
-    type = models.CharField(max_length=10, choices=SCRIPT_TYPE_CHOICES)
+    script_type = models.CharField(max_length=10, choices=SCRIPT_TYPE_CHOICES)
     
     
