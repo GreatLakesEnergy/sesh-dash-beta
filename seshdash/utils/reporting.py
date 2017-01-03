@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db.models import Avg, Sum
 from django.apps import apps
 from django.core.exceptions import FieldError
+from django.conf import settings
 from django.template.loader import get_template
 
 from guardian.shortcuts import get_users_with_perms
@@ -220,19 +221,21 @@ def get_table_report_dict(report_table_name, operations):
 """
 Kapacitor report utils
 """
-def add_kapacitor_task():
+def add_report_kap_task():
     """  
-    This function adds a task to kapacitoor
+    This function adds a report task to kapacitor
     """
     data = {
+        'database': settings.INFLUX_DB,
+        'operator': 'mean',
         'field': 'battery_voltage',
-        'where_filter_lambda': """ lambda: "battery_voltage" > 50 """,
-        'time_window': '5m',
-        'error_lambda': """ lambda: "battery_voltage" > 50 """,
+        'output_field': 'mean_battery_voltage',
+        'duration': '5m',
+        'site_id': '1'
     }
    
     kap = Kapacitor()
-    t = get_template('seshdash/kapacitor_tasks/alert_template.tick')
+    t = get_template('seshdash/kapacitor_tasks/aggregate_report.tick')
     print "About to send this template: %s" % (t.render(data))
     response = kap.create_task('testing', t.render(data))
    

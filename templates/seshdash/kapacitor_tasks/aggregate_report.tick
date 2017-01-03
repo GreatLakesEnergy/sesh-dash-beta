@@ -1,0 +1,24 @@
+// Example report tick script
+// A user wants to get average(mean) for a field battery_voltage in a db called sesh
+// The result will be outputed in a field called mean_battery_voltage in the sesh db
+
+
+var database = '{{ database }}'
+
+var duration = '{{ duration }}'
+
+var output_field = '{{ output_field }}'
+
+var points = batch
+    |query ('''
+               SELECT {{operator}}(value)
+               FROM "{{database}}"."autogen"."{{ field }}"
+               WHERE site_id={{site_id}}
+            ''')
+        .period(duration)
+        .every(duration)
+
+points
+    |influxDBOut()
+        .database(database)
+        .measurement(output_field)
