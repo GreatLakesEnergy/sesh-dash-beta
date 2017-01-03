@@ -1,12 +1,14 @@
 from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point, Sesh_User
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.model_tools import get_measurement_unit
+from seshdash.data.db.kapacitor import Kapacitor
 
 from django.forms.models import model_to_dict
 from django.utils import timezone
 from django.db.models import Avg, Sum
 from django.apps import apps
 from django.core.exceptions import FieldError
+from django.template.loader import get_template
 
 from guardian.shortcuts import get_users_with_perms
 from datetime import datetime
@@ -213,3 +215,25 @@ def get_table_report_dict(report_table_name, operations):
                 report_table_attributes.append(report_attribute_dict)
 
     return report_table_attributes
+
+
+"""
+Kapacitor report utils
+"""
+def add_kapacitor_task():
+    """  
+    This function adds a task to kapacitoor
+    """
+    data = {
+        'field': 'battery_voltage',
+        'where_filter_lambda': """ lambda: "battery_voltage" > 50 """,
+        'time_window': '5m',
+        'error_lambda': """ lambda: "battery_voltage" > 50 """,
+    }
+   
+    kap = Kapacitor()
+    t = get_template('seshdash/kapacitor_tasks/alert_template.tick')
+    print "About to send this template: %s" % (t.render(data))
+    response = kap.create_task('testing', t.render(data))
+   
+    return response
