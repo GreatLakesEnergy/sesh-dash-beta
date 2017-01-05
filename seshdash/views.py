@@ -118,7 +118,7 @@ def index(request,site_id=0):
 
     # status card form
     site = Sesh_Site.objects.filter(id=site_id).first()
-    form = StatusCardForm(instance=site.status_card) 
+    form = StatusCardForm(instance=site.status_card)
     context_dict['status_form'] = form
 
 
@@ -860,7 +860,7 @@ def historical_data(request):
 
 @require_GET
 @login_required
-def graphs(request): 
+def graphs(request):
     """
     Returns json, containing data that is used in data analysis graphs
     """
@@ -874,7 +874,7 @@ def graphs(request):
     end_time = request.GET.get('end_time', datetime.now())
     resolution = request.GET.get('resolution', '1h')
     current_site = Sesh_Site.objects.filter(id=active_id).first()
-    
+
 
     if (not current_site) or current_site.organisation != request.user.organisation:
         return HttpResponseBadRequest("Invalid site id, No site was found for the given site id")
@@ -896,13 +896,13 @@ def graphs(request):
         #time_delta = time_delta_dict[time]
         #time_bucket= time_bucket_dict[time]
         choice_dict['si_unit'] = get_measurement_unit(choice)
-       
+
         # Gettting the values of the given element
         client = Influx()
 
         query_results = client.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
 
-        
+
         #looping into values
         choice_data = []
         for result in query_results:
@@ -1302,7 +1302,8 @@ def manage_reports(request, site_id):
 @login_required
 def add_report(request, site_id):
     """
-    View to help in managing the reports
+    View to add a report instance for a site.
+    @param site_id - Site id of the current site
     """
     site = Sesh_Site.objects.filter(id=site_id).first()
     context_dict = {}
@@ -1310,14 +1311,16 @@ def add_report(request, site_id):
     attributes = []
 
     # if the user does not belong to the organisation or if the user is not an admin
-    if not(request.user.organisation == site.organisation and request.user.is_org_admin):
+    if request.user.organisation != site.organisation or request.user.is_org_admin != True:
         return HttpResponseForbidden()
 
     if request.method == "POST":
         # Getting all the checked report attribute values
+        key, value =  request.POST.items()[0]
         for key, value in request.POST.items():
             if value == 'on':
                 attributes.append(demjson.decode(key))
+
 
         Report.objects.create(site=site,
                               attributes=attributes,
@@ -1389,7 +1392,7 @@ def export_csv_measurement_data(request):
         i = Influx()
 
         results = i.get_measurement_range(measurement, start_time, end_time, site=site)
- 
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="%s.csv"' % ( site.site_name + '_' + measurement + '_sesh')
         writer = csv.DictWriter(response, ['site_name', 'time', 'value'])

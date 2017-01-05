@@ -430,6 +430,5 @@ GEOPOSITION_MARKER_OPTIONS = {
 
 
 # Sesh Settings
-SESH_REPORT_TABLES = [
-    'Daily_Data_Point',
-]
+# The report tables are used to allow report generation for sesh models
+SESH_REPORT_TABLES = []

@@ -5,12 +5,12 @@
 
 var database = '{{ database }}'
 
-var duration = '{{ duration }}'
+var duration = {{ duration }}
 
 var output_field = '{{ output_field }}'
 
 var points = batch
-    |query ('''
+    |query('''
                SELECT {{operator}}(value)
                FROM "{{database}}"."autogen"."{{ field }}"
                WHERE site_id={{site_id}}

@@ -2,6 +2,7 @@ from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Ru
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.model_tools import get_measurement_unit
 from seshdash.data.db.kapacitor import Kapacitor
+from seshdash.data.db.influx import Influx
 
 from django.forms.models import model_to_dict
 from django.utils import timezone
@@ -22,15 +23,15 @@ import json
 logger = logging.getLogger()
 
 
-def send_report(report): 
+def send_report(report):
     """
-    Sends report to the users with 
+    Sends report to the users with
     activated report permission on the site
     """
     report_data = generate_report_data(report)
     users = Sesh_User.objects.filter(organisation=report.site.organisation, send_mail=True) #users with emailreport on in the organisation
-    emails = get_emails_list(users) 
- 
+    emails = get_emails_list(users)
+
     # Collecting the data needed in the email reports.
     subject = report.duration.capitalize() + " report for " + report.site.site_name
     context_dict = {}
@@ -47,12 +48,12 @@ def generate_report_data(report):
     """
     Function to generate a report,
     The function receives a report model instance and
-    it returns a dict containing the aggregated value of the 
+    it returns a dict containing the aggregated value of the
     report attributes
-    """ 
+    """
     report_data = []
     now = datetime.now()
-    
+
     # Getting the correct date range
     if report.duration == "daily":
         start = now - relativedelta(hours=24)
@@ -80,8 +81,8 @@ def generate_report_data(report):
         data["user_friendly_name"] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
         data["unit"] = get_measurement_unit(attribute["column"])
         report_data.append(data)
-                    
-    return report_data        
+
+    return report_data
 
 def _get_operation(attribute):
     """
@@ -93,9 +94,9 @@ def _get_operation(attribute):
     elif attribute['operation'] == "sum":
         operation = Sum
     else:
-        raise Exception("Invalid opperation in attribute for report")       
+        raise Exception("Invalid opperation in attribute for report")
 
-    return operation      
+    return operation
 
 
 def _format_column_str(string):
@@ -120,26 +121,48 @@ def get_emails_list(users):
 
     for user in users:
         emails.append(user.email)
-    
+
     return emails
 
 def get_report_table_attributes():
     """
-    Returns the report attributes for sesh report tables
-    found in settings
+    Returns the report attributes for sesh report tables found in settings.
     """
+
+    """
+    REMOVING: For now assuming that there are no sesh tables to create report from, only using influx
     from django.conf import settings
     attributes  = []
 
     for table_name in settings.SESH_REPORT_TABLES:
         attributes.extend(get_table_report_dict(table_name, ['sum', 'average']))
-  
+
     return attributes
+    """
+    i = Influx()
+    measurements = i.get_measurements()
+    attributes = []
+    operators = ['sum', 'mean']
+
+    for measurement in measurements:
+        if measurement['name'] != 'site':
+            for operator in operators:
+                dict = {}
+                dict['field'] = str(measurement['name'])
+                dict['output_field'] = str(operator + '_' + measurement['name'])
+                dict['operator'] = str(operator)
+                dict['user_friendly_name'] = str(_format_column_str(measurement['name']) + ' ' + operator)
+                attributes.append(dict)
+
+    return attributes
+
+
+
 
 
 def get_report_instance_attributes(report):
     """
-    This function takes in a report, 
+    This function takes in a report,
     and then generates a dict representing the elements
     in the json field and the value
     This is to be passed to a template in order to help in editing a report
@@ -147,12 +170,12 @@ def get_report_instance_attributes(report):
     data_list = []
     jsondata = report.attributes
 
-    for field in jsondata: 
+    for field in jsondata:
         data_dict = {}
         data_dict['report_value'] = field
         data_dict['status'] = 'on'
         data_list.append(data_dict)
- 
+
     return data_list
 
 
@@ -178,7 +201,7 @@ def get_edit_report_list(report):
 
 def is_in_report_attributes(dictionary, report):
     """
-    This function checks if a dictionary of items is 
+    This function checks if a dictionary of items is
     in the report attributes
     @param dictionary: this is a string containing json reprot data "{'column':'pv_yield', 'table':'Daily_Data_Point', ...}
     @param report: Report class instance
@@ -195,16 +218,16 @@ def get_table_report_dict(report_table_name, operations):
     """
     Returns a dict containing all the reporting values
     possible for models containing reporting data
-  
+
     @param report_table_name: Ex Daily_Data_Point
     @param operations: 'sum' or 'average' or ['sum', 'average']
-    """ 
+    """
     operations = operations if isinstance(operations, list) else [operations] # Converting any item that is not a list ot a list
     table = apps.get_model(app_label="seshdash", model_name=report_table_name)
 
     report_table_attributes = []
     fields = table._meta.fields
-    
+
     for operation in operations:
         for field in fields:
             if field.name != 'site' and field.name != 'id' and field.name != 'date':
@@ -221,22 +244,27 @@ def get_table_report_dict(report_table_name, operations):
 """
 Kapacitor report utils
 """
-def add_report_kap_task():
-    """  
-    This function adds a report task to kapacitor
+def add_report_kap_task(site, report, task_type='batch'):
     """
-    data = {
-        'database': settings.INFLUX_DB,
-        'operator': 'mean',
-        'field': 'battery_voltage',
-        'output_field': 'mean_battery_voltage',
-        'duration': '5m',
-        'site_id': '1'
-    }
-   
+    This function adds tasks for a report to kapacitor
+    @param site - The site the report is form
+    @param site - The report instance in the database
+    """
     kap = Kapacitor()
     t = get_template('seshdash/kapacitor_tasks/aggregate_report.tick')
-    print "About to send this template: %s" % (t.render(data))
-    response = kap.create_task('testing', t.render(data))
-   
-    return response
+
+    for attribute in report.attributes:
+        data = {
+            'database': settings.INFLUX_DB,
+            'operator': attribute['operator'],
+            'field': attribute['field'],
+            'output_field': attribute['output_field'],
+            'duration': '1m',
+            'site_id': site.id,
+        }
+
+        task_name = str(site.site_name + '_' + attribute['operator'] + '_' + attribute['field'])
+        print "About to send this template: %s" % (t.render(data))
+        response = kap.create_task(task_name, t.render(data), task_type=task_type)
+        print "The response for the task creation: %s" % (response)
+        return response
