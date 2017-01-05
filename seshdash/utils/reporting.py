@@ -65,22 +65,26 @@ def generate_report_data(report):
 
     # Getting the aggregation of the values in the report attributes
     for attribute in report.attributes:
-        operation = _get_operation(attribute) # Getting the operation to execute, average or sum
+        if "table" in attribute: # If it uses sesh tables
+            operation = _get_operation(attribute) # Getting the operation to execute, average or sum
 
-        try:
-            table = apps.get_model(app_label="seshdash", model_name=attribute["table"])
-        except LookupError:
-            raise Exception("ERROR IN REPORTS: Incorrect table name in the report jsonfield")
+            try:
+                table = apps.get_model(app_label="seshdash", model_name=attribute["table"])
+            except LookupError:
+                raise Exception("ERROR IN REPORTS: Incorrect table name in the report jsonfield")
 
-        try:
-            data = table.objects.filter(site=report.site,
-                                    date__range=[start, now]).aggregate(val = operation(attribute["column"]))
-        except FieldError:
-            raise Exception("ERROR IN REPORTS: Incorrect column name in the jsonfield")
+            try:
+                data = table.objects.filter(site=report.site,
+                                        date__range=[start, now]).aggregate(val = operation(attribute["column"]))
+            except FieldError:
+                raise Exception("ERROR IN REPORTS: Incorrect column name in the jsonfield")
 
-        data["user_friendly_name"] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
-        data["unit"] = get_measurement_unit(attribute["column"])
-        report_data.append(data)
+            data["user_friendly_name"] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
+            data["unit"] = get_measurement_unit(attribute["column"])
+            report_data.append(data)
+        else:
+            print "About to use influx and kapacitor to get report dtaa"
+            report_data = ['TODO: USING INFLUX AND KAPACITOR TO GET REPORT DATA']
 
     return report_data
 
@@ -142,16 +146,16 @@ def get_report_table_attributes():
     i = Influx()
     measurements = i.get_measurements()
     attributes = []
-    operators = ['sum', 'mean']
+    operations = ['sum', 'mean']
 
     for measurement in measurements:
         if measurement['name'] != 'site':
-            for operator in operators:
+            for operation in operations:
                 dict = {}
                 dict['field'] = str(measurement['name'])
-                dict['output_field'] = str(operator + '_' + measurement['name'])
-                dict['operator'] = str(operator)
-                dict['user_friendly_name'] = str(_format_column_str(measurement['name']) + ' ' + operator)
+                dict['output_field'] = str(operation + '_' + measurement['name'])
+                dict['operation'] = str(operation)
+                dict['user_friendly_name'] = str(_format_column_str(measurement['name']) + ' ' + operation)
                 attributes.append(dict)
 
     return attributes
@@ -256,14 +260,14 @@ def add_report_kap_task(site, report, task_type='batch'):
     for attribute in report.attributes:
         data = {
             'database': settings.INFLUX_DB,
-            'operator': attribute['operator'],
+            'operation': attribute['operation'],
             'field': attribute['field'],
             'output_field': attribute['output_field'],
             'duration': '1m',
             'site_id': site.id,
         }
 
-        task_name = str(site.site_name + '_' + attribute['operator'] + '_' + attribute['field'])
+        task_name = str(site.site_name + '_' + attribute['operation'] + '_' + attribute['field'])
         print "About to send this template: %s" % (t.render(data))
         response = kap.create_task(task_name, t.render(data), task_type=task_type)
         print "The response for the task creation: %s" % (response)

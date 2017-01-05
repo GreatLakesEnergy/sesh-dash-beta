@@ -11,7 +11,7 @@ var output_field = '{{ output_field }}'
 
 var points = batch
     |query('''
-               SELECT {{operator}}(value)
+               SELECT {{operation}}(value)
                FROM "{{database}}"."autogen"."{{ field }}"
                WHERE site_id={{site_id}}
             ''')
