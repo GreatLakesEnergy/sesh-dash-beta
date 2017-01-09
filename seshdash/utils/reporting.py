@@ -191,7 +191,6 @@ def get_edit_report_list(report):
     possible_attributes = get_report_table_attributes()
     data_list = []
 
-    print "Data in report attributes: %s" % possible_attributes
 
     for attribute in possible_attributes:
         data_dict = {}
@@ -203,6 +202,7 @@ def get_edit_report_list(report):
         data_dict['report_value'] = attribute
         data_list.append(data_dict)
 
+    print "The returned data list is: %s" % data_list
     return data_list
 
 def is_in_report_attributes(dictionary, report):
