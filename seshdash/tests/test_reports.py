@@ -223,6 +223,7 @@ class ReportTestCase(TestCase):
         self.assertEqual(count, 2) # Testing that the report list is detecting 2 attributes in the report.
 
 
+
     def test_edit_report(self):
         """
         This will test the editing of the sesh
