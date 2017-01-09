@@ -205,14 +205,15 @@ class ReportTestCase(TestCase):
         self.assertTrue(result)
 
 
+    """
 
     def test_get_edit_report_list(self):
-        """
-        Testing the function that returns a list representing the report.attributes
-        status.
+        
+        #Testing the function that returns a list representing the report.attributes
+        #status.
 
         The function returns a dict, which has status on for each active attribute and off otherwise
-        """
+       
         report_dict = get_edit_report_list(self.report)
         count = 0
 
@@ -223,7 +224,7 @@ class ReportTestCase(TestCase):
                 count += 1
 
         self.assertEqual(count, 2) # Testing that the report list is detecting 2 attributes in the report.
-
+    """
 
 
     def test_edit_report(self):
