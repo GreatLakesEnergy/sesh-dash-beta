@@ -216,7 +216,9 @@ class ReportTestCase(TestCase):
         report_dict = get_edit_report_list(self.report)
         count = 0
 
+
         for item in report_dict:
+            print "%s: %s" % (item, item['status'])
             if item['status'] == 'on':
                 count += 1
 
