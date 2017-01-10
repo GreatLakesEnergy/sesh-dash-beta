@@ -176,9 +176,15 @@ class ReportTestCase(TestCase):
         """
         # The below is the format of the data that is received from a client when adding a report
         data = {
-            '{"table":"Daily_Data_Point","column":"daily_pv_yield","operation":"average","user_friendly_name":"Daily pv yield average"}': ['on'],
+            '{"operation": "sum", \
+             "field": "trans", \
+             "output_field": "sum_trans", \
+             "user_friendly_name": "Trans sum"}': ['on'],
 
-            '{"table":"Daily_Data_Point","column":"daily_power_consumption_total","operation":"sum","user_friendly_name":"Daily power consumption sum"}': ['on'],
+            '{"operation": "mean", \
+             "field": "relay_state", \
+             "output_field": "mean_relay_state", \
+             "user_friendly_name": "Relay state mean"}': ['on'],
         }
 
         self.client.login(username='test_user', password='test.test.test')
