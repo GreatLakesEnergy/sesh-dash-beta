@@ -44,7 +44,7 @@ from seshdash.utils.model_tools import get_quick_status, get_model_first_referen
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
                                        associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
 
-from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
+from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list, add_report_kap_tasks
 from seshdash.models import SENSORS_LIST
 
 from datetime import timedelta
@@ -1322,10 +1322,12 @@ def add_report(request, site_id):
                 attributes.append(demjson.decode(key))
 
 
-        Report.objects.create(site=site,
+        report = Report.objects.create(site=site,
                               attributes=attributes,
                               duration=request.POST.get('duration', 'daily'),
                               day_to_report=0)
+ 
+        add_report_kap_tasks(site, report)
         return redirect(reverse('manage_reports', args=[site.id]))
 
     return render(request, 'seshdash/settings/add_report.html', context_dict)

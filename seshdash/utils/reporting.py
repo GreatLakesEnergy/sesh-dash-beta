@@ -250,7 +250,7 @@ def get_table_report_dict(report_table_name, operations):
 """
 Kapacitor report utils
 """
-def add_report_kap_task(site, report, task_type='batch'):
+def add_report_kap_tasks(site, report, task_type='batch'):
     """
     This function adds tasks for a report to kapacitor
     @param site - The site the report is form
@@ -258,8 +258,9 @@ def add_report_kap_task(site, report, task_type='batch'):
     """
     kap = Kapacitor()
     t = get_template('seshdash/kapacitor_tasks/aggregate_report.tick')
+    attributes = report.attributes
 
-    for attribute in report.attributes:
+    for attribute in attributes:
         data = {
             'database': settings.INFLUX_DB,
             'operation': attribute['operation'],
@@ -271,6 +272,8 @@ def add_report_kap_task(site, report, task_type='batch'):
 
         task_name = str(site.site_name + '_' + attribute['operation'] + '_' + attribute['field'])
         print "About to send this template: %s" % (t.render(data))
-        response = kap.create_task(task_name, t.render(data), task_type=task_type)
+        dbrps = [{"db": settings.INFLUX_DB, "rp": "autogen"}]
+        response = kap.create_task(task_name, t.render(data), task_type=task_type, dbrps=dbrps)
         print "The response for the task creation: %s" % (response)
-        return response
+
+    return True
