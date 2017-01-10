@@ -346,6 +346,18 @@ class Influx:
         results = list(self._influx_client.query(query, database=db).get_points())
         return results
 
+    def drop_measurement(self, measurement_name, database=None):
+        """
+        Deletes a measurement from the influx db
+        """
+        db = self.db
+        if database:
+            db = database
+
+        query = "DROP MEASUREMENT %s" % (measurement_name)
+
+        results = list(self._influx_client.query(query, database=db).get_points())
+        return results
 
 
 # Helper classes to the interface

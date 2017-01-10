@@ -14,6 +14,7 @@ from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisati
 from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list, \
                                      get_table_report_dict, get_edit_report_list, is_in_report_attributes
 from seshdash.tasks import check_reports
+from seshdash.data.db.influx import Influx
 
 
 class ReportTestCase(TestCase):
@@ -84,6 +85,8 @@ class ReportTestCase(TestCase):
                                             duration="daily",
                                             day_to_report=datetime.now().today().weekday(),
                                             attributes=self.attributes_data)
+
+        self.i = Influx()
 
 
     def test_models(self):
@@ -212,6 +215,10 @@ class ReportTestCase(TestCase):
 
         The function returns a dict, which has status on for each active attribute and off otherwise
         """
+        # Creating measurements to the influx db
+        self.i.insert_point(site=self.site, measurement_name='trans', value=0)
+        self.i.insert_point(site=self.site, measurement_name='relay_state', value=0)
+
         report_dict = get_edit_report_list(self.report)
         count = 0
 
@@ -224,6 +231,10 @@ class ReportTestCase(TestCase):
                 count += 1
 
         self.assertEqual(count, 2) # Testing that the report list is detecting 2 attributes in the report.
+
+        # Removing the measurements
+        self.i.drop_measurement('trans')
+        self.i.drop_measurement('relay_state')
 
 
     def test_edit_report(self):
