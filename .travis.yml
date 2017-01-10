@@ -30,4 +30,4 @@ install:
 before_script:
     - python manage.py migrate --noinput
 script: 
-    - python -W ignore manage.py -p test_repor*.py test 
+    - python -W ignore manage.py test -p test_repor*.py 
