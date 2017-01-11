@@ -9,7 +9,7 @@ from django.db import IntegrityError,transaction
 from django.forms.models import model_to_dict
 from celery import shared_task,states
 from celery.signals import task_failure,task_success
-from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account, Report, Data_Process_Rule
+from .models import Sesh_Site,Site_Weather_Data,BoM_Data_Point,Daily_Data_Point,Sesh_Alert,Alert_Rule, RMC_status, Sesh_RMC_Account, Report_Job, Data_Process_Rule
 
 #fraom seshdash.api.enphase import EnphaseAPI
 from seshdash.api.forecast import ForecastAPI
@@ -554,7 +554,7 @@ def check_reports():
     Task to check send the reports,
     This tasks should execute daily
     """
-    reports = Report.objects.all()
+    reports = Report_Job.objects.all()
     sent_reports_counter = 0
 
     for report in reports:
@@ -562,7 +562,7 @@ def check_reports():
         if report.duration == "daily":
             sent_val = send_report(report)
 
-        # For weekly we check the day 
+        # For weekly we check the day
         elif report.duration == "weekly":
             if datetime.now().today().weekday() == report.day_to_report:
                 sent_val = send_report(report)
