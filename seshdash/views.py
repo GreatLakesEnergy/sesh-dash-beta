@@ -324,7 +324,6 @@ def _get_user_sites(request, site_type='all'):
     # Get sites for use
 
     sites = Sesh_Site.objects.filter(organisation=request.user.organisation)
-    print "#### found users for ste %s "%sites
     if site_type == 'vrm':
         sites = sites.filter(vrm_site_id__isnull=False)
     elif site_type == 'rmc':
