@@ -775,12 +775,15 @@ class Report_Job(models.Model):
 
         return duration_list
 
-class Report_sent(models.Model):
+class Report_Sent(models.Model):
     """
     Store each report sent for later viewing or resending
     """
     report_job = models.ForeignKey(Report_Job)
+    title = models.CharField(max_length = 60)
     date = models.DateTimeField()
+    report_date = models.DateTimeField()
+    status = models.CharField(max_length = 100)
     content = models.TextField()
     sent_to = JSONField() # list of users report was sent to
 
