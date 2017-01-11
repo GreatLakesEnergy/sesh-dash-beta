@@ -324,14 +324,13 @@ def _get_user_sites(request, site_type='all'):
     # Get sites for use
 
     sites = Sesh_Site.objects.filter(organisation=request.user.organisation)
-
+    print "#### found users for ste %s "%sites
     if site_type == 'vrm':
-        sites.filter(vrm_site_id__isnull=False)
+        sites = sites.filter(vrm_site_id__isnull=False)
     elif site_type == 'rmc':
-        sites.filter(vrm_site_id__isnull=True)
+        sites = sites.filter(vrm_site_id__isnull=True)
     else:
         return sites
-    return sites
 
 
 
@@ -855,7 +854,7 @@ def historical_data(request):
 
 @require_GET
 @login_required
-def graphs(request): 
+def graphs(request):
     """
     Returns json, containing data that is used in data analysis graphs
     """
@@ -869,7 +868,7 @@ def graphs(request):
     end_time = request.GET.get('end_time', datetime.now())
     resolution = request.GET.get('resolution', '1h')
     current_site = Sesh_Site.objects.filter(id=active_id).first()
-    
+
 
     if (not current_site) or current_site.organisation != request.user.organisation:
         return HttpResponseBadRequest("Invalid site id, No site was found for the given site id")
@@ -886,7 +885,7 @@ def graphs(request):
 
 
 
-    if start_time and end_time: 
+    if start_time and end_time:
         start_time = datetime.strptime(start_time, "%Y-%m-%d")
         end_time = datetime.strptime(end_time, "%Y-%m-%d")
     else:
@@ -900,13 +899,13 @@ def graphs(request):
         #time_delta = time_delta_dict[time]
         #time_bucket= time_bucket_dict[time]
         choice_dict['si_unit'] = get_measurement_unit(choice)
-       
+
         # Gettting the values of the given element
         client = Influx()
 
         query_results = client.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
 
-        
+
         #looping into values
         choice_data = []
         for result in query_results:
@@ -1393,7 +1392,7 @@ def export_csv_measurement_data(request):
         i = Influx()
 
         results = i.get_measurement_range(measurement, start_time, end_time, site=site)
- 
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="%s.csv"' % ( site.site_name + '_' + measurement + '_sesh')
         writer = csv.DictWriter(response, ['site_name', 'time', 'value'])
