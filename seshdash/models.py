@@ -750,7 +750,7 @@ class Sensor_Mapping(models.Model):
         unique_together =  ('site_id', 'node_id', 'sensor_type')
 
 
-class Report(models.Model):
+class Report_Job(models.Model):
     """
     Model to contain the reports that should be sent,
     to users of specific sites
@@ -774,6 +774,16 @@ class Report(models.Model):
             duration_list.append(item[0])
 
         return duration_list
+
+class Report_sent(models.Model):
+    """
+    Store each report sent for later viewing or resending
+    """
+    report_job = models.ForeignKey(Report_Job)
+    date = models.DateTimeField()
+    content = models.TextField()
+    sent_to = JSONField() # list of users report was sent to
+
 
 class Data_Process_Rule(models.Model):
     """
