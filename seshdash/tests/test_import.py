@@ -95,3 +95,4 @@ class VRM_Import_TestCase(TestCase):
         #TODO: UNCOMMENT THIS AND FIX THE PROBLEMS WITH GETTING DATA FROM VICTON
         #self.assertEqual(len(bom_data),1)
 
+
