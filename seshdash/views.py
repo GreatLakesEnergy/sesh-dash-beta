@@ -329,14 +329,12 @@ def _get_user_sites(request, site_type='all'):
     # Get sites for use
 
     sites = Sesh_Site.objects.filter(organisation=request.user.organisation)
-
     if site_type == 'vrm':
-        sites.filter(vrm_site_id__isnull=False)
+        sites = sites.filter(vrm_site_id__isnull=False)
     elif site_type == 'rmc':
-        sites.filter(vrm_site_id__isnull=True)
+        sites = sites.filter(vrm_site_id__isnull=True)
     else:
         return sites
-    return sites
 
 
 
@@ -888,6 +886,15 @@ def graphs(request):
                         '7d':'1d',
                         '30d':'5d',
                     }
+
+
+    if start_time and end_time:
+        start_time = datetime.strptime(start_time, "%Y-%m-%d")
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
+    else:
+        start_time = datetime.now() - timedelta(weeks=1)
+        end_time = datetime.now()
+
 
     # processing post request values to be used in the influx queries
     for choice in choices:
