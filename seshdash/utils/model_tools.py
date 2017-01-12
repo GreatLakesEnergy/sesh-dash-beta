@@ -15,6 +15,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 def get_model_from_string(model_name):
+    """
+    Return a model name froms string
+    """
     model = eval(model_name)
     return model
 
@@ -31,9 +34,8 @@ def get_measurement_from_rule(rule):
         return rule.check_field
 
 
-
-""" Returns the first model reference from string """
 def get_model_first_reference(model_name, instance):
+    """ Returns the first model reference from string """
     # model_name must be a string
 
     """

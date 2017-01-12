@@ -10,7 +10,7 @@ from django.db.models import Avg, Sum
 from django.core.urlresolvers import reverse
 from geoposition import Geoposition
 
-from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisation, Sesh_User
+from seshdash.models import Daily_Data_Point, Report_Job, Sesh_Site, Sesh_Organisation, Sesh_User, Report_Sent
 from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list, \
                                      get_table_report_dict, get_edit_report_list, is_in_report_attributes
 from seshdash.tasks import check_reports
@@ -27,14 +27,14 @@ class ReportTestCase(TestCase):
                                                              slack_token='testing_token')
 
         self.test_user = Sesh_User.objects.create_user(username='test_user',
-                                                       email='test@gle.solar', 
+                                                       email='test@gle.solar',
                                                        password='test.test.test',
                                                        organisation=self.organisation,
                                                        is_org_admin=True,
                                                        department='test',
                                                        send_mail=True)
 
-        self.site = Sesh_Site.objects.create(site_name='test_site', 
+        self.site = Sesh_Site.objects.create(site_name='test_site',
                                              organisation=self.organisation,
                                              comission_date=timezone.now(),
                                              location_city='kigali',
@@ -71,17 +71,17 @@ class ReportTestCase(TestCase):
                                             daily_power_consumption_total = 10,
                                     )
 
-        self.report = Report.objects.create(site=self.site,
+        self.report = Report_Job.objects.create(site=self.site,
                                             duration="daily",
                                             day_to_report=datetime.now().today().weekday(),
                                             attributes=self.attributes_data)
 
-        
+
     def test_models(self):
         """
         Testing the models
         """
-        self.assertEqual(Report.objects.all().count(), 1)     
+        self.assertEqual(Report_Job.objects.all().count(), 1)
 
     def test_generate_report_data(self):
         """
@@ -99,23 +99,26 @@ class ReportTestCase(TestCase):
     def test_send_reports(self):
         """
         Testing the task that send reports
-        """ 
+        """
         reported_reports = check_reports()
         self.assertEqual(reported_reports, 1)
 
     def test_send_report(self):
         """
         Testing the sending of the generated reports,
-        This tests the sending by mail 
+        Test logging of report
         """
         val = send_report(self.report)
+
+        report_log = Report_Sent.objects.all()
         self.assertTrue(val)
+        self.assertGreater(len(report_log),0)
 
     def test__get_operation(self):
-        """
+        '''
         Testing _get_operation function that takes
         an attribute and returns a function to execute
-        """
+        '''
         val = _get_operation(self.attributes_data[0])
         self.assertEqual(val, Avg)
 
@@ -143,15 +146,14 @@ class ReportTestCase(TestCase):
         report_dict = get_table_report_dict('Daily_Data_Point', 'sum')
         self.assertEqual(report_dict[0]['operation'], 'sum')
         self.assertEqual(report_dict[0]['table'], 'Daily_Data_Point')
-        
+
         # Should raise a lookup error in case of incorrect table input
         with self.assertRaises(LookupError):
             get_table_report_dict('UnknownTable', 'sum')
 
-
     def test_add_report(self):
         """
-        Testing the adding of the reports from 
+        Testing the adding of the reports from
         a client to a the db
         """
         # The below is the format of the data that is received from a client when adding a report
@@ -163,48 +165,43 @@ class ReportTestCase(TestCase):
 
         self.client.login(username='test_user', password='test.test.test')
         response = self.client.post(reverse('add_report', args=[self.site.id]), data)
- 
+
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
-        self.assertEqual(Report.objects.all().count(), 2)
-
-
+        self.assertEqual(Report_Job.objects.all().count(), 2)
 
     def test_delete_report(self):
         """
-        Testing the deletion of a report 
+        Testing the deletion of a report
         """
         self.client.login(username='test_user', password='test.test.test')
         response = self.client.get(reverse('delete_report', args=[self.report.id]))
-        self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site      
+        self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
 
-        self.assertEqual(Report.objects.all().count(), 0)
+        self.assertEqual(Report_Job.objects.all().count(), 0)
 
-    def test_is_in_report_attributes(self): 
+    def test_is_in_report_attributes(self):
         """
         Testing the function that determines if an attribute
         is in the report.attribues
         """
         result = is_in_report_attributes(self.report.attributes[0], self.report)
         self.assertTrue(result)
-        
-
 
     def test_get_edit_report_list(self):
         """
         Testing the function that returns a list representing the report.attributes
         status.
-         
+
         The function returns a dict, which has status on for each active attribute and off otherwise
         """
         report_dict = get_edit_report_list(self.report)
-        count = 0       
+        count = 0
 
         for item in report_dict:
             if item['status'] == 'on':
                 count += 1
- 
-        self.assertEqual(count, 2) # Testing that the report list is detecting 2 attributes in the report.
 
+        self.assertEqual(count, 2) # Testing that the report list is detecting 2 attributes in the report.
 
     def test_edit_report(self):
         """
@@ -221,7 +218,7 @@ class ReportTestCase(TestCase):
 
         response = self.client.post(reverse('edit_report', args=[self.report.id]), data)
         self.assertEqual(response.status_code, 302)  # The rediction to the manage reports
-        
-        report = Report.objects.filter(id=self.report.id).first()
+
+        report = Report_Job.objects.filter(id=self.report.id).first()
         self.assertEqual(report.duration, 'monthly')
         self.assertEqual(len(report.attributes), 1)

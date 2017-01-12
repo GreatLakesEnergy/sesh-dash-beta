@@ -337,7 +337,7 @@ class VictronHistoricalAPI:
              second_cookies  = r.cookies.get_dict()
          except Exception,e:
              self.IS_HIST_INITIALIZED = False
-             logger.error("Victron Hist apI error getting cookies: %s "%str(e))
+             logger.error("Victron Hist apI error getting cookies %s "%str(e))
 
          # Merge our cookie dictionaries
 

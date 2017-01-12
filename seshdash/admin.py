@@ -39,7 +39,7 @@ class RMC_AccountAdmin(GuardedModelAdmin):
 
 @admin.register(Sesh_Organisation)
 class Organisation(GuardedModelAdmin):
-    list_display = ('slack_token',)
+    list_display = ('name',)
     pass
 
 @admin.register(Sesh_User)
@@ -92,6 +92,10 @@ class SensorBMV(GuardedModelAdmin):
 class StatusRule(GuardedModelAdmin):
     pass
 
-@admin.register(Report)
+@admin.register(Report_Job)
+class ReportDisplay(GuardedModelAdmin):
+    pass
+
+@admin.register(Report_Sent)
 class ReportDisplay(GuardedModelAdmin):
     pass

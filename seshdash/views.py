@@ -886,8 +886,6 @@ def graphs(request):
                         '7d':'1d',
                         '30d':'5d',
                     }
-
-
     if start_time and end_time:
         start_time = datetime.strptime(start_time, "%Y-%m-%d")
         end_time = datetime.strptime(end_time, "%Y-%m-%d")
@@ -1299,7 +1297,7 @@ def manage_reports(request, site_id):
     """
     context_dict = {}
     site = Sesh_Site.objects.filter(id=site_id).first()
-    reports = Report.objects.filter(site=site)
+    reports = Report_Job.objects.filter(site=site)
 
     context_dict['site'] = site
     context_dict['reports'] = reports
@@ -1326,7 +1324,7 @@ def add_report(request, site_id):
             if value == 'on':
                 attributes.append(demjson.decode(key))
 
-        Report.objects.create(site=site,
+        Report_Job.objects.create(site=site,
                               attributes=attributes,
                               duration=request.POST.get('duration', 'daily'),
                               day_to_report=0)
@@ -1342,7 +1340,7 @@ def edit_report(request, report_id):
     a report id as an parameter
     """
     context_dict = {}
-    report = Report.objects.filter(id=report_id).first()
+    report = Report_Job.objects.filter(id=report_id).first()
     attribute_list = []
 
     if request.method == 'POST':
@@ -1368,7 +1366,7 @@ def delete_report(request, report_id):
     View to delete a report
     """
     context_dict = {}
-    report = Report.objects.filter(id=report_id).first()
+    report = Report_Job.objects.filter(id=report_id).first()
     site = report.site
     report.delete()
     return redirect(reverse('manage_reports', args=[site.id]))

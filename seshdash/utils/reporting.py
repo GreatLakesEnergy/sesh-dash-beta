@@ -1,4 +1,4 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point, Sesh_User
+from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point, Sesh_User, Report_Sent
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.model_tools import get_measurement_unit
 
@@ -19,15 +19,15 @@ import json
 logger = logging.getLogger()
 
 
-def send_report(report): 
+def send_report(report):
     """
-    Sends report to the users with 
+    Sends report to the users with
     activated report permission on the site
     """
     report_data = generate_report_data(report)
     users = Sesh_User.objects.filter(organisation=report.site.organisation, send_mail=True) #users with emailreport on in the organisation
-    emails = get_emails_list(users) 
- 
+    emails = get_emails_list(users)
+
     # Collecting the data needed in the email reports.
     subject = report.duration.capitalize() + " report for " + report.site.site_name
     context_dict = {}
@@ -38,18 +38,30 @@ def send_report(report):
     context_dict["url_to_dash"] = 'http://dash.gle.solar/site/' + report.site.site_name
 
     val = send_mail(subject, emails, context_dict, 'reporting')
+
+    # Store the report
+    report = Report_Sent(
+            report_job = report,
+            title = subject,
+            date = context_dict["date"],
+            content = report,
+            sent_to = map(lambda x: x.email, users),
+            status = val
+            )
+    report.save()
+
     return val
 
 def generate_report_data(report):
     """
     Function to generate a report,
     The function receives a report model instance and
-    it returns a dict containing the aggregated value of the 
+    it returns a dict containing the aggregated value of the
     report attributes
-    """ 
+    """
     report_data = []
     now = datetime.now()
-    
+
     # Getting the correct date range
     if report.duration == "daily":
         start = now - relativedelta(hours=24)
@@ -77,8 +89,8 @@ def generate_report_data(report):
         data["user_friendly_name"] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
         data["unit"] = get_measurement_unit(attribute["column"])
         report_data.append(data)
-                    
-    return report_data        
+
+    return report_data
 
 def _get_operation(attribute):
     """
@@ -90,9 +102,9 @@ def _get_operation(attribute):
     elif attribute['operation'] == "sum":
         operation = Sum
     else:
-        raise Exception("Invalid opperation in attribute for report")       
+        raise Exception("Invalid opperation in attribute for report")
 
-    return operation      
+    return operation
 
 
 def _format_column_str(string):
@@ -117,7 +129,7 @@ def get_emails_list(users):
 
     for user in users:
         emails.append(user.email)
-    
+
     return emails
 
 def get_report_table_attributes():
@@ -130,13 +142,13 @@ def get_report_table_attributes():
 
     for table_name in settings.SESH_REPORT_TABLES:
         attributes.extend(get_table_report_dict(table_name, ['sum', 'average']))
-  
+
     return attributes
 
 
 def get_report_instance_attributes(report):
     """
-    This function takes in a report, 
+    This function takes in a report,
     and then generates a dict representing the elements
     in the json field and the value
     This is to be passed to a template in order to help in editing a report
@@ -144,12 +156,12 @@ def get_report_instance_attributes(report):
     data_list = []
     jsondata = report.attributes
 
-    for field in jsondata: 
+    for field in jsondata:
         data_dict = {}
         data_dict['report_value'] = field
         data_dict['status'] = 'on'
         data_list.append(data_dict)
- 
+
     return data_list
 
 
@@ -175,7 +187,7 @@ def get_edit_report_list(report):
 
 def is_in_report_attributes(dictionary, report):
     """
-    This function checks if a dictionary of items is 
+    This function checks if a dictionary of items is
     in the report attributes
     @param dictionary: this is a string containing json reprot data "{'column':'pv_yield', 'table':'Daily_Data_Point', ...}
     @param report: Report class instance
@@ -192,16 +204,16 @@ def get_table_report_dict(report_table_name, operations):
     """
     Returns a dict containing all the reporting values
     possible for models containing reporting data
-  
+
     @param report_table_name: Ex Daily_Data_Point
     @param operations: 'sum' or 'average' or ['sum', 'average']
-    """ 
+    """
     operations = operations if isinstance(operations, list) else [operations] # Converting any item that is not a list ot a list
     table = apps.get_model(app_label="seshdash", model_name=report_table_name)
 
     report_table_attributes = []
     fields = table._meta.fields
-    
+
     for operation in operations:
         for field in fields:
             if field.name != 'site' and field.name != 'id' and field.name != 'date':
