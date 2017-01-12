@@ -39,7 +39,7 @@ class RMC_AccountAdmin(GuardedModelAdmin):
 
 @admin.register(Sesh_Organisation)
 class Organisation(GuardedModelAdmin):
-    list_display = ('slack_token',)
+    list_display = ('name',)
     pass
 
 @admin.register(Sesh_User)

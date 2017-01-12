@@ -112,6 +112,7 @@ class Status_Card(models.Model):
      def __str__(self):
          return "For site: " + self.sesh_site.site_name
 
+
 class Site_Measurements(models.Model):
     """
     Contains measurements to be displayed in graphs dropdowns
@@ -160,10 +161,6 @@ class Site_Measurements(models.Model):
 
     def __str__(self):
         return self.sesh_site.site_name
-
-
-
-
 
 
 class Sesh_Site(models.Model):
@@ -223,7 +220,6 @@ class Sesh_Site(models.Model):
             ('view_Sesh_Site', 'View Sesh Site'),
         )
 
-
 class Sesh_RMC_Account(models.Model):
     """
     API key used by SESH EMON node to communicate
@@ -248,7 +244,6 @@ class Sesh_RMC_Account(models.Model):
 
     class Meta:
         verbose_name = "RMC API Account"
-
 
 
 class Alert_Rule(models.Model):
@@ -298,8 +293,6 @@ class Alert_Rule(models.Model):
     class Meta:
          verbose_name = 'System Alert Rule'
          verbose_name_plural = 'System Alert Rules'
-
-
 
 #TODO Add alert Object to save alerts
 class Sesh_Alert(models.Model):
@@ -639,7 +632,6 @@ class Sensor_EmonTx(models.Model):
          super(Sensor_EmonTx, self).save(*args, **kwargs)
 
 
-
 class Sensor_EmonTh(models.Model):
      """
      Table Representive structure fo the emon th
@@ -664,7 +656,6 @@ class Sensor_EmonTh(models.Model):
         if self.pk is None:
             Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
         super(Sensor_EmonTh, self).save(*args, **kwargs)
-
 
 
 class Sensor_BMV(models.Model):
@@ -728,9 +719,6 @@ class Sensor_EmonPi(models.Model):
         super(Sensor_EmonPi, self).save(*args, **kwargs)
 
 
-
-
-
 class Sensor_Mapping(models.Model):
     """
     To contain informations about the sensor mapping
@@ -775,6 +763,7 @@ class Report_Job(models.Model):
 
         return duration_list
 
+
 class Report_Sent(models.Model):
     """
     Store each report sent for later viewing or resending
@@ -782,7 +771,6 @@ class Report_Sent(models.Model):
     report_job = models.ForeignKey(Report_Job)
     title = models.CharField(max_length = 60)
     date = models.DateTimeField()
-    report_date = models.DateTimeField()
     status = models.CharField(max_length = 100)
     content = models.TextField()
     sent_to = JSONField() # list of users report was sent to
