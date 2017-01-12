@@ -81,7 +81,7 @@ class ReportTestCase(TestCase):
         """
         Testing the models
         """
-        self.assertEqual(Report.objects.all().count(), 1)
+        self.assertEqual(Report_Job.objects.all().count(), 1)
 
     def test_generate_report_data(self):
         """
@@ -106,7 +106,7 @@ class ReportTestCase(TestCase):
     def test_send_report(self):
         """
         Testing the sending of the generated reports,
-        This tests the sending by mail
+        Test logging of report
         """
         val = send_report(self.report)
 
@@ -167,7 +167,7 @@ class ReportTestCase(TestCase):
         response = self.client.post(reverse('add_report', args=[self.site.id]), data)
 
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
-        self.assertEqual(Report.objects.all().count(), 2)
+        self.assertEqual(Report_Job.objects.all().count(), 2)
 
     def test_delete_report(self):
         """
@@ -177,7 +177,7 @@ class ReportTestCase(TestCase):
         response = self.client.get(reverse('delete_report', args=[self.report.id]))
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
 
-        self.assertEqual(Report.objects.all().count(), 0)
+        self.assertEqual(Report_Job.objects.all().count(), 0)
 
     def test_is_in_report_attributes(self):
         """
@@ -219,6 +219,6 @@ class ReportTestCase(TestCase):
         response = self.client.post(reverse('edit_report', args=[self.report.id]), data)
         self.assertEqual(response.status_code, 302)  # The rediction to the manage reports
 
-        report = Report.objects.filter(id=self.report.id).first()
+        report = Report_Job.objects.filter(id=self.report.id).first()
         self.assertEqual(report.duration, 'monthly')
         self.assertEqual(len(report.attributes), 1)
