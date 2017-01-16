@@ -44,7 +44,7 @@ def send_report(report):
             report_job = report,
             title = subject,
             date = context_dict["date"],
-            content = report,
+            content = report_data,
             sent_to = map(lambda x: x.email, users),
             status = val
             )
