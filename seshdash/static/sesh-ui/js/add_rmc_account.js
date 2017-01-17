@@ -61,15 +61,7 @@ $(function(){
         */
         var form;
 
-        if (sensorType == 'Emon Th') {
-            form = emonThForm
-        }
-        else if (sensorType == 'Emon Tx') {
-            form = emonTxForm
-        }
-        else if (sensorType == 'BMV') {
-            form = bmvForm
-        }
+        form = SensorForm
 
         form = form.substring(1, (form.length -1)) // Removing the wrapper quotes
 

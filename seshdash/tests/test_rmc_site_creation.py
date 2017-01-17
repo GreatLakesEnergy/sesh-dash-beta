@@ -11,7 +11,7 @@ from django.utils import timezone
 # Other libs
 from geoposition import Geoposition
 
-from seshdash.models import Sesh_User, Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Sensor_Mapping
+from seshdash.models import Sesh_User, Sesh_Site, Sesh_RMC_Account, Sensor_Node, Sensor_Mapping
 from seshdash.utils.model_tools import get_all_associated_sensors, get_config_sensors
 
 class TestAddRMCSite(TestCase):
@@ -201,4 +201,4 @@ class TestAddRMCSite(TestCase):
 	# Testing for invalid apikeys
         response = self.client.get('/get_rmc_config', {'api_key': 'incorrect'})
         self.assertEqual(response.status_code, 403)
-  
+
