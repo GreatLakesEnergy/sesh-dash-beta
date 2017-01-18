@@ -84,9 +84,6 @@ class SensorMapping(GuardedModelAdmin):
     pass
 
 
-class StatusRule(GuardedModelAdmin):
-    pass
-
 @admin.register(Report_Job)
 class ReportDisplay(GuardedModelAdmin):
     pass
