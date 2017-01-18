@@ -77,10 +77,12 @@ class SiteMeasurements(GuardedModelAdmin):
 @admin.register(Sensor_Node)
 class SensorNode(GuardedModelAdmin):
     list_filter = ('site','sensor_type')
+
+
+@admin.register(Sensor_Mapping)
+class SensorMapping(GuardedModelAdmin):
     pass
 
-class StatusRule(GuardedModelAdmin):
-    pass
 
 @admin.register(Report_Job)
 class ReportDisplay(GuardedModelAdmin):

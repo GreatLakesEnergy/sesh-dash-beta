@@ -638,7 +638,8 @@ class Sensor_Node(models.Model):
      index12 = models.CharField(max_length=40, blank=True, null=True)
 
      def __str__(self):
-         return "Sensor Node" + str(self.sensor_type) + " " + self.site.site_name + "With id "+ str(self.node_id)
+
+         return "Sensor Node" + str(self.sensor_type) + " " + self.site.site_name + "with id "+ str(self.node_id)
 
      def save(self, *args, **kwargs):
          if not Sensor_Mapping.objects.filter(site_id=self.site.id, node_id=self.node_id,sensor_type=self.sensor_type):
@@ -646,8 +647,9 @@ class Sensor_Node(models.Model):
          super(Sensor_Node,self).save(*args, **kwargs)
 
      def delete(self, *args, **kwargs):
-        Sensor_Mapping.delete(site_id=self.site.id, node_id=self.node_id,
-                                  sensor_type=self.sensor_type)
+        Sensor_Mapping.objects.filter(site_id=self.site.id, node_id=self.node_id,
+                                  sensor_type=self.sensor_type).delete()
+
         super(Sensor_Node,self).delete(*args, **kwargs)
 
 class Sensor_Mapping(models.Model):
