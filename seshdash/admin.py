@@ -83,6 +83,11 @@ class StatusRule(GuardedModelAdmin):
     pass
 
 @admin.register(Report_Job)
+
+class ReportDisplay(GuardedModelAdmin):
+    pass
+
+@admin.register(Report_Sent)
 class ReportDisplay(GuardedModelAdmin):
     pass
 
