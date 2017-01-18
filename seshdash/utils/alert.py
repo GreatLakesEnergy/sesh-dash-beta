@@ -95,8 +95,6 @@ def render_alert_script(data_for_alert):
     return template
 
 
-
-
 def create_alert(site, alert):
     """
     Wrapper function to create alerts in kapacitor using django alert tempaltes
@@ -118,8 +116,6 @@ def create_alert(site, alert):
 
     alert_script = render_alert_script(data_for_alert)
     res = kap.create_task(alert_id, dbrps = self.settings.KAPACITOR_DBRPS, script=alert_script)
-
-
 
 
 def send_alert_slack(site_groups, content):
@@ -169,9 +165,6 @@ def get_slack_alert_msg(subject, alert):
     return msg
 
 
-
-
-
 def get_alert_check_value(rule):
     """
     Returns the value to check for alert from latest data point
@@ -204,13 +197,16 @@ def get_alert_check_value(rule):
     else:
         return None, None
 
+
 def get_latest_point_influx(site, rule):
     latest_data_point = influx.get_latest_point_site(site, rule.check_field, settings.INFLUX_DB)
     return latest_data_point
 
+
 def get_latest_point_value_influx(site, rule):
     latest_data_point_value = get_latest_point_influx(site,rule)
     return latest_data_point_value['value']
+
 
 def is_influx_rule(rule):
     """
@@ -478,7 +474,10 @@ def alert_status_check():
             site_groups = get_groups_with_perms(site)
 
             # Reporting
-            send_mail('Alert Silenced', content, mails)
-            send_sms(content, sms_numbers)
+            if mails:
+                send_mail('Alert Silenced', mails, content)
+            if sms_numbers:
+                send_sms(content, sms_numbers)
+
             slack_msg = get_slack_alert_msg("Alert silenced", alert)
             send_alert_slack(site_groups, slack_msg)

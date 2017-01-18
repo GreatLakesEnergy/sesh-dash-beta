@@ -178,7 +178,7 @@ class AlertTestCase(TestCase):
         else:
             self.assertEqual(alert_sms_sent.count(), 1)
 
-        #test_slack 
+        #test_slack
         alert_slack_sent = Sesh_Alert.objects.filter(slackSent=True)
         self.assertEqual(alert_slack_sent.count(), 4)
 
@@ -188,7 +188,11 @@ class AlertTestCase(TestCase):
         Test the display of alerts to the user
         """
         self.client.login(username='patrick', password='test.test.test')
-
+        alerts = Sesh_Alert.objects.all()
+        print "#####################"
+        print alerts
+        for alert in alerts:
+            print alert.id
         response = self.client.post('/get-alert-data/',{'alertId':'1'})
         self.assertEqual(response.status_code, 200)
 
@@ -214,8 +218,6 @@ class AlertTestCase(TestCase):
         silenced_alert = Sesh_Alert.objects.filter(id=1).first()
         self.assertEqual(silenced_alert.isSilence, True)
 
-        
-            
 
 
     @override_settings(DEBUG=True)
