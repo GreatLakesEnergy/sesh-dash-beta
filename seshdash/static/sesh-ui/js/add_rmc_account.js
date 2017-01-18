@@ -59,9 +59,8 @@ $(function(){
             var sensorSelectorInput is used to determine the location to add the form and
             var sensorType is used to determine the type of the form to add.
         */
-        var form;
 
-        form = SensorForm
+        var form = SensorForm;
 
         form = form.substring(1, (form.length -1)) // Removing the wrapper quotes
 

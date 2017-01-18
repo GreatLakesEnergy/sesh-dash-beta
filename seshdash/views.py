@@ -29,8 +29,7 @@ from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Acco
 from django.db.models import Avg
 from django.db.models import Sum
 
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
-                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm, \
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorNodeForm, EditSiteForm, SiteVRMForm, \
                            AlertRuleForm, SeshUserForm, StatusCardForm
 
 # Special things we need
@@ -1116,7 +1115,7 @@ def add_rmc_account(request, site_id):
     SensorNodeFormSetFactory = formset_factory(SensorNodeForm)
 
     # formsets
-    sensor_form_set = SensorNodeSetFactory(prefix="emonth")
+    sensor_form_set = SensorNodeFormSetFactory(prefix="emonth")
 
 
     context_dict = {}
@@ -1125,7 +1124,7 @@ def add_rmc_account(request, site_id):
     if request.method == 'POST':
 
         rmc_form = RMCForm(request.POST)
-        sensor_form = SensorForm(request.POST, prefix="sensor")
+        sensor_form = SensorNodeForm(request.POST, prefix="sensor")
 
         sensors_sets =  [sensor_form_set]
 

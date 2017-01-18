@@ -199,7 +199,7 @@ class Sesh_Site(models.Model):
             self.status_card = Status_Card.objects.create()
             self.site_measurements = Site_Measurements.objects.create()
             super(Sesh_Site, self).save(*args, **kwargs)
-            Sensor_EmonPi.objects.create(site=self)
+            Sensor_Node.objects.create(site=self)
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
 
@@ -623,7 +623,7 @@ class Sensor_Node(models.Model):
 
      site = models.ForeignKey(Sesh_Site)
      node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
-     sensor_type = CharField(max_length=40, choices=SENSOR_TYPE_CHOICES)
+     sensor_type = models.CharField(max_length=40, choices=SENSOR_TYPE_CHOICES)
      index1 = models.CharField(max_length=40, default="ac_power1")
      index2 = models.CharField(max_length=40, default="pv_production")
      index3 = models.CharField(max_length=40, default="consumption")
@@ -638,17 +638,17 @@ class Sensor_Node(models.Model):
      index12 = models.CharField(max_length=40, blank=True, null=True)
 
      def __str__(self):
-         return "Sensor Node for " + self.site.site_name
+         return "Sensor Node" + str(self.sensor_type) + " " + self.site.site_name + "With id "+ str(self.node_id)
 
      def save(self, *args, **kwargs):
          if not Sensor_Mapping.objects.filter(site_id=self.site.id, node_id=self.node_id,sensor_type=self.sensor_type):
              Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type=self.sensor_type)
-         super(Sensor_EmonTx, self).save(*args, **kwargs)
+         super(Sensor_Node,self).save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+     def delete(self, *args, **kwargs):
         Sensor_Mapping.delete(site_id=self.site.id, node_id=self.node_id,
                                   sensor_type=self.sensor_type)
-        super(Sensor_EmonTx,self).delete(*args, **kwargs)
+        super(Sensor_Node,self).delete(*args, **kwargs)
 
 class Sensor_Mapping(models.Model):
     """
