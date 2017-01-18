@@ -74,21 +74,11 @@ class SiteMeasurements(GuardedModelAdmin):
     pass
 
 
-@admin.register(Sensor_EmonTx)
-class SensorEmonTx(GuardedModelAdmin):
-    list_filter = ('site',)
+@admin.register(Sensor_Node)
+class SensorNode(GuardedModelAdmin):
+    list_filter = ('site','sensor_type')
     pass
 
-@admin.register(Sensor_EmonTh)
-class SensorEmonTh(GuardedModelAdmin):
-    list_filter = ('site',)
-    pass
-
-@admin.register(Sensor_BMV)
-class SensorBMV(GuardedModelAdmin):
-    list_filter = ('site',)
-
-@admin.register(Status_Rule)
 class StatusRule(GuardedModelAdmin):
     pass
 
@@ -97,5 +87,6 @@ class ReportDisplay(GuardedModelAdmin):
     pass
 
 @admin.register(Report_Sent)
-class ReportDisplay(GuardedModelAdmin):
-    pass
+class ReportSentDisplay(GuardedModelAdmin):
+    list_display = ('report_job', 'date', 'title', 'status')
+    list_display = ('status','date','report_job')

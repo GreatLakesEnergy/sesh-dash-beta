@@ -11,11 +11,12 @@ from django.utils import timezone
 # Other libs
 from geoposition import Geoposition
 
-from seshdash.models import Sesh_User, Sesh_Site, Sesh_RMC_Account, Sensor_EmonTh, Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Sensor_Mapping
+from seshdash.models import Sesh_User, Sesh_Site, Sesh_RMC_Account, Sensor_Node, Sensor_Mapping
 from seshdash.utils.model_tools import get_all_associated_sensors, get_config_sensors
 
 class TestAddRMCSite(TestCase):
     """
+    Testing creation of RMC site and sensor nodes
     """
     def setUp(self):
         """
@@ -45,7 +46,7 @@ class TestAddRMCSite(TestCase):
                            )
 
 
-        self.emonth = Sensor_EmonTh.objects.create(site=self.site, node_id=5)
+        self.sensor_node = Sensor_Node.objects.create(site=self.site, node_id=5)
 
     def test_add_rmc_site(self):
         """
@@ -117,14 +118,14 @@ class TestAddRMCSite(TestCase):
                            'emontx-1-index10': '',
                            'emontx-1-index11': '',
                            'emontx-1-index12': '',
-                           'emonth-MAX_NUM_FORMS': '1000',
-                           'emonth-TOTAL_FORMS': '1',
-                           'emonth-INITIAL_FORMS': '0',
-                           'emonth-0-node_id': '6',
-                           'emonth-0-index1': 'soc',
-                           'emonth-0-index2': 'battery_voltage',
-                           'emonth-0-index3': 'battery_load',
-                           'emonth-0-index4': 'required',
+                           'sensor_node-MAX_NUM_FORMS': '1000',
+                           'sensor_node-TOTAL_FORMS': '1',
+                           'sensor_node-INITIAL_FORMS': '0',
+                           'sensor_node-0-node_id': '6',
+                           'sensor_node-0-index1': 'soc',
+                           'sensor_node-0-index2': 'battery_voltage',
+                           'sensor_node-0-index3': 'battery_load',
+                           'sensor_node-0-index4': 'required',
                            'bmv-MAX_NUM_FORMS': '1000',
                            'bmv-TOTAL_FORMS': '1',
                            'bmv-INITIAL_FORMS': '0',
@@ -161,25 +162,13 @@ class TestAddRMCSite(TestCase):
         self.assertEqual(Sesh_RMC_Account.objects.all().count(), 1)
         self.assertEqual(Sesh_RMC_Account.objects.last().site, self.site)
 
-        # Asserting the creation fo the emon tx sensor and it linking to site
-        self.assertEqual(Sensor_EmonTx.objects.all().count(), 2)
-        self.assertEqual(Sensor_EmonTx.objects.last().site, self.site)
-
         # Asserting the creation of the emon th sensor and it linking to the site
-        self.assertEqual(Sensor_EmonTh.objects.all().count(), 2) # The added one plus one in the setUp
-        self.assertEqual(Sensor_EmonTh.objects.all().last().site, self.site)
-
-        # Asserting the creation of the bmv sensor and the linking to the site
-        self.assertEqual(Sensor_BMV.objects.all().count(), 1)
-        self.assertEqual(Sensor_BMV.objects.all().last().site, self.site)
+        self.assertEqual(Sensor_Node.objects.all().count(), 2) # The added one plus one in the setUp
+        self.assertEqual(Sensor_Node.objects.all().last().site, self.site)
 
         # Asserting the number of sensor mappings created
-        self.assertEqual(Sensor_Mapping.objects.all().count(), 6)
+        self.assertEqual(Sensor_Mapping.objects.all().count(), 2)
 
-
-        # Testing editing emonpi sensor site
-        emonpi = Sensor_EmonPi.objects.filter(site=self.site).first()
-        self.assertEqual(emonpi.index1, 'testing')
 
     def test_get_rmc_config(self):
         """
@@ -192,8 +181,7 @@ class TestAddRMCSite(TestCase):
         associated_sensors = get_all_associated_sensors(self.site)
         configuration, victron_device_number = get_config_sensors(associated_sensors)
 
-        self.assertRegexpMatches(configuration, 'emonTH_1')
-        self.assertRegexpMatches(configuration, 'emonPi_')
+        self.assertRegexpMatches(configuration, 'sensor_node_1')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/plain')
@@ -201,4 +189,4 @@ class TestAddRMCSite(TestCase):
 	# Testing for invalid apikeys
         response = self.client.get('/get_rmc_config', {'api_key': 'incorrect'})
         self.assertEqual(response.status_code, 403)
-  
+
