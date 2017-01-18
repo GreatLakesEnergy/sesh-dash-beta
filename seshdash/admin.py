@@ -79,6 +79,11 @@ class SensorNode(GuardedModelAdmin):
     list_filter = ('site','sensor_type')
     pass
 
+@admin.register(Sensor_Mapping)
+class SensorMapping(GuardedModelAdmin):
+    pass
+
+
 class StatusRule(GuardedModelAdmin):
     pass
 
