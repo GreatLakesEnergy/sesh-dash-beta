@@ -616,9 +616,9 @@ class Sensor_Node(models.Model):
                          (29, 29),
                      )
      SENSOR_TYPE_CHOICES = (
-                        ('Temperature Humidity','th'),
-                        ('Power Voltage','tx'),
-                        ('Ph Ethenoal','pe'),
+                        ('th','Temperature Humidity'),
+                        ('tx','Power Voltage'),
+                        ('pe','Ph Ethenoal'),
                     )
 
      site = models.ForeignKey(Sesh_Site)
