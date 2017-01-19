@@ -1101,7 +1101,6 @@ def add_rmc_site(request):
     return render(request, 'seshdash/add_rmc_site.html', context_dict)
 
 
-
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
 def add_rmc_account(request, site_id):
