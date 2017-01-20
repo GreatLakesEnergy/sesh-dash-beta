@@ -1356,7 +1356,7 @@ def delete_report(request, report_id):
     report.delete()
     return redirect(reverse('manage_reports', args=[site.id]))
 
-
+@login_required
 def export_csv_measurement_data(request):
     """
     Returns a csv of a given measurement a request
