@@ -254,6 +254,18 @@ class Kapacitor:
         return re[1]
 
 
+    def delete_all_tasks(self):
+        """
+        Delete all the tasks in kapacitor
+        """
+        tasks = self.list_tasks()
+         
+        for task in tasks["tasks"]:
+            self.delete_task(task['id'])
+ 
+        return True
+
+
     def create_recording(self, task_id, stop, method='stream', id=None):
         """
         Creates a kapacitor recording

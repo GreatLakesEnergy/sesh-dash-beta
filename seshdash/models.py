@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 
 from django_mysql.models import JSONField
 
+
 # Create your models here.
 class VRM_Account(models.Model):
     """
@@ -774,6 +775,15 @@ class Report(models.Model):
             duration_list.append(item[0])
 
         return duration_list
+
+    def save(self, *args, **kwargs):
+        """
+        On save add kapacitor task referencing the report
+        """
+        from seshdash.utils.reporting import add_report_kap_tasks
+        add_report_kap_tasks(self)
+        super(Report, self).save(*args, **kwargs)
+        
 
 class Data_Process_Rule(models.Model):
     """

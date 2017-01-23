@@ -15,6 +15,7 @@ from seshdash.utils.reporting import send_report, generate_report_data, _format_
                                      get_table_report_dict, get_edit_report_list, is_in_report_attributes
 from seshdash.tasks import check_reports
 from seshdash.data.db.influx import Influx
+from seshdash.data.db.kapacitor import Kapacitor
 
 
 class ReportTestCase(TestCase):
@@ -87,6 +88,7 @@ class ReportTestCase(TestCase):
                                             attributes=self.attributes_data)
 
         self.i = Influx()
+        self.kap = Kapacitor()
 
 
     def test_models(self):
@@ -192,6 +194,9 @@ class ReportTestCase(TestCase):
 
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
         self.assertEqual(Report.objects.all().count(), 2)
+
+        tasks = self.kap.get_tasks()
+        print "The tasks number of tasks is: %s" % len(tasks)
 
 
 
