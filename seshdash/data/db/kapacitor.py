@@ -198,7 +198,7 @@ class Kapacitor:
     def list_tasks(self, pattern=''):
         """
         List the current tasks in kapacitor
-        @param pattern - This specifies a pattern to query kapacitor with, Note: it uses go pattern matching syntax
+        @param pattern - This specifies a pattern to query kapacitor with, Note: it uses shell global matching syntax
         """
         data_dict = {
             'pattern': pattern,
@@ -206,7 +206,7 @@ class Kapacitor:
          
         re = self._make_request('tasks', 
                                 type_of_request = 'GET',
-                                path_params = data_dict,
+                                data = data_dict,
                                 )
 
         logger.debug("got response %s %s" % re)
@@ -237,7 +237,7 @@ class Kapacitor:
 
 
 
-    def delete_task(self, task_id ):
+    def delete_task(self, task_id):
         """
         Delete a created task
 
@@ -257,6 +257,19 @@ class Kapacitor:
         logger.debug("got response %s %s"%re)
         return re[1]
 
+
+    def delete_tasks(self, pattern):
+        """
+        Deletes tasks matching a specific pattern, 
+ 
+        @param pattern - specifies a shell glob mapping pattern
+        """
+        tasks = self.list_tasks(pattern=pattern)
+          
+        for task in tasks["tasks"]:
+            self.delete_task(task['id'])
+
+        return True
 
     def delete_all_tasks(self):
         """

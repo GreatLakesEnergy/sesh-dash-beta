@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 
 from django_mysql.models import JSONField
 
+from seshdash.data.db.kapacitor import Kapacitor
 
 # Create your models here.
 class VRM_Account(models.Model):
@@ -703,6 +704,15 @@ class Report_Job(models.Model):
         from seshdash.utils.reporting import add_report_kap_tasks
         add_report_kap_tasks(self)
         super(Report_Job, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """
+        On delete delet kapacitor tasks referencing the report Job
+        """
+        kap = Kapacitor()
+        pattern =  self.site.site_name + '_' + self.duration + "*" # tasks begining with site_name_duration
+        kap.delete_tasks(pattern)
+        super(Report_Job, self).delete(*args, **kwargs)
 
     class Meta:
         unique_together = (('site','duration'),)

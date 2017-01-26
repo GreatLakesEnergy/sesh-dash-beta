@@ -284,7 +284,7 @@ def add_report_kap_tasks(report):
             'site_id': report.site.id,
         }
 
-        task_name = str(report.site.site_name + '_' + attribute['operation'] + '_' + attribute['field'])
+        task_name = str(report.site.site_name + '_' + report.duration + '_' +  attribute['operation'] + '_' + attribute['field'])
         dbrps = [{"db": settings.INFLUX_DB, "rp": "autogen"}]
         response = kap.create_task(task_name, t.render(data), task_type='batch', dbrps=dbrps)
 
