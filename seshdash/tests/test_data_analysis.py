@@ -6,7 +6,7 @@ from django.utils import timezone
 from geoposition import Geoposition
 
 from seshdash.data.db.influx import Influx
-from seshdash.models import Sesh_Site
+from seshdash.models import Sesh_Site, Sesh_User
 
 class DataAnalysisTestCase(TestCase):
     """
@@ -46,9 +46,13 @@ class DataAnalysisTestCase(TestCase):
                                              battery_bank_capacity=12321,
                                              has_genset=True,
                                              has_grid=True,
-                                            )   
-    
-   
+                                            )
+        self.test_user = Sesh_User.objects.create_user(
+             username="johndoe",
+             email="alp@gle.solar",
+             password="asdasd12345")
+
+
     def test_get_csv_data(self):
         """
         Testing the functions that return csv files
@@ -61,6 +65,7 @@ class DataAnalysisTestCase(TestCase):
             'site-name': self.site.site_name
         }
 
-        response = self.client.post(reverse('export-csv-data'), data) 
+        self.client.login(username='johndoe',password='asdasd12345')
+        response = self.client.post(reverse('export-csv-data'), data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/csv')

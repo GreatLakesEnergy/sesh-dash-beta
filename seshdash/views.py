@@ -29,8 +29,7 @@ from seshdash.models import Sesh_Site,Site_Weather_Data, BoM_Data_Point,VRM_Acco
 from django.db.models import Avg
 from django.db.models import Sum
 
-from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorEmonThForm,  \
-                           SensorEmonTxForm, SensorBMVForm, SensorEmonPiForm, EditSiteForm, SiteVRMForm, \
+from seshdash.forms import SiteForm, VRMForm, RMCForm, SiteRMCForm, SensorNodeForm, EditSiteForm, SiteVRMForm, \
                            AlertRuleForm, SeshUserForm, StatusCardForm
 
 # Special things we need
@@ -329,14 +328,12 @@ def _get_user_sites(request, site_type='all'):
     # Get sites for use
 
     sites = Sesh_Site.objects.filter(organisation=request.user.organisation)
-
     if site_type == 'vrm':
-        sites.filter(vrm_site_id__isnull=False)
+        sites = sites.filter(vrm_site_id__isnull=False)
     elif site_type == 'rmc':
-        sites.filter(vrm_site_id__isnull=True)
+        sites = sites.filter(vrm_site_id__isnull=True)
     else:
         return sites
-    return sites
 
 
 
@@ -888,6 +885,13 @@ def graphs(request):
                         '7d':'1d',
                         '30d':'5d',
                     }
+    if start_time and end_time:
+        start_time = datetime.strptime(start_time, "%Y-%m-%d")
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
+    else:
+        start_time = datetime.now() - timedelta(weeks=1)
+        end_time = datetime.now()
+
 
     # processing post request values to be used in the influx queries
     for choice in choices:
@@ -1097,7 +1101,6 @@ def add_rmc_site(request):
     return render(request, 'seshdash/add_rmc_site.html', context_dict)
 
 
-
 @login_required
 @permission_required_or_403('auth.view_Sesh_Site')
 def add_rmc_account(request, site_id):
@@ -1108,18 +1111,11 @@ def add_rmc_account(request, site_id):
     site = Sesh_Site.objects.filter(id=site_id).first()
 
     # sensors formset factories
-    emonThFormSetFactory = formset_factory(SensorEmonThForm)
-    emonTxFormSetFactory = formset_factory(SensorEmonTxForm)
-    bmvFormSetFactory = formset_factory(SensorBMVForm)
+    SensorNodeFormSetFactory = formset_factory(SensorNodeForm)
 
     # formsets
-    emonth_form_set = emonThFormSetFactory(prefix="emonth")
-    emontx_form_set = emonTxFormSetFactory(prefix="emontx")
-    bmv_form_set = bmvFormSetFactory(prefix="bmv")
+    sensor_form_set = SensorNodeFormSetFactory(prefix="emonth")
 
-    # emonpi form
-    site_emonpi = Sensor_EmonPi.objects.filter(site=site).first()
-    emonpi_form = SensorEmonPiForm(prefix='emonpi', instance=site_emonpi)
 
     context_dict = {}
     rmc_form = RMCForm()
@@ -1127,31 +1123,25 @@ def add_rmc_account(request, site_id):
     if request.method == 'POST':
 
         rmc_form = RMCForm(request.POST)
-        emonpi_form = SensorEmonPiForm(request.POST, prefix='emonpi', instance=site_emonpi)
-        emonth_form_set = emonThFormSetFactory(request.POST, prefix="emonth")
-        emontx_form_set = emonTxFormSetFactory(request.POST, prefix="emontx")
-        bmv_form_set = bmvFormSetFactory(request.POST, prefix="bmv")
+        sensor_form = SensorNodeForm(request.POST, prefix="sensor")
 
-        sensors_sets =  [emonth_form_set, emontx_form_set, bmv_form_set]
+        sensors_sets =  [sensor_form_set]
 
         if rmc_form.is_valid():
             rmc_account = rmc_form.save(commit=False)
             rmc_account.site = site
             rmc_account.save()
             associate_sensors_sets_to_site(sensors_sets, site)
-            if emonpi_form.is_valid():
-                emonpi_form.save()
+            if sensor_form.is_valid():
+                sensor_form.save()
 
             return redirect('index')
 
 
     context_dict['rmc_form'] = rmc_form
-    context_dict['emonpi_form'] = emonpi_form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
-    context_dict['emonth_form'] = emonThFormSetFactory(prefix="emonth")
-    context_dict['emontx_form'] = emonTxFormSetFactory(prefix="emontx")
-    context_dict['bmv_form'] = bmvFormSetFactory(prefix="bmv")
+    context_dict['sensor_form'] = SensorNodeFormSetFactory(prefix="sensor")
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
 
 
@@ -1292,7 +1282,7 @@ def manage_reports(request, site_id):
     """
     context_dict = {}
     site = Sesh_Site.objects.filter(id=site_id).first()
-    reports = Report.objects.filter(site=site)
+    reports = Report_Job.objects.filter(site=site)
 
     context_dict['site'] = site
     context_dict['reports'] = reports
@@ -1321,8 +1311,7 @@ def add_report(request, site_id):
             if value == 'on':
                 attributes.append(demjson.decode(key))
 
-
-        report = Report.objects.create(site=site,
+        Report_Job.objects.create(site=site,
                               attributes=attributes,
                               duration=request.POST.get('duration', 'daily'),
                               day_to_report=0)
@@ -1340,7 +1329,7 @@ def edit_report(request, report_id):
     a report id as an parameter
     """
     context_dict = {}
-    report = Report.objects.filter(id=report_id).first()
+    report = Report_Job.objects.filter(id=report_id).first()
     attribute_list = []
 
     if request.method == 'POST':
@@ -1366,12 +1355,12 @@ def delete_report(request, report_id):
     View to delete a report
     """
     context_dict = {}
-    report = Report.objects.filter(id=report_id).first()
+    report = Report_Job.objects.filter(id=report_id).first()
     site = report.site
     report.delete()
     return redirect(reverse('manage_reports', args=[site.id]))
 
-
+@login_required
 def export_csv_measurement_data(request):
     """
     Returns a csv of a given measurement a request

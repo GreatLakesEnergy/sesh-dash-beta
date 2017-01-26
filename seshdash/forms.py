@@ -1,7 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account, Sensor_EmonTh, \
-                            Sensor_EmonTx, Sensor_BMV, Sensor_EmonPi, Alert_Rule, Sesh_User, Status_Card
+from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account, Sensor_Node, Alert_Rule, Sesh_User, Status_Card
 from seshdash.utils.time_utils import get_timezone_from_geo, localize
 
 class SiteForm(ModelForm):
@@ -51,8 +50,8 @@ class SiteRMCForm(ModelForm):
 
 
 class SiteVRMForm(ModelForm):
-    """ 
-    Form for a vrm site 
+    """
+    Form for a vrm site
     """
     class Meta:
         model = Sesh_Site
@@ -80,45 +79,19 @@ class VRMForm(ModelForm):
                   'vrm_password': forms.PasswordInput(),
                    }
 
-
-class SensorEmonThForm(ModelForm):
-     """
-     Emonth form
-     """
-     class Meta:
-         model = Sensor_EmonTh
-         exclude = ('site',)
-
-class SensorEmonTxForm(ModelForm):
+class SensorNodeForm(ModelForm):
     """
-    Emontx form
+    Generic Sensor Node Form
     """
     class Meta:
-        model = Sensor_EmonTx
+        model = Sensor_Node
         exclude = ('site',)
 
-
-class SensorBMVForm(ModelForm):
-    """
-    Bmv form
-    """
-    class Meta:
-        model = Sensor_BMV
-        exclude = ('site',)
-
-
-class SensorEmonPiForm(ModelForm):
-    """
-    Form for the emon pi senosr
-    """
-    class Meta:
-        model = Sensor_EmonPi
-        exclude = ('site',)
 
 
 class AlertRuleForm(ModelForm):
     """
-    Form for the Alert Rule 
+    Form for the Alert Rule
     Model
     """
     class Meta:

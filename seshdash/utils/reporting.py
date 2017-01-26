@@ -1,4 +1,4 @@
-from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point, Sesh_User
+from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point, Sesh_User, Report_Sent
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.model_tools import get_measurement_unit
 from seshdash.data.db.kapacitor import Kapacitor
@@ -42,6 +42,18 @@ def send_report(report):
     context_dict["url_to_dash"] = 'http://dash.gle.solar/site/' + report.site.site_name
 
     val = send_mail(subject, emails, context_dict, 'reporting')
+
+    # Store the report
+    report = Report_Sent(
+            report_job = report,
+            title = subject,
+            date = context_dict["date"],
+            content = report_data,
+            sent_to = map(lambda x: x.email, users),
+            status = val
+            )
+    report.save()
+
     return val
 
 def generate_report_data(report):
@@ -83,8 +95,11 @@ def generate_report_data(report):
             data["unit"] = get_measurement_unit(attribute["column"])
             report_data.append(data)
         else:
-            print "About to use influx and kapacitor to get report dtaa"
             report_data = ['TODO: USING INFLUX AND KAPACITOR TO GET REPORT DATA']
+
+        data["user_friendly_name"] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
+        data["unit"] = get_measurement_unit(attribute["column"])
+        report_data.append(data)
 
     return report_data
 
@@ -269,7 +284,7 @@ def add_report_kap_tasks(report):
             'site_id': report.site.id,
         }
 
-        task_name = str(site.site_name + '_' + attribute['operation'] + '_' + attribute['field'])
+        task_name = str(report.site.site_name + '_' + attribute['operation'] + '_' + attribute['field'])
         dbrps = [{"db": settings.INFLUX_DB, "rp": "autogen"}]
         response = kap.create_task(task_name, t.render(data), task_type='batch', dbrps=dbrps)
 

@@ -10,7 +10,7 @@ from django.db.models import Avg, Sum
 from django.core.urlresolvers import reverse
 from geoposition import Geoposition
 
-from seshdash.models import Daily_Data_Point, Report, Sesh_Site, Sesh_Organisation, Sesh_User
+from seshdash.models import Daily_Data_Point, Report_Job, Sesh_Site, Sesh_Organisation, Sesh_User, Report_Sent
 from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list, \
                                      get_table_report_dict, get_edit_report_list, is_in_report_attributes
 from seshdash.tasks import check_reports
@@ -82,7 +82,7 @@ class ReportTestCase(TestCase):
                                             daily_power_consumption_total = 10,
                                     )
 
-        self.report = Report.objects.create(site=self.site,
+        self.report = Report_Job.objects.create(site=self.site,
                                             duration="daily",
                                             day_to_report=datetime.now().today().weekday(),
                                             attributes=self.attributes_data)
@@ -90,12 +90,11 @@ class ReportTestCase(TestCase):
         self.i = Influx()
         self.kap = Kapacitor()
 
-
     def test_models(self):
         """
         Testing the models
         """
-        self.assertEqual(Report.objects.all().count(), 1)
+        self.assertEqual(Report_Job.objects.all().count(), 1)
 
     def test_generate_report_data(self):
         """
@@ -124,22 +123,21 @@ class ReportTestCase(TestCase):
     def test_send_report(self):
         """
         Testing the sending of the generated reports,
-        This tests the sending by mail
+        Test logging of report
         """
         val = send_report(self.report)
+
+        report_log = Report_Sent.objects.all()
         self.assertTrue(val)
+        self.assertGreater(len(report_log),0)
 
     def test__get_operation(self):
         """
         Testing _get_operation function that takes
         an attribute and returns a function to execute
         """
-        """
-        TODO: To fix this after kapacitor reports are working
         val = _get_operation(self.attributes_data[0])
         self.assertEqual(val, Avg)
-        """
-        print "This will test the operations to be got for sesh tables"
 
     def test__format_column_str(self):
         """
@@ -170,7 +168,6 @@ class ReportTestCase(TestCase):
         with self.assertRaises(LookupError):
             get_table_report_dict('UnknownTable', 'sum')
 
-
     def test_add_report(self):
         """
         Testing the adding of the reports from
@@ -193,12 +190,7 @@ class ReportTestCase(TestCase):
         response = self.client.post(reverse('add_report', args=[self.site.id]), data)
 
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
-        self.assertEqual(Report.objects.all().count(), 2)
-
-        tasks = self.kap.get_tasks()
-        print "The tasks number of tasks is: %s" % len(tasks)
-
-
+        self.assertEqual(Report_Job.objects.all().count(), 2)
 
     def test_delete_report(self):
         """
@@ -208,7 +200,7 @@ class ReportTestCase(TestCase):
         response = self.client.get(reverse('delete_report', args=[self.report.id]))
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
 
-        self.assertEqual(Report.objects.all().count(), 0)
+        self.assertEqual(Report_Job.objects.all().count(), 0)
 
     def test_is_in_report_attributes(self):
         """
@@ -217,7 +209,6 @@ class ReportTestCase(TestCase):
         """
         result = is_in_report_attributes(self.report.attributes[0], self.report)
         self.assertTrue(result)
-
 
     def test_get_edit_report_list(self):
         """
@@ -233,20 +224,12 @@ class ReportTestCase(TestCase):
         report_dict = get_edit_report_list(self.report)
         count = 0
 
-        print "The report dict, is: %s" % report_dict
-
-
         for item in report_dict:
             print "%s: %s" % (item, item['status'])
             if item['status'] == 'on':
                 count += 1
 
         self.assertEqual(count, 2) # Testing that the report list is detecting 2 attributes in the report.
-
-        # Removing the measurements
-        self.i.drop_measurement('trans')
-        self.i.drop_measurement('relay_state')
-
 
     def test_edit_report(self):
         """
@@ -264,6 +247,6 @@ class ReportTestCase(TestCase):
         response = self.client.post(reverse('edit_report', args=[self.report.id]), data)
         self.assertEqual(response.status_code, 302)  # The rediction to the manage reports
 
-        report = Report.objects.filter(id=self.report.id).first()
+        report = Report_Job.objects.filter(id=self.report.id).first()
         self.assertEqual(report.duration, 'monthly')
         self.assertEqual(len(report.attributes), 1)

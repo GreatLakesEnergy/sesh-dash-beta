@@ -15,6 +15,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 def get_model_from_string(model_name):
+    """
+    Return a model name froms string
+    """
     model = eval(model_name)
     return model
 
@@ -31,9 +34,8 @@ def get_measurement_from_rule(rule):
         return rule.check_field
 
 
-
-""" Returns the first model reference from string """
 def get_model_first_reference(model_name, instance):
+    """ Returns the first model reference from string """
     # model_name must be a string
 
     """
@@ -182,10 +184,9 @@ def get_all_associated_sensors(site):
     """
     sensors_list = []
 
-    for model in [Sensor_EmonTx, Sensor_EmonTh, Sensor_BMV, Sensor_EmonPi]:
-        sensors = model.objects.filter(site=site)
+    sensors = Sensor_Node.objects.filter(site=site)
 
-        for sensor in sensors:
+    for sensor in sensors:
             sensors_list.append(sensor)
 
     return sensors_list
@@ -198,41 +199,20 @@ def get_config_sensors(sensors):
     """
     configuration = ""
 
-    bmv_index = 0
-    emonth_index = 0
-    emontx_index = 0
+    sensor_node_index = 0
 
     bmv_number = None # Setting the bmv number so that it can be used in the initial bmv config, This is because we can only have on bmv per site
 
 
     for sensor in sensors:
 
-        if type(sensor) is Sensor_EmonTh:
-           t = get_template('seshdash/configs/emon_th.conf')
-           text = t.render({'number': sensor.node_id, 'sensor_number': (emonth_index + 1) })
-           emonth_index = emonth_index + 1
+           t = get_template('seshdash/configs/sensor_node.conf')
+           text = t.render({'number': sensor.node_id, 'sensor_number': (sensor_node_index + 1) })
+           sensor_node_index = sensor_node_index + 1
 
-        elif type(sensor) is Sensor_EmonTx:
-           t = get_template('seshdash/configs/emon_tx.conf')
-           text = t.render({'number': sensor.node_id, 'sensor_number': (emontx_index + 1) })
-           emontx_index = emontx_index + 1
+           configuration = configuration + text
 
-        elif type(sensor) is Sensor_BMV:
-            bmv_number = sensor.node_id
-            t = get_template('seshdash/configs/bmv.conf')
-            text = t.render({'number': sensor.node_id, 'sensor_number': (bmv_index + 1) })
-            bmv_index = bmv_index + 1
-
-        elif type(sensor) is Sensor_EmonPi:
-            t = get_template('seshdash/configs/emonpi.conf')
-            text = t.render({'number': sensor.node_id})
-        else:
-            logger.error("Invalid sensor")
-            raise Exception("Invalid sensor")
-
-        configuration = configuration + text
-
-    return configuration, bmv_number
+    return configuration, 0
 
 
 

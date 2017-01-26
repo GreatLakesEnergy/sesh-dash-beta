@@ -91,27 +91,8 @@ class VRM_Import_TestCase(TestCase):
         get_BOM_data()
         sleep(1)
         bom_data = Data_Point.objects.all()
-        #Commenting out the test 
+        #Commenting out the test
         #TODO: UNCOMMENT THIS AND FIX THE PROBLEMS WITH GETTING DATA FROM VICTON
         #self.assertEqual(len(bom_data),1)
 
-"""   
-    @override_settings(DEBUG=True)
-    def test_vrm_historical_import(self):
-        
-        #Test all the DP were created in MYSQL and INFLUX
-       
-        with transaction.atomic():
-            self.items_recieved = get_historical_BoM(self.site.pk, time_utils.get_epoch_from_datetime(self.site.comission_date))
-        dps = Data_Point.objects.filter(site=self.site)
-        self.assertNotEqual(dps.count(), 0)
-        sleep(2)
-        num_point = len(self.i.query("soc"))
-        self.assertNotEqual(num_point,0)
 
-        #run historical aggregates
-        print "running historical aggregate"
-        run_aggregate_on_historical(self.site.id)
-        aggregates = ddp.objects.filter(site=self.site,date__range=[self.start_date,self.now])
-        self.assertNotEqual(aggregates.count(),0)
-"""

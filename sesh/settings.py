@@ -163,6 +163,7 @@ DATABASES = {
         'USER': config.get('database','USER'),
         'PASSWORD': config.get('database','PASSWORD'),
         'HOST': config.get('database','HOST'),
+        'PORT': config.get('database','DB_PORT')
     }
 }
 

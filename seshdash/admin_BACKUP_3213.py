@@ -88,11 +88,13 @@ class SensorMapping(GuardedModelAdmin):
 class ReportDisplay(GuardedModelAdmin):
     pass
 
+<<<<<<< HEAD
 @admin.register(Tick_Script)
 class TickScript(GuardedModelAdmin):
     pass
-
+=======
 @admin.register(Report_Sent)
 class ReportSentDisplay(GuardedModelAdmin):
     list_display = ('report_job', 'date', 'title', 'status')
     list_display = ('status','date','report_job')
+>>>>>>> 936a1f8a8ec170399760522406d4bbedf5ee5cea

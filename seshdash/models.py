@@ -113,6 +113,7 @@ class Status_Card(models.Model):
      def __str__(self):
          return "For site: " + self.sesh_site.site_name
 
+
 class Site_Measurements(models.Model):
     """
     Contains measurements to be displayed in graphs dropdowns
@@ -163,10 +164,6 @@ class Site_Measurements(models.Model):
         return self.sesh_site.site_name
 
 
-
-
-
-
 class Sesh_Site(models.Model):
     """
     Model for each PV SESH installed site
@@ -203,7 +200,7 @@ class Sesh_Site(models.Model):
             self.status_card = Status_Card.objects.create()
             self.site_measurements = Site_Measurements.objects.create()
             super(Sesh_Site, self).save(*args, **kwargs)
-            Sensor_EmonPi.objects.create(site=self)
+            Sensor_Node.objects.create(site=self)
         else:
             super(Sesh_Site, self).save(*args, **kwargs)
 
@@ -223,7 +220,6 @@ class Sesh_Site(models.Model):
         permissions = (
             ('view_Sesh_Site', 'View Sesh Site'),
         )
-
 
 class Sesh_RMC_Account(models.Model):
     """
@@ -249,7 +245,6 @@ class Sesh_RMC_Account(models.Model):
 
     class Meta:
         verbose_name = "RMC API Account"
-
 
 
 class Alert_Rule(models.Model):
@@ -299,8 +294,6 @@ class Alert_Rule(models.Model):
     class Meta:
          verbose_name = 'System Alert Rule'
          verbose_name_plural = 'System Alert Rules'
-
-
 
 #TODO Add alert Object to save alerts
 class Sesh_Alert(models.Model):
@@ -599,14 +592,14 @@ class Status_Rule(models.Model):
 
 # Used globally?
 SENSORS_LIST = {
-    'Emon Tx',
-    'Emon Th',
-    'BMV'
+    'Tx',
+    'Th',
+    'Pe'
 }
 
 
 
-class Sensor_EmonTx(models.Model):
+class Sensor_Node(models.Model):
      """
      Table representative for the emon tx
      """
@@ -615,15 +608,28 @@ class Sensor_EmonTx(models.Model):
                          (20, 20),
                          (21, 21),
                          (22, 22),
+                         (23, 23),
+                         (24, 24),
+                         (25, 25),
+                         (26, 26),
+                         (27, 27),
+                         (28, 28),
+                         (29, 29),
                      )
+     SENSOR_TYPE_CHOICES = (
+                        ('th','Temperature Humidity'),
+                        ('tx','Power Voltage'),
+                        ('pe','Ph Ethenoal'),
+                    )
 
      site = models.ForeignKey(Sesh_Site)
      node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     sensor_type = models.CharField(max_length=40, choices=SENSOR_TYPE_CHOICES)
      index1 = models.CharField(max_length=40, default="ac_power1")
-     index2 = models.CharField(max_length=40, default="pv_production")
-     index3 = models.CharField(max_length=40, default="consumption")
-     index4 = models.CharField(max_length=40, default="grid_in")
-     index5 = models.CharField(max_length=40, default="AC_Voltage_out")
+     index2 = models.CharField(max_length=40, default="pv_production", blank=True, null=True)
+     index3 = models.CharField(max_length=40, default="consumption", blank=True, null=True)
+     index4 = models.CharField(max_length=40, default="grid_in", blank=True, null=True)
+     index5 = models.CharField(max_length=40, default="AC_Voltage_out", blank=True, null=True)
      index6 = models.CharField(max_length=40, blank=True, null=True)
      index7 = models.CharField(max_length=40, blank=True, null=True)
      index8 = models.CharField(max_length=40, blank=True, null=True)
@@ -633,104 +639,18 @@ class Sensor_EmonTx(models.Model):
      index12 = models.CharField(max_length=40, blank=True, null=True)
 
      def __str__(self):
-         return "Emon tx sensor for " + self.site.site_name
+         return "Sensor Node " + str(self.sensor_type) + " for " + self.site.site_name + " with id "+ str(self.node_id)
 
      def save(self, *args, **kwargs):
-         Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emontx')
-         super(Sensor_EmonTx, self).save(*args, **kwargs)
+         if not Sensor_Mapping.objects.filter(site_id=self.site.id, node_id=self.node_id,sensor_type=self.sensor_type):
+             Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type=self.sensor_type)
+         super(Sensor_Node,self).save(*args, **kwargs)
 
+     def delete(self, *args, **kwargs):
+        Sensor_Mapping.objects.filter(site_id=self.site.id, node_id=self.node_id,
+                                  sensor_type=self.sensor_type).delete()
 
-
-class Sensor_EmonTh(models.Model):
-     """
-     Table Representive structure fo the emon th
-     """
-     NODE_ID_CHOICES = (
-                    (6, 6),
-                    (7, 7),
-                    (8, 8),
-               )
-
-     site = models.ForeignKey(Sesh_Site)
-     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
-     index1 = models.CharField(max_length=40, default="tempreature")
-     index2 = models.CharField(max_length=40, default="external_tempreature")
-     index3 = models.CharField(max_length=40, default="humidity")
-     index4 = models.CharField(max_length=40, default="battery")
-
-     def __str__(self):
-         return "Emon th sensor for " +  self.site.site_name
-
-     def save(self, *args, **kwargs):
-        if self.pk is None:
-            Sensor_Mapping.objects.create(site_id=self.site.id, node_id=self.node_id, sensor_type='sensor_emonth')
-        super(Sensor_EmonTh, self).save(*args, **kwargs)
-
-
-
-class Sensor_BMV(models.Model):
-    """
-    Mapping for the bmv
-    """
-    NODE_ID_CHOICES = (
-                        (29, 29),
-                    )
-
-    site = models.ForeignKey(Sesh_Site)
-    node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
-    index1 = models.CharField(max_length=40, default="soc")
-    index2 = models.CharField(max_length=40, default="ce")
-    index3 = models.CharField(max_length=40, default="ttg")
-    index4 = models.CharField(max_length=40, default="v")
-    index5 = models.CharField(max_length=40, default="i")
-    index6 = models.CharField(max_length=40, default="relay")
-    index7 = models.CharField(max_length=40, default="alarm")
-
-    def __str__(self):
-        return "BMV sensor for " + self.site.site_name
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_bmv')
-        super(Sensor_BMV, self).save(*args, **kwargs)
-
-
-class Sensor_EmonPi(models.Model):
-    """
-    This is the default base sensor for each site
-    that is used in the rmc config
-    """
-    site = models.ForeignKey(Sesh_Site)
-    node_id = models.IntegerField(default=5, editable=False)
-    index1 = models.CharField(max_length=40, default="power1")
-    index2 = models.CharField(max_length=40, default="power2")
-    index3 = models.CharField(max_length=40, default="power3")
-    index4 = models.CharField(max_length=40, default="power4")
-    index5 = models.CharField(max_length=40, default="v_battery_bank")
-    index6 = models.CharField(max_length=40, default="Vrms")
-    index7 = models.CharField(max_length=40, default="T1")
-    index8 = models.CharField(max_length=40, default="T2")
-    index9 = models.CharField(max_length=40, default="T3")
-    index10 = models.CharField(max_length=40, default="T4")
-    index11 = models.CharField(max_length=40, default="T5")
-    index12 = models.CharField(max_length=40, default="T6")
-    index13 = models.CharField(max_length=40, default="pulseCount")
-
-    def __str__(self):
-        return "Emon pi for site %s " % self.site.site_name
-
-    def save(self, *args, **kwargs):
-
-        if self.pk is None: # If it is saved for the first time
-            if self.site.sensor_emonpi_set.all().count() > 0:
-                raise Exception("Site can not have more than 2 emonpi sensors")
-
-            Sensor_Mapping.objects.create(site_id=self.site_id, node_id=self.node_id, sensor_type='sensor_emonpi')
-        super(Sensor_EmonPi, self).save(*args, **kwargs)
-
-
-
-
+        super(Sensor_Node,self).delete(*args, **kwargs)
 
 class Sensor_Mapping(models.Model):
     """
@@ -751,7 +671,7 @@ class Sensor_Mapping(models.Model):
         unique_together =  ('site_id', 'node_id', 'sensor_type')
 
 
-class Report(models.Model):
+class Report_Job(models.Model):
     """
     Model to contain the reports that should be sent,
     to users of specific sites
@@ -784,6 +704,18 @@ class Report(models.Model):
         add_report_kap_tasks(self)
         super(Report, self).save(*args, **kwargs)
         
+
+class Report_Sent(models.Model):
+    """
+    Store each report sent for later viewing or resending
+    """
+    report_job = models.ForeignKey(Report_Job)
+    title = models.CharField(max_length = 60)
+    date = models.DateTimeField()
+    status = models.CharField(max_length = 100)
+    content = models.TextField()
+    sent_to = JSONField() # list of users report was sent to
+
 
 class Data_Process_Rule(models.Model):
     """

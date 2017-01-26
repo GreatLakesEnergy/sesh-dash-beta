@@ -29,7 +29,7 @@
                             <div class="row emonpi-sensor">
                                 <div class="form-group col-xs-8">
                                     <select class="sensor-selector form-control" name="sensor" class="disabled">
-                                        <option name="emonpi">EmonPi</option>
+                                        <option name="sensor_node">Sensor Node</option>
                                     </select>
                                 </div>
 
@@ -40,7 +40,7 @@
                             </div>
 
                             <div class="row configure-form-container">
-                                {{ emonpi_form|bootstrap }}
+                                {{ sensor_form|bootstrap }}
                             </div>
         
                         </div>
@@ -101,9 +101,7 @@
 
 {% block javascript %}
     
-        var emonThForm = '{{ emonth_form|bootstrap|js_escape }}',
-            emonTxForm = '{{ emontx_form|bootstrap|js_escape }}',
-            bmvForm = '{{bmv_form|bootstrap|js_escape}}';
+        var SensorForm = '{{ sensor_form|bootstrap|js_escape }}' ;
           
  
 {% endblock %}

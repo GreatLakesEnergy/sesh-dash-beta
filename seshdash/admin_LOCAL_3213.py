@@ -39,7 +39,7 @@ class RMC_AccountAdmin(GuardedModelAdmin):
 
 @admin.register(Sesh_Organisation)
 class Organisation(GuardedModelAdmin):
-    list_display = ('name',)
+    list_display = ('slack_token',)
     pass
 
 @admin.register(Sesh_User)
@@ -74,25 +74,28 @@ class SiteMeasurements(GuardedModelAdmin):
     pass
 
 
-@admin.register(Sensor_Node)
-class SensorNode(GuardedModelAdmin):
-    list_filter = ('site','sensor_type')
+@admin.register(Sensor_EmonTx)
+class SensorEmonTx(GuardedModelAdmin):
+    list_filter = ('site',)
     pass
 
-@admin.register(Sensor_Mapping)
-class SensorMapping(GuardedModelAdmin):
+@admin.register(Sensor_EmonTh)
+class SensorEmonTh(GuardedModelAdmin):
+    list_filter = ('site',)
     pass
 
+@admin.register(Sensor_BMV)
+class SensorBMV(GuardedModelAdmin):
+    list_filter = ('site',)
 
-@admin.register(Report_Job)
+@admin.register(Status_Rule)
+class StatusRule(GuardedModelAdmin):
+    pass
+
+@admin.register(Report)
 class ReportDisplay(GuardedModelAdmin):
     pass
 
 @admin.register(Tick_Script)
 class TickScript(GuardedModelAdmin):
     pass
-
-@admin.register(Report_Sent)
-class ReportSentDisplay(GuardedModelAdmin):
-    list_display = ('report_job', 'date', 'title', 'status')
-    list_display = ('status','date','report_job')
