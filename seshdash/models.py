@@ -703,6 +703,9 @@ class Report_Job(models.Model):
         from seshdash.utils.reporting import add_report_kap_tasks
         add_report_kap_tasks(self)
         super(Report_Job, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together = (('site','duration'),)
         
 
 class Report_Sent(models.Model):

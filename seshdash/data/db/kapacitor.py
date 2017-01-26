@@ -195,14 +195,18 @@ class Kapacitor:
         return re[1]
 
 
-    def list_tasks(self):
+    def list_tasks(self, pattern=''):
         """
         List the current tasks in kapacitor
+        @param pattern - This specifies a pattern to query kapacitor with, Note: it uses go pattern matching syntax
         """
-        data_dict = {}
+        data_dict = {
+            'pattern': pattern,
+        }
          
         re = self._make_request('tasks', 
                                 type_of_request = 'GET',
+                                path_params = data_dict,
                                 )
 
         logger.debug("got response %s %s" % re)
