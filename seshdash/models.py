@@ -702,7 +702,7 @@ class Report_Job(models.Model):
         """
         from seshdash.utils.reporting import add_report_kap_tasks
         add_report_kap_tasks(self)
-        super(Report, self).save(*args, **kwargs)
+        super(Report_Job, self).save(*args, **kwargs)
         
 
 class Report_Sent(models.Model):
