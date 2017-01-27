@@ -28,6 +28,9 @@ def send_report(report):
     Sends report to the users with
     activated report permission on the site
     """
+    # Function to send the report when given data
+
+    """
     report_data = generate_report_data(report)
     users = Sesh_User.objects.filter(organisation=report.site.organisation, send_mail=True) #users with emailreport on in the organisation
     emails = get_emails_list(users)
@@ -55,81 +58,8 @@ def send_report(report):
     report.save()
 
     return val
-
-def generate_report_data(report):
     """
-    Function to generate a report,
-    The function receives a report model instance and
-    it returns a dict containing the aggregated value of the
-    report attributes
-    """
-    report_data = []
-    now = datetime.now()
-
-    # Getting the correct date range
-    if report.duration == "daily":
-        start = now - relativedelta(hours=24)
-    elif report.duration == "weekly":
-        start = now - relativedelta(weeks=1)
-    elif report.duration == "monthly":
-        start = now - relativedelta(months=1)
-
-
-    # Getting the aggregation of the values in the report attributes
-    for attribute in report.attributes:
-        if "table" in attribute: # If it uses sesh tables
-            operation = _get_operation(attribute) # Getting the operation to execute, average or sum
-
-            try:
-                table = apps.get_model(app_label="seshdash", model_name=attribute["table"])
-            except LookupError:
-                raise Exception("ERROR IN REPORTS: Incorrect table name in the report jsonfield")
-
-            try:
-                data = table.objects.filter(site=report.site,
-                                        date__range=[start, now]).aggregate(val = operation(attribute["column"]))
-            except FieldError:
-                raise Exception("ERROR IN REPORTS: Incorrect column name in the jsonfield")
-
-            data["user_friendly_name"] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
-            data["unit"] = get_measurement_unit(attribute["column"])
-            report_data.append(data)
-        else:
-            report_data = ['TODO: USING INFLUX AND KAPACITOR TO GET REPORT DATA']
-
-        data["user_friendly_name"] =  _format_column_str(attribute["column"]) + " " + attribute["operation"]
-        data["unit"] = get_measurement_unit(attribute["column"])
-        report_data.append(data)
-
-    return report_data
-
-def _get_operation(attribute):
-    """
-    Function to return the operation to be used
-    when aggregating data for a report attribute
-    """
-    if attribute['operation'] == "average":
-        operation = Avg
-    elif attribute['operation'] == "sum":
-        operation = Sum
-    else:
-        raise Exception("Invalid opperation in attribute for report")
-
-    return operation
-
-
-def _format_column_str(string):
-    """
-    This formats a columns string to look
-    more user friendly
-    """
-    mod = ''
-    for index, letter in  enumerate(string):
-        if letter == '_':
-            mod = mod + ' '
-        else:
-            mod = mod + letter
-    return mod.capitalize()
+    print "Modify the function to work with influx data"
 
 
 def get_emails_list(users):
@@ -143,20 +73,24 @@ def get_emails_list(users):
 
     return emails
 
-def get_report_table_attributes():
+
+def _format_column_str(string):
+    """
+    This formats a columns string to look
+    more user friendly
+    """
+    mod = ''
+    for index, letter in  enumerate(string):
+        if letter == '_':
+            mod = mod + ' '
+        else:
+            mod = mod + letter
+
+    return mod.capitalize()
+
+def get_report_attributes():
     """
     Returns the report attributes for sesh report tables found in settings.
-    """
-
-    """
-    REMOVING: For now assuming that there are no sesh tables to create report from, only using influx
-    from django.conf import settings
-    attributes  = []
-
-    for table_name in settings.SESH_REPORT_TABLES:
-        attributes.extend(get_table_report_dict(table_name, ['sum', 'average']))
-
-    return attributes
     """
     i = Influx()
     measurements = i.get_measurements()
@@ -203,7 +137,7 @@ def get_edit_report_list(report):
     Returns a list that represents the status
     of items in the report compared to what can be in the reports
     """
-    possible_attributes = get_report_table_attributes()
+    possible_attributes = get_report_attributes()
     data_list = []
 
 
@@ -234,32 +168,6 @@ def is_in_report_attributes(dictionary, report):
             return True
     return False
 
-
-def get_table_report_dict(report_table_name, operations):
-    """
-    Returns a dict containing all the reporting values
-    possible for models containing reporting data
-
-    @param report_table_name: Ex Daily_Data_Point
-    @param operations: 'sum' or 'average' or ['sum', 'average']
-    """
-    operations = operations if isinstance(operations, list) else [operations] # Converting any item that is not a list ot a list
-    table = apps.get_model(app_label="seshdash", model_name=report_table_name)
-
-    report_table_attributes = []
-    fields = table._meta.fields
-
-    for operation in operations:
-        for field in fields:
-            if field.name != 'site' and field.name != 'id' and field.name != 'date':
-                report_attribute_dict = {}
-                report_attribute_dict['column'] = field.name
-                report_attribute_dict['table'] = report_table_name
-                report_attribute_dict['operation'] = operation
-                report_attribute_dict['user_friendly_name'] = _format_column_str(field.name) + ' ' + operation
-                report_table_attributes.append(report_attribute_dict)
-
-    return report_table_attributes
 
 
 """
