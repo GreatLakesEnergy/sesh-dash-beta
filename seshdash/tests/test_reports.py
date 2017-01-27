@@ -48,16 +48,6 @@ class ReportTestCase(TestCase):
                                              battery_bank_capacity = 1000)
 
         self.attributes_data = [
-                                   #REMOVING THIS because we are not using sesh table for reports
-                                   #{"table":"Daily_Data_Point",
-                                   # "column":"daily_pv_yield",
-                                   # "operation":"average",
-                                   # "user_friendly_name":"Daily pv yield average"},
-                                   #{"table":"Daily_Data_Point",
-                                   # "column":"daily_power_consumption_total",
-                                   # "operation":"sum",
-                                   # "user_friendly_name":"Daily power consumption total sum"
-                                   #},
                                    {"operation": "sum",
                                     "field": "trans",
                                     "output_field": "sum_trans",
@@ -77,19 +67,19 @@ class ReportTestCase(TestCase):
         self.i = Influx()
         self.kap = Kapacitor()
 
+
+    def tearDown(self):
+        """
+        Delete kap tasks for the test site 
+        """
+        self.kap.delete_tasks(pattern="test_site*")
+        
+
     def test_models(self):
         """
         Testing the models
         """
         self.assertEqual(Report_Job.objects.all().count(), 1)
-
-    def test_send_reports(self):
-        """
-        Testing the task that send reports
-        """
-        #reported_reports = check_reports()
-        #self.assertEqual(reported_reports, 1)
-        print "test the generation of report instnacne"
 
     def test_send_report(self):
         """
@@ -152,10 +142,21 @@ class ReportTestCase(TestCase):
         Testing the deletion of a report
         """
         self.client.login(username='test_user', password='test.test.test')
+        
+        # checkinf if there tasks in kapacitor
+        kap_tasks = self.kap.list_tasks()
+        self.assertNotEqual(len(kap_tasks["tasks"]), 0)
+       
+        
+        # deleting the tasks
         response = self.client.get(reverse('delete_report', args=[self.report.id]))
         self.assertEqual(response.status_code, 302) # Testing the redirection to manage reports page for site
 
+        # Checking if the tasks and the report deleted after the report is deleted
         self.assertEqual(Report_Job.objects.all().count(), 0)
+        kap_tasks = self.kap.list_tasks()
+        self.assertEqual(len(kap_tasks["tasks"]), 0)
+        
 
     def test_is_in_report_attributes(self):
         """
