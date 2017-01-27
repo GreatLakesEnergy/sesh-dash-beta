@@ -697,22 +697,41 @@ class Report_Job(models.Model):
 
         return duration_list
 
+    def get_kapacitor_tasks(self): 
+        kap = Kapacitor()
+        pattern = self.site.site_name + '_' + self.duration + "*"
+        return kap.list_tasks(pattern=pattern)
+
     def save(self, *args, **kwargs):
         """
         On save add kapacitor task referencing the report
         """
-        from seshdash.utils.reporting import add_report_kap_tasks
-        add_report_kap_tasks(self)
+        self.add_kapacitor_tasks()
         super(Report_Job, self).save(*args, **kwargs)
 
+    def add_kapacitor_tasks(self):
+        """
+        Adds the kapacitor tasks for the report
+        """
+        from seshdash.utils.reporting import add_report_kap_tasks
+        add_report_kap_tasks(self)
+        
     def delete(self, *args, **kwargs):
         """
         On delete delet kapacitor tasks referencing the report Job
         """
+        self.delete_kapacitor_tasks()
+        super(Report_Job, self).delete(*args, **kwargs)
+
+
+    def delete_kapacitor_tasks(self):
+        """
+        Deletes the kapacitor tasks attached to the report
+        """ 
         kap = Kapacitor()
         pattern =  self.site.site_name + '_' + self.duration + "*" # tasks begining with site_name_duration
-        kap.delete_tasks(pattern)
-        super(Report_Job, self).delete(*args, **kwargs)
+        return kap.delete_tasks(pattern)
+
 
     class Meta:
         unique_together = (('site','duration'),)

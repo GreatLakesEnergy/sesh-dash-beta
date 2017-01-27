@@ -235,6 +235,31 @@ class Kapacitor:
         return re[1]
 
 
+    def set_task_status(self, task_id, status):
+        """
+        Sets the status for a given task
+        
+        @param task_id - The task to set the status to
+        @param status - value to set, 'enabled' or 'disabled'
+        """
+        path_params = {
+            'task_id': task_id,
+        }
+
+        data = {
+            'status': status, 
+        }
+
+        re = self._make_request('get_tasks',
+                                type_of_request = 'PATCH',
+                                path_params = path_params,
+                                data = data 
+                                )
+
+        logger.debug("got response %s %s"%re)
+        return re[1]
+        
+
 
 
     def delete_task(self, task_id):

@@ -197,3 +197,31 @@ def add_report_kap_tasks(report):
         response = kap.create_task(task_name, t.render(data), task_type='batch', dbrps=dbrps)
 
     return True
+
+
+def disable_report_tasks(report):
+    """
+    This disables the report tasks for a given instance
+    @param report = The report instance to user
+    """ 
+    kap = Kapacitor()
+    tasks = report.get_kapacitor_tasks()
+
+    for task in tasks["tasks"]:
+        kap.set_task_status(task['id'], 'disabled')
+   
+    return True
+
+def enable_report_tasks(report): 
+    """
+    This enables the report tasks that are disabled for a report
+    @param reprot - The report instance to use
+    """
+    kap = Kapacitor()
+    attributes = report.attributes
+
+    for attribute in attributes:
+        task_name = str(report.site.site_name + '_' + report.duration + '_' +  attribute['operation'] + '_' + attribute['field'])  
+        response = kap.set_task_status(task_name, 'enabled')
+
+    return True
