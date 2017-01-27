@@ -43,7 +43,7 @@ from seshdash.utils.model_tools import get_quick_status, get_model_first_referen
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
                                        associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
 
-from seshdash.utils.reporting import get_report_attributes, get_edit_report_list
+from seshdash.utils.reporting import get_report_attributes, get_edit_report_list, disable_report_tasks, enable_report_tasks
 from seshdash.models import SENSORS_LIST
 
 from datetime import timedelta
@@ -1338,6 +1338,11 @@ def edit_report(request, report_id):
 
         report.attributes = attribute_list
         report.duration = request.POST['duration']
+
+        # Editing the kapacitor tasks
+        disable_report_tasks(report)  
+        enable_report_tasks(report)
+
         report.save()
         return redirect(reverse('manage_reports', args=[report.site.id]))
 
