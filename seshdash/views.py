@@ -996,6 +996,15 @@ def site_add_edit(request):
     return render(request, 'seshdash/settings/site_settings.html', context_dict)
 
 
+@login_required
+def delete_site(request, site_id):
+    """
+    Deletes a sesh site
+    """
+    site = Sesh_Site.objects.filter(id=site_id).first()
+    site.delete()
+    return redirect('index') 
+
 
 @login_required
 def settings_alert_rules(request):

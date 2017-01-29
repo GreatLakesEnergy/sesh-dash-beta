@@ -90,7 +90,7 @@
                                           <a href="/edit_site/{{ site.id }}">{{ site.site_name }}</a>
                                       </td>
                                       <td>
-                                          <a href="/" class="red fa fa-close pull-right delete-site-button"></a>
+                                          <a href="{% url 'delete_site' site.id %}" class="red fa fa-close pull-right delete-site-button"></a>
                                       </td>
                                   </tr>
                               {% endfor %}

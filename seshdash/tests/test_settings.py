@@ -128,7 +128,6 @@ class TestSettings(TestCase):
         """
         self.client.login(username='test_user', password='test.test.test')
                 
-        print 'The id for the sesh user is: %s ' % self.sesh_user.id
 
         data = {
             u'form-MAX_NUM_FORMS': [u'1000'],
@@ -147,3 +146,16 @@ class TestSettings(TestCase):
         user = Sesh_User.objects.filter(id=self.sesh_user.id).first()
         self.assertEqual(user.on_call, True)
         self.assertEqual(user.send_sms, True)
+
+    def test_delete_site(self):
+        """
+        Testing the view that deletes a site
+        """
+        self.client.login(username='test_user', password='test.test.test')
+     
+        response = self.client.get(reverse('delete_site', args=[self.site.id]))
+        self.assertRedirects(response, reverse('index'))
+
+        # testing if the site is delted
+        sites = Sesh_Site.objects.all()
+        self.assertEqual(len(sites), 0)
