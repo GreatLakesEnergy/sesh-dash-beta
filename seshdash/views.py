@@ -1091,8 +1091,10 @@ def add_rmc_site(request):
         form = SiteRMCForm(request.POST)
 
         if form.is_valid():
-            form = form.save()
-            return HttpResponseRedirect(reverse('add_rmc_account', args=[form.id]))
+            site = form.save()
+            site.organisation = request.user.organisation
+            site.save()
+            return HttpResponseRedirect(reverse('add_rmc_account', args=[site.id]))
 
     else:
         form = SiteRMCForm()
@@ -1138,10 +1140,13 @@ def add_rmc_account(request, site_id):
             return redirect('index')
 
 
+    user_sites = _get_user_sites(request)
     context_dict['rmc_form'] = rmc_form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
     context_dict['sensor_form'] = SensorNodeFormSetFactory(prefix="sensor")
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
 
 
