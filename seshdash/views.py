@@ -867,8 +867,8 @@ def graphs(request):
     time = request.GET.get('time', '') # This is the time range it has to be: 24h, 7d or 30d
     choices = request.GET.getlist('choice[]')
     active_id = request.GET.get('active_site_id', None)
-    start_time = request.GET.get('start_time', datetime.now() - timedelta(weeks=1))
-    end_time = request.GET.get('end_time', datetime.now())
+    start_time = request.GET.get('start_time', '')
+    end_time = request.GET.get('end_time', '')
     resolution = request.GET.get('resolution', '1h')
     current_site = Sesh_Site.objects.filter(id=active_id).first()
 
