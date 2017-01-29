@@ -337,6 +337,7 @@ BOWER_INSTALLED_APPS = (
                         'moment',
                         'mapbox.js',
                         'highcharts',
+                        'bootbox.js',
             )
 
 ANONYMOUS_USER_ID = -1
