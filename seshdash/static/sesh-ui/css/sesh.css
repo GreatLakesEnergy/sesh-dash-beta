@@ -23,6 +23,11 @@ h2.page-header.page-title {
     margin-top: 0px;
 }
 
+#alerts-panel #alerts-container {
+  max-height: 260px;
+  overflow: scroll;
+}
+
 .page-sidebar.sidebar {
   min-height: 100vh;
   height: 100%;

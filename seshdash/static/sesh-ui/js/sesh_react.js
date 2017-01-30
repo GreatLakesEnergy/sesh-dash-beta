@@ -8,6 +8,7 @@ var TableRow = React.createClass({
                 <td>{this.props.site}</td>
                 <td>{this.props.alert}</td>
                 <td>{this.props.date}</td>
+                <td>{this.props.status}</td>
             </tr>
         );
     }
@@ -21,6 +22,7 @@ var TableRowHeader = React.createClass({
           <th>Site</th>
           <th>Alert</th>
           <th>Time</th>
+          <th>Status</th>
         </tr>
       </thead>
     );
@@ -31,7 +33,7 @@ var AlertList = React.createClass({
     render: function() {
         var alertNodes = this.props.data.map(function(alert)  {
             return(
-                <TableRow site={alert.site} alert={alert.alert} date={alert.date} dataId={alert.alertId}/>
+                <TableRow site={alert.site} alert={alert.alert} date={alert.date} status={alert.status} dataId={alert.alertId}/>
             );
         });
 
