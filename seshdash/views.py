@@ -40,8 +40,9 @@ import demjson
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
-                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
+                                       get_measurement_verbose_name, get_measurement_unit, get_site_sensor_fields, \
+                                       get_site_measurements, associate_sensors_sets_to_site, get_all_associated_sensors,\
+                                       get_config_sensors, save_sensor_set, model_list_to_field_list
 
 from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
 from seshdash.models import SENSORS_LIST
@@ -779,7 +780,7 @@ def get_latest_bom_data(request):
     site = Sesh_Site.objects.filter(id=site_id).first()
 
     # The measurement list contains attributes to be displayed in the status card,
-    measurement_list = get_status_card_items(site)
+    measurement_list = get_site_sensor_fields(site)
 
     if measurement_list != 0:
         latest_points = get_measurements_latest_point(site, measurement_list)
