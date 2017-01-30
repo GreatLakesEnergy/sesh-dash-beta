@@ -14,6 +14,8 @@ from django.core.exceptions import ValidationError
 
 from django_mysql.models import JSONField
 
+from seshdash.data.db.kapacitor import Kapacitor
+
 # Create your models here.
 class VRM_Account(models.Model):
     """
@@ -695,6 +697,45 @@ class Report_Job(models.Model):
 
         return duration_list
 
+    def get_kapacitor_tasks(self): 
+        kap = Kapacitor()
+        pattern = self.site.site_name + '_' + self.duration + "*"
+        return kap.list_tasks(pattern=pattern)
+
+    def save(self, *args, **kwargs):
+        """
+        On save add kapacitor task referencing the report
+        """
+        self.add_kapacitor_tasks()
+        super(Report_Job, self).save(*args, **kwargs)
+
+    def add_kapacitor_tasks(self):
+        """
+        Adds the kapacitor tasks for the report
+        """
+        from seshdash.utils.reporting import add_report_kap_tasks
+        add_report_kap_tasks(self)
+        
+    def delete(self, *args, **kwargs):
+        """
+        On delete delet kapacitor tasks referencing the report Job
+        """
+        self.delete_kapacitor_tasks()
+        super(Report_Job, self).delete(*args, **kwargs)
+
+
+    def delete_kapacitor_tasks(self):
+        """
+        Deletes the kapacitor tasks attached to the report
+        """ 
+        kap = Kapacitor()
+        pattern =  self.site.site_name + '_' + self.duration + "*" # tasks begining with site_name_duration
+        return kap.delete_tasks(pattern)
+
+
+    class Meta:
+        unique_together = (('site','duration'),)
+        
 
 class Report_Sent(models.Model):
     """
@@ -744,3 +785,24 @@ class Data_Process_Rule(models.Model):
     duration = models.CharField(max_length=40, default="24h", choices=DURATION)
     interval = models.CharField(max_length=10, default="5m", choices=TIME_BUCKETS)
     output_field = models.ForeignKey(Trend_Data_Point)
+
+
+class Tick_Script(models.Model):
+    """ 
+    This is a model to hold data about the 
+    tick scripts
+    """
+    SCRIPT_TYPE_CHOICES = (
+        ('stream', 'Stream'),
+        ('batch', 'Batch'),
+    )
+
+    site = models.ForeignKey(Sesh_Site)
+    input_field_name = models.CharField(max_length=40)  # The influx measurement to operate on
+    output_field_name = models.CharField(max_length=40)  # The influx measurement to output results of the operation
+    script = models.TextField() 
+    function = models.CharField(max_length=20) # Influx function operation to use
+    interval = models.CharField(max_length=10) # The interval the task script runs on e.g 1min, 1h, 1d, 1w
+    script_type = models.CharField(max_length=10, choices=SCRIPT_TYPE_CHOICES)
+    
+    

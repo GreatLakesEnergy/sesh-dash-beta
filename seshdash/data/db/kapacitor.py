@@ -195,14 +195,18 @@ class Kapacitor:
         return re[1]
 
 
-    def list_tasks(self):
+    def list_tasks(self, pattern=''):
         """
         List the current tasks in kapacitor
+        @param pattern - This specifies a pattern to query kapacitor with, Note: it uses shell global matching syntax
         """
-        data_dict = {}
+        data_dict = {
+            'pattern': pattern,
+        }
          
         re = self._make_request('tasks', 
                                 type_of_request = 'GET',
+                                data = data_dict,
                                 )
 
         logger.debug("got response %s %s" % re)
@@ -231,9 +235,34 @@ class Kapacitor:
         return re[1]
 
 
+    def set_task_status(self, task_id, status):
+        """
+        Sets the status for a given task
+        
+        @param task_id - The task to set the status to
+        @param status - value to set, 'enabled' or 'disabled'
+        """
+        path_params = {
+            'task_id': task_id,
+        }
+
+        data = {
+            'status': status, 
+        }
+
+        re = self._make_request('get_tasks',
+                                type_of_request = 'PATCH',
+                                path_params = path_params,
+                                data = data 
+                                )
+
+        logger.debug("got response %s %s"%re)
+        return re[1]
+        
 
 
-    def delete_task(self, task_id ):
+
+    def delete_task(self, task_id):
         """
         Delete a created task
 
@@ -252,6 +281,31 @@ class Kapacitor:
 
         logger.debug("got response %s %s"%re)
         return re[1]
+
+
+    def delete_tasks(self, pattern):
+        """
+        Deletes tasks matching a specific pattern, 
+ 
+        @param pattern - specifies a shell glob mapping pattern
+        """
+        tasks = self.list_tasks(pattern=pattern)
+          
+        for task in tasks["tasks"]:
+            self.delete_task(task['id'])
+
+        return True
+
+    def delete_all_tasks(self):
+        """
+        Delete all the tasks in kapacitor
+        """
+        tasks = self.list_tasks()
+         
+        for task in tasks["tasks"]:
+            self.delete_task(task['id'])
+ 
+        return True
 
 
     def create_recording(self, task_id, stop, method='stream', id=None):

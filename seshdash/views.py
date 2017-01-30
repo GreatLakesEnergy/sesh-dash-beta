@@ -43,7 +43,7 @@ from seshdash.utils.model_tools import get_quick_status, get_model_first_referen
                                        get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
                                        associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
 
-from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
+from seshdash.utils.reporting import get_report_attributes, get_edit_report_list, disable_report_tasks, enable_report_tasks
 from seshdash.models import SENSORS_LIST
 
 from datetime import timedelta
@@ -1319,27 +1319,30 @@ def manage_reports(request, site_id):
 @login_required
 def add_report(request, site_id):
     """
-    View to help in managing the reports
+    View to add a report instance for a site.
+    @param site_id - Site id of the current site
     """
     site = Sesh_Site.objects.filter(id=site_id).first()
     context_dict = {}
-    context_dict['report_attributes'] = get_report_table_attributes()
+    context_dict['report_attributes'] = get_report_attributes()
     attributes = []
 
     # if the user does not belong to the organisation or if the user is not an admin
-    if not(request.user.organisation == site.organisation and request.user.is_org_admin):
+    if request.user.organisation != site.organisation or request.user.is_org_admin != True:
         return HttpResponseForbidden()
 
     if request.method == "POST":
         # Getting all the checked report attribute values
+        key, value =  request.POST.items()[0]
         for key, value in request.POST.items():
             if value == 'on':
                 attributes.append(demjson.decode(key))
 
-        Report_Job.objects.create(site=site,
+        report = Report_Job.objects.create(site=site,
                               attributes=attributes,
                               duration=request.POST.get('duration', 'daily'),
                               day_to_report=0)
+ 
         return redirect(reverse('manage_reports', args=[site.id]))
 
     return render(request, 'seshdash/settings/add_report.html', context_dict)
@@ -1362,6 +1365,11 @@ def edit_report(request, report_id):
 
         report.attributes = attribute_list
         report.duration = request.POST['duration']
+
+        # Editing the kapacitor tasks
+        disable_report_tasks(report)  
+        enable_report_tasks(report)
+
         report.save()
         return redirect(reverse('manage_reports', args=[report.site.id]))
 

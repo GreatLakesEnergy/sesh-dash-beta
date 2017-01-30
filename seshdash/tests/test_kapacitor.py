@@ -95,6 +95,7 @@ class KapacitorTestCase(TestCase):
         #assign a user to the sites
         assign_perm("view_Sesh_Site",self.test_user,self.site)
 
+
     def tearDown(self):
         self.i.delete_database(self._influx_db_name)
         self.kap.delete_template(self.template_id)
@@ -250,6 +251,28 @@ class KapacitorTestCase(TestCase):
         rendered_alert = template.render(alert_info)
         result = self.kap.create_task(alert_id, dbrps= self.dbrps, script=rendered_alert)
         self.assertEquals(result['status'], 'enabled')
+
+    def test_set_task_status(self):
+        """
+        Testing the function that updates status
+        of tasks
+        """ 
+        script = """
+                    stream
+                        |from()
+                            .measurement('cpu')
+                        |alert()
+                            .crit(lambda: "value" <  70)
+                            .log('/tmp/alerts.log')
+                        """
+
+        task = self.kap.create_task('test_task', script, status='enabled')
+        self.kap.set_task_status('test_task', 'disabled')
+
+        # asserting
+        task = self.kap.get_task('test_task')
+        self.assertEqual(task['status'], 'disabled')
+        
 
 
 
