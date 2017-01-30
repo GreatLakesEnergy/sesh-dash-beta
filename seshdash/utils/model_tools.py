@@ -316,3 +316,20 @@ def model_list_to_field_list(model_list, field):
         result_list.append(getattr(val,field))
 
     return result_list
+
+
+
+def get_site_sensor_fields(site):
+    """
+    Returns the name of the fields for a site, 
+    These are the fields that are stored in influx db
+    
+    @param site - The site for which the data has to come from
+    """
+    sensors = Sensor_Node.objects.filter(site=site)
+    fields = []
+
+    for sensor in sensors:
+        fields += sensor.get_fields()
+        
+    return sorted(list(set(fields))) # removing duplicate values if and sorting

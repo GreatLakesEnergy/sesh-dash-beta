@@ -624,11 +624,11 @@ class Sensor_Node(models.Model):
      site = models.ForeignKey(Sesh_Site)
      node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
      sensor_type = models.CharField(max_length=40, choices=SENSOR_TYPE_CHOICES)
-     index1 = models.CharField(max_length=40, default="ac_power1")
-     index2 = models.CharField(max_length=40, default="pv_production", blank=True, null=True)
-     index3 = models.CharField(max_length=40, default="consumption", blank=True, null=True)
-     index4 = models.CharField(max_length=40, default="grid_in", blank=True, null=True)
-     index5 = models.CharField(max_length=40, default="AC_Voltage_out", blank=True, null=True)
+     index1 = models.CharField(max_length=40)
+     index2 = models.CharField(max_length=40, blank=True, null=True)
+     index3 = models.CharField(max_length=40, blank=True, null=True)
+     index4 = models.CharField(max_length=40, blank=True, null=True)
+     index5 = models.CharField(max_length=40, blank=True, null=True)
      index6 = models.CharField(max_length=40, blank=True, null=True)
      index7 = models.CharField(max_length=40, blank=True, null=True)
      index8 = models.CharField(max_length=40, blank=True, null=True)
@@ -650,6 +650,21 @@ class Sensor_Node(models.Model):
                                   sensor_type=self.sensor_type).delete()
 
         super(Sensor_Node,self).delete(*args, **kwargs)
+
+     def get_fields(self):
+         """
+         Returns the field of the sensor 
+         """
+         all_fields = [self.index1, self.index2, self.index3, self.index4, self.index5, self.index5, \
+                   self.index6, self.index7, self.index8, self.index9, self.index10, self.index11, self.index12]
+
+         fields = []
+         
+         for field in all_fields:
+             if field:
+                 fields.append(field)
+
+         return list(set(fields)) # removing duplicate values if any
 
 class Sensor_Mapping(models.Model):
     """
