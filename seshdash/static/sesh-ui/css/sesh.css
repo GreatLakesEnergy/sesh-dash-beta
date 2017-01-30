@@ -11,46 +11,67 @@ div#map {
     height: 300px;
     z-index: 1;
 }
+
+#delete-confirm.modal {
+  background: rgba(0, 0, 0, 0.5)!important;
+}
+
 button#dynamic_graph_button {
     margin-top: 25px;
 }
 h2.page-header.page-title {
     margin-top: 0px;
 }
+
+#alerts-panel #alerts-container {
+  max-height: 260px;
+  overflow: scroll;
+}
+
 .page-sidebar.sidebar {
   min-height: 100vh;
   height: 100%;
 }
+
 .page-title{
   text-align: center;
 }
+
 .page-inner{
   padding: 0px;
 }
+
 .slimScrollDiv {
   height: 90%!important;
 }
+
 div.awesomplete > ul {
-    margin: 42px 0px;
+  margin: 42px 0px;
 }
+
 h2.page-header {
-    text-align: center;
-    font-weight: 300;
-    color: #2B384E;
+  text-align: center;
+  font-weight: 300;
+  color: #2B384E;
 }
+
 div#create_site {
-    background: #F1F4F9;
-    margin-top: 20px;
+  background: #F1F4F9;
+  margin-top: 20px;
 }
+
 form.search-form {
-    overflow: visible;
+  overflow: visible;
 }
+
 div.awesomplete li:hover mark {
-    background: hsl(200, 40%, 80%);
+  background: hsl(200, 40%, 80%);
 }
+
 div.awesomplete mark {
-      background: hsl(200, 40%, 80%);
+  background: hsl(200, 40%, 80%);
 }
+
 /* spinner */
 .spinner {
   margin: 100px auto;
@@ -65,7 +86,6 @@ div.awesomplete mark {
   height: 100%;
   width: 6px;
   display: inline-block;
-
   -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
   animation: sk-stretchdelay 1.2s infinite ease-in-out;
 }
@@ -369,3 +389,4 @@ a.action-icon:hover {
 .status-card-link:hover {
   color: #ddd;
 }
+

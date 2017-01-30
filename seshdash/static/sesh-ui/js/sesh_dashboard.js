@@ -153,12 +153,6 @@ $(function(){
     }
 
 
-    $(".site-list > li").each(function(){
-      if ($(this).val() == active_site_id){
-          $(this).addClass("active");
-       }
-
-    });
 
     // Minifying long site names
     var siteNames = $('.site-name'),
@@ -174,6 +168,7 @@ $(function(){
             $(this).text(siteName);
         }
     });
+
 
 
     

@@ -6,7 +6,11 @@
 {% block main %}
 
 
-    <div id="page-wrapper"> 
+    {# Js specific for this page #}
+    <script src="{% static 'bootbox.js/bootbox.js' %}"></script>
+    <script src="{% static 'sesh-ui/js/sites.js' %}"></script>
+
+    <div id="page-wrapper">
      {# Tabs container #}
         <div id="create_site" class="container">
 
@@ -14,6 +18,7 @@
             <ul class="nav nav-tabs">
                 <li class="active"><a data-toggle="tab" href="#Edit_site" >Edit Existing site</a></li>
                 <li><a data-toggle="tab" href="#Add_site">Add new site</a></li>
+                <li><a data-toggle="tab" href="#delete-site">Delete Site</a></li>
             </ul>
 
             <div class="tab-content">
@@ -41,11 +46,11 @@
                           {% endif %}
 
 
-                          
+
 
                           <button type="submit" class="btn btn-primary button-save">SAVE </button>
                      </form>
-                 
+
                 </div>
 
                 {# Tab content -> Add site #}
@@ -68,6 +73,31 @@
 
                     </div>
 
+                </div>
+
+
+
+                {# Tab delete sites #}
+                <div id="delete-site" class="tab-pane fade">
+                   <h3>Deleting a site deletes all its data, This is an irreversible operation </h3>
+
+                   <div class="sites">
+                       <table class="table">
+                            <tbody>
+                              {% for site in sites %}
+                                  <tr>
+                                      <td class="sites-available">
+                                          <a href="/edit_site/{{ site.id }}">{{ site.site_name }}</a>
+                                      </td>
+                                      <td>
+                                          <a href="{% url 'delete_site' site.id %}" class="red fa fa-close pull-right delete-site-button"></a>
+                                      </td>
+                                  </tr>
+                              {% endfor %}
+                            </tbody>
+                       </table>
+
+                   </div>
                 </div>
 
             </div>

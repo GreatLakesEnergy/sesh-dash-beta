@@ -668,18 +668,22 @@ def get_alerts(request):
     site_id = request.POST.get('site_id','')
 
 
-    alerts = Sesh_Alert.objects.filter(site=site_id, isSilence=False).order_by('-date')[:5]
+    alerts = Sesh_Alert.objects.filter(site=site_id).order_by("isSilence", "-date")[:10]
 
     alert_data = []
 
 
     # Loop to generate alert data
     for alert in alerts:
+        status = "on"
+        if alert.isSilence:
+            status = "silenced"
         alert_data.append({
             "alertId": alert.id,
             "site":alert.site.site_name,
             "alert":str(alert),
             "date":get_timesince(alert.date),
+            "status":status,
             })
 
     return HttpResponse(json.dumps(alert_data))
@@ -867,8 +871,8 @@ def graphs(request):
     time = request.GET.get('time', '') # This is the time range it has to be: 24h, 7d or 30d
     choices = request.GET.getlist('choice[]')
     active_id = request.GET.get('active_site_id', None)
-    start_time = request.GET.get('start_time', datetime.now() - timedelta(weeks=1))
-    end_time = request.GET.get('end_time', datetime.now())
+    start_time = request.GET.get('start_time', '')
+    end_time = request.GET.get('end_time', '')
     resolution = request.GET.get('resolution', '1h')
     current_site = Sesh_Site.objects.filter(id=active_id).first()
 
@@ -996,6 +1000,21 @@ def site_add_edit(request):
     return render(request, 'seshdash/settings/site_settings.html', context_dict)
 
 
+@login_required
+def delete_site(request, site_id):
+    """
+    Deletes a sesh site
+    """
+    user = request.user
+    site = Sesh_Site.objects.filter(id=site_id).first()
+
+    if user.is_org_admin and user.organisation == site.organisation:
+        site.delete()
+    else:
+        return HttpResponseForbidden("You are not allowed to operate this permission")
+
+    return redirect('index') 
+
 
 @login_required
 def settings_alert_rules(request):
@@ -1091,8 +1110,10 @@ def add_rmc_site(request):
         form = SiteRMCForm(request.POST)
 
         if form.is_valid():
-            form = form.save()
-            return HttpResponseRedirect(reverse('add_rmc_account', args=[form.id]))
+            site = form.save()
+            site.organisation = request.user.organisation
+            site.save()
+            return HttpResponseRedirect(reverse('add_rmc_account', args=[site.id]))
 
     else:
         form = SiteRMCForm()
@@ -1138,10 +1159,13 @@ def add_rmc_account(request, site_id):
             return redirect('index')
 
 
+    user_sites = _get_user_sites(request)
     context_dict['rmc_form'] = rmc_form
     context_dict['site_id'] = site_id
     context_dict['sensors_list'] = SENSORS_LIST
     context_dict['sensor_form'] = SensorNodeFormSetFactory(prefix="sensor")
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/add_rmc_account.html', context_dict)
 
 
@@ -1284,8 +1308,11 @@ def manage_reports(request, site_id):
     site = Sesh_Site.objects.filter(id=site_id).first()
     reports = Report_Job.objects.filter(site=site)
 
+    user_sites = _get_user_sites(request)
     context_dict['site'] = site
     context_dict['reports'] = reports
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/settings/manage_reports.html', context_dict)
 
 
@@ -1338,9 +1365,13 @@ def edit_report(request, report_id):
         report.save()
         return redirect(reverse('manage_reports', args=[report.site.id]))
 
+
+    user_sites = _get_user_sites(request)
     context_dict['attributes'] = get_edit_report_list(report)
     context_dict['report'] = report
     context_dict['duration_choices'] = report.get_duration_choices()
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/settings/edit_report.html', context_dict)
 
 

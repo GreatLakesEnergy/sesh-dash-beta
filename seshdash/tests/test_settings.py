@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from geoposition import Geoposition
 from time import sleep
 
-from seshdash.models import Alert_Rule, Sesh_Site, Sesh_User
+from seshdash.models import Alert_Rule, Sesh_Site, Sesh_User, Sesh_Organisation
 from seshdash.data.db.influx import Influx
 
 class TestSettings(TestCase):
@@ -34,8 +34,14 @@ class TestSettings(TestCase):
 
         self.client = Client()
 
+        self.organisation = Sesh_Organisation.objects.create(
+                                     name="test_org", 
+                                     slack_token="secret"
+                                 )
+
         self.site = Sesh_Site.objects.create(
                         site_name='test',
+                        organisation=self.organisation,
                         comission_date=timezone.now(),
                         location_city='Kigali',
                         location_country='Rwanda',
@@ -53,6 +59,8 @@ class TestSettings(TestCase):
                         value='0',
                     )
 
+
+        
 
         self.sesh_user = Sesh_User.objects.create_superuser(username='test_user',
                                                              email='test@sesh.sesh',
@@ -128,7 +136,6 @@ class TestSettings(TestCase):
         """
         self.client.login(username='test_user', password='test.test.test')
                 
-        print 'The id for the sesh user is: %s ' % self.sesh_user.id
 
         data = {
             u'form-MAX_NUM_FORMS': [u'1000'],
@@ -147,3 +154,23 @@ class TestSettings(TestCase):
         user = Sesh_User.objects.filter(id=self.sesh_user.id).first()
         self.assertEqual(user.on_call, True)
         self.assertEqual(user.send_sms, True)
+
+    def test_delete_site(self):
+        """
+        Testing the view that deletes a site
+        """
+        self.client.login(username='test_user', password='test.test.test')
+     
+        # Users that are not admin of the organisation must not be allowed to delete a site
+        response = self.client.get(reverse('delete_site', args=[self.site.id]))
+        self.assertEqual(response.status_code, 403)
+ 
+
+        # testing if the site is deleted when the user is admin of the organisation
+        self.sesh_user.organisation = self.organisation
+        self.sesh_user.is_org_admin = True
+        self.sesh_user.save()
+        response = self.client.get(reverse('delete_site', args=[self.site.id]))
+        self.assertRedirects(response, reverse('index'))
+        sites = Sesh_Site.objects.all()
+        self.assertEqual(len(sites), 0)
