@@ -7,6 +7,7 @@ from seshdash.models import *
 from seshdash.data.db.influx import get_latest_point_site
 #import wearher data function
 from seshdash.api.forecast import ForecastAPI
+from seshdash.utils.reporting import _format_column_str
 from django.utils import timezone
 
 import logging
@@ -83,13 +84,6 @@ def get_measurement_verbose_name(measurement):
     except KeyError ,e :
         logger.error(e)
         pass
-
-
-def get_measurement_unit(measurement):
-    try:
-        return Daily_Data_Point.UNITS_DICTIONARY[measurement]
-    except KeyError:
-        raise Exception("The measurement: %s has not key in the UNITS DICTIONARY DICT and maybe not a valid measurent" % measurement)
 
 
 def get_model_field_names(model):
@@ -256,13 +250,8 @@ def get_quick_status(user_sites):
 
         #site weather_data
         site_weather_data = Site_Weather_Data.objects.filter(site= site)
-        print "Found weather data: %s" % site_weather_data
         cloud_cover = []
         for weather_data in site_weather_data:
-            print "for each"
-            print "The date for the weather data is: %s" % weather_data.date
-            print "The date now is: %s" % now
-            print "Appended"
             cloud_cover.append(weather_data.cloud_cover)
         if len(cloud_cover) is not 0:
             average_cloud_cover = sum(cloud_cover)/len(cloud_cover)
@@ -333,3 +322,18 @@ def get_site_sensor_fields(site):
         fields += sensor.get_fields()
         
     return sorted(list(set(fields))) # removing duplicate values if and sorting
+
+
+def get_site_sensor_fields_choices(site):
+    """
+    Returns a dict containing the site fields as the key,
+    and a user friendly name as the value
+    """
+    fields = get_site_sensor_fields(site)
+    choices = {}
+
+    for field in fields:
+        choices[field] = _format_column_str(field)
+
+    return choices
+

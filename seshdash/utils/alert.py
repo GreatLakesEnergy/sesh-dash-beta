@@ -3,7 +3,8 @@ from seshdash.models import Sesh_User, Sesh_Site,Site_Weather_Data,BoM_Data_Poin
 from seshdash.utils.send_mail import send_mail
 from seshdash.utils.send_sms import send_sms
 from seshdash.utils.model_tools import get_model_from_string, get_latest_instance
-from seshdash.utils.model_tools import get_model_first_reference, get_measurement_from_rule, get_measurement_unit, get_measurement_verbose_name
+from seshdash.utils.model_tools import get_model_first_reference, get_measurement_from_rule, get_measurement_verbose_name
+from seshdash.utils.reporting import get_measurement_unit
 from seshdash.utils.time_utils import get_epoch_from_datetime
 from seshdash.utils.send_slack import Slack
 
