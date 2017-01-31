@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 
 from django_mysql.models import JSONField
 
+
 # Create your models here.
 class VRM_Account(models.Model):
     """
@@ -111,6 +112,14 @@ class Status_Card(models.Model):
 
      def __str__(self):
          return "For site: " + self.sesh_site.site_name
+
+     def get_choices(self):
+         """
+         Returns the choices for the status card
+         """
+         from seshdash.utils.model_tools import get_site_sensor_fields_choices
+         return get_site_sensor_fields_choices(self.sesh_site)
+         
 
 
 class Site_Measurements(models.Model):

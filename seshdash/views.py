@@ -40,11 +40,10 @@ import demjson
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name, get_measurement_unit, get_site_sensor_fields, \
-                                       get_site_measurements, associate_sensors_sets_to_site, get_all_associated_sensors,\
-                                       get_config_sensors, save_sensor_set, model_list_to_field_list
+                                       get_measurement_verbose_name,get_status_card_items,get_site_measurements, \
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
 
-from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
+from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list, get_measurement_unit
 from seshdash.models import SENSORS_LIST
 
 from datetime import timedelta
@@ -120,6 +119,7 @@ def index(request,site_id=0):
     site = Sesh_Site.objects.filter(id=site_id).first()
     form = StatusCardForm(instance=site.status_card)
     context_dict['status_form'] = form
+    context_dict['status_card'] = site.status_card
 
 
     #sites witth weather and battery status
