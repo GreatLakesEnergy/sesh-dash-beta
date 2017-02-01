@@ -42,8 +42,7 @@ from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_e
 from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
                                        get_measurement_verbose_name, get_site_measurements, \
                                        associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors,\
-                                       save_sensor_set, model_list_to_field_list, get_site_sensor_fields, get_status_card_items
-
+                                       save_sensor_set, model_list_to_field_list,get_site_sensor_fields,get_status_card_items,get_site_sensor_fields_choices
 from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list, get_measurement_unit
 from seshdash.models import SENSORS_LIST
 
@@ -105,16 +104,7 @@ def index(request,site_id=0):
 
     #Generating site measurements for a graph
     current_site = Sesh_Site.objects.filter(id = site_id).first()
-
-    #getting site measurements
-    site_measurements = get_site_measurements(current_site)
-    measurements ={}
-
-    for measurement in site_measurements:
-        #getting verbose names
-        measurement_verbose_name = get_measurement_verbose_name(measurement)
-        measurements[measurement] = measurement_verbose_name
-    context_dict['measurements']= measurements
+    context_dict['measurements'] =  get_site_sensor_fields_choices(current_site)
 
     # status card form
     site = Sesh_Site.objects.filter(id=site_id).first()
@@ -905,7 +895,6 @@ def graphs(request):
         choice_dict['measurement'] = choice
         #time_delta = time_delta_dict[time]
         #time_bucket= time_bucket_dict[time]
-        choice_dict['si_unit'] = get_measurement_unit(choice)
 
         # Gettting the values of the given element
         client = Influx()
