@@ -10,6 +10,7 @@
                  Edit status card
              </div>
              <div class="modal-body">
+
                  <form class="panel-form" method="post" action="{% url 'edit_status_card' site_id %}">
 
                       {% csrf_token %}
@@ -51,6 +52,7 @@
 
                      <input type="submit" class="btn btn-primary" value="Submit">
                  </form>
+
              </div>
           </div>
         </div>

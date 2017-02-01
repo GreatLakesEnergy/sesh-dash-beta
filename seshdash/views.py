@@ -40,8 +40,9 @@ import demjson
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name,get_status_card_items,get_site_measurements, \
-                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
+                                       get_measurement_verbose_name, get_site_measurements, \
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors,\
+                                       save_sensor_set, model_list_to_field_list, get_site_sensor_fields, get_status_card_items
 
 from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list, get_measurement_unit
 from seshdash.models import SENSORS_LIST
@@ -780,32 +781,32 @@ def get_latest_bom_data(request):
     site = Sesh_Site.objects.filter(id=site_id).first()
 
     # The measurement list contains attributes to be displayed in the status card,
-    measurement_list = get_site_sensor_fields(site)
+    measurement_list = get_status_card_items(site)
 
-    if measurement_list != 0:
-        latest_points = get_measurements_latest_point(site, measurement_list)
+    latest_points = get_measurements_latest_point(site, measurement_list)
+    print "The latest points are: %s" % latest_points
+ 
+    latest_point_data = []
 
-        latest_point_data = []
+    # If the points exist and the points returned are equal to the items in measurement list
+    for measurement, point in latest_points.items():
+        latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                  "value":str(round(latest_points[measurement]['value'], 2))
+                                          + get_measurement_unit(measurement)
+                         })
 
-        # If the points exist and the points returned are equal to the items in measurement list
-        for measurement, point in latest_points.items():
-            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
-                                      "value":str(round(latest_points[measurement]['value'], 2))
-                                              + get_measurement_unit(measurement)
-                             })
+    if 'last_contact' in measurement_list:
+       # Adding the last contact from the rmc status
+       rmc_latest = RMC_status.objects.filter(site=site).last()
+       if rmc_latest:
+           last_contact = rmc_latest.minutes_last_contact
+           last_contact_seconds = last_contact * 60
+           last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
+           latest_point_data.append({"item":"Last Contact", "value": last_contact})
+       else:
+           logger.debug("No rmc_status points for site ")
 
-        if 'last_contact' in measurement_list:
-            # Adding the last contact from the rmc status
-            rmc_latest = RMC_status.objects.filter(site=site).last()
-            if rmc_latest:
-                last_contact = rmc_latest.minutes_last_contact
-                last_contact_seconds = last_contact * 60
-                last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
-                latest_point_data.append({"item":"Last Contact", "value": last_contact})
-            else:
-                logger.debug("No rmc_status points for site ")
-
-        return HttpResponse(json.dumps(latest_point_data))
+    return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
 
@@ -1449,3 +1450,4 @@ def edit_status_card(request, site_id):
                 return redirect(reverse('index', args=[site.id]))
         else:
             return HttpResponseBadRequest("You can not edit the status card, You are not and admin of your organisation")
+
