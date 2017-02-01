@@ -1379,7 +1379,7 @@ def delete_report(request, report_id):
     return redirect(reverse('manage_reports', args=[site.id]))
 
 @login_required
-def export_csv_measurement_data(request):
+def export_csv_measurement_data(request, site_id):
     """
     Returns a csv of a given measurement a request
 
@@ -1389,9 +1389,8 @@ def export_csv_measurement_data(request):
     measurement = request.POST.get('measurement', '')
     start_time = request.POST.get('start-time', None)
     end_time = request.POST.get('end-time', None)
-    site_name = request.POST.get('site-name', '')
 
-    site = Sesh_Site.objects.filter(site_name=site_name).first()
+    site = Sesh_Site.objects.filter(id=site_id).first()
 
     if request.method == 'POST':
         # Converting strings to date
@@ -1415,8 +1414,8 @@ def export_csv_measurement_data(request):
 
     i = Influx()
     user_sites = _get_user_sites(request)
-    context_dict['sites'] = user_sites
-    context_dict['measurements'] = i.get_measurements()
+    context_dict['site'] = site
+    context_dict['measurements'] = get_site_sensor_fields_choices(site)
     context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/data_analysis/export-csv.html', context_dict)

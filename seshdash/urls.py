@@ -45,7 +45,7 @@ urlpatterns = [
             url(r'^delete_site/([0-9]{1,5})/$', views.delete_site, name='delete_site'),
             url(r'^edit_report/([0-9]{1,6})$', views.edit_report, name='edit_report'),
             url(r'^delete_report/([0-9]{1,6})$', views.delete_report, name='delete_report'),
-            url(r'^export-csv/', views.export_csv_measurement_data, name='export-csv-data'),
+            url(r'^export-csv/([0-9]{1,6})$', views.export_csv_measurement_data, name='export-csv-data'),
             url(r'^edit-status-card/([0-9]{1,6})$', views.edit_status_card, name='edit_status_card'),
             ]
 
