@@ -40,10 +40,10 @@ import demjson
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
 from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
-                                       get_measurement_verbose_name, get_measurement_unit,get_status_card_items,get_site_measurements, \
-                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, save_sensor_set, model_list_to_field_list
-
-from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list
+                                       get_measurement_verbose_name, get_site_measurements, \
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors,\
+                                       save_sensor_set, model_list_to_field_list,get_site_sensor_fields,get_status_card_items,get_site_sensor_fields_choices
+from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list, get_measurement_unit
 from seshdash.models import SENSORS_LIST
 
 from datetime import timedelta
@@ -104,21 +104,13 @@ def index(request,site_id=0):
 
     #Generating site measurements for a graph
     current_site = Sesh_Site.objects.filter(id = site_id).first()
-
-    #getting site measurements
-    site_measurements = get_site_measurements(current_site)
-    measurements ={}
-
-    for measurement in site_measurements:
-        #getting verbose names
-        measurement_verbose_name = get_measurement_verbose_name(measurement)
-        measurements[measurement] = measurement_verbose_name
-    context_dict['measurements']= measurements
+    context_dict['measurements'] =  get_site_sensor_fields_choices(current_site)
 
     # status card form
     site = Sesh_Site.objects.filter(id=site_id).first()
     form = StatusCardForm(instance=site.status_card)
     context_dict['status_form'] = form
+    context_dict['status_card'] = site.status_card
 
 
     #sites witth weather and battery status
@@ -781,30 +773,30 @@ def get_latest_bom_data(request):
     # The measurement list contains attributes to be displayed in the status card,
     measurement_list = get_status_card_items(site)
 
-    if measurement_list != 0:
-        latest_points = get_measurements_latest_point(site, measurement_list)
+    latest_points = get_measurements_latest_point(site, measurement_list)
+    print "The latest points are: %s" % latest_points
+ 
+    latest_point_data = []
 
-        latest_point_data = []
+    # If the points exist and the points returned are equal to the items in measurement list
+    for measurement, point in latest_points.items():
+        latest_point_data.append({"item":get_measurement_verbose_name(measurement),
+                                  "value":str(round(latest_points[measurement]['value'], 2))
+                                          + get_measurement_unit(measurement)
+                         })
 
-        # If the points exist and the points returned are equal to the items in measurement list
-        for measurement, point in latest_points.items():
-            latest_point_data.append({"item":get_measurement_verbose_name(measurement),
-                                      "value":str(round(latest_points[measurement]['value'], 2))
-                                              + get_measurement_unit(measurement)
-                             })
+    if 'last_contact' in measurement_list:
+       # Adding the last contact from the rmc status
+       rmc_latest = RMC_status.objects.filter(site=site).last()
+       if rmc_latest:
+           last_contact = rmc_latest.minutes_last_contact
+           last_contact_seconds = last_contact * 60
+           last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
+           latest_point_data.append({"item":"Last Contact", "value": last_contact})
+       else:
+           logger.debug("No rmc_status points for site ")
 
-        if 'last_contact' in measurement_list:
-            # Adding the last contact from the rmc status
-            rmc_latest = RMC_status.objects.filter(site=site).last()
-            if rmc_latest:
-                last_contact = rmc_latest.minutes_last_contact
-                last_contact_seconds = last_contact * 60
-                last_contact = time_utils.format_timesince_seconds(last_contact_seconds)
-                latest_point_data.append({"item":"Last Contact", "value": last_contact})
-            else:
-                logger.debug("No rmc_status points for site ")
-
-        return HttpResponse(json.dumps(latest_point_data))
+    return HttpResponse(json.dumps(latest_point_data))
 
    # Requesting all site names and site id from the database
 
@@ -903,7 +895,6 @@ def graphs(request):
         choice_dict['measurement'] = choice
         #time_delta = time_delta_dict[time]
         #time_bucket= time_bucket_dict[time]
-        choice_dict['si_unit'] = get_measurement_unit(choice)
 
         # Gettting the values of the given element
         client = Influx()
@@ -1388,7 +1379,7 @@ def delete_report(request, report_id):
     return redirect(reverse('manage_reports', args=[site.id]))
 
 @login_required
-def export_csv_measurement_data(request):
+def export_csv_measurement_data(request, site_id):
     """
     Returns a csv of a given measurement a request
 
@@ -1398,9 +1389,8 @@ def export_csv_measurement_data(request):
     measurement = request.POST.get('measurement', '')
     start_time = request.POST.get('start-time', None)
     end_time = request.POST.get('end-time', None)
-    site_name = request.POST.get('site-name', '')
 
-    site = Sesh_Site.objects.filter(site_name=site_name).first()
+    site = Sesh_Site.objects.filter(id=site_id).first()
 
     if request.method == 'POST':
         # Converting strings to date
@@ -1424,8 +1414,8 @@ def export_csv_measurement_data(request):
 
     i = Influx()
     user_sites = _get_user_sites(request)
-    context_dict['sites'] = user_sites
-    context_dict['measurements'] = i.get_measurements()
+    context_dict['site'] = site
+    context_dict['measurements'] = get_site_sensor_fields_choices(site)
     context_dict['permitted'] = get_org_edit_permissions(request.user)
     context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/data_analysis/export-csv.html', context_dict)
@@ -1448,3 +1438,4 @@ def edit_status_card(request, site_id):
                 return redirect(reverse('index', args=[site.id]))
         else:
             return HttpResponseBadRequest("You can not edit the status card, You are not and admin of your organisation")
+

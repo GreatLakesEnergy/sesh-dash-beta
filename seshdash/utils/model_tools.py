@@ -7,6 +7,7 @@ from seshdash.models import *
 from seshdash.data.db.influx import get_latest_point_site
 #import wearher data function
 from seshdash.api.forecast import ForecastAPI
+from seshdash.utils.reporting import _format_column_str
 from django.utils import timezone
 
 import logging
@@ -85,13 +86,6 @@ def get_measurement_verbose_name(measurement):
         pass
 
 
-def get_measurement_unit(measurement):
-    try:
-        return Daily_Data_Point.UNITS_DICTIONARY[measurement]
-    except KeyError:
-        raise Exception("The measurement: %s has not key in the UNITS DICTIONARY DICT and maybe not a valid measurent" % measurement)
-
-
 def get_model_field_names(model):
     """
     This function returns the field names of fields
@@ -107,42 +101,6 @@ def get_model_field_names(model):
     return field_arr
 
 
-def get_status_card_items(site):
-    """
-    Returns the list of items to be displayed in the status card
-    The items are the values of all the rows in the status card table that
-    contain characters
-    """
-    try:
-        status_card = site.status_card
-
-        if not status_card:
-            logger.error('No status card linked to the site')
-            return []
-
-        # Getting all the status card fields
-        status_card_fields = Status_Card._meta.get_fields()
-        status_card_items = []
-        # Getting the status card field values, Constructing the arr of the status card items of the site
-        for field in status_card_fields:
-            status_card_items.append(getattr(status_card, field.name))
-        # removing the non char items from the arr
-        for i, item in enumerate(status_card_items):
-            if type(item) != unicode:
-                status_card_items.pop(i)
-
-        # Removing the int items the int item
-        for i, item in enumerate(status_card_items):
-            if type(item) == int or type(item) == long:
-                status_card_items.pop(i)
-
-        return status_card_items
-    except OperationalError ,e :
-        logger.error(e)
-        pass
-    except Exception  ,e :
-        logger.error(e)
-        pass
 
 def get_site_measurements(site):
     """
@@ -175,6 +133,44 @@ def get_site_measurements(site):
     logger.debug("Got measurements for site %s"%site_measurements_items)
     return site_measurements_items
 
+
+def get_status_card_items(site):
+    """
+    Returns the list of items to be displayed in the status card
+    The items are the values of all the rows in the status card table that
+    contain characters
+    """
+    try:
+        status_card = site.status_card
+
+        if not status_card:
+            logger.error('No status card linked to the site')
+            return []
+
+        # Getting all the status card fields
+        status_card_fields = Status_Card._meta.get_fields()
+        status_card_items = []
+        # Getting the status card field values, Constructing the arr of the status card items of the site
+        for field in status_card_fields:
+            status_card_items.append(getattr(status_card, field.name))
+        # removing the non char items from the arr
+        for i, item in enumerate(status_card_items):
+            if type(item) != unicode:
+                status_card_items.pop(i)
+
+        # Removing the int items the int item
+        for i, item in enumerate(status_card_items):
+            if type(item) == int or type(item) == long:
+                status_card_items.pop(i)
+
+        return list(set(status_card_items))
+
+    except OperationalError ,e :
+        logger.error(e)
+        pass
+    except Exception  ,e :
+        logger.error(e)
+        pass
 
 
 def get_all_associated_sensors(site):
@@ -256,13 +252,8 @@ def get_quick_status(user_sites):
 
         #site weather_data
         site_weather_data = Site_Weather_Data.objects.filter(site= site)
-        print "Found weather data: %s" % site_weather_data
         cloud_cover = []
         for weather_data in site_weather_data:
-            print "for each"
-            print "The date for the weather data is: %s" % weather_data.date
-            print "The date now is: %s" % now
-            print "Appended"
             cloud_cover.append(weather_data.cloud_cover)
         if len(cloud_cover) is not 0:
             average_cloud_cover = sum(cloud_cover)/len(cloud_cover)
@@ -316,3 +307,35 @@ def model_list_to_field_list(model_list, field):
         result_list.append(getattr(val,field))
 
     return result_list
+
+
+
+def get_site_sensor_fields(site):
+    """
+    Returns the name of the fields for a site, 
+    These are the fields that are stored in influx db
+    
+    @param site - The site for which the data has to come from
+    """
+    sensors = Sensor_Node.objects.filter(site=site)
+    fields = []
+
+    for sensor in sensors:
+        fields += sensor.get_fields()
+        
+    return sorted(list(set(fields))) # removing duplicate values if and sorting
+
+
+def get_site_sensor_fields_choices(site):
+    """
+    Returns a dict containing the site fields as the key,
+    and a user friendly name as the value
+    """
+    fields = get_site_sensor_fields(site)
+    choices = {}
+
+    for field in fields:
+        choices[field] = _format_column_str(field)
+
+    return choices
+

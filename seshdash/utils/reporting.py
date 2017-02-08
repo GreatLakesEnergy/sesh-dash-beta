@@ -1,6 +1,5 @@
 from seshdash.models import Sesh_Site,Site_Weather_Data,BoM_Data_Point, Alert_Rule, Sesh_Alert,Daily_Data_Point, Sesh_User, Report_Sent
 from seshdash.utils.send_mail import send_mail
-from seshdash.utils.model_tools import get_measurement_unit
 
 from django.forms.models import model_to_dict
 from django.utils import timezone
@@ -51,6 +50,12 @@ def send_report(report):
     report.save()
 
     return val
+
+def get_measurement_unit(measurement):
+    try:
+        return Daily_Data_Point.UNITS_DICTIONARY[measurement]
+    except KeyError:
+        raise Exception("The measurement: %s has not key in the UNITS DICTIONARY DICT and maybe not a valid measurent" % measurement)
 
 def generate_report_data(report):
     """

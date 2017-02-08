@@ -10,11 +10,49 @@
                  Edit status card
              </div>
              <div class="modal-body">
+
                  <form class="panel-form" method="post" action="{% url 'edit_status_card' site_id %}">
-                     {% csrf_token %}
-                     {{status_form|bootstrap}}
+
+                      {% csrf_token %}
+
+                     <div class="form-group">
+                         <select name="row1" class="form-control">
+                             {% for key, value in status_card.get_choices.iteritems %}
+                                <option value="{{key}}">{{value}}</option>
+                             {% endfor %}
+                         </select>
+                     </div>
+
+           
+                     <div class="form-group">
+                         <select name="row2" class="form-control">
+                             {% for key, value in status_card.get_choices.iteritems %}
+                                <option value="{{key}}">{{value}}</option>
+                             {% endfor %}
+                         </select>
+                     </div>
+
+ 
+                     <div class="form-group">
+                         <select name="row3" class="form-control">
+                             {% for key, value in status_card.get_choices.iteritems %}
+                                <option value="{{key}}">{{value}}</option>
+                             {% endfor %}
+                         </select>
+                     </div>
+
+
+                     <div class="form-group">
+                         <select name="row4" class="form-control">
+                             {% for key, value in status_card.get_choices.iteritems %}
+                                <option value="{{key}}">{{value}}</option>
+                             {% endfor %}
+                         </select>
+                     </div>
+
                      <input type="submit" class="btn btn-primary" value="Submit">
                  </form>
+
              </div>
           </div>
         </div>

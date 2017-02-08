@@ -52,7 +52,17 @@
                            <span class="fa fa-history"></span>
                         </a> 
                     </li>
-                    <li><a href="{% url 'export-csv-data' %}">Export csv</a></li>
+                    <li class="droplink">
+                         <a href="#" class="">
+                             <p>Export csv</p>
+                             <span class="arrow"></span>
+                         </a>
+
+                         <ul class="sub-menu">
+                             {% for site in sites %}
+                                 <a href="{% url 'export-csv-data' site.id %}">{{site.site_name}}</a></li>
+                             {% endfor %}
+                         </ul>
                 </ul>
 
             </li>
