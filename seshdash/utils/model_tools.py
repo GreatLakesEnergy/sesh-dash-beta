@@ -101,42 +101,6 @@ def get_model_field_names(model):
     return field_arr
 
 
-def get_status_card_items(site):
-    """
-    Returns the list of items to be displayed in the status card
-    The items are the values of all the rows in the status card table that
-    contain characters
-    """
-    try:
-        status_card = site.status_card
-
-        if not status_card:
-            logger.error('No status card linked to the site')
-            return []
-
-        # Getting all the status card fields
-        status_card_fields = Status_Card._meta.get_fields()
-        status_card_items = []
-        # Getting the status card field values, Constructing the arr of the status card items of the site
-        for field in status_card_fields:
-            status_card_items.append(getattr(status_card, field.name))
-        # removing the non char items from the arr
-        for i, item in enumerate(status_card_items):
-            if type(item) != unicode:
-                status_card_items.pop(i)
-
-        # Removing the int items the int item
-        for i, item in enumerate(status_card_items):
-            if type(item) == int or type(item) == long:
-                status_card_items.pop(i)
-
-        return status_card_items
-    except OperationalError ,e :
-        logger.error(e)
-        pass
-    except Exception  ,e :
-        logger.error(e)
-        pass
 
 def get_site_measurements(site):
     """
@@ -169,6 +133,44 @@ def get_site_measurements(site):
     logger.debug("Got measurements for site %s"%site_measurements_items)
     return site_measurements_items
 
+
+def get_status_card_items(site):
+    """
+    Returns the list of items to be displayed in the status card
+    The items are the values of all the rows in the status card table that
+    contain characters
+    """
+    try:
+        status_card = site.status_card
+
+        if not status_card:
+            logger.error('No status card linked to the site')
+            return []
+
+        # Getting all the status card fields
+        status_card_fields = Status_Card._meta.get_fields()
+        status_card_items = []
+        # Getting the status card field values, Constructing the arr of the status card items of the site
+        for field in status_card_fields:
+            status_card_items.append(getattr(status_card, field.name))
+        # removing the non char items from the arr
+        for i, item in enumerate(status_card_items):
+            if type(item) != unicode:
+                status_card_items.pop(i)
+
+        # Removing the int items the int item
+        for i, item in enumerate(status_card_items):
+            if type(item) == int or type(item) == long:
+                status_card_items.pop(i)
+
+        return list(set(status_card_items))
+
+    except OperationalError ,e :
+        logger.error(e)
+        pass
+    except Exception  ,e :
+        logger.error(e)
+        pass
 
 
 def get_all_associated_sensors(site):
@@ -337,3 +339,13 @@ def get_site_sensor_fields_choices(site):
 
     return choices
 
+
+def get_alert_rule_fields_choices(site):
+    """
+    This returns alert rule field choices for a given
+    site
+    """
+    fields = get_site_sensor_fields_choices(site)
+    fields['RMC_status#minutes_last_contact'] = 'RMC Last Contact'
+    return fields
+    
