@@ -10,29 +10,20 @@
 
         <div class="panel panel-success">
             <div class="panel-heading">
-                Export Csv data
+                Export Csv data for {{site.site_name}}
             </div>
 
             <div class="panel-body">
                 <form class="" method="post">
                    {% csrf_token %}
                    
-                   {# Sesh Site #}
-                   <div class="form-group">
-                       <label for="site-name">Site </label>
-                       <select class="form-control" name="site-name" id="site-name">
-                           {% for site in sites %}
-                               <option value="{{site.site_name}}">{{site.site_name}}</option>
-                           {% endfor %} 
-                       </select>
-                   </div>
  
                    {# Measurement to export #}
                    <div class="form-group">
                        <label for="measurement">Measurement </label>
                        <select class="form-control" name="measurement" id="measurement">
-                           {% for measurement in measurements %}
-                               <option value="{{measurement.name}}">{{measurement.name}}</option>
+                           {% for key, value in measurements.items %}
+                               <option value="{{key}}">{{value}}</option>
                            {% endfor %} 
                        </select>
                    </div>

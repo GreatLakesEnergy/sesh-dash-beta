@@ -66,6 +66,6 @@ class DataAnalysisTestCase(TestCase):
         }
 
         self.client.login(username='johndoe',password='asdasd12345')
-        response = self.client.post(reverse('export-csv-data'), data)
+        response = self.client.post(reverse('export-csv-data', args=[self.site.id]), data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/csv')
