@@ -1039,12 +1039,8 @@ def site_alert_rules(request, site_id):
 
 
     if request.method == 'POST':
-        data = {}
-        data['check_field'] = request.POST.get('check_field', '')
-        data['operator']  = request.POST.get('operator', '')
-        data['value'] = request.POST.get('value', '')
  
-        form = AlertRuleForm(data)
+        form = AlertRuleForm(request.POST)
         if form.is_valid():
             alert_rule = form.save(commit=False)
             alert_rule.site = site
@@ -1080,6 +1076,12 @@ def edit_alert_rule(request, alert_rule_id):
 
 
     context_dict['form'] = form
+    context_dict['site'] = alert_rule.site
+    context_dict['alert_rule'] = alert_rule
+    context_dict['site_sensor_fields'] = get_alert_rule_fields_choices(alert_rule.site)
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/settings/edit_alert_rule.html', context_dict)
 
 
