@@ -85,29 +85,10 @@ class Status_Card(models.Model):
      status card
      """
 
-     ROW_CHOICES = (
-         ('AC_Load_in', 'AC Load in'),
-         ('AC_Load_out', 'AC Load out'),
-         ('AC_Voltage_in', 'AC Voltage in'),
-         ('AC_Voltage_out', 'AC Voltage out'),
-         ('AC_input', 'AC input'),
-         ('AC_output', 'AC output' ),
-         ('AC_output_absolute', 'AC output absolute'),
-         ('battery_voltage', 'Battery Voltage'),
-         ('genset_state', 'Genset state'),
-         ('main_on', 'Main on'),
-         ('pv_production', 'PV production'),
-         ('relay_state', 'Relay state'),
-         ('soc', 'State of Charge'),
-         ('trans', 'Trans'),
-         ('last_contact', 'Last Contact'),
-     )
-
-
-     row1 = models.CharField(max_length=30, choices=ROW_CHOICES, default='soc')
-     row2 = models.CharField(max_length=30, choices=ROW_CHOICES, default='battery_voltage')
-     row3 = models.CharField(max_length=30, choices=ROW_CHOICES, default='AC_output_absolute')
-     row4 = models.CharField(max_length=30, choices=ROW_CHOICES, default='last_contact')
+     row1 = models.CharField(max_length=30, null=True, blank=True)
+     row2 = models.CharField(max_length=30, null=True, blank=True)
+     row3 = models.CharField(max_length=30, null=True, blank=True)
+     row4 = models.CharField(max_length=30, null=True, blank=True)
 
 
      def __str__(self):
@@ -277,18 +258,8 @@ class Alert_Rule(models.Model):
             'gt' : '>',
             }
 
-    FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
-                     ('BoM_Data_Point#soc','System State of Charge'),
-                     ('BoM_Data_Point#AC_output','AC Loads'),
-                     ('BoM_Data_Point#pv_production','Solar Energy Produced'),
-                     ('BoM_Data_Point#main_on','Grid Availible'),
-                     ('BoM_Data_Point#genset_state','Generator on'),
-                     ('RMC_status#minutes_last_contact', 'RMC Last Contact'),
-                     ('battery_voltage', 'Battery Voltage in influx rule'),
-                )
-
     site = models.ForeignKey(Sesh_Site)
-    check_field = models.CharField(choices=FIELD_CHOICES,max_length=100)
+    check_field = models.CharField(max_length=100)
     value = models.FloatField()
     operator = models.CharField(max_length=2,
                                       choices=OPERATOR_CHOICES,
@@ -297,7 +268,7 @@ class Alert_Rule(models.Model):
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
-        return "If %s is %s %s" % (self.get_check_field_display(), self.get_operator_display() ,self.value)
+        return "If %s is %s %s" % (self.check_field, self.get_operator_display() ,self.value)
 
     class Meta:
          verbose_name = 'System Alert Rule'
