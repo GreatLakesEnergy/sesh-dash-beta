@@ -39,10 +39,12 @@ import demjson
 #Import utils
 from seshdash.data.trend_utils import get_avg_field_year, get_alerts_for_year, get_historical_dict
 from seshdash.utils.time_utils import get_timesince, get_timesince_influx, get_epoch_from_datetime
-from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose,\
+from seshdash.utils.model_tools import get_quick_status, get_model_first_reference, get_model_verbose, \
                                        get_measurement_verbose_name, get_site_measurements, \
-                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors,\
-                                       save_sensor_set, model_list_to_field_list,get_site_sensor_fields,get_status_card_items,get_site_sensor_fields_choices
+                                       associate_sensors_sets_to_site, get_all_associated_sensors, get_config_sensors, \
+                                       save_sensor_set, model_list_to_field_list,get_site_sensor_fields, \
+                                       get_status_card_items,get_site_sensor_fields_choices, get_alert_rule_fields_choices
+
 from seshdash.utils.reporting import get_report_table_attributes, get_edit_report_list, get_measurement_unit
 from seshdash.models import SENSORS_LIST
 
@@ -1037,6 +1039,7 @@ def site_alert_rules(request, site_id):
 
 
     if request.method == 'POST':
+ 
         form = AlertRuleForm(request.POST)
         if form.is_valid():
             alert_rule = form.save(commit=False)
@@ -1047,6 +1050,7 @@ def site_alert_rules(request, site_id):
 
     context_dict['form'] = form
     context_dict['site'] = site
+    context_dict['site_sensor_fields'] = get_alert_rule_fields_choices(site)
     context_dict['alert_rules'] = alert_rules
     user_sites = _get_user_sites(request)
     context_dict['permitted'] = get_org_edit_permissions(request.user)
@@ -1072,6 +1076,12 @@ def edit_alert_rule(request, alert_rule_id):
 
 
     context_dict['form'] = form
+    context_dict['site'] = alert_rule.site
+    context_dict['alert_rule'] = alert_rule
+    context_dict['site_sensor_fields'] = get_alert_rule_fields_choices(alert_rule.site)
+    user_sites = _get_user_sites(request)
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/settings/edit_alert_rule.html', context_dict)
 
 

@@ -339,3 +339,13 @@ def get_site_sensor_fields_choices(site):
 
     return choices
 
+
+def get_alert_rule_fields_choices(site):
+    """
+    This returns alert rule field choices for a given
+    site
+    """
+    fields = get_site_sensor_fields_choices(site)
+    fields['RMC_status#minutes_last_contact'] = 'RMC Last Contact'
+    return fields
+    

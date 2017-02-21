@@ -258,18 +258,8 @@ class Alert_Rule(models.Model):
             'gt' : '>',
             }
 
-    FIELD_CHOICES = (('BoM_Data_Point#battery_voltage','battery voltage'),
-                     ('BoM_Data_Point#soc','System State of Charge'),
-                     ('BoM_Data_Point#AC_output','AC Loads'),
-                     ('BoM_Data_Point#pv_production','Solar Energy Produced'),
-                     ('BoM_Data_Point#main_on','Grid Availible'),
-                     ('BoM_Data_Point#genset_state','Generator on'),
-                     ('RMC_status#minutes_last_contact', 'RMC Last Contact'),
-                     ('battery_voltage', 'Battery Voltage in influx rule'),
-                )
-
     site = models.ForeignKey(Sesh_Site)
-    check_field = models.CharField(choices=FIELD_CHOICES,max_length=100)
+    check_field = models.CharField(max_length=100)
     value = models.FloatField()
     operator = models.CharField(max_length=2,
                                       choices=OPERATOR_CHOICES,
@@ -278,7 +268,7 @@ class Alert_Rule(models.Model):
     #TODO a slug field with the field operator and value info can be added
     #TODO this is vastly incomplete!! fields need to be mapable and chooices need to exist
     def __str__(self):
-        return "If %s is %s %s" % (self.get_check_field_display(), self.get_operator_display() ,self.value)
+        return "If %s is %s %s" % (self.check_field, self.get_operator_display() ,self.value)
 
     class Meta:
          verbose_name = 'System Alert Rule'
