@@ -2,7 +2,6 @@ from django.forms import ModelForm
 from django import forms
 from seshdash.models import Sesh_Site,VRM_Account,Sesh_RMC_Account, Sensor_Node, Alert_Rule, Sesh_User, Status_Card
 from seshdash.utils.time_utils import get_timezone_from_geo, localize
-from seshdash.utils.model_tools import get_site_sensor_fields_choices
 
 class SiteForm(ModelForm):
     error_css_class = "warning"
