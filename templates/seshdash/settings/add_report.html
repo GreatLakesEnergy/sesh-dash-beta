@@ -17,9 +17,16 @@
                     <option value="monthly">Monthly</option>
                 </select><br>
     
+                <div class="attribute-choices">
                 {% for attribute in report_attributes %}
-                    {{attribute.user_friendly_name}}<input type="checkbox"  name="{{attribute}}" checked="checked">  
-                {% endfor %}
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label for="" class="col-md-10">{{attribute.user_friendly_name}} </label>
+                            <input type="checkbox"  name="{{attribute}}" checked="checked" >  
+                        </div>
+                    </div>
+                {% endfor %} 
+                </div>
 
                 <input type="submit" class="btn btn-primary" value="Go">
             </form>
