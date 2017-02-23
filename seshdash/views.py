@@ -1343,6 +1343,10 @@ def add_report(request, site_id):
                               day_to_report=0)
         return redirect(reverse('manage_reports', args=[site.id]))
 
+    user_sites = _get_user_sites(request)
+    context_dict['site'] = site
+    context_dict['permitted'] = get_org_edit_permissions(request.user)
+    context_dict['sites_stats'] = get_quick_status(user_sites)
     return render(request, 'seshdash/settings/add_report.html', context_dict)
 
 
