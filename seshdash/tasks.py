@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 import logging
 import sys
-import pytz
 
 from django.conf import settings
 from django.db import IntegrityError,transaction
@@ -23,6 +22,10 @@ from datetime import datetime, date, timedelta
 from dateutil.parser import parse
 from seshdash.utils import time_utils
 from django.utils import timezone
+import pytz
+
+#other utils
+from itertools import groupby
 
 logger = logging.getLogger(__name__)
 
@@ -376,21 +379,12 @@ def find_chunks(input_list,key):
     """
     result_list = []
     section = {}
-    count = 0
-    for i in xrange(0,len(input_list)-1):
-        if count > 0:
-            section[input_list[i][key]] = count
-        if input_list[i][key] == input_list[i+1][key]:
-            count = count + 1
-            if i == (len(input_list)-2):
-            # We are at end of list
-
-                result_list.append(section)
-        else:
-            count = 0
-            section = {}
-            result_list.append(section)
-
+    print "got list ##### %s"%input_list
+    input_list = map (lambda x: x[key], input_list) # Flatten list
+    for key, iter in  groupby(input_list): # OHHH python!
+        section[key] = len(list(iter))
+        result_list.append(section)
+        section = {}
     return result_list
 
 
@@ -407,11 +401,10 @@ def get_grid_stats(measurement_dict_list, measurement_value, measurement_key, bu
 
     chunked_list = find_chunks(measurement_dict_list,measurement_key)
     logger.debug("Chunked list  %s"%chunked_list)
-    count = 0
     for chunk_dict in chunked_list:
         if measurement_value in chunk_dict.keys():
-            result_dict['duration'] = time_gap * chunk_dict[measurement_value]
-            result_dict['count'] = count + 1
+            result_dict['duration'] = result_dict['duration'] + time_gap * chunk_dict[measurement_value]
+            result_dict['count'] = result_dict['count'] + 1
     logger.debug("Found chunks %s"%result_dict)
     return result_dict
 
@@ -481,6 +474,7 @@ def get_aggregate_daily_data(date=None):
 
             logger.debug("aggregate data for %s date: %ss"%(site,date_to_fetch))
             agg_dict = {}
+            aggregate_data_grid_outage_stats = {}
 
             for rule in site_rules:
                 result = get_aggregate_data(site,
@@ -488,34 +482,40 @@ def get_aggregate_daily_data(date=None):
                         start=date_to_fetch,
                         operator=rule.function)
 
+            if site.has_pv:
+                agg_dict['aggregate_data_pv'] = get_aggregate_data (site, 'pv_production',start=date_to_fetch)[0]
 
-            agg_dict['aggregate_data_pv'] = get_aggregate_data (site, 'pv_production',start=date_to_fetch)[0]
             agg_dict['aggregate_data_AC'] = get_aggregate_data (site, 'AC_output_absolute',start=date_to_fetch)[0]
-            agg_dict['aggregate_data_batt'] = get_aggregate_data (site, 'AC_output', clause='negative', start=date_to_fetch)[0]
-            agg_dict['aggregate_data_grid'] = get_aggregate_data (site, 'AC_input', clause='positive',start=date_to_fetch)[0]
-            agg_dict['aggregate_data_grid_data'] = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
+            if site.has_batteries:
+                agg_dict['aggregate_data_batt'] = get_aggregate_data (site, 'AC_output', clause='negative', start=date_to_fetch)[0]
+            if site.has_grid:
+                agg_dict['aggregate_data_grid'] = get_aggregate_data (site, 'AC_input', clause='positive',start=date_to_fetch)[0]
+                agg_dict['aggregate_data_grid_data'] = get_aggregate_data (site, 'AC_Voltage_in',bucket_size='10m', toSum=False, start=date_to_fetch)
+                # Calculate outage data
+                logger.debug("aggregate date for grid %s "%agg_dict['aggregate_data_grid_data'])
+                aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
 
-            # Calculate outage data
-            logger.debug("aggregate date for grid %s "%agg_dict['aggregate_data_grid_data'])
-            aggregate_data_grid_outage_stats = get_grid_stats(agg_dict['aggregate_data_grid_data'], 0, 'min', 10)
+            # Get Alerts
             aggregate_data_alerts = Sesh_Alert.objects.filter(site=site, date=date_to_fetch)
+
+            # This is only for AC coupled systems TODO needs to be handled better
             agg_dict['sum_power_pv'] = agg_dict['aggregate_data_AC'] - agg_dict['aggregate_data_grid']
 
             #print agg_dict
             # Create model of aggregates
             daily_aggr = Daily_Data_Point(
-                                         site = site,
-                                         daily_pv_yield = agg_dict['aggregate_data_pv'],
-                                         daily_power_consumption_total = agg_dict['aggregate_data_AC'],
-                                         daily_battery_charge = agg_dict['aggregate_data_batt'],
-                                         daily_power_cons_pv = agg_dict['sum_power_pv'],
-                                         daily_grid_usage = agg_dict['aggregate_data_grid'],
-                                         daily_grid_outage_t = aggregate_data_grid_outage_stats['duration'],
-                                         daily_grid_outage_n = aggregate_data_grid_outage_stats['count'],
-                                         daily_no_of_alerts = aggregate_data_alerts.count(),
-                                         date = date_to_fetch,
-                                            )
-            #print "saving daily aggreagete for %s dp:%s"%(date_to_fetch,daily_aggr)
+                     site = site,
+                     daily_pv_yield = agg_dict.get('aggregate_data_pv',0),
+                     daily_power_consumption_total = agg_dict.get('aggregate_data_AC', 0),
+                     daily_battery_charge = agg_dict.get('aggregate_data_batt',0),
+                     daily_power_cons_pv = agg_dict.get('sum_power_pv',0),
+                     daily_grid_usage = agg_dict.get('aggregate_data_grid',0),
+                     daily_grid_outage_t = aggregate_data_grid_outage_stats.get('duration',0),
+                     daily_grid_outage_n = aggregate_data_grid_outage_stats.get('count',0),
+                     daily_no_of_alerts = aggregate_data_alerts.count(),
+                     date = date_to_fetch,
+                        )
+#print "saving daily aggreagete for %s dp:%s"%(date_to_fetch,daily_aggr)
             try:
                 daily_aggr.save()
             except IntegrityError,e:

@@ -30,6 +30,14 @@ def get_random_binary():
         return 1
     return 0
 
+def grid_data():
+    """
+    harcoded grid data
+    """
+
+
+    return data
+
 def get_random_interval(cieling,floor):
     return uniform(cieling,floor)
 
@@ -44,10 +52,11 @@ def generate_date_array(start=None, end = 'now',  naive=False, interval=5, units
     return time_arr
 
 
+def create_test_data(site, start=None, end="now", interval=5, units='minutes' , val=50, db='test_db', data={}):
+        """
+        data = {'R1':[0,0,0,..],'R2':[0,0,123,12,...]...}
+        """
 
-
-def create_test_data(site, start=None, end="now", interval=5, units='minutes' ,random=True, val=50, db='test_db'):
-        #TODO test weekly and monthly reports
 
         _influx_db_name = db
         i = Influx(database=_influx_db_name)
@@ -60,17 +69,39 @@ def create_test_data(site, start=None, end="now", interval=5, units='minutes' ,r
         R3 = val
         R4 = val
         R5 = val
+        count = 0
         print "creating %s test data points"%len(data_point_dates)
         print "between %s and %s "%(data_point_dates[0],data_point_dates[len(data_point_dates)-1:])
         # Simulate Grid outage
         for time_val in data_point_dates:
-                if random:
+                try:
+                    soc = data.get('soc',[])[count]
+                except:
                     soc = get_random_int()
+                try:
+                    R1 = data('R1',[])[count]
+                except:
                     R1 = voltage_in * get_random_binary()
+
+                try:
+                    R2 = data('R2',[])[count]
+                except:
                     R2 = get_random_interval(100,500)
+
+                try:
+                    R3 = data('R3',[])[count]
+                except:
                     R3 = get_random_interval(22,28)
+
+                try:
+                    R4 = data('R4',[])[count]
+                except:
                     R4 = get_random_interval(100,500)
+                try:
+                    R5 = data('R5',[])[count]
+                except:
                     R5 = get_random_interval(100,500)
+
 
                 dp = Data_Point.objects.create(
                                             site=site,
@@ -91,6 +122,10 @@ def create_test_data(site, start=None, end="now", interval=5, units='minutes' ,r
                 dp_dict.pop('inverter_state')
                 dp_dict.pop('id')
                 i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),tags={"site_name":site.site_name})
+                count = count + 1
+                # Count number of outages
+
+
         return len(data_point_dates)
 
 
