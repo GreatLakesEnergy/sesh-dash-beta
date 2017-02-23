@@ -54,7 +54,8 @@ def generate_date_array(start=None, end = 'now',  naive=False, interval=5, units
 
 def create_test_data(site, start=None, end="now", interval=5, units='minutes' , val=50, db='test_db', data={}):
         """
-        data = {'R1':[0,0,0,..],'R2':[0,0,123,12,...]...}
+        data = {'R1':[0,0,0,..],'R2':[0,0,123,12,...]...} will not generate date but use fixed data set
+        if val is not set random data will be generated if data is not existing
         """
 
 
@@ -74,6 +75,7 @@ def create_test_data(site, start=None, end="now", interval=5, units='minutes' , 
         print "between %s and %s "%(data_point_dates[0],data_point_dates[len(data_point_dates)-1:])
         # Simulate Grid outage
         for time_val in data_point_dates:
+            if not val:
                 try:
                     soc = data.get('soc',[])[count]
                 except:
