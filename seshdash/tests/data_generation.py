@@ -118,14 +118,14 @@ def create_test_data(site, start=None, end="now", interval=5, units='minutes' , 
                                             AC_Load_in = R2,
                                             AC_Load_out = R4,
                                             pv_production = R5)
-                # Also send ton influx
-                dp_dict = model_to_dict(dp)
-                dp_dict.pop('time')
-                dp_dict.pop('inverter_state')
-                dp_dict.pop('id')
-                i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),tags={"site_name":site.site_name})
-                count = count + 1
-                # Count number of outages
+            # Also send ton influx
+            dp_dict = model_to_dict(dp)
+            dp_dict.pop('time')
+            dp_dict.pop('inverter_state')
+            dp_dict.pop('id')
+            i.send_object_measurements(dp_dict,timestamp=time_val.isoformat(),tags={"site_name":site.site_name})
+            count = count + 1
+            # Count number of outages
 
 
         return len(data_point_dates)
