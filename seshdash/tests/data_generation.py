@@ -29,15 +29,6 @@ def get_random_binary():
     if val > 50:
         return 1
     return 0
-
-def grid_data():
-    """
-    harcoded grid data
-    """
-
-
-    return data
-
 def get_random_interval(cieling,floor):
     return uniform(cieling,floor)
 

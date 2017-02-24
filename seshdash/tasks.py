@@ -379,7 +379,6 @@ def find_chunks(input_list,key):
     """
     result_list = []
     section = {}
-    print "got list ##### %s"%input_list
     input_list = map (lambda x: x[key], input_list) # Flatten list
     for key, iter in  groupby(input_list): # OHHH python!
         section[key] = len(list(iter))
