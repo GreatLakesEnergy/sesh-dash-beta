@@ -74,8 +74,8 @@ class InfluxTestCase(TestCase):
         self.no_points = create_test_data(self.site,
                                         start = self.site.comission_date,
                                         end = dt + timedelta( hours = 48),
-                                        interval = 30,
-                                        random = False)
+                                        interval = 30
+                                        )
         #create test user
         self.test_user = Sesh_User.objects.create_user(username="john doe",email="alp@gle.solar",password="asdasd12345")
         #assign a user to the sites
