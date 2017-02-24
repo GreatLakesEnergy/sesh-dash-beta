@@ -81,31 +81,31 @@ def create_test_data(site, start=None, end="now", interval=5, units='minutes' , 
                 except:
                     soc = get_random_int()
                 try:
-                    R1 = data('R1',[])[count]
+                    R1 = data.get('R1',[])[count]
                 except:
                     R1 = voltage_in * get_random_binary()
 
                 try:
-                    R2 = data('R2',[])[count]
+                    R2 = data.get('R2',[])[count]
                 except:
                     R2 = get_random_interval(100,500)
 
                 try:
-                    R3 = data('R3',[])[count]
+                    R3 = data.get('R3',[])[count]
                 except:
                     R3 = get_random_interval(22,28)
 
                 try:
-                    R4 = data('R4',[])[count]
+                    R4 = data.get('R4',[])[count]
                 except:
                     R4 = get_random_interval(100,500)
                 try:
-                    R5 = data('R5',[])[count]
+                    R5 = data.get('R5',[])[count]
                 except:
                     R5 = get_random_interval(100,500)
 
 
-                dp = Data_Point.objects.create(
+            dp = Data_Point.objects.create(
                                             site=site,
                                             soc = soc ,
                                             battery_voltage = R3,
