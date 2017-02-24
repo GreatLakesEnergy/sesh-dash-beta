@@ -146,11 +146,11 @@ ul li {
 						<p>Here is your <i>energy usage</i>  for  {{ content.date }}</p>
 
 						<h2>{{ content.report.duration }}  report:</h2>
-
+						<ul>
 						{% for attribute in content.report_data %}
-							<li><p> {{ attribute.user_friendly_name }} : {{ attribute.val|floatformat }} {{attribute.unit}} </p> </li>
+							<li>{{ attribute.user_friendly_name }} : {{ attribute.val|floatformat }} {{attribute.unit}}  </li>
 						{% endfor %}
-
+						</ul>
 						<a href="{{content.url_to_dash}}" class="btn-primary">See the realtime stats here </a>
 						<p>Thanks, have a lovely day.</p>
 						<p>Seshina</p>

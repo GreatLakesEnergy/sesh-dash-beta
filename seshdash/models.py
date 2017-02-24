@@ -100,7 +100,7 @@ class Status_Card(models.Model):
          """
          from seshdash.utils.model_tools import get_site_sensor_fields_choices
          return get_site_sensor_fields_choices(self.sesh_site)
-         
+
 
 
 class Site_Measurements(models.Model):
@@ -164,9 +164,9 @@ class Sesh_Site(models.Model):
     location_country = models.CharField(max_length = 100)
     time_zone = models.CharField(max_length = 100, default='Africa/Kigali')
     position = GeopositionField()
-    installed_kw = models.FloatField()
-    system_voltage = models.IntegerField()
-    number_of_panels = models.IntegerField()
+    installed_kw = models.FloatField(default=None, blank=True)
+    system_voltage = models.IntegerField(default=None, blank=True)
+    number_of_panels = models.IntegerField(default=None, blank=True)
     #enphase_ID = models.CharField( max_length = 100)
     #TODO need to figure a way to show this in admin to automatically populate
     #enphase_site_id = models.IntegerField()
@@ -174,6 +174,8 @@ class Sesh_Site(models.Model):
     battery_bank_capacity = models.IntegerField()
     has_genset = models.BooleanField(default=False)
     has_grid = models.BooleanField(default=False)
+    has_pv = models.BooleanField(default=False)
+    has_batteries =models.BooleanField(default=False)
     vrm_account = models.ForeignKey(VRM_Account,default=None,blank=True,null=True)
     vrm_site_id = models.CharField(max_length=20,default="",blank=True, null=True)
     status_card = models.OneToOneField(Status_Card,default=None,blank=True,null=True, on_delete=models.SET_NULL)
@@ -633,13 +635,13 @@ class Sensor_Node(models.Model):
 
      def get_fields(self):
          """
-         Returns the field of the sensor 
+         Returns the field of the sensor
          """
          all_fields = [self.index1, self.index2, self.index3, self.index4, self.index5, self.index5, \
                    self.index6, self.index7, self.index8, self.index9, self.index10, self.index11, self.index12]
 
          fields = []
-         
+
          for field in all_fields:
              if field:
                  fields.append(field)
