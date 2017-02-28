@@ -1324,7 +1324,7 @@ def add_report(request, site_id):
     """
     site = Sesh_Site.objects.filter(id=site_id).first()
     context_dict = {}
-    context_dict['report_attributes'] = get_report_table_attributes()
+    context_dict['report_attributes'] = get_report_table_attributes(site)
     attributes = []
 
     # if the user does not belong to the organisation or if the user is not an admin
