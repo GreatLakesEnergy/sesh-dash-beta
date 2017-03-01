@@ -137,17 +137,12 @@ def get_emails_list(users):
 
     return emails
 
-def get_report_table_attributes():
+def get_report_table_attributes(site):
     """
-    Returns the report attributes for sesh report tables
+    Returns the report attributes for daily data point
     found in settings
     """
-    from django.conf import settings
-    attributes  = []
-
-    for table_name in settings.SESH_REPORT_TABLES:
-        attributes.extend(get_table_report_dict(table_name, ['sum', 'average']))
-
+    attributes = get_table_report_dict(site, 'Daily_Data_Point', ['sum', 'average'])
     return attributes
 
 
@@ -175,7 +170,7 @@ def get_edit_report_list(report):
     Returns a list that represents the status
     of items in the report compared to what can be in the reports
     """
-    possible_attributes = get_report_table_attributes()
+    possible_attributes = get_report_table_attributes(report.site)
     data_list = []
 
     for attribute in possible_attributes:
@@ -204,8 +199,20 @@ def is_in_report_attributes(dictionary, report):
             return True
     return False
 
+def is_in_report_attributes_dictionary(dictionary, array_dictionary):
+    """
+    Checks if a given dictionary is in report table attributes for a given site,
+    :param dictionary: The dictionary to check if is in
+    :return: Returns boolean True or False basing if the dictionary was found or not
+    """
 
-def get_table_report_dict(report_table_name, operations):
+    for item in array_dictionary:
+        if item == dictionary:
+            return True
+
+    return False
+
+def get_table_report_dict(site, report_table_name, operations):
     """
     Returns a dict containing all the reporting values
     possible for models containing reporting data
@@ -222,6 +229,22 @@ def get_table_report_dict(report_table_name, operations):
     for operation in operations:
         for field in fields:
             if field.name != 'site' and field.name != 'id' and field.name != 'date':
+
+                # Removing values for sites that do not have pv
+                if not site.has_pv:
+                    if field.name in ['daily_pv_yield', 'daily_power_cons_pv']:
+                        continue
+
+                # Removing values for sites that do not have grid
+                if not site.has_grid:
+                    if field.name in ['daily_grid_outage_n', 'daily_grid_outage_t', 'daily_grid_usage']:
+                        continue
+
+                # Removing values for site that do not have batteries
+                if not site.has_batteries:
+                    if field.name in ['daily_battery_charge']:
+                        continue
+
                 report_attribute_dict = {}
                 report_attribute_dict['column'] = field.name
                 report_attribute_dict['table'] = report_table_name
