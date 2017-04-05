@@ -390,3 +390,20 @@ a.action-icon:hover {
   color: #ddd;
 }
 
+.add-report .attribute-choices {
+  padding: 35px 0;
+}
+
+.add-report .attribute-choices .row {
+  padding: 5px 0;
+}
+
+.add-report .attribute-choices .row .col-md-10 {
+  margin: 0;
+  padding-left: 0;
+}
+
+.add-report .submit-btn-container {
+  margin-top: 35px;
+  padding: 0 30px;
+}

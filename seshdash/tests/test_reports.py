@@ -12,7 +12,8 @@ from geoposition import Geoposition
 
 from seshdash.models import Daily_Data_Point, Report_Job, Sesh_Site, Sesh_Organisation, Sesh_User, Report_Sent
 from seshdash.utils.reporting import send_report, generate_report_data, _format_column_str, _get_operation, get_emails_list, \
-                                     get_table_report_dict, get_edit_report_list, is_in_report_attributes
+                                     get_table_report_dict, get_edit_report_list, is_in_report_attributes, get_report_table_attributes, \
+                                     is_in_report_attributes_dictionary
 from seshdash.tasks import check_reports
 
 
@@ -47,9 +48,9 @@ class ReportTestCase(TestCase):
 
         self.attributes_data = [
                                    {"table":"Daily_Data_Point",
-                                    "column":"daily_pv_yield",
+                                    "column":"daily_no_of_alerts",
                                     "operation":"average",
-                                    "user_friendly_name":"Daily pv yield average"},
+                                    "user_friendly_name":"Daily no of alerts average"},
                                    {"table":"Daily_Data_Point",
                                     "column":"daily_power_consumption_total",
                                     "operation":"sum",
@@ -143,13 +144,72 @@ class ReportTestCase(TestCase):
         Testing the function that takes a table and operations as input
         and then returns a attribute dict that can be used to create a report
         """
-        report_dict = get_table_report_dict('Daily_Data_Point', 'sum')
+        report_dict = get_table_report_dict(self.site, 'Daily_Data_Point', 'sum')
         self.assertEqual(report_dict[0]['operation'], 'sum')
         self.assertEqual(report_dict[0]['table'], 'Daily_Data_Point')
 
         # Should raise a lookup error in case of incorrect table input
         with self.assertRaises(LookupError):
-            get_table_report_dict('UnknownTable', 'sum')
+            get_table_report_dict(self.site, 'UnknownTable', 'sum')
+
+    def test_get_table_report_attributes(self):
+        """
+        This is the function that returns the table attributes to display,
+        It should display the options basing on the site, 
+
+        This test will test how it will work with Daily_Data_Point Field models
+        where it should check if a site has pv and return values consideringly
+        """
+
+        fields = get_report_table_attributes(self.site)
+
+        # Testing for some of the values that should not be in for a site that doesn't have pv, genset, grid, batteries
+        dict = {'column': 'daily_pv_yield', 'operation':'sum', 'table':'Daily_Data_Point', 'user_friendly_name':'Daily pv yield sum'}
+        self.assertFalse(is_in_report_attributes_dictionary(dict, fields))
+
+        dict = {'column': 'daily_power_cons_pv', 'operation':'sum', 'table': 'Daily_Data_Point', 'user_friendly_name': 'Daily power cons pv sum'}
+        self.assertFalse(is_in_report_attributes_dictionary(dict, fields))
+
+        dict = {'column': 'daily_grid_outage_n', 'operation':'sum','table': 'Daily_Data_Point', 'user_friendly_name': 'Daily grid outage n sum'}
+        self.assertFalse(is_in_report_attributes_dictionary(dict, fields))
+
+        dict = {'column': 'daily_battery_charge', 'operation': 'sum', 'table': 'Daily_Data_Point', 'user_friendly_name': 'Daily battery charge sum'}
+        self.assertFalse(is_in_report_attributes_dictionary(dict, fields))
+
+
+        # Creating a site that has pv, genset grid and batteries
+        site_has_all = Sesh_Site.objects.create(site_name='test_site_has_all',
+                                             organisation=self.organisation,
+                                             comission_date=timezone.now(),
+                                             location_city='kigali',
+                                             location_country='Rwanda',
+                                             installed_kw=123.0,
+                                             position = self.location,
+                                             system_voltage = 12,
+                                             number_of_panels = 12,
+                                             battery_bank_capacity = 1000,
+                                             has_genset=True,
+                                             has_grid=True,
+                                             has_pv=True,
+                                             has_batteries=True)
+
+        fields = get_report_table_attributes(site_has_all)
+
+        # Testing if the correct values are there for a site that has pv, genset, grid and batteries
+        dict = {'column': 'daily_pv_yield', 'operation':'sum', 'table':'Daily_Data_Point', 'user_friendly_name':'Daily pv yield sum'}
+        self.assertTrue(is_in_report_attributes_dictionary(dict, fields))
+
+        dict = {'column': 'daily_power_cons_pv', 'operation': 'sum', 'table': 'Daily_Data_Point',
+                'user_friendly_name': 'Daily power cons pv sum'}
+        self.assertTrue(is_in_report_attributes_dictionary(dict, fields))
+
+        dict = {'column': 'daily_grid_outage_n', 'operation': 'sum', 'table': 'Daily_Data_Point',
+                'user_friendly_name': 'Daily grid outage n sum'}
+        self.assertTrue(is_in_report_attributes_dictionary(dict, fields))
+
+        dict4 = {'column': 'daily_battery_charge', 'operation': 'sum', 'table': 'Daily_Data_Point',
+                'user_friendly_name': 'Daily battery charge sum'}
+        self.assertTrue(is_in_report_attributes_dictionary(dict, fields))
 
     def test_add_report(self):
         """
