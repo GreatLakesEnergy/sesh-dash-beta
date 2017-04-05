@@ -55,7 +55,7 @@ def get_measurement_unit(measurement):
     """
     Get a unit for measurement or refer to default
     """
-        return Daily_Data_Point.UNITS_DICTIONARY.get(measurement,Daily_Data_Point.DEFAULT_UNIT)
+    return Daily_Data_Point.UNITS_DICTIONARY.get(measurement,Daily_Data_Point.DEFAULT_UNIT)
 
 def generate_report_data(report):
     """
