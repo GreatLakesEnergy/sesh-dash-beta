@@ -52,10 +52,10 @@ def send_report(report):
     return val
 
 def get_measurement_unit(measurement):
-    try:
-        return Daily_Data_Point.UNITS_DICTIONARY[measurement]
-    except KeyError:
-        raise Exception("The measurement: %s has not key in the UNITS DICTIONARY DICT and maybe not a valid measurent" % measurement)
+    """
+    Get a unit for measurement or refer to default
+    """
+        return Daily_Data_Point.UNITS_DICTIONARY.get(measurement,Daily_Data_Point.DEFAULT_UNIT)
 
 def generate_report_data(report):
     """

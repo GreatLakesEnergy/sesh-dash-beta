@@ -59,7 +59,6 @@ class SiteVRMForm(ModelForm):
         exclude = ('vrm_account', 'organisation', 'vrm_site_id', 'status_card', 'site_measurements')
 
 
-
 class RMCForm(ModelForm):
     error_css_class = "warning"
     required_css_class = "info"
@@ -67,6 +66,7 @@ class RMCForm(ModelForm):
     class Meta:
         model = Sesh_RMC_Account
         exclude = ('Delete','site',)
+
 
 
 class VRMForm(ModelForm):
@@ -80,6 +80,7 @@ class VRMForm(ModelForm):
                   'vrm_password': forms.PasswordInput(),
                    }
 
+
 class SensorNodeForm(ModelForm):
     """
     Generic Sensor Node Form
@@ -87,7 +88,6 @@ class SensorNodeForm(ModelForm):
     class Meta:
         model = Sensor_Node
         exclude = ('site',)
-
 
 
 class AlertRuleForm(ModelForm):
@@ -98,6 +98,7 @@ class AlertRuleForm(ModelForm):
     class Meta:
         model = Alert_Rule
         fields = ('check_field', 'operator', 'value',)
+
 
 class SeshUserForm(ModelForm):
     """

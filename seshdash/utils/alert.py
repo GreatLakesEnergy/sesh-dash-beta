@@ -64,6 +64,7 @@ def alert_generator():
                     mails, sms_numbers = get_recipients_for_site(site)
 
                     # reporting
+                    logging.debug("Alert triggered sending alerts out %s"%mail)
                     alert_obj.emailSent = send_mail("Alert Mail", mails, content)
                     alert_obj.smsSent = send_sms(sms_numbers, content)
                     slack_msg = get_slack_alert_msg("Alert Triggered", alert_obj)
