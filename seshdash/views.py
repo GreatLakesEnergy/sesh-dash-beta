@@ -771,13 +771,13 @@ def get_latest_bom_data(request):
     # getting current site and latest rmc status object
     site_id = request.POST.get('siteId')
     site = Sesh_Site.objects.filter(id=site_id).first()
-
+    print "looking up site %s"%site
     # The measurement list contains attributes to be displayed in the status card,
     measurement_list = get_status_card_items(site)
 
     latest_points = get_measurements_latest_point(site, measurement_list)
     print "The latest points are: %s" % latest_points
- 
+
     latest_point_data = []
 
     # If the points exist and the points returned are equal to the items in measurement list
@@ -1006,7 +1006,7 @@ def delete_site(request, site_id):
     else:
         return HttpResponseForbidden("You are not allowed to operate this permission")
 
-    return redirect('index') 
+    return redirect('index')
 
 
 @login_required
@@ -1039,7 +1039,7 @@ def site_alert_rules(request, site_id):
 
 
     if request.method == 'POST':
- 
+
         form = AlertRuleForm(request.POST)
         if form.is_valid():
             alert_rule = form.save(commit=False)
