@@ -497,7 +497,7 @@ class Daily_Data_Point(models.Model):
         "cloud_cover": "Cloud Cover",
     }
 
-    DEFUALT_UNIT = "%"
+    DEFAULT_UNIT = "%"
 
 
     site = models.ForeignKey(Sesh_Site)
