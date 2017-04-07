@@ -12,7 +12,7 @@ from django.db.models import Avg
 # Seshdash
 from seshdash.models import Daily_Data_Point, Sesh_Site, Sesh_Alert
 from seshdash.utils.time_utils import get_date_dashed
-
+from seshdash.utils.reporting import get_measurement_unit
 
 def get_avg_field_year(site, field):
     """ Returns the average of a field for a year range in Daily Data Point"""
@@ -23,8 +23,6 @@ def get_avg_field_year(site, field):
                                                                   get_date_dashed(now)],site=site)\
                                                                   .aggregate(Avg(field)).values()[0]
     return avg_field_yield
-
-
 
 
 def get_alerts_for_year(site):
@@ -49,12 +47,9 @@ def get_alerts_for_range(site, start_date=None, end_date=None):
     return alerts_for_year
 
 
-
-
-
 def get_historical_dict(column='daily_pv_yield'):
     """ Packages a ditionary containing data information of a column in Daily_Data_Point for the whole year """
-    unit = Daily_Data_Point.UNITS_DICTIONARY[column]
+    unit = get_measurement_unit(column)
     sites = Sesh_Site.objects.all();
     historical_points = Daily_Data_Point.objects.all()
 

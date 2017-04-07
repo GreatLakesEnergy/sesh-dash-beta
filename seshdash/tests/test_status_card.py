@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 
 from guardian.shortcuts import assign_perm
 
-from seshdash.data.db.influx import Influx
+from seshdash.data.db.influx import Influx, insert_point
 from seshdash.models import Sesh_User, Sesh_Site, Status_Card, Sesh_Organisation
 
 from geoposition import Geoposition
@@ -29,22 +29,22 @@ class StatusCardTestCase(TestCase):
            self.i.create_database(self._influx_db_name)
            pass
 
- 
+
         self.client = Client()
         self.organisation = Sesh_Organisation.objects.create(name='test_organisation')
-                                                             
+
         self.user = Sesh_User.objects.create_user(username='test_user',
-                                             password='test.test.test', 
+                                             password='test.test.test',
                                              email='test@gle.solar',
                                              organisation=self.organisation
                                              )
         self.location = Geoposition(1, 4)
-        self.site = Sesh_Site.objects.create(site_name='test_site', 
+        self.site = Sesh_Site.objects.create(site_name='test_site',
                                              organisation=self.organisation,
                                              comission_date=timezone.now(),
                                              location_city='',
                                              location_country='',
-                                             installed_kw='13', 
+                                             installed_kw='13',
                                              position=self.location,
                                              system_voltage=24,
                                              number_of_panels=12,
@@ -54,10 +54,11 @@ class StatusCardTestCase(TestCase):
         self.status_card = Status_Card.objects.create(row1='AC_Load_in',
                                                       row2='AC_Load_out',
                                                       row3='AC_Voltage_in',
-                                                      row4='AC_Voltage_out') 
+                                                      row4='AC_Voltage_out')
 
         self.site.status_card = self.status_card
         self.site.save()
+
 
         assign_perm('view_Sesh_Site', self.user, self.site)
 
@@ -87,6 +88,36 @@ class StatusCardTestCase(TestCase):
         # Testing if the changes have been applied
         status_card = Status_Card.objects.filter(id=self.status_card.id).first()
         self.assertEqual(status_card.row1, 'battery_voltage')
-      
+
+        # Test negative test case
+        data = {
+            'row1': 'battery_voltage',
+            'row2': 'AC_Load_in',
+            'row3': 'AC_Voltage_in',
+            'row4': 'Wrong_setting'
+        }
+
+        insert_point(self.site, 'battery_voltage', 2, db='test_db')
+        insert_point(self.site, 'AC_Load_in', 12, db='test_db')
+        insert_point(self.site, 'AC_Voltage_in', 12, db='test_db')
+        insert_point(self.site, 'Wrong_setting' ,12, db='test_db')
+
+        # Testing with admin user
+        self.client.login(username='test_user', password='test.test.test')
+        self.user.is_org_admin = True
+        self.user.save()
+        response = self.client.post(reverse('edit_status_card', args=[self.site.id]), data)
+        self.assertRedirects(response, reverse('index', args=[self.site.id]))
+
+        # Testing if the changes have been applied
+        status_card = Status_Card.objects.filter(id=self.status_card.id).first()
+        self.assertEqual(status_card.row4, 'Wrong_setting')
+
+        # call get-latest-bom-data
+        response = self.client.post('/get-latest-bom-data',{'siteId':self.site.id})
+        self.assertEqual(response.status_code,200)
+
+
+
 
 

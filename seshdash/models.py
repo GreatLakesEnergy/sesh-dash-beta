@@ -102,7 +102,6 @@ class Status_Card(models.Model):
          return get_site_sensor_fields_choices(self.sesh_site)
 
 
-
 class Site_Measurements(models.Model):
     """
     Contains measurements to be displayed in graphs dropdowns
@@ -368,6 +367,10 @@ class Data_Point(models.Model):
     UNITS_DICTIONARY = (
         ("id", ''),
         ("soc","%"),
+        ('temperature','C'),
+        ('humidity','%'),
+        ('PH', 'ph'),
+        ('Ethanol', '%'),
         ("battery_voltage", "V"),
         ("AC_Voltage_in" , "V"),
         ("AC_Voltage_out" , "V"),
@@ -425,8 +428,11 @@ class Data_Point(models.Model):
     site = models.ForeignKey(Sesh_Site)
     field_name = models.FloatField(default=0,
             verbose_name="Data Point Name",  choices=MEASUREMENTS_VERBOSE_NAMES)
+
     field_unit = models.FloatField(default=0,
             verbose_name="Data Point Name",  choices=UNITS_DICTIONARY)
+
+    field_scale = models.FloatField(default=1)
     #TODO Perhaps add scale as well?
 
 class Daily_Data_Point(models.Model):
@@ -491,7 +497,7 @@ class Daily_Data_Point(models.Model):
         "cloud_cover": "Cloud Cover",
     }
 
-
+    DEFAULT_UNIT = "%"
 
 
     site = models.ForeignKey(Sesh_Site)

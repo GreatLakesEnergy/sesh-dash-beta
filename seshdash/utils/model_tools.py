@@ -61,6 +61,7 @@ def get_model_fields_names(model):
 
     return field_names
 
+
 def get_model_verbose(model):
     """ Returns a dictionary where keys are columns and values are verbose name """
     fields = model._meta.fields
@@ -75,7 +76,6 @@ def get_model_verbose(model):
 def get_latest_instance(model):
     """ Returns the latest row in a model """
     return model.objects.all().order_by('id').last()
-
 
 
 def get_measurement_verbose_name(measurement):
@@ -99,7 +99,6 @@ def get_model_field_names(model):
         field_arr.append(field.name)
 
     return field_arr
-
 
 
 def get_site_measurements(site):
@@ -211,8 +210,6 @@ def get_config_sensors(sensors):
     return configuration, 0
 
 
-
-
 def get_quick_status(user_sites):
     """
     returns battery state and future forecast
@@ -271,7 +268,6 @@ def get_quick_status(user_sites):
     return results
 
 
-
 def associate_sensors_sets_to_site(sensor_sets, site):
     """
     Function to associate sensors sets to site
@@ -294,6 +290,7 @@ def save_sensor_set(sensor_set, site):
         sensor_instance.site = site
         sensor.save()
 
+
 def model_list_to_field_list(model_list, field):
     """
     Convert a model dictionary into a list with the values of the field from each item as each item.
@@ -309,12 +306,11 @@ def model_list_to_field_list(model_list, field):
     return result_list
 
 
-
 def get_site_sensor_fields(site):
     """
-    Returns the name of the fields for a site, 
+    Returns the name of the fields for a site,
     These are the fields that are stored in influx db
-    
+
     @param site - The site for which the data has to come from
     """
     sensors = Sensor_Node.objects.filter(site=site)
@@ -322,7 +318,7 @@ def get_site_sensor_fields(site):
 
     for sensor in sensors:
         fields += sensor.get_fields()
-        
+
     return sorted(list(set(fields))) # removing duplicate values if and sorting
 
 
@@ -348,4 +344,4 @@ def get_alert_rule_fields_choices(site):
     fields = get_site_sensor_fields_choices(site)
     fields['RMC_status#minutes_last_contact'] = 'RMC Last Contact'
     return fields
-    
+
