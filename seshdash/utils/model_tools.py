@@ -80,7 +80,7 @@ def get_latest_instance(model):
 
 def get_measurement_verbose_name(measurement):
     try:
-        return Daily_Data_Point.MEASUREMENTS_VERBOSE_NAMES[measurement]
+        return Daily_Data_Point.MEASUREMENTS_VERBOSE_NAMES.get(measurement,measurement)
     except KeyError ,e :
         logger.error(e)
         pass
