@@ -590,7 +590,7 @@ class Sensor_Node(models.Model):
      """
      Table representative for the emon tx
      """
-    SENSOR_TYPE_CHOICES = (
+     SENSOR_TYPE_CHOICES = (
                         ('th','Temperature Humidity'),
                         ('tx','Power Voltage'),
                         ('pe','Ph Ethenoal'),
