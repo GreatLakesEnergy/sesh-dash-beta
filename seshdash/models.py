@@ -590,27 +590,14 @@ class Sensor_Node(models.Model):
      """
      Table representative for the emon tx
      """
-     NODE_ID_CHOICES = (
-                         (19, 19),
-                         (20, 20),
-                         (21, 21),
-                         (22, 22),
-                         (23, 23),
-                         (24, 24),
-                         (25, 25),
-                         (26, 26),
-                         (27, 27),
-                         (28, 28),
-                         (29, 29),
-                     )
-     SENSOR_TYPE_CHOICES = (
+    SENSOR_TYPE_CHOICES = (
                         ('th','Temperature Humidity'),
                         ('tx','Power Voltage'),
                         ('pe','Ph Ethenoal'),
                     )
 
      site = models.ForeignKey(Sesh_Site)
-     node_id = models.IntegerField(default=0, choices=NODE_ID_CHOICES)
+     node_id = models.IntegerField(default=0)
      sensor_type = models.CharField(max_length=40, choices=SENSOR_TYPE_CHOICES)
      index1 = models.CharField(max_length=40)
      index2 = models.CharField(max_length=40, blank=True, null=True)
