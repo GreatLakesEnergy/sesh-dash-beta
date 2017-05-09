@@ -116,7 +116,6 @@ class StatusCardTestCase(TestCase):
         # call get-latest-bom-data
         response = self.client.post('/get-latest-bom-data',{'siteId':self.site.id})
         self.assertGreater(len(response.content),1)
-
         self.assertEqual(response.status_code,200)
 
 
