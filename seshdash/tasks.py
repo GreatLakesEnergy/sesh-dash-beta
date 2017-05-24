@@ -99,6 +99,30 @@ def generate_auto_rules(site_id):
 
     logger.debug("Added low voltage, soc, and comm alert for site %s"%site)
 
+def create_data_point(bat_data, sys_data):
+    """
+    Helper function in creating data point object
+    """
+
+        soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0),
+        battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0),
+        AC_Voltage_in =  sys_data.get('Input voltage phase 1',{}).get('valueFloat',0),
+        AC_Voltage_out = sys_data.get('Output voltage phase 1',{}).get('valueFloat',0),
+        AC_input = sys_data.get('Input power 1',{}).get('valueFloat',0),
+        AC_output =  sys_data.get('Output power 1',{}).get('valueFloat',0),
+        AC_output_absolute =  float(sys_data.get('Output power 1',{}).get('valueFloat',0) +   float(sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0))),
+        AC_Load_in =  sys_data,get('Input current phase 1',{}).get('valueFloat',0),
+        AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0),
+        inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum',''),
+        pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0),
+        #TODO these need to be activated
+        genset_state =  0,
+        main_on = mains,
+        relay_state = 0,
+        )
+    return data_point
+
+
 
 @shared_task
 def get_BOM_data():
@@ -128,30 +152,25 @@ def get_BOM_data():
 
                         data_point = BoM_Data_Point(
                             site = site,
-                            time = date,
-                            soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0),
-                            battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0),
-                            AC_Voltage_in =  sys_data['Input voltage phase 1']['valueFloat'],
-                            AC_Voltage_out = sys_data['Output voltage phase 1']['valueFloat'],
-                            AC_input = sys_data['Input power 1']['valueFloat'],
-                            AC_output =  sys_data['Output power 1']['valueFloat'],
-                            AC_output_absolute =  float(sys_data['Output power 1']['valueFloat']) +
-                                                    float(sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0)),
-                            AC_Load_in =  sys_data['Input current phase 1']['valueFloat'],
-                            AC_Load_out =  sys_data['Output current phase 1']['valueFloat'],
-                            inverter_state = sys_data['VE.Bus state']['nameEnum'],
-                            pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0),
-                            #TODO these need to be activated
-                            genset_state =  0,
-                            main_on = mains,
-                            relay_state = 0,
-                            )
-                	with transaction.atomic():
-                        	data_point.save()
-                        # Send to influx
-                        send_to_influx(data_point, site, date, to_exclude=['time'])
+                            time = date)
 
-                        # Alert if check(data_point) fails
+                        data_point.soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0)
+                        data_point. battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0)
+                        data_pint.AC_Voltage_in =  sys_data.get('Input voltage phase 1',{}).get('valueFloat',0)
+                        data_point.AC_Voltage_out = sys_data.get('Output voltage phase 1',{}).get('valueFloat',0)
+                        data_point.AC_input = sys_data.get('Input power 1',{}).get('valueFloat',0)
+                        data_point.AC_output =  sys_data.get('Output power 1',{}).get('valueFloat',0)
+                        data_point.AC_output_absolute =  float(sys_data.get('Output power 1',{}).get('valueFloat',0) +   float(sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0)))
+                        data_point.AC_Load_in =  sys_data,get('Input current phase 1',{}).get('valueFloat',0)
+                        data_point.AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0)
+                        data_point.inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum','')
+                        data_point. pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0) # For AC coupled systems
+
+                        #TODO these need to be activated
+                        data_point.genset_state = 0
+                        data_point.main_on = mains
+                        data_point.relay_state = 0
+
 
         except IntegrityError, e:
             logger.debug("Duplicate entry skipping data point")
@@ -163,7 +182,12 @@ def get_BOM_data():
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e, name='get_BOM_data' )
             pass
-
+        finally:
+            # Save our object regardless
+            with transaction.atomic():
+                data_point.save()
+                # Send to influx
+                send_to_influx(data_point, site, date, to_exclude=['time'])
 
 def _check_data_pont(data_point_arr):
         """

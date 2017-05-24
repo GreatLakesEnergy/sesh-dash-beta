@@ -246,7 +246,6 @@ class VictronAPI:
         #print resut_dict
         return resut_dict
 
-
 class VictronHistoricalAPI:
     """
     API to get historical data from the VRM
