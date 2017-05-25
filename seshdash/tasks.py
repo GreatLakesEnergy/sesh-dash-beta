@@ -99,30 +99,6 @@ def generate_auto_rules(site_id):
 
     logger.debug("Added low voltage, soc, and comm alert for site %s"%site)
 
-def create_data_point(bat_data, sys_data):
-    """
-    Helper function in creating data point object
-    """
-
-        soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0),
-        battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0),
-        AC_Voltage_in =  sys_data.get('Input voltage phase 1',{}).get('valueFloat',0),
-        AC_Voltage_out = sys_data.get('Output voltage phase 1',{}).get('valueFloat',0),
-        AC_input = sys_data.get('Input power 1',{}).get('valueFloat',0),
-        AC_output =  sys_data.get('Output power 1',{}).get('valueFloat',0),
-        AC_output_absolute =  float(sys_data.get('Output power 1',{}).get('valueFloat',0) +   float(sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0))),
-        AC_Load_in =  sys_data,get('Input current phase 1',{}).get('valueFloat',0),
-        AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0),
-        inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum',''),
-        pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0),
-        #TODO these need to be activated
-        genset_state =  0,
-        main_on = mains,
-        relay_state = 0,
-        )
-    return data_point
-
-
 
 @shared_task
 def get_BOM_data():
@@ -144,24 +120,23 @@ def get_BOM_data():
                             ))
                         date = time_utils.epoch_to_datetime(float(sys_data['VE.Bus state']['timestamp']) , tz=site.time_zone)
                         #logger.debug("saving before localize  BOM data point with time %s"%date)
+                        data_point = BoM_Data_Point(
+                             site = site,
+                             time = date)
                         logger.debug("saving BOM data point with time %s"%date)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
                         if sys_data['Input voltage phase 1']['valueFloat'] > 0:
                             mains = True
 
-                        data_point = BoM_Data_Point(
-                            site = site,
-                            time = date)
-
                         data_point.soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0)
                         data_point. battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0)
-                        data_pint.AC_Voltage_in =  sys_data.get('Input voltage phase 1',{}).get('valueFloat',0)
+                        data_point.AC_Voltage_in =  sys_data.get('Input voltage phase 1',{}).get('valueFloat',0)
                         data_point.AC_Voltage_out = sys_data.get('Output voltage phase 1',{}).get('valueFloat',0)
                         data_point.AC_input = sys_data.get('Input power 1',{}).get('valueFloat',0)
                         data_point.AC_output =  sys_data.get('Output power 1',{}).get('valueFloat',0)
                         data_point.AC_output_absolute =  float(sys_data.get('Output power 1',{}).get('valueFloat',0) +   float(sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0)))
-                        data_point.AC_Load_in =  sys_data,get('Input current phase 1',{}).get('valueFloat',0)
+                        data_point.AC_Load_in =  sys_data.get('Input current phase 1',{}).get('valueFloat',0)
                         data_point.AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0)
                         data_point.inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum','')
                         data_point. pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0) # For AC coupled systems
