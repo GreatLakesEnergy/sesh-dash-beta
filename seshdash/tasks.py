@@ -140,7 +140,8 @@ def get_BOM_data():
                             mains = True
 
                         data_point.soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0)
-                        data_point. battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0)
+                        data_point.battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0)
+                        data_point.battery_current = bat_data.get('Battery current',{}).get('valueFloat',0)
                         data_point.AC_Voltage_in =  sys_data.get('Input voltage phase 1',{}).get('valueFloat',0)
                         data_point.AC_Voltage_out = sys_data.get('Output voltage phase 1',{}).get('valueFloat',0)
                         data_point.AC_input = sys_data.get('Input power 1',{}).get('valueFloat',0)
