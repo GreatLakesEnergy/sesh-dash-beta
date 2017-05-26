@@ -16,14 +16,13 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 class VictronAPI:
-    #API_BASE_URL = "http://juice.m2mobi.com/{call_type}/{function}"
     API_BASE_URL = "https://juice.victronenergy.com/{call_type}/{function}"
 
     API_HIST_LOGIN_URL = "https://vrm.victronenergy.com/user/login"
     API_HIST_FETCH_URL = "https://vrm.victronenergy.com/site/download-csv/site/{SITE_ID}/start_time/{START_TIME}/end_time/{END_TIME}"
     VERIFICATION_TOKEN = "seshdev"
     _SYSTEM_STAT_KEYS = [
-       'VE.Bus state',
+        'VE.Bus state',
         'Input power 1',
         'AC Input 1 ',
         'Input frequency 1',
@@ -44,11 +43,10 @@ class VictronAPI:
         'Battery state']
 
     _PV_STATS_KEYS = [
-    'Yield today',
-    'PV to consumers',
-    'PV to battery',
-    'PV - DC-coupled',
-
+        'Yield today',
+        'PV to consumers',
+        'PV to battery',
+        'PV - DC-coupled',
     ]
 
     API_VERSION = "220"
