@@ -133,6 +133,9 @@ def get_BOM_data():
                             date = timezone.now()
 
                         #logger.debug("saving before localize  BOM data point with time %s"%date)
+                        data_point = BoM_Data_Point(
+                             site = site,
+                             time = date)
                         logger.debug("saving BOM data point with time %s"%date)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
@@ -140,6 +143,7 @@ def get_BOM_data():
                             mains = True
 
                         data_point = BoM_Data_Point(site = site, time = date)
+
                         data_point.soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0)
                         data_point.battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0)
                         data_point.battery_current = bat_data.get('Battery current',{}).get('valueFloat',0)
@@ -152,6 +156,7 @@ def get_BOM_data():
                         data_point.AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0)
                         data_point.inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum','')
                         data_point.relay_state = 0
+
                         # Does  the ste have PV?
                         if site.has_pv:
                             # AC coupled or DC coupled
@@ -167,6 +172,7 @@ def get_BOM_data():
                             data_point.save()
                             # Send to influx
                             send_to_influx(data_point, site, date, to_exclude=['time'])
+
 
         except IntegrityError, e:
             logger.debug("Duplicate entry skipping data point")

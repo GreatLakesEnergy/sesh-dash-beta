@@ -47,7 +47,6 @@ class VictronAPI:
         'PV to consumers',
         'PV to battery',
         'PV - DC-coupled',
-
     ]
 
     API_VERSION = "220"
