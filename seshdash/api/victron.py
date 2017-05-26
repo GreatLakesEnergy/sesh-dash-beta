@@ -218,7 +218,7 @@ class VictronAPI:
         parsed = self._parse_results(results,'attributes')
         return parsed
 
-    def get_system_stats(self,site_id):
+    def get_pv_stats(self,site_id):
         """
         Get the  basic PV  stats
         """
@@ -254,8 +254,8 @@ class VictronAPI:
         #print "THE Battery Stat keys is: ",
         #print self._BATTERY_STAT_KEYS
         #print "BUT THE ATTRIBUTE DICT CONTAINS",
-        pretty_printer = pprint.PrettyPrinter(indent=4)
-        print pretty_printer.pprint(self.ATTRIBUTE_DICT[site_id])
+        #pretty_printer = pprint.PrettyPrinter(indent=4)
+        #print pretty_printer.pprint(self.ATTRIBUTE_DICT[site_id])
         code_arr = []
         for key in self._BATTERY_STAT_KEYS:
             if self.ATTRIBUTE_DICT[site_id].has_key(key):

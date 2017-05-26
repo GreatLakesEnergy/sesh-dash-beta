@@ -55,8 +55,8 @@ class VRM_Import_TestCase(TestCase):
 
         if self.VRM_API.IS_INITIALIZED:
            sites = self.VRM_API.SYSTEMS_IDS
-           vrm_site_id = sites[2][0]
-           print sites
+           self.vrm_site_id = sites[2][0]
+           #print sites
 
         self.location = Geoposition(52.5,24.3)
         self.now = timezone.now()
@@ -71,7 +71,7 @@ class VRM_Import_TestCase(TestCase):
                                              position=self.location,
                                              system_voltage=12,
                                              number_of_panels=12,
-                                             vrm_site_id=vrm_site_id,
+                                             vrm_site_id=self.vrm_site_id,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
                                              has_grid=True)
@@ -86,6 +86,17 @@ class VRM_Import_TestCase(TestCase):
     def tearDown(self):
         self.i.delete_database(self._influx_db_name)
         pass
+
+    def test_api_stats(self):
+        """
+        Test Victron API points
+        """
+        stats = self.VRM_API.get_system_stats(self.vrm_site_id)
+        self.assertTrue(stats.has_key('Input power 1'))
+        stats = self.VRM_API.get_battery_stats(self.vrm_site_id)
+        self.assertTrue(stats.has_key('Battery voltage'))
+        stats = self.VRM_API.get_pv_stats(self.vrm_site_id)
+        self.assertTrue(stats.has_key('PV - DC-coupled'))
 
     def test_bom_data_point(self):
         get_BOM_data()

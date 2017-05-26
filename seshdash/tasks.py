@@ -111,8 +111,18 @@ def get_BOM_data():
             v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
 
             if v_client.IS_INITIALIZED:
-                        bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+
+                        bat_data = {}
+                        sys_data = {}
+                        pv_data = {}
+
+                        if site.has_batteries:
+                            bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
+                        if site.has_pv:
+                            pv_data = v_client.get_pv_data(int(site.vrm_site_id))
+
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
+
                         #This data is already localazied
                         logger.debug("got raw date %s with timezone %s"%(
                             sys_data['VE.Bus state']['timestamp'],
@@ -139,7 +149,13 @@ def get_BOM_data():
                         data_point.AC_Load_in =  sys_data.get('Input current phase 1',{}).get('valueFloat',0)
                         data_point.AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0)
                         data_point.inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum','')
-                        data_point. pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0) # For AC coupled systems
+                        # Does  the ste have PV?
+                        if site.has_pv:
+                            # AC coupled or DC coupled
+                            if sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0):
+                                data_point.pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0) # For AC coupled systems
+                            else:
+                                data_point.pv_production = pv_data.get('PV - DC-coupled',{}).get('valueFloat',0)
 
                         #TODO these need to be activated
                         data_point.genset_state = 0
