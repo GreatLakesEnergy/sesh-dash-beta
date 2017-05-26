@@ -313,15 +313,11 @@ def get_site_sensor_fields(site):
 
     @param site - The site for which the data has to come from
     """
-
+    sensors = Sensor_Node.objects.filter(site=site)
     fields = []
 
-    # Check if site is VRM or RMC
-    if not site.vrm_account:
-        sensors = Sensor_Node.objects.filter(site=site)
-
-        for sensor in sensors:
-            fields += sensor.get_fields()
+    for sensor in sensors:
+        fields += sensor.get_fields()
 
     return sorted(list(set(fields))) # removing duplicate values if and sorting
 

@@ -17,15 +17,17 @@ class CoffeeTestCase(TestCase):
         self.location = Geoposition(52.5,24.3)
 
         self.organisation = Sesh_Organisation.objects.create(name='test_organisation')
-
+    
         self.site = Sesh_Site.objects.create(site_name=u"Test site",
                                              comission_date=timezone.datetime(2015, 12, 11, 22, 0),
                                              location_city=u"kigali",
                                              location_country=u"rwanda",
+                                             vrm_account = self.VRM,
                                              installed_kw=123.0,
                                              position=self.location,
                                              system_voltage=24,
                                              number_of_panels=12,
+                                             vrm_site_id=213,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
                                              has_grid=True,
@@ -41,11 +43,11 @@ class CoffeeTestCase(TestCase):
 
     def test_get_site_sensor_fields(self):
         """
-        Test the functions that returns the data fields for a given site,
+        Test the functions that returns the data fields for a given site, 
         the fields are got from sensor nodes
-        """
+        """ 
         sensor_one = Sensor_Node.objects.create(site=self.site, index1='coffee1', index2='coffee2')
         sensor_two = Sensor_Node.objects.create(site=self.site, index1='coffee3', index2='coffee4')
 
-        fields = get_site_sensor_fields(self.site)
+        fields = get_site_sensor_fields(self.site) 
         self.assertEqual(fields, ['coffee1', 'coffee2', 'coffee3', 'coffee4'])
