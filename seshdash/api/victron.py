@@ -43,6 +43,14 @@ class VictronAPI:
         'Battery Power (System)',
         'Battery state']
 
+    _PV_STATS_KEYS = [
+    'Yield today',
+    'PV to consumers',
+    'PV to battery',
+    'PV - DC-coupled',
+
+    ]
+
     API_VERSION = "220"
     ATTRIBUTE_DICT = {}
 
@@ -150,7 +158,6 @@ class VictronAPI:
         else:
             return r.json()
 
-
     def _parse_results(self,results,key=None):
         """
         unwrap each package
@@ -211,6 +218,19 @@ class VictronAPI:
         parsed = self._parse_results(results,'attributes')
         return parsed
 
+    def get_pv_stats(self,site_id):
+        """
+        Get the  basic PV  stats
+        """
+        code_arr = []
+        for key in self._PV_STATS_KEYS:
+            if self.ATTRIBUTE_DICT[site_id].has_key(key):
+                code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+        result_arr = self.get_site_attribute(site_id,code_arr)
+        resut_dict = self._reformat_attr_dict(result_arr)
+        return resut_dict
+
+
 
     def get_system_stats(self,site_id):
         """
@@ -238,14 +258,14 @@ class VictronAPI:
         #print pretty_printer.pprint(self.ATTRIBUTE_DICT[site_id])
         code_arr = []
         for key in self._BATTERY_STAT_KEYS:
-            code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
+            if self.ATTRIBUTE_DICT[site_id].has_key(key):
+                code_arr.append(self.ATTRIBUTE_DICT[site_id][key]['code'])
 
         result_arr = self.get_site_attribute(site_id,code_arr)
         resut_dict = self._reformat_attr_dict(result_arr)
         #print "The returned data from the get battery stats is: ",
         #print resut_dict
         return resut_dict
-
 
 class VictronHistoricalAPI:
     """

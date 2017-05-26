@@ -334,6 +334,7 @@ class BoM_Data_Point(models.Model):
     time = models.DateTimeField()
     soc = models.FloatField(default=0)
     battery_voltage = models.FloatField(default=0)
+    battery_current = models.FloatField(default=0)
     AC_Voltage_in = models.FloatField(default=0)
     AC_Voltage_out = models.FloatField(default=0)
     AC_input = models.FloatField(default=0)
