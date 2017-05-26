@@ -314,10 +314,11 @@ def get_site_sensor_fields(site):
     @param site - The site for which the data has to come from
     """
 
+    fields = []
+
     # Check if site is VRM or RMC
     if not site.vrm_account:
         sensors = Sensor_Node.objects.filter(site=site)
-        fields = []
 
         for sensor in sensors:
             fields += sensor.get_fields()
