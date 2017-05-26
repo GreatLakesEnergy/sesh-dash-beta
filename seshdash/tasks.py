@@ -106,16 +106,16 @@ def get_BOM_data():
     sites = Sesh_Site.objects.exclude(vrm_site_id__isnull=True).exclude(vrm_site_id__exact='')
     logger.info("Running VRM data collection")
     for site in sites:
+
         logger.debug("Getting VRM data for %s"%site)
+        v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
+
+        bat_data = {}
+        sys_data = {}
+        pv_data = {}
+
         try:
-            v_client = VictronAPI(site.vrm_account.vrm_user_id,site.vrm_account.vrm_password)
-
             if v_client.IS_INITIALIZED:
-
-                        bat_data = {}
-                        sys_data = {}
-                        pv_data = {}
-
                         if site.has_batteries:
                             bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         if site.has_pv:
@@ -125,20 +125,21 @@ def get_BOM_data():
 
                         #This data is already localazied
                         logger.debug("got raw date %s with timezone %s"%(
-                            sys_data['VE.Bus state']['timestamp'],
+                            sys_data.get('VE.Bus state',{}).get('timestamp',0),
                             site.time_zone
                             ))
-                        date = time_utils.epoch_to_datetime(float(sys_data['VE.Bus state']['timestamp']) , tz=site.time_zone)
+                        date = time_utils.epoch_to_datetime(float(sys_data.get('VE.Bus state',{}).get('timestamp',0)) , tz=site.time_zone)
+                        if not date:
+                            date = timezone.now()
+
                         #logger.debug("saving before localize  BOM data point with time %s"%date)
-                        data_point = BoM_Data_Point(
-                             site = site,
-                             time = date)
                         logger.debug("saving BOM data point with time %s"%date)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
-                        if sys_data['Input voltage phase 1']['valueFloat'] > 0:
+                        if sys_data.get('Input voltage phase 1',{}).get('valueFloat') > 0:
                             mains = True
 
+                        data_point = BoM_Data_Point(site = site, time = date)
                         data_point.soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0)
                         data_point.battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0)
                         data_point.battery_current = bat_data.get('Battery current',{}).get('valueFloat',0)
@@ -150,6 +151,7 @@ def get_BOM_data():
                         data_point.AC_Load_in =  sys_data.get('Input current phase 1',{}).get('valueFloat',0)
                         data_point.AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0)
                         data_point.inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum','')
+                        data_point.relay_state = 0
                         # Does  the ste have PV?
                         if site.has_pv:
                             # AC coupled or DC coupled
@@ -157,29 +159,23 @@ def get_BOM_data():
                                 data_point.pv_production = sys_data.get('PV - AC-coupled on output L1',{}).get('valueFloat',0) # For AC coupled systems
                             else:
                                 data_point.pv_production = pv_data.get('PV - DC-coupled',{}).get('valueFloat',0)
-
                         #TODO these need to be activated
                         data_point.genset_state = 0
                         data_point.main_on = mains
-                        data_point.relay_state = 0
 
+                        with transaction.atomic():
+                            data_point.save()
+                            # Send to influx
+                            send_to_influx(data_point, site, date, to_exclude=['time'])
 
         except IntegrityError, e:
             logger.debug("Duplicate entry skipping data point")
             pass
-        except KeyError,  e:
-            logger.warning("Sites %s is missing key while getting vrm data%s"%(site,e))
         except Exception ,e:
             message = "error with geting site %s data exception %s"%(site,e)
             logger.exception("error with geting site %s data exception"%site)
             handle_task_failure(message = message, exception=e, name='get_BOM_data' )
             pass
-        finally:
-            # Save our object regardless
-            with transaction.atomic():
-                data_point.save()
-                # Send to influx
-                send_to_influx(data_point, site, date, to_exclude=['time'])
 
 def _check_data_pont(data_point_arr):
         """
