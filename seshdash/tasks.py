@@ -133,6 +133,9 @@ def get_BOM_data():
                             date = timezone.now()
 
                         #logger.debug("saving before localize  BOM data point with time %s"%date)
+                        data_point = BoM_Data_Point(
+                             site = site,
+                             time = date)
                         logger.debug("saving BOM data point with time %s"%date)
                         mains = False
                         #check if we have an output voltage on inverter input. Indicitave of if mains on
