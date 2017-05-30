@@ -899,9 +899,7 @@ def graphs(request):
         #time_bucket= time_bucket_dict[time]
 
         # Gettting the values of the given element
-        client = Influx()
-
-        query_results = client.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
+        client = Influx.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
 
 
         #looping into values
@@ -999,7 +997,7 @@ def delete_site(request, site_id):
     Deletes a sesh site
     """
     user = request.user
-    site = Sesh_Site.objects.filter(id=site_id).first()
+    site = Sesh_Site.objects.filter(id=site_id).first() # AT bug with deleting first site
 
     if user.is_org_admin and user.organisation == site.organisation:
         site.delete()
