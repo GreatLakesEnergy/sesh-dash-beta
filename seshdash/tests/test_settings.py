@@ -187,4 +187,4 @@ class TestSettings(TestCase):
         response = self.client.get(reverse('delete_site', args=[self.site2.id]))
         self.assertRedirects(response, reverse('index'))
         sites = Sesh_Site.objects.all()
-        self.assertEqual(len(sites), 0)
+        self.assertEqual(sites.first().site_name,'test_site1' )
