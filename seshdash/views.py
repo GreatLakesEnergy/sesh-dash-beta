@@ -899,8 +899,10 @@ def graphs(request):
         #time_bucket= time_bucket_dict[time]
 
         # Gettting the values of the given element
-        client = Influx.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
-
+        if choice:
+            client = Influx.get_measurement_range_bucket(choice, start_time, end_time, group_by=resolution)
+        else:
+            break  #No choices were provided break cycle no data for site
 
         #looping into values
         choice_data = []
