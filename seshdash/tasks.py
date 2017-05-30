@@ -119,7 +119,7 @@ def get_BOM_data():
                         if site.has_batteries:
                             bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         if site.has_pv:
-                            pv_data = v_client.get_pv_data(int(site.vrm_site_id))
+                            pv_data = v_client.get_pv_stats(int(site.vrm_site_id))
 
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
 
