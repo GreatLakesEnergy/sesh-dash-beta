@@ -119,7 +119,7 @@ def get_BOM_data():
                         if site.has_batteries:
                             bat_data = v_client.get_battery_stats(int(site.vrm_site_id))
                         if site.has_pv:
-                            pv_data = v_client.get_pv_data(int(site.vrm_site_id))
+                            pv_data = v_client.get_pv_stats(int(site.vrm_site_id))
 
                         sys_data = v_client.get_system_stats(int(site.vrm_site_id))
 
@@ -143,7 +143,6 @@ def get_BOM_data():
                             mains = True
 
                         data_point = BoM_Data_Point(site = site, time = date)
-
                         data_point.soc = bat_data.get('Battery State of Charge (System)',{}).get('valueFloat',0)
                         data_point.battery_voltage = bat_data.get('Battery voltage',{}).get('valueFloat',0)
                         data_point.battery_current = bat_data.get('Battery current',{}).get('valueFloat',0)
@@ -156,7 +155,6 @@ def get_BOM_data():
                         data_point.AC_Load_out =  sys_data.get('Output current phase 1',{}).get('valueFloat',0)
                         data_point.inverter_state = sys_data.get('VE.Bus state',{}).get('nameEnum','')
                         data_point.relay_state = 0
-
                         # Does  the ste have PV?
                         if site.has_pv:
                             # AC coupled or DC coupled
@@ -172,7 +170,6 @@ def get_BOM_data():
                             data_point.save()
                             # Send to influx
                             send_to_influx(data_point, site, date, to_exclude=['time'])
-
 
         except IntegrityError, e:
             logger.debug("Duplicate entry skipping data point")

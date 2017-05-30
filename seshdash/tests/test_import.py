@@ -74,7 +74,8 @@ class VRM_Import_TestCase(TestCase):
                                              vrm_site_id=self.vrm_site_id,
                                              battery_bank_capacity=12321,
                                              has_genset=True,
-                                             has_grid=True)
+                                             has_grid=True,
+                                             has_pv=True)
 
 
         #create test user
@@ -97,6 +98,8 @@ class VRM_Import_TestCase(TestCase):
         self.assertTrue(stats.has_key('Battery voltage'))
         stats = self.VRM_API.get_pv_stats(self.vrm_site_id)
         self.assertTrue(stats.has_key('PV - DC-coupled'))
+
+        #print self.VRM_API.ATTRIBUTE_DICT
 
     def test_bom_data_point(self):
         get_BOM_data()

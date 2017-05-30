@@ -10,7 +10,7 @@ from seshdash.data.db.influx import Influx
 
 class TestSettings(TestCase):
     """
-    Testing the alert rules options in the 
+    Testing the alert rules options in the
     settings
     """
 
@@ -35,12 +35,12 @@ class TestSettings(TestCase):
         self.client = Client()
 
         self.organisation = Sesh_Organisation.objects.create(
-                                     name="test_org", 
+                                     name="test_org",
                                      slack_token="secret"
                                  )
 
         self.site = Sesh_Site.objects.create(
-                        site_name='test',
+                        site_name='test_site1',
                         organisation=self.organisation,
                         comission_date=timezone.now(),
                         location_city='Kigali',
@@ -52,6 +52,20 @@ class TestSettings(TestCase):
                         battery_bank_capacity=450,
                     )
 
+        self.site2 = Sesh_Site.objects.create(
+                        site_name='test_site2',
+                        organisation=self.organisation,
+                        comission_date=timezone.now(),
+                        location_city='Kigali',
+                        location_country='Rwanda',
+                        position=Geoposition(12,1),
+                        installed_kw=25,
+                        system_voltage=45,
+                        number_of_panels=45,
+                        battery_bank_capacity=450,
+                    )
+
+
         self.alert_rule = Alert_Rule.objects.create(
                         site=self.site,
                         check_field='battery_voltage',
@@ -60,19 +74,19 @@ class TestSettings(TestCase):
                     )
 
 
-        
+
 
         self.sesh_user = Sesh_User.objects.create_superuser(username='test_user',
                                                              email='test@sesh.sesh',
                                                              password='test.test.test',
                                                              on_call=False,
                                                              send_sms=False,
-                                                             send_mail=False)     
-           
- 
+                                                             send_mail=False)
+
+
     def test_settings_alert_rules_page(self):
         """
-        Testing if the page is 
+        Testing if the page is
         being rednered correctl
         """
         self.client.login(username='test_user', password='test.test.test')
@@ -91,7 +105,7 @@ class TestSettings(TestCase):
 
 
         self.client.login(username='test_user', password='test.test.test')
-        
+
         # Testing the creation of an alert rulses
         response = self.client.post(reverse('site_alert_rules', args=[self.site.id]), data)
         self.assertEqual(response.status_code, 302)
@@ -99,7 +113,7 @@ class TestSettings(TestCase):
 
     def test_edit_alert_rule(self):
         """
-        Testing the editing of an alert rule 
+        Testing the editing of an alert rule
         """
         data = {
                 'check_field': 'battery_voltage',
@@ -135,7 +149,7 @@ class TestSettings(TestCase):
         Testing the user notifications
         """
         self.client.login(username='test_user', password='test.test.test')
-                
+
 
         data = {
             u'form-MAX_NUM_FORMS': [u'1000'],
@@ -146,9 +160,9 @@ class TestSettings(TestCase):
             u'form-0-id': [u'%s' % self.sesh_user.id],
             u'form-MIN_NUM_FORMS': [u'0']
         }
- 
+
         response = self.client.post(reverse('user_notifications'), data)
-                 
+
         # Asserting the correctness of the response and the result of the post
         self.assertEqual(response.status_code, 302)
         user = Sesh_User.objects.filter(id=self.sesh_user.id).first()
@@ -160,17 +174,17 @@ class TestSettings(TestCase):
         Testing the view that deletes a site
         """
         self.client.login(username='test_user', password='test.test.test')
-     
+
         # Users that are not admin of the organisation must not be allowed to delete a site
         response = self.client.get(reverse('delete_site', args=[self.site.id]))
         self.assertEqual(response.status_code, 403)
- 
+
 
         # testing if the site is deleted when the user is admin of the organisation
         self.sesh_user.organisation = self.organisation
         self.sesh_user.is_org_admin = True
         self.sesh_user.save()
-        response = self.client.get(reverse('delete_site', args=[self.site.id]))
+        response = self.client.get(reverse('delete_site', args=[self.site2.id]))
         self.assertRedirects(response, reverse('index'))
         sites = Sesh_Site.objects.all()
-        self.assertEqual(len(sites), 0)
+        self.assertEqual(sites.first().site_name,'test_site1' )
