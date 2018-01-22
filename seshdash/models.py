@@ -613,7 +613,8 @@ class Sensor_Node(models.Model):
      index10 = models.CharField(max_length=40, blank=True, null=True)
      index11 = models.CharField(max_length=40, blank=True, null=True)
      index12 = models.CharField(max_length=40, blank=True, null=True)
-     index13 = models.CharField(max_length=40)
+     index13 = models.CharField(max_length=40,blank=True, null=True)
+
      index14 = models.CharField(max_length=40, blank=True, null=True)
      index15 = models.CharField(max_length=40, blank=True, null=True)
      index16 = models.CharField(max_length=40, blank=True, null=True)
@@ -625,7 +626,8 @@ class Sensor_Node(models.Model):
      index22 = models.CharField(max_length=40, blank=True, null=True)
      index23 = models.CharField(max_length=40, blank=True, null=True)
      index24 = models.CharField(max_length=40, blank=True, null=True)
-     index25 = models.CharField(max_length=40)
+     index25 = models.CharField(max_length=40, blank=True, null=True)
+
      index26 = models.CharField(max_length=40, blank=True, null=True)
      index27 = models.CharField(max_length=40, blank=True, null=True)
      index28 = models.CharField(max_length=40, blank=True, null=True)
@@ -637,7 +639,7 @@ class Sensor_Node(models.Model):
      index34 = models.CharField(max_length=40, blank=True, null=True)
      index35 = models.CharField(max_length=40, blank=True, null=True)
      index36 = models.CharField(max_length=40, blank=True, null=True)
-     index37 = models.CharField(max_length=40)
+     index37 = models.CharField(max_length=40,blank=True, null=True)
      index38 = models.CharField(max_length=40, blank=True, null=True)
      index39 = models.CharField(max_length=40, blank=True, null=True)
      index40 = models.CharField(max_length=40, blank=True, null=True)
