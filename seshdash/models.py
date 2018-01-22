@@ -595,6 +595,7 @@ class Sensor_Node(models.Model):
                         ('th','Temperature Humidity'),
                         ('tx','Power Voltage'),
                         ('pe','Ph Ethenoal'),
+                        ('other','Other Sensor'),
                     )
 
      site = models.ForeignKey(Sesh_Site)
@@ -612,6 +613,38 @@ class Sensor_Node(models.Model):
      index10 = models.CharField(max_length=40, blank=True, null=True)
      index11 = models.CharField(max_length=40, blank=True, null=True)
      index12 = models.CharField(max_length=40, blank=True, null=True)
+     index13 = models.CharField(max_length=40,blank=True, null=True)
+
+     index14 = models.CharField(max_length=40, blank=True, null=True)
+     index15 = models.CharField(max_length=40, blank=True, null=True)
+     index16 = models.CharField(max_length=40, blank=True, null=True)
+     index17 = models.CharField(max_length=40, blank=True, null=True)
+     index18 = models.CharField(max_length=40, blank=True, null=True)
+     index19 = models.CharField(max_length=40, blank=True, null=True)
+     index20 = models.CharField(max_length=40, blank=True, null=True)
+     index21 = models.CharField(max_length=40, blank=True, null=True)
+     index22 = models.CharField(max_length=40, blank=True, null=True)
+     index23 = models.CharField(max_length=40, blank=True, null=True)
+     index24 = models.CharField(max_length=40, blank=True, null=True)
+     index25 = models.CharField(max_length=40, blank=True, null=True)
+
+     index26 = models.CharField(max_length=40, blank=True, null=True)
+     index27 = models.CharField(max_length=40, blank=True, null=True)
+     index28 = models.CharField(max_length=40, blank=True, null=True)
+     index29 = models.CharField(max_length=40, blank=True, null=True)
+     index30 = models.CharField(max_length=40, blank=True, null=True)
+     index31 = models.CharField(max_length=40, blank=True, null=True)
+     index32 = models.CharField(max_length=40, blank=True, null=True)
+     index33 = models.CharField(max_length=40, blank=True, null=True)
+     index34 = models.CharField(max_length=40, blank=True, null=True)
+     index35 = models.CharField(max_length=40, blank=True, null=True)
+     index36 = models.CharField(max_length=40, blank=True, null=True)
+     index37 = models.CharField(max_length=40,blank=True, null=True)
+     index38 = models.CharField(max_length=40, blank=True, null=True)
+     index39 = models.CharField(max_length=40, blank=True, null=True)
+     index40 = models.CharField(max_length=40, blank=True, null=True)
+     index41 = models.CharField(max_length=40, blank=True, null=True)
+     index42 = models.CharField(max_length=40, blank=True, null=True)
 
      def __str__(self):
          return "Sensor Node " + str(self.sensor_type) + " for " + self.site.site_name + " with id "+ str(self.node_id)
@@ -632,7 +665,12 @@ class Sensor_Node(models.Model):
          Returns the field of the sensor
          """
          all_fields = [self.index1, self.index2, self.index3, self.index4, self.index5, self.index5, \
-                   self.index6, self.index7, self.index8, self.index9, self.index10, self.index11, self.index12]
+                   self.index6, self.index7, self.index8, self.index9, self.index10, self.index11, self.index12, \
+                   self.index13, self.index14, self.index15, self.index16, self.index17, self.index18, self.index19, \
+                   self.index20, self.index21, self.index22, self.index23, self.index24, self.index25, self.index26, \
+                   self.index28, self.index29, self.index30, self.index31, self.index32, self.index33, self.index34, \
+                   self.index35, self.index36, self.index37, self.index38, self.index39, self.index40, self.index41, self.index42
+                   ]
 
          fields = []
 

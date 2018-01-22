@@ -55,8 +55,9 @@ class VRM_Import_TestCase(TestCase):
 
         if self.VRM_API.IS_INITIALIZED:
            sites = self.VRM_API.SYSTEMS_IDS
-           self.vrm_site_id = sites[2][0]
-           #print sites
+           print sites
+           if len(sites) > 1:
+               self.vrm_site_id = sites[0][0]
 
         self.location = Geoposition(52.5,24.3)
         self.now = timezone.now()
@@ -96,8 +97,8 @@ class VRM_Import_TestCase(TestCase):
         self.assertTrue(stats.has_key('Input power 1'))
         stats = self.VRM_API.get_battery_stats(self.vrm_site_id)
         self.assertTrue(stats.has_key('Battery voltage'))
-        stats = self.VRM_API.get_pv_stats(self.vrm_site_id)
-        self.assertTrue(stats.has_key('PV - DC-coupled'))
+        #stats = self.VRM_API.get_pv_stats(self.vrm_site_id)
+        #self.assertTrue(stats.has_key('PV - DC-coupled'))
 
         #print self.VRM_API.ATTRIBUTE_DICT
 
